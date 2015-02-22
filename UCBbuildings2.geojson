@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+      	"name":"Barker Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.26547241210936,
+          37.87395569043575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+      	"name":"Department of Plant and Microbial Biology"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.26489305496216,
+          37.87397262833122
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Complex icons</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="http://cdn.alloyui.com/3.0.0/aui/aui-min.js"></script>
+    <link href="http://cdn.alloyui.com/3.0.0/aui-css/css/bootstrap.min.css" rel="stylesheet"></link>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <script>
+
+    function initialize() {
+      var myLatlng = new google.maps.LatLng(37.875309, -122.258548);
+      var mapOptions = {
+            zoom: 18,
+            center: myLatlng
+      }
+      var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+      var contentString = '<div id="content">'+
+          '<div id="siteNotice">'+
+          '</div>'+
+          '<h1 id="firstHeading" class="firstHeading">Some dosimeter</h1>'+
+          '<div id="bodyContent">'+
+          '<p>Some random HTML that we can add here</p>'+
+          '<iframe width="550" height="550" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~navrit/45.embed?width=550&height=550"></iframe>'+
+          '</div>'+
+          '</div>';
+
+      var infowindow = new google.maps.InfoWindow({
+          content: contentString
+      });
+
+      var marker = new google.maps.Marker({
+          position: myLatlng,
+          map: map,
+          title: 'Some random dosimeter'
+      });
+      
+      google.maps.event.addListener(marker, 'click', function() {
+        infowindow.open(map,marker);
+      });
+
+      setMarkers(map, marker);
+      setMarkers(map, beaches);
+      google.maps.event.addListener(marker, 'click', function() {
+        //window.alert('success');
+        
+      });
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+    }
+
+
+    /**
+     * Data for the markers consisting of a name, a LatLng and a zIndex for
+     * the order in which these markers should display on top of each
+     * other.
+     */
+    var beaches = [
+      ['Etchevery', 37.875673, -122.259294, 3],
+      ['Soda', 37.875665, -122.258730, 2],
+      ['Cory', 37.875034, -122.257582, 1],
+    ];
+    var pointMarker = new Array();//store marker in array
+    function setMarkers(map, locations) {
+      // Add markers to the map
+
+      // Marker sizes are expressed as a Size of X,Y
+      // where the origin of the image (0,0) is located
+      // in the top left of the image.
+
+      // Origins, anchor positions and coordinates of the marker
+      // increase in the X direction to the right and in
+      // the Y direction down.
+      
+      // Shapes define the clickable region of the icon.
+      // The type defines an HTML &lt;area&gt; element 'poly' which
+      // traces out a polygon as a series of X,Y points. The final
+      // coordinate closes the poly by connecting to the first
+      // coordinate.
+      var shape = {
+          coords: [1, 1, 1, 20, 18, 20, 18 , 1],
+          type: 'poly'
+      };
+      for (var i = 0; i < locations.length; i++) {
+        var beach = locations[i];
+        var myLatLng = new google.maps.LatLng(beach[1], beach[2]);
+        pointMarker[i] = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            
+            shape: shape,
+            title: beach[0],
+            zIndex: beach[3]
+        });
+      google.maps.event.addListener(pointMarker[i], 'click', function(){
+          infowindow.open(map,beaches);
+          //window.alert("success");
+        }
+        );
+      }
+    }
+
+    function showAlert() {
+      window.alert('DIV clicked');
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+
+    </script>
+
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>
