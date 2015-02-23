@@ -6,40 +6,41 @@
 # University of California, Berkeley, U.S.A.
 # Saturday 21/2/15
 
-import MySQLdb as mdb
+import MySQLdb as mdb #easiest to use MySQL handler
 import sys
-import collections 
-import geojson
+import collections #cannot remember what this is for
+import geojson #for geojson files 
 from geojson import Point, Feature, FeatureCollection
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import plotly.plotly as py
+import matplotlib #for local plotting with MATLAB type syntax
+matplotlib.use('Agg') #for SVG export
+import matplotlib.pyplot as plt 
+import plotly.plotly as py #for cloud based Plot.ly plotting
 from plotly.graph_objs import *
-import pandas as pd
+import pandas as pd #for DataFrame (table-like)
 
-
+#need to change this to dosenet username and associated token
 py.sign_in('navrit','g739jakmhr')
 # Open database connection
 db = mdb.connect("localhost","ne170group","ne170groupSpring2015","dosimeter_network" )
 
-# prepare a cursor object using cursor() method
+# prepare a cursor object using cursor() method - traverses the database using this
 cursor = db.cursor()
 
-#cursor.execute(" SELECT receiveTime, stationID, doseRate, errorFlag FROM dosnet; ")
-
+#MySQL query - can have more than one by having more lines or separating queries with ; as normal
 cursor.execute(" SELECT receiveTime, stationID, doseRate, errorFlag FROM dosnet WHERE stationID=1; ")
+#Gets all tuples (rows) as another tuple - like rows and column type structure
 rows = cursor.fetchall()
 
 # Convert query to row arrays
 rowarray_list = []
+#parses rows to table like structure - converts datetime column to string per row
 for row in rows:
     t = (str(row[0]), row[1], row[2], row[3])
     rowarray_list.append(t)
 
 #print rowarray_list[1][1] #[row number][column]
 
-
+#should get this from another SQL request to a new station DB ()
 longlat_1 = (-122.25924432277681,37.8755647731171)
 longlat_2 = (-122.25871324539183,37.87563252319576)
 
