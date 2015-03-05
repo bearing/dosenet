@@ -1,85 +1,118 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python
 
 # Navrit Bal
 # DoseNet
 # Nuclear Engineering 170A: Nuclear Design
 # University of California, Berkeley, U.S.A.
-# Saturday 21/2/15
+# Created: Sat 21/02/15
+# Last updated: Mon 2/03/15
 
-import MySQLdb as mdb #easiest to use MySQL handler
+import MySQLdb as mdb
 import sys
-import collections #cannot remember what this is for
-import geojson #for geojson files 
+import collections 
+import geojson
 from geojson import Point, Feature, FeatureCollection
-import matplotlib #for local plotting with MATLAB type syntax
-matplotlib.use('Agg') #for SVG export
-import matplotlib.pyplot as plt 
-import plotly.plotly as py #for cloud based Plot.ly plotting
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import plotly.plotly as py
 from plotly.graph_objs import *
-import pandas as pd #for DataFrame (table-like)
+import pandas as pd
 
-#need to change this to dosenet username and associated token
-py.sign_in('navrit','g739jakmhr')
+
+py.sign_in('ne170','ilo0p1671e')
 # Open database connection
 db = mdb.connect("localhost","ne170group","ne170groupSpring2015","dosimeter_network" )
-
-# prepare a cursor object using cursor() method - traverses the database using this
+# prepare a cursor object using cursor() method
 cursor = db.cursor()
 
-#MySQL query - can have more than one by having more lines or separating queries with ; as normal
-cursor.execute(" SELECT receiveTime, stationID, doseRate, errorFlag FROM dosnet WHERE stationID=1; ")
-#Gets all tuples (rows) as another tuple - like rows and column type structure
+
+cursor.execute("SELECT receiveTime, stationID, cpm, rem, rad, errorFlag FROM dosnet WHERE 1; ")
 rows = cursor.fetchall()
 
 # Convert query to row arrays
 rowarray_list = []
-#parses rows to table like structure - converts datetime column to string per row
 for row in rows:
-    t = (str(row[0]), row[1], row[2], row[3])
+    t = (str(row[0]), row[1], row[2], row[3], row[4], row[5])
     rowarray_list.append(t)
 
 #print rowarray_list[1][1] #[row number][column]
 
-#should get this from another SQL request to a new station DB ()
-longlat_1 = (-122.25924432277681,37.8755647731171)
-longlat_2 = (-122.25871324539183,37.87563252319576)
+# iterate through station MySQL DB to get '# of stations, station name, longitude, latitude '
+cursor.execute("SELECT * FROM stations WHERE 1; ")
+station_rows = cursor.fetchall()
+# Convert query to row arrays
+station_rowarray_list = []
+for station_row in station_rows:
+    s = (station_row[0], station_row[1], station_row[2], station_row[3])
+    print s
+    station_rowarray_list.append(s)
 
-# May remove this feature - unnecassary work? We can see where they are on the maps...
-stationID_1 = "Etcheverry Hall"
-stationID_2 = "Soda Hall"
 
-#Also probably pointless
-#time_1 = rowarray_list[0][0]
-#time_2 = rowarray_list[1][0]
+feature_list=[]
+dtRow_rowarray_list = []
+for station_row in range(len(station_rows)):
+	# builds up a tuple coordinates of the stations, longitude & latitude
+	longlat = [ station_rowarray_list[station_row][3], station_rowarray_list[station_row][2] ]
+	# gets the stationID for insertion into the features
+	stationID = station_rowarray_list[station_row][1]
+	# get latest dose (cpm) and time for that measurement in the loop so we can display in exported GeoJSON file
+	sqlString = "SELECT dosnet.receiveTime, dosnet.cpm, stations.Name FROM dosnet INNER JOIN stations ON dosnet.stationID=stations.ID WHERE `stations`.`Name`='%s';" % stationID
+	cursor.execute(sqlString)
+	dtRows = cursor.fetchall()
+	for dtRow in range(len(dtRows)):
+		print dtRow[0]
+		"""#t = (dtRow[0], dtRow[1])
+		#print t
+		#dtRow_rowarray_list.append(t)"""
+	print(dtRow_rowarray_list)
+	LCPM = dtRow[1]
+	Ltime = dtRow[0]
+	point = Point(longlat)
+	feature = Feature(geometry=point,properties={"Name": stationID, "Latest dose (CPM)": L_CPM,"Latest measurement": L_time})
+	feature_list.append(feature)
+
+featurecollection = FeatureCollection(feature_list)
+##########################################################
+
+time_1 = rowarray_list[0][0]
+time_2 = rowarray_list[1][0]
 
 #Should be done with Plot.ly
-doseRate_1 = rowarray_list[0][2]
-doseRate_2 = rowarray_list[1][2]
+cpm_1 = rowarray_list[0][2]
+cpm_2 = rowarray_list[1][2]
 
-point1 = Point(longlat_1)
-point2 = Point(longlat_2)
+#point1 = Point(longlat_1)
+#point2 = Point(longlat_2)
 #for reference
 # feature1 = Feature(geometry=point1,properties={"Name": stationID_1, "doseRate": doseRate_1})
 
-feature1 = Feature(geometry=point1,properties={"Name": stationID_1})
-feature2 = Feature(geometry=point2,properties={"Name": stationID_2})
 
-featurecollection = FeatureCollection([feature1, feature2])
+#######################################################
+## Iterate through to define all features (stations) ##
+#######################################################
 
-# Panda code to get SQL tuples of tuples into panda df tables
+#feature1 = Feature(geometry=point1,properties={"Name": stationID_1})
+#feature2 = Feature(geometry=point2,properties={"Name": stationID_2})
+
+#featurestring = "["+str(feature1)+"," +str(feature2)+"]"
+
+#featurecollection = FeatureCollection([feature1, feature2])
+
+# Panda code to get SQL tuples of tuples into panda df tables which are WAAAY easier to work with (and apparently are faster?)
 df = pd.DataFrame( [[ij for ij in i] for i in rows] )
-df.rename(columns={0:'receiveTime', 1:'stationID', 2:'doseRate', 3:'errorFlag'}, inplace=True)
+df.rename(columns={0:'receiveTime', 1:'stationID', 2:'CPM', 3:'rem', 4:'rad', 5:'errorFlag'}, inplace=True)
 df = df.sort(['receiveTime'],ascending=[1])
 
 trace1 = Scatter(
 	x=df['receiveTime'],
-	y=df['doseRate'],
+	y=df['CPM'],
 	mode='markers'
 	)
 
 layout = Layout(
 	xaxis=XAxis( title='Time' ),
-	yaxis=YAxis( type='log',title='Dose')
+	yaxis=YAxis( type='log',title='Counts per minute (CPM) [1/min]')
 	)
 
 # Plot.ly export
@@ -103,11 +136,13 @@ receiveString = str(df['receiveTime'][0])
 title = ('Dose over time starting '+receiveString)
 
 plt.title(title,fontsize=16)
-plt.plot(df['receiveTime'],df['doseRate'])
-plt.ylabel(r'$Dose$',fontsize=24)
+plt.plot(df['receiveTime'],df['CPM'])
+plt.ylabel(r'$CPM$',fontsize=24)
 plt.xlabel(r'$Time$',fontsize=24)
 
-print("I have connected to the database, grabbed the whole table, parsed the data and plotted it via plot.ly and a matlab type to a SVG")
+plot_url = py.plot(fig, filename=receiveString)
+print(plot_url)
+
 plt.savefig(title+'.svg', format='svg')
 #plt.show()
 
