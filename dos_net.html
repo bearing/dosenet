@@ -1,125 +1,326 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <title>Complex icons</title>
-    <style>
-      html, body, #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
-    </style>
-    <script src="http://cdn.alloyui.com/3.0.0/aui/aui-min.js"></script>
-    <link href="http://cdn.alloyui.com/3.0.0/aui-css/css/bootstrap.min.css" rel="stylesheet"></link>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
-    <script>
+<html lang="en">
+  	<head>
+  		<title>DoseNet @ UC Berkeley</title>
+	  	<meta charset="UTF-8">
+	  	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	  	<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
-    function initialize() {
-      var myLatlng = new google.maps.LatLng(37.875309, -122.258548);
-      var mapOptions = {
-            zoom: 18,
-            center: myLatlng
-      }
-      var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
-      var contentString = '<div id="content">'+
-          '<div id="siteNotice">'+
-          '</div>'+
-          '<h1 id="firstHeading" class="firstHeading">Some dosimeter</h1>'+
-          '<div id="bodyContent">'+
-          '<p>Some random HTML that we can add here</p>'+
-          '<iframe width="550" height="550" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~navrit/45.embed?width=550&height=550"></iframe>'+
-          '</div>'+
-          '</div>';
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+	   	<script src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobox/src/infobox.js"></script>
+	    <style>
+			#map-canvas {
+				width: 100%;
+				min-width:30em;
+				min-height: 40em;
+			}
+			h5{
+				padding: 0.5em 0 0 0;
+		        font-size: 32px;
+		        font-weight: bold;
+		        text-align: center;
+			}
+		    p {
+		        padding: 1em;
+		        font-size: 28px;
+		        font-weight: bold;
+		        text-align: center;
+		    }
+		    .header {
+		    	margin: 1em 1em 0 1em;
+		    }
+		    .plot{
+		    	margin:1em;
+		    	width:100%;
+		    	min-width: 30em;
+		    	max-width: 700px;
+		    	min-height: 35em;
+		    	max-height: 500px;
+		    }	
+		    .jumbotron{
+		    	padding:0;
+		    	margin: 1em;
+		    }
+		</style>
+	    <script>
 
-      var infowindow = new google.maps.InfoWindow({
-          content: contentString
-      });
+		function get_unit_type(){
+			var sel = document.getElementById('dose_dropdown');
+			var sv = sel.options[sel.selectedIndex].value;
+		}
 
-      var marker = new google.maps.Marker({
-          position: myLatlng,
-          map: map,
-          title: 'Some random dosimeter'
-      });
-      
-      google.maps.event.addListener(marker, 'click', function() {
-        infowindow.open(map,marker);
-      });
+		var map;
+		var infowindow = new google.maps.InfoWindow();
+		function initialize() {
+			// Create a simple map.
+			map = new google.maps.Map(document.getElementById('map-canvas'), {
+				zoom: 16,
+				center: new google.maps.LatLng(37.872269, -122.258901)
+			});
 
-      setMarkers(map, marker);
-      setMarkers(map, beaches);
-      google.maps.event.addListener(marker, 'click', function() {
-        //window.alert('success');
-        
-      });
+		    google.maps.event.addListener(map, 'mouseover', function() {
+				infowindow.close();
+			});
 
-      google.maps.event.addDomListener(window, 'load', initialize);
-    }
+			// Load the associated GeoJSON
+			
+			var url = 'output.geojson'
+			//var url = 'https://radwatch-test.berkeley.edu/sites/default/files/output.geojson';
+			map.data.loadGeoJson(url);
 
-
-    /**
-     * Data for the markers consisting of a name, a LatLng and a zIndex for
-     * the order in which these markers should display on top of each
-     * other.
-     */
-    var beaches = [
-      ['Etchevery', 37.875673, -122.259294, 3],
-      ['Soda', 37.875665, -122.258730, 2],
-      ['Cory', 37.875034, -122.257582, 1],
-    ];
-    var pointMarker = new Array();//store marker in array
-    function setMarkers(map, locations) {
-      // Add markers to the map
-
-      // Marker sizes are expressed as a Size of X,Y
-      // where the origin of the image (0,0) is located
-      // in the top left of the image.
-
-      // Origins, anchor positions and coordinates of the marker
-      // increase in the X direction to the right and in
-      // the Y direction down.
-      
-      // Shapes define the clickable region of the icon.
-      // The type defines an HTML &lt;area&gt; element 'poly' which
-      // traces out a polygon as a series of X,Y points. The final
-      // coordinate closes the poly by connecting to the first
-      // coordinate.
-      var shape = {
-          coords: [1, 1, 1, 20, 18, 20, 18 , 1],
-          type: 'poly'
-      };
-      for (var i = 0; i < locations.length; i++) {
-        var beach = locations[i];
-        var myLatLng = new google.maps.LatLng(beach[1], beach[2]);
-        pointMarker[i] = new google.maps.Marker({
-            position: myLatLng,
-            map: map,
-            
-            shape: shape,
-            title: beach[0],
-            zIndex: beach[3]
-        });
-      google.maps.event.addListener(pointMarker[i], 'click', function(){
-          infowindow.open(map,beaches);
-          //window.alert("success");
-        }
-        );
-      }
-    }
-
-    function showAlert() {
-      window.alert('DIV clicked');
-    }
-
-    google.maps.event.addDomListener(window, 'load', initialize);
+			map.data.addListener('mousemove', function(event){
+				///var labelText = event.feature.getProperty('Latest dose (CPM)');
+				///var myOptions = {
+				///content: labelText,
+				///boxStyle: {
+				//border: "1px solid black"
+				//background-color: #FFFFFF,
+				//opacity: 100,
+				///textAlign: "center",
+				///fontSize: "2em",
+				//width: "50px",
+				///}
+				///,disableAutoPan: false
+				///,pixelOffset: new google.maps.Size(0,-34)
+				///,position: (event.latLng)
+				///,closeBoxURL: ""
+				///,isHidden: false
+				//,pane: "mapPane"
+				///,enableEventPropagation: true
+				///};
+				///var ibLabel = new InfoBox(myOptions);
+				///ibLabel.open(map);
+			});
+			//set global var for plotly_src
+			//var plotly_src = "https://plot.ly/~ne170/116.png";
+			//Set event listener for plots
+			map.data.addListener('click', function(event) {
+				src = event.feature.getProperty('URL').toString()
+				
+				<!-- src = event.feature.getProperty('URL').toString();
+				<!-- window.alert(src)
+				<!-- src = src.slice(23)
+				-->
+				document.getElementById("plot").innerHTML = "<img src=\"" + src + ".png" + "\">"; 
+			});
+			
+			// Set event listener for each feature.
+			map.data.addListener('mouseover', function(event) {
+				var content = "URL: "+event.feature.getProperty('URL').toString() +"<br>" + "Name: "+event.feature.getProperty('Name')+"<br>"+"Latest dose (CPM): "+event.feature.getProperty('Latest dose (CPM)')+"<br>"+"Latest measurement: "+event.feature.getProperty('Latest measurement')+"<br>";
+				infowindow.setContent(content);
+				infowindow.setPosition(event.latLng);
+				infowindow.setOptions({pixelOffset: new google.maps.Size(0,-34)});
+				infowindow.open(map);
+			});
+		}
+		google.maps.event.addDomListener(window, 'load', initialize);
+	   </script>
+ 	</head>
 
 
-    </script>
+ <body>
+	<div class="container-fluid">
+		<div class="header">
+			<div class="jumbotron" style="padding:0.5em 2em 2em 2em; margin:0;">
+				<h2>Dosimeter Network - UC Berkeley</h2>
+				<h6> 
+					<label> Units to Display on Map </label>
+					<select id="dose_dropdown" onChange='get_unit_type()'>
+						<option value="" disabled="disabled" selected="selected">Please select a Dose Unit</option>
+						<option value="banana">Banana Dose</option>
+						<option value="plane">Hours on an Airplane</option>
+					</select>
+				</h6>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-7" style="padding-left:0;">
+				<div style="margin-left:1em" id="map-canvas"></div>
+			</div>
+		
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5" style="padding-left:0; padding-right:0; margin-bottom:1em; max-width: 700px;max-height: 500px;">
+				<div id="plot" class="container-fluid" style="max-width: 700px;max-height: 500px; " align=center>
+				<!-- <iframe width="640" height="480" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/116.png" ></iframe> -->
+				<!-- <div> -->
+					<img class="plot" src="https://plot.ly/~ne170/235.png">
+					<!-- <script data-plotly="ne170:115" src="https://plot.ly/embed.js" async></script> -->
+					<!-- </div> -->
+				</div>
+			</div>
+		</div>
 
-  </head>
-  <body>
-    <div id="map-canvas"></div>
+		<br>
+
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						About DoseNet
+					</h5>
+					<p>
+						DoseNet is a collection of radiation detectors that are placed throughout the UC Berkeley campus and Berkeley area more generally. These dosimeters measure the amount of radiation that enters the detector and deposits energy every minute. This value is then converted to a count rate and used to calculate the amount of dose that is exposed to people.  Each dosimeter then takes this measurement and sends it to a central server, where it is displayed on RadWatch.  This system is unique in that it allows for real-time monitoring of radiation levels.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid" style="margin:0;">
+					<h5>
+						How the map works
+					</h5>
+					<p>
+						The map uses Google Maps with pinpoints at each dosimeter location. These dosimeters then update to show the current radiation level. Clicking on any of the points will bring up a new window, displaying more information about the individual detector and allow you to view the radiation level as a function of time. The units can be changed using the dropdown just above the map. These units show the background radiation level in terms of more familiar units. 
+					</p>
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Technical Details
+					</h5>
+					<p>
+						The dosimeters are semiconductor detectors attached to Raspberry Pi microcontrollers.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Units Used
+					</h5>
+					<p>
+						Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Micro-Sievert (µSv)
+					</h5>
+					<p>
+						The Sievert is the standard (SI) unit of absorbed dose. It is related to the amount of energy that radiation deposits in the body. 1 Sv is defined as being 1 joule of energy that is absorbed in 1 kg of tissue. 1 µSv is equal to 10^-6 (0.000001) Sv. 
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Millirem (mrem) - 1mrem = 10µSv
+					</h5>
+					<p>
+						The millirem (equal to 1/1000th of a rem) is an older measurement of radiation dose that the Sievert replaced. It is still common, however, in the literature on radiation dose. Because of this, it is included in here as well.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Number of Bananas (0.1µSv per banana)
+					</h5>
+					<p>
+						Bananas, as a source of potassium, contains the radioisotope potassium-40. This isotope, which has a half-life of 1.3 billion years, has been around since the formation of the Earth. Since bananas contain a lot of potassium, they also have a small, but measurable, amount of this isotope. This unit indicates approximately how many bananas you would need to eat to get the same dose as standing in this location for 10 minutes. <a href="http://en.wikipedia.org/wiki/Banana_equivalent_dose">Wikipedia entry</a>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Minutes on Airplane (2.38 µSv per hour)
+					</h5>
+					<p>
+						Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude means the air is thinner. With thinner air, there is less protection from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground. This unit compares how many minutes on an airplane would give you the same dose as standing at this location for 10 minutes. <a href="http://www.hps.org/publicinformation/ate/faqs/commercialflights.html">HPS Public information</a>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Medical Procedures
+					</h5>
+					<p>
+						Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure. The units here compare how many of each type of image would need to be taken to give you the same dose as standing at this location for 10 minutes.
+
+						Dental X-Ray (5 to 15 µSv)
+						Hand X-Ray (5 uSv)
+						Chest CT Scan (7mSv)
+						<a href="http://www.radiologyinfo.org/en/pdf/sfty_xray.pdf">Radiology information</a>
+						<a href="http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html">NRC - Daily lives</a>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						Will I be okay from receiving radiation?
+					</h5>
+					<p>
+						Very likely. Just as skin heals after a sunburn, the human body has ways of dealing with small amounts of radiation. Life on earth has existed with this background radiation for a very long time. In the same way life has adapted to sunlight, life has adopted to background radiation; it is a part of life and our bodies have mechanisms for repairing the damage that small doses cause.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						The area where I live seems higher than other areas, should I be concerned?
+					</h5>
+					<p>
+						Different locations have different amounts of natural radiation background. The background in Denver, for example, is considerably higher compared to that at sea level. Some variation in background level is to be expected, just as different places have different weather.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class ="jumbotron" >
+				<div class="container-fluid">
+					<h5>
+						The radiation level is higher today than it was yesterday. Should I be concerned?
+					</h5>
+					<p>
+						Probably not. In the same way that some days are windy and other days are calm, the background radiation level can change from day to day. What matters more than the dose each day is the overall trend in the dose over time. 
+						<a href="http://www.epa.gov/radiation/understand/perspective.html">EPA - Understand perspective</a>
+					</p>
+				</div>
+			</div>
+		</div>
+
+	</div>
   </body>
 </html>
