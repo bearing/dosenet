@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   	<head>
+	
+		<meta http-equiv="cache-control" content="max-age=0" />
+		<meta http-equiv="cache-control" content="no-cache" />
+		<meta http-equiv="expires" content="0" />
+		<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+		<meta http-equiv="pragma" content="no-cache" />
+		
   		<title>DoseNet @ UC Berkeley</title>
 	  	<meta charset="UTF-8">
 	  	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -8,13 +15,15 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		<link href="sticky-footer.css" rel="stylesheet">
 	    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
 	   	<script src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobox/src/infobox.js"></script>
-	   	<script src="https://raw.githubusercontent.com/googlemaps/js-marker-clusterer/gh-pages/src/markerclusterer.js"></script>
-	   	<script type="text/javascript" src="resources/markerwithlabel.js"></script>
-	    <style language="css" text="text/css">
+	    <style text="text/css">
+			
+
+			
 	    	@font-face { 
-				font-family:'Garamond';
+				font-family: 'Garamond';
 				src: local('Garamond'), url('resources/Garamond.ttf') format('truetype');
 			}
 			#map-canvas {
@@ -40,11 +49,11 @@
 		        text-align: center;
 		    }
 		    .header-text {
-		    	font-size: 3vw;
+		    	font-size: 2vw;
 		    	font-family: 'Garamond', Arial, sans-serif;
 		    }
 		    .header-image{
-		    	width: 80%;
+		    	width: 100%;
 		    	max-width: 40em;
 		    	min-height: 1em;
 		    }
@@ -68,496 +77,290 @@
 		    	
 		    }
 		    .navbar-static-top{
-
 		    }
 		    .marker{
 		    	height:2em;
 		    }
-		    .modal-dialog {
-				width: 100%; /* or whatever you wish */
-			}
-			.labels {
-				color: black;
-				background-color: white;
-				font-family: "Lucida Grande", "Arial", sans-serif;
-				font-size: 10px;
-				font-weight: bold;
-				text-align: center;
-				width: 40px;     
-				border: 2px solid black;
-				white-space: nowrap;
-			}
 		</style>
-
-	    <script language="javascript" type="text/javascript">
-
+	    <script>
+		function map_explained() {
+			document.getElementById("text_field").innerHTML = 
+			"<div class =\"jumbotron\" >" + "<br \>" +
+				"<h5>" + "<br \>" +
+					"How the map works" + "<br \>" +
+				"</h5>" + "<br \>" +
+				"<p>" + "<br \>" +
+					"The map uses Google Maps with pinpoints at each dosimeter location. These dosimeters then update to show the current radiation level. Clicking on any of the points will bring up a new window, displaying more information about the individual detector and allow you to view the radiation level as a function of time. The units can be changed using the dropdown just above the map. These units show the background radiation level in terms of more familiar units." + "<br \>" + 
+				"</p>" + "<br \>" +
+			"</div>"
+		}
+		
+		function about_radiation(){
+			document.getElementById("text_field").innerHTML = 
+				"<div class =\"jumbotron\" >" + "<br \>" +
+					"<h5>" + "<br \>" +
+						"The radiation level is higher today than it was yesterday. Should I be concerned?" + "<br \>" +
+					"</h5>" + "<br \>" +
+					"<p>" + "<br \>" +
+						"Probably not. In the same way that some days are windy and other days are calm, the background radiation level can change from day to day. What matters more than the dose each day is the overall trend in the dose over time." + "<br \>" + 
+						"<a href=\"http://www.epa.gov/radiation/understand/perspective.html\">EPA - Understand perspective</a>" + "<br \>" +
+					"</p>" + "<br \>" +
+					
+					"<h5>" + "<br \>" +
+						"Will I be okay from receiving radiation?" + "<br \>" +
+					"</h5>" + "<br \>" +
+					"<p>" + "<br \>" +
+						"Very likely. Just as skin heals after a sunburn, the human body has ways of dealing with small amounts of radiation. Life on earth has existed with this background radiation for a very long time. In the same way life has adapted to sunlight, life has adopted to background radiation; it is a part of life and our bodies have mechanisms for repairing the damage that small doses cause." + "<br \>" +
+					"</p>" + "<br \>" +
+					"<h5>" + "<br \>" +
+						"The area where I live seems higher than other areas, should I be concerned?" + "<br \>" +
+					"</h5>" + "<br \>" +
+					"<p>" + "<br \>" +
+						"Different locations have different amounts of natural radiation background. The background in Denver, for example, is considerably higher compared to that at sea level. Some variation in background level is to be expected, just as different places have different weather." + "<br \>" +
+					"</p>" + "<br \>" +
+											
+				"</div>";
+		}
+		
+		function about_dosnet(){
+			document.getElementById("text_field").innerHTML = 
+				"<div class =\"jumbotron\" >" + "<br \>" +
+					"<h5>" + "<br \>" +
+						"About DoseNet" + "<br \>" +
+					"</h5>" + "<br \>" +
+					"<p>" + "<br \>" +
+						"DoseNet is a collection of radiation detectors that are placed throughout the UC Berkeley campus and Berkeley area more generally. These dosimeters measure the amount of radiation that enters the detector and deposits energy every minute. This value is then converted to a count rate and used to calculate the amount of dose that is exposed to people.  Each dosimeter then takes this measurement and sends it to a central server, where it is displayed on RadWatch.  This system is unique in that it allows for real-time monitoring of radiation levels." + "<br \>" +
+					"</p>" + "<br \>" +
+				"</div>";
+		}
+		
+		sv_time = "hour";
+		function get_timeframe(){
+			var sel_time = document.getElementById('time_dropdown');
+			sv_time = sel_time.options[sel_time.selectedIndex].value;
+		}
+		
+		sv = "CPM";
 		function get_unit_type(){
 			var sel = document.getElementById('dose_dropdown');
-			var sv = sel.options[sel.selectedIndex].value;
-		}
+			sv = sel.options[sel.selectedIndex].value;
+			switch(sv) {
+				case 'plane':
+					document.getElementById("text_field").innerHTML = 
+					"<div class =\"jumbotron\">" + "<br />" + 
+						"<h5>" + "<br />" +
+							"Minutes on Airplane (2.38 µSv per hour)" + "<br />" + 
+						"</h5>" + "<br />" + 
+						"<p>" + "<br />" +
+							"Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude means the air is thinner. With thinner air, there is less protection from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground. This unit compares how many minutes on an airplane would give you the same dose as standing at this location for 10 minutes. <a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public information</a>" + "<br />" +
+						"</p>" + "<br />" + 
+					"</div>";
+				break;
+				case 'medical':
+					document.getElementById("text_field").innerHTML = 
+					"<div class =\"jumbotron\">" + "<br />" + 
+						"<h5>" + "<br />" +
+							"Medical Procedures" + "<br />" +
+						"</h5>" + "<br />" +
+						"<p>" + "<br />" +
+							"Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure. The units here compare how many of each type of image would need to be taken to give you the same dose as standing at this location for 10 minutes." + "<br />" +
 
+							"Dental X-Ray (5 to 15 µSv)" + "<br />" +
+							"Hand X-Ray (5 uSv)" + "<br />" +
+							"Chest CT Scan (7mSv)" + "<br />" +
+							"<a href=\"http://www.radiologyinfo.org/en/pdf/sfty_xray.pdf\">Radiology information</a>" + "<br />" +
+							"<a href=\"http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html\">NRC - Daily lives</a>" + "<br />" +
+						"</p>"
+					"</div>";					;
+				break;
+				case 'mREM/hr':
+					document.getElementById("text_field").innerHTML = 
+						"<div class =\"jumbotron\">" + "<br />" +
+							"<h5>" + "<br />" +
+								"Millirem per hour (mREM/hr) - 1 mREM/hr = 10 µSv/hr" + "<br />" +
+							"</h5>" + "<br />" +
+							"<p>" + "<br />" +
+								"The millirem (equal to 1/1000th of a rem) is an older measurement of radiation dose that the Sievert replaced. It is still common  however, in the literature on radiation dose. Because of this, it is included in here as well. The mREM/hr unit is the dose rate - the dose absorbed per hour of exposure." + "<br />" +
+							"</p>" + "<br />" +
+						"</div>";
+				break;
+				case 'uSv/hr':
+					document.getElementById("text_field").innerHTML = 
+						"<div class =\"jumbotron\">" + "<br />" +
+							"<h5>" + "<br />" +
+								"Micro-Sievert per hour (µSv/hr)" + "<br />" +
+							"</h5>" + "<br />" +
+							"<p>" + "<br />" +
+								"The Sievert is the standard (SI) unit of absorbed dose. It is related to the amount of energy that radiation deposits in the body. 1 Sv is defined as being 1 joule of energy that is absorbed in 1 kg of tissue. 1 µSv is equal to 10^-6 (0.000001) Sv. Sv/hr is the dose rate - the dose absorbed per hour of exposure." + "<br />" +
+							"</p>" + "<br />" +
+						"</div>";
+				break;
+				default:
+					document.getElementById("text_field").innerHTML = "default";
+			}
+				 
+		}
 		var map;
 		var infowindow = new google.maps.InfoWindow();
-		
+
 		function initialize() {
 			// Create a simple map.
 			map = new google.maps.Map(document.getElementById('map-canvas'), {
 				zoom: 16,
 				center: new google.maps.LatLng(37.872269, -122.258901)
 			});
-
 		    google.maps.event.addListener(map, 'mouseover', function() {
 				infowindow.close();
 			});
-
-			// Load the associated GeoJSON
 			
-			var url = 'output.geojson';
-			//var url = 'https://radwatch-test.berkeley.edu/sites/default/files/output.geojson';
+			//var url = 'https://radwatch-test.berkeley.edu/sites/default/files/output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
+			var url = 'output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
+			
 			map.data.loadGeoJson(url);
-
 			map.data.addListener('mousemove', function(event){
-				///var labelText = event.feature.getProperty('Latest dose (CPM)');
-				///var myOptions = {
-				///content: labelText,
-				///boxStyle: {
-				//border: "1px solid black"
-				//background-color: #FFFFFF,
-				//opacity: 100,
-				///textAlign: "center",
-				///fontSize: "2em",
-				//width: "50px",
-				///}
-				///,disableAutoPan: false
-				///,pixelOffset: new google.maps.Size(0,-34)
-				///,position: (event.latLng)
-				///,closeBoxURL: ""
-				///,isHidden: false
-				//,pane: "mapPane"
-				///,enableEventPropagation: true
-				///};
-				///var ibLabel = new InfoBox(myOptions);
-				///ibLabel.open(map);
-			});
-			//set global var for plotly_src
-			//var plotly_src = "https://plot.ly/~ne170/116.png";
-			//Set event listener for plots
-			/*map.data.addListener('click', function(event) {
-				src = event.feature.getProperty('URL').toString()
 				
-				<!-- src = event.feature.getProperty('URL').toString();
-				<!-- window.alert(src)
-				<!-- src = src.slice(23)
-				-->
-				document.getElementById("plot").innerHTML = "<img src=\"" + src + ".png" + "\">"; 
-			});*/
-			
+			});
+						
 			// Set event listener for each feature.
 			map.data.addListener('click', function(event) {
-				var content = "URL: "+event.feature.getProperty('CPM_URL').toString() +"<br>" + "Name: "+event.feature.getProperty('Name')+"<br>"+"Latest dose (CPM): "+event.feature.getProperty('Latest dose (CPM)')+"<br>"+"Latest measurement: "+event.feature.getProperty('Latest measurement')+"<br>"+"<iframe width=\"500\" height=\"400\" frameborder=\"0\" seamless=\"seamless\" scrolling=\"no\" src=\""+event.feature.getProperty('URL').toString()+".embed?width=500&height=400\"></iframe>";
+				
+				if (sv_time == "hour") {
+					if (sv == "mRAD/hr") {
+						plotly_url = "RAD_URL_Past_Hour"
+						}
+					else if (sv == "mREM/hr") {
+							plotly_url = "REM_URL_Past_Hour"
+						}
+					else if (sv == "CPM") {
+							plotly_url = "CPM_URL_Past_Hour"
+						}
+					}
+				 else if (sv_time == "day") {
+						if (sv == "mRAD/hr") {
+							plotly_url = "RAD_URL_Past_Day"
+							}
+						else if (sv == "mREM/hr") {
+							plotly_url = "REM_URL_Past_Day"
+						}
+						else if (sv == "CPM") {
+							plotly_url = "CPM_URL_Past_Day"
+						}
+					}
+				else if (sv_time == "month") {
+					if (sv == "mRAD/hr") {
+						plotly_url = "RAD_URL_Past_Month"
+						}
+					else if (sv == "mREM/hr") {
+						plotly_url = "REM_URL_Past_Month"
+					}
+					else if (sv == "CPM") {
+						plotly_url = "CPM_URL_Past_Month"
+					}
+				}
+				
+				//window.alert(plotly_url);
+				//window.alert(event.feature.getProperty(plotly_url).toString());
+					
+				var content = "URL: "+event.feature.getProperty(plotly_url.toString()).toString() +"<br>" + "Name: "+event.feature.getProperty('Name')+"<br>"+"Latest dose (CPM): "+event.feature.getProperty('Latest dose (CPM)')+"<br>"+"Latest measurement: "+event.feature.getProperty('Latest measurement')+"<br>"+"<iframe width=\"500\" height=\"400\" frameborder=\"0\" seamless=\"seamless\" scrolling=\"no\" src=\""+event.feature.getProperty(plotly_url.toString()).toString()+".embed?width=500&height=400\"></iframe>";
+				
 				infowindow.setContent(content);
 				infowindow.setPosition(event.latLng);
 				infowindow.setOptions({pixelOffset: new google.maps.Size(0,-34)});
 				infowindow.open(map);
 			});
-
-			google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-			     google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-			          google.maps.event.trigger(map, 'resize');
-
-			     });
-			});
-
-			$(function(){
-			// Using Twitter's Bootstrap modal:
-		 
-			$("#mapModal").modal({
-				backdrop: true,
-				keyboard: true
-			});
 			
-			// Init maps:
-		 
-			Map.init({
-				normal: $("#map"),
-				large: $("#map-large")
-			});
-		 
-		    $("#mapModal").bind("show", resize);
-			
-			var homeLatLng = new google.maps.LatLng(37.873,-122.26);
-
-			var markers = [];
-			function resize(){
-				// Delay the execution to wait for the modal animation.
-				setTimeout(function(){
-					$.each(Map.getMaps(), function(i, item){
-						google.maps.event.trigger(item.map, 'resize');
-						google.maps.event.trigger(item.map, 'bounds_changed');
-						item.map.setZoom(item.map.getZoom() );
-						item.map.setCenter(item.marker.getPosition());
-						var marker = new MarkerWithLabel({
-							position: homeLatLng,
-							draggable: false,
-							map: map,
-							labelContent: "$$$$",
-							labelAnchor: new google.maps.Point(22, 0),
-							labelClass: "labels", // the CSS class for the label
-							labelStyle: {opacity: 0.75}
-						});
-						markers.push(marker);
-						});
-					}, 1000);
-				}
-			 
-			});
-
-
 		}
 		google.maps.event.addDomListener(window, 'load', initialize);
+		setInterval(initialize, 30000);
 	   </script>
  	</head>
-
-
- <body>
+<body>
 	<div class="container-fluid">
 		<nav class="navbar navbar-default navbar-static-top">
 			<div class="container">
 				<div class="header">
 					<div class="jumbotron" style="padding:0.5em 2em 0em 2em; margin:0; background-color : transparent;">
-						<img class="header-image" src="http://www.nuc.berkeley.edu/sites/default/files/theme/NE-Banner.png">
-						<h2 class="header-text">Dosimeter Network - UC Berkeley</h2>
-						<h6> 
-							<div>
-								<label>
-									<span class="label label-primary">
-										Units to Display on Map 
-									</span>
-								</label>
-								<select id="dose_dropdown" onChange='get_unit_type()'>
-									<option value="" disabled="disabled" selected="selected">Please select a Dose Unit</option>
-									<option value="colorado">Years in Colorado</option>
-									<option value="plane">Hours on an Airplane</option>
-								</select>
-								<span class="label label-info">
-									<!-- Dosimeters - <img src="resources/marker.png" class="marker"> !-->
-									Dosimeters - <img src="http://i.imgur.com/d5MqteS.png" class="marker">
-									</img>
-								</span>
-								
-							</div>
-						</h6>
+						<img class="header-image img-responsive center-block" src="http://www.nuc.berkeley.edu/sites/default/files/theme/NE-Banner.png">
+						<h5 class="header-text text-center">Dosimeter Network  -  UC Berkeley</h5>
+						
 					</div>
 				</div>
 			</div>
 		</nav>
 		
 		<div class="row">
-			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="padding-left:0;">
-				<!-- <div style="margin-left:1em" align=center id="map-canvas"></div> !-->
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-7" style="padding-left:0;">
+				<h6> 
+					<div>
+						<label>
+							<span class="label label-primary">
+								Units to Display on Plots
+							</span>
+						</label>
+						<select id="dose_dropdown" onChange='get_unit_type()'>
+							<!-- <option value="" disabled="disabled" selected="selected">Please select a Dose Unit</option> -->
+							<option value="CPM">CPM</option>
+							<option value="mREM/hr">Milirem per Hour</option>
+							<option value="mRAD/hr">Milirad per Hour</option>
+							
+							
+							<!-- <option value="uSv/hr">Micro-Sievert per Hour</option>
+							<option value="plane">Hours on an Airplane</option>
+							<option value="medical">Medical Procedures</option> -->
+						</select>
+						
+						<label>
+							<span class="label label-primary">
+								Timeframe 
+							</span>
+						</label>
+						<select id="time_dropdown" onChange='get_timeframe()'>
+							<!-- <option value="" disabled="disabled" selected="selected">Please select the Length of Measurement</option -->>
+							<option value="hour">Last Hour</option>
+							<option value="day">Last Day</option>
+							<option value="month">Last Month</option>
+							
+							<!-- <option value="week">Last Week</option>
+							<option value="year">Last Year</option> -->
+						</select>
+						<span class="label label-info">
+							Dosimeters - <img src='images/marker.png' class="marker"></img>
+							<!-- Dosimeters - <img src='https://radwatch-test.berkeley.edu/sites/default/files/marker.png' class="marker"></img> -->
+						</span>
+						
+					</div>
+				</h6>
+						
+				<div style="margin-left:1em" align=center id="map-canvas">
+				</div>
 			</div>
-		
-			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" align=center style="padding-left:0; padding-right:0; margin-bottom:1em;">
-				<div class="container-fluid" align=center>
-					<a href="#" class="btn btn-lg btn-success"
-								data-toggle="modal"
-								data-target="#mapModal">Click to open Map
-					</a>
-					<div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModal" aria-hidden="true">
-					    <div class="modal-dialog modal-lg">
-					        <div class="modal-content">
-					            <div class="modal-header">
-					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">close</button>
-					            <h4 class="modal-title" id="myModalLabel">DoseNet Map</h4>
-					            </div>
-					            <div class="modal-body">
-					                <div id="map-canvas"></div>
-					            </div>
-					            <!--<div class="modal-footer">
-					                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					        	</div> !-->
-					    	</div>
-					  	</div>
-					</div>
-
-
-					<div class="bs-example">
-					    <div class="panel-group" id="accordion">
-					    	<div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse12">About DoseNet</a>
-					                </h4>
-					            </div>
-					            <div id="collapse12" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													About DoseNet
-												</h5>
-												<p>
-													DoseNet is a collection of radiation detectors that are placed throughout the UC Berkeley campus and Berkeley area more generally. These dosimeters measure the amount of radiation that enters the detector and deposits energy every minute. This value is then converted to a count rate and used to calculate the amount of dose that is exposed to people.  Each dosimeter then takes this measurement and sends it to a central server, where it is displayed on RadWatch.  This system is unique in that it allows for real-time monitoring of radiation levels.
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse13">How the map works</a>
-					                </h4>
-					            </div>
-					            <div id="collapse13" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													How the map works
-												</h5>
-												<p>
-													The map uses Google Maps with pinpoints at each dosimeter location. These dosimeters then update to show the current radiation level. Clicking on any of the points will bring up a new window, displaying more information about the individual detector and allow you to view the radiation level as a function of time. The units can be changed using the dropdown just above the map. These units show the background radiation level in terms of more familiar units. 
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">Units used</a>
-					                </h4>
-					            </div>
-					            <div id="collapse1" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													Units Used
-												</h5>
-												<p>
-													Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities.
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Dose-rate - Micro-sievert per hour (µSv/hr)</a>
-					                </h4>
-					            </div>
-					            <div id="collapse3" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                    <div class="container-fluid">
-					                    	<div class ="jumbotron" >
-												<h5>
-													Micro-Sievert per hour (µSv/hr)
-												</h5>
-												<p>
-													The Sievert is the standard (SI) unit of absorbed dose. It is related to the amount of energy that radiation deposits in the body. 1 Sv is defined as being 1 joule of energy that is absorbed in 1 kg of tissue. 1 µSv is equal to 10^-6 (0.000001) Sv. Sv/hr is the dose rate - the dose absorbed per hour of exposure.
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse4">Dose-rate - Millirem per hour (mREM/hr)</a>
-					                </h4>
-					            </div>
-					            <div id="collapse4" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                    <div class="container-fluid">
-					                    	<div class ="jumbotron" >
-												<h5>
-													Millirem per hour (mREM/hr) - 1 mREM/hr = 10 µSv/hr
-												</h5>
-												<p>
-													The millirem (equal to 1/1000th of a rem) is an older measurement of radiation dose that the Sievert replaced. It is still common  however, in the literature on radiation dose. Because of this, it is included in here as well. The mREM/hr unit is the dose rate - the dose absorbed per hour of exposure.
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Dose - Equivalent banana dose</a>
-					                </h4>
-					            </div>
-					            <div id="collapse2" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                	<div class ="jumbotron" >
-							                    <h5>
-													Number of bananas (0.1 µSv per banana)
-												</h5>
-												<p>
-													 Bananas, as a source of potassium, contains the radioisotope potassium-40. This isotope, which has a half-life of 1.3 billion years, has been around since the formation of the Earth. Since bananas contain a lot of potassium, they also have a small but measurable amount of this isotope. This unit indicates approximately how many bananas you would need to eat to get the same dose as standing in this location for 10 minutes. <a href="http://en.wikipedia.org/wiki/Banana_equivalent_dose">Banana equivalent dose</a>
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse6">Dose - Minutes on Airplane</a>
-					                </h4>
-					            </div>
-					            <div id="collapse6" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													Minutes on Airplane (2.38 µSv per hour)
-												</h5>
-												<p>
-													Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude means the air is thinner. With thinner air, there is less protection from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground. This unit compares how many minutes on an airplane would give you the same dose as standing at this location for 10 minutes. <a href="http://www.hps.org/publicinformation/ate/faqs/commercialflights.html">HPS Public information</a>
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse11">Medical Procedures</a>
-					                </h4>
-					            </div>
-					            <div id="collapse11" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													Medical Procedures
-												</h5>
-												<p>
-													Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure. The units here compare how many of each type of image would need to be taken to give you the same dose as standing at this location for 10 minutes.
-
-													Dental X-Ray (5 to 15 µSv)
-													Hand X-Ray (5 uSv)
-													Chest CT Scan (7mSv)
-													<a href="http://www.radiologyinfo.org/en/pdf/sfty_xray.pdf">Radiology information</a>
-													<a href="http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html">NRC - Daily lives</a>
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse17">The radiation level is higher today than it was yesterday...</a>
-					                </h4>
-					            </div>
-					            <div id="collapse17" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													The radiation level is higher today than it was yesterday. Should I be concerned?
-												</h5>
-												<p>
-													Probably not. In the same way that some days are windy and other days are calm, the background radiation level can change from day to day. What matters more than the dose each day is the overall trend in the dose over time. 
-													<a href="http://www.epa.gov/radiation/understand/perspective.html">EPA - Understand perspective</a>
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse16">The area where I live seems higher than other areas...</a>
-					                </h4>
-					            </div>
-					            <div id="collapse16" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													The area where I live seems higher than other areas, should I be concerned?
-												</h5>
-												<p>
-													Different locations have different amounts of natural radiation background. The background in Denver, for example, is considerably higher compared to that at sea level. Some variation in background level is to be expected, just as different places have different weather.
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse14">Will I be okay from receiving radiation?</a>
-					                </h4>
-					            </div>
-					            <div id="collapse14" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" >
-												<h5>
-													Will I be okay from receiving radiation?
-												</h5>
-												<p>
-													Very likely. Just as skin heals after a sunburn, the human body has ways of dealing with small amounts of radiation. Life on earth has existed with this background radiation for a very long time. In the same way life has adapted to sunlight, life has adopted to background radiation; it is a part of life and our bodies have mechanisms for repairing the damage that small doses cause.
-												</p>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-					        <div class="panel panel-default">
-					            <div class="panel-heading">
-					                <h4 class="panel-title">
-					                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse15">Sample line plot</a>
-					                </h4>
-					            </div>
-					            <div id="collapse15" class="panel-collapse collapse">
-					                <div class="panel-body">
-					                	<div class="container-fluid">
-						                    <div class ="jumbotron" style="background:#FFFFFF;" >
-												<iframe width="719" height="780" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/449.embed?width=780&height=719"></iframe>
-											</div>
-										</div>
-					                </div>
-					            </div>
-					        </div>
-
-
-					    </div>
-					</div>
+			
+			<div id = "text_field" class="col-xs-12 col-sm-12 col-md-12 col-lg-5" align=center style="padding-left:0; padding-right:0; margin-bottom:1em;">
+				<div class ="jumbotron" >
+					<h5>
+						Units Used
+					</h5>
+					<p>
+						Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities.
+					</p>
 				</div>
 			</div>
 		</div>
-
-
-		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
-			<div class ="jumbotron" >
-				<div class="container-fluid">
-					Team members: Navrit Bal, Tigran Ter-Stepanyan, Mark Trudel, Nathan Richner
-				</div>
-				<div class="container-fluid">
-					Project manager: Joey Curtis
-				</div>
-			</div>
-		</div>
-
 	</div>
-  </body>
+	<div class="navbar navbar-default navbar-fixed-bottom">
+		<div class="container">
+			
+			<span class="navbar-text text-left">
+				Team: Joseph Curtis, Ryan Pavlovski, Navrit Bal, </br> Tigran Ter-Stepanyan, Mark Trudel, Nathan Richner
+			</span>
+			<span class="navbar-text pull-right">
+				<button type="button" class="btn btn-link" onclick="map_explained()">How the Map Works</button>
+				<button type="button" class="btn btn-link" onclick="about_radiation()">About Radiation</button>
+				<button type="button" class="btn btn-link" onclick="about_dosnet()">About DosNet</button>
+				
+			</span>
+		</div>
+	</div>
+  
+</body>
 </html>
