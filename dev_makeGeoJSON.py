@@ -77,7 +77,12 @@ def initVariables():
 	global fname; fname = ''
 
 def sqlForPlot(stationID,startTime,endTime):
-	sqlString = "SELECT receiveTime, cpm, rem, usv FROM dosnet INNER JOIN stations ON dosnet.stationID=stations.ID WHERE `stations`.`Name`='%s' AND receiveTime BETWEEN '%s' AND '%s';" % (stationID, startTime, endTime)
+	sqlString = "SELECT receiveTime, cpm, rem, usv \
+				FROM dosnet \
+				INNER JOIN stations \
+				ON dosnet.stationID=stations.ID \
+				WHERE `stations`.`Name`='%s' \
+					AND receiveTime BETWEEN '%s' \AND '%s';" % (stationID, startTime, endTime)
 	#print sqlString
 	try:
 		cursor.execute(sqlString)
@@ -86,7 +91,8 @@ def sqlForPlot(stationID,startTime,endTime):
 	dosePerStation = cursor.fetchall()
 	#
 	# Populate time-restricted row array list
-	# Panda code to get SQL tuples of tuples into panda df tables which are WAAAY easier to work with (and apparently are faster?)
+	# Panda code to get SQL tuples of tuples into panda df tables which are 
+	# WAAAY easier to work with (and apparently are faster?)
 	# I'm doing this purely because the other more manual method did not work
 	# Pandas are easier to work with
 	df = pd.DataFrame( [[ij for ij in i] for i in dosePerStation] )
@@ -123,7 +129,7 @@ def makePlot(stationID,unit,dfunit,plotTitle,df,plength):
 								auto_open=False)
 		return plot_url
 	except:
-		print 'This '+unit+' failed - '+fname
+		print 'This '+unit+' plot failed - '+fname
 
 def resetURLs():
 	plot_url_cpm = ''
