@@ -5,7 +5,7 @@
 # Nuclear Engineering 170A: Nuclear Design
 # University of California, Berkeley, U.S.A.
 # Created: Sat 21/02/15
-# Last updated: Tues 07/04/15
+# Last updated: Wed 08/04/15
 
 import MySQLdb as mdb
 import sys
@@ -82,7 +82,8 @@ def sqlForPlot(stationID,startTime,endTime):
 				INNER JOIN stations \
 				ON dosnet.stationID=stations.ID \
 				WHERE `stations`.`Name`='%s' \
-					AND receiveTime BETWEEN '%s' \AND '%s';" % (stationID, startTime, endTime)
+					AND receiveTime BETWEEN '%s' \
+					AND '%s';" % (stationID, startTime, endTime)
 	#print sqlString
 	try:
 		cursor.execute(sqlString)
