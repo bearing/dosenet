@@ -13,8 +13,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 
 while True:
 	cpm = random.uniform(1,2)
-	time = time.strftime("%H:%M:%S")
-	package = "1" + "," + str(cpm) + "," + time	
+	tm = time.strftime("%H:%M:%S")
+	package = "1" + "," + str(cpm) + "," + tm
     sock.sendto(package, (UDP_IP, UDP_PORT))
     print "Package sent"
-    time.sleep(1)
+	time.sleep(1)
