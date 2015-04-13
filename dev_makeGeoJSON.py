@@ -5,7 +5,7 @@
 # Nuclear Engineering 170A: Nuclear Design
 # University of California, Berkeley, U.S.A.
 # Created: Sat 21/02/15
-# Last updated: Tues 07/04/15
+# Last updated: Sun 12/04/15
 
 import MySQLdb as mdb
 import sys
@@ -39,10 +39,12 @@ def initialise():
 	global G_cpmTitle; G_cpmTitle = 'Counts per minute (CPM) [1/min]'
 	global G_remtitle; G_remtitle = 'mREM/hr [J/kg/hr]'
 	global G_usvTitle; G_usvTitle = 'uSv/hr [J/kg/hr]'
+	global pLengthString; pLengthString = ('Hour','Day','Month')
+	#global num_cores; num_cores = multiprocessing.cpu_count()
 
 def getStationInfoFromDB():
 	# Get # of stations, station name, longitude, latitude
-	cursor.execute("SELECT `ID`, `Name`, `Lat`, `Long` FROM dosimeter_network.stations;")
+	cursor.execute("SELECT ID, `Name`, Lat, `Long` FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
 	global station_rows; station_rows = cursor.fetchall()
 
 def setStationInfo(i):
@@ -53,9 +55,10 @@ def setStationInfoForAll():
 	for i in station_rows:
 		setStationInfo(i)
 
-"""
-Parallel(n_jobs=num_cores)(delayed(setStationInfo(i)) for i in station_rows)
-"""
+'''
+Parallel(n_jobs=num_cores)(delayed(setStationInfo)(i)for i in station_rows)
+'''
+'''Parallel(n_jobs=num_cores)(delayed(FUNCTION)(ARGUMENT) for ARGUMENT in NUMBEROFITERATIONS)'''
 
 def setConstants():
 	global secondsInYear; secondsInYear = 31557600 #365.23 days
@@ -67,10 +70,7 @@ def setConstants():
 
 def initVariables():
 	global feature_list; feature_list = []
-	global url_list; url_list = []
-	global plot_url_cpm; plot_url_cpm = ''
-	global plot_url_rem; plot_url_rem = ''
-	global plot_url_usv; plot_url_usv = ''
+	#global url_list; url_list = []
 	global dtRow_rowarray_list; dtRow_rowarray_list = []
 	global dosesForEachStation_1d_list; dosesForEachStation_1d_list =[]
 	global station_row; station_row = 0
@@ -82,7 +82,8 @@ def sqlForPlot(stationID,startTime,endTime):
 				INNER JOIN stations \
 				ON dosnet.stationID=stations.ID \
 				WHERE `stations`.`Name`='%s' \
-					AND receiveTime BETWEEN '%s' \AND '%s';" % (stationID, startTime, endTime)
+				AND receiveTime BETWEEN '%s' \
+				AND '%s';" % (stationID, startTime, endTime)
 	#print sqlString
 	try:
 		cursor.execute(sqlString)
@@ -99,11 +100,20 @@ def sqlForPlot(stationID,startTime,endTime):
 	#sys.getsizeof(df_1d)
 	df.rename(columns={0:'receiveTime', 1:'CPM', 2:'REM', 3:'USV'}, 
 				inplace=True)
+	i = 0;
+	while len(df.index) > 200: # Reduce data for plotting
+		#print df
+		i += 1
+		df = df[::2]
+		#print df
+	if i!=0:
+		print 'Data was halved' ,i,'times'
 	return df
 
 def makePlot(stationID,unit,dfunit,plotTitle,df,plength):
 	# [unit] over numberOfSeconds for a specific named station [stationID]
 	try:
+		t0 = time.clock()                                                   ######################
 		# make the filename for Plot.ly export
 		# current station ID
 		fname = (str(stationID)+'_'+unit+'_'+plength)
@@ -127,14 +137,11 @@ def makePlot(stationID,unit,dfunit,plotTitle,df,plength):
 								layout=layout), 
 								filename=fname, 
 								auto_open=False)
+		print fname, 'Plot.ly:',time.clock() - t0, '(s)'                           ######################
+		#print plot_url
 		return plot_url
 	except:
 		print 'This '+unit+' plot failed - '+fname
-
-def resetURLs():
-	plot_url_cpm = ''
-	plot_url_rem = ''
-	plot_url_usv = ''
 
 def printPlotFail(error):
 	print 'Plotting failed'
@@ -144,11 +151,11 @@ def printFeatureFail(error):
 	print 'Iterative feature creation failed'
 	print error
 
-def setFeature(point,stationID,plength,LCPM,LTime,URLlist):
+def setFeature(geometry,name,plength,latestCPM,latestTime,URLlist):
 	# Will have to iterate through here to go through a 3x3 --> plength x URLlist
-	feature = Feature(geometry=point,
+	feature = Feature(geometry=geometry,
 					properties={
-						'Name': stationID, 
+						'Name': name, 
 						('URL_CPM_'+plength[0]): URLlist[0][0], 
 						('URL_REM_'+plength[0]): URLlist[0][1], 
 						('URL_USV_'+plength[0]): URLlist[0][2],
@@ -158,8 +165,8 @@ def setFeature(point,stationID,plength,LCPM,LTime,URLlist):
 						('URL_CPM_'+plength[2]): URLlist[2][0], 
 						('URL_REM_'+plength[2]): URLlist[2][1], 
 						('URL_USV_'+plength[2]): URLlist[2][2],  
-						'Latest dose (CPM)': LCPM, 
-						'Latest measurement': str(LTime)
+						'Latest dose (CPM)': latestCPM, 
+						'Latest measurement': str(latestTime)
 						}
 					)
 	feature_list.append(feature)
@@ -179,18 +186,22 @@ def plotOverTime(latestTime,latestStationID,latestCPM,pointLatLong,plotLengthStr
 			print "There probably isn't any data from this time.\n" + str(e)
 	df = sqlForPlot(latestStationID,startPlotTime,latestTime)
 	try:
+		urlA = ''
+		urlB = ''
+		urlC = ''
+		urlList = []
 		#Plot scatters Plot.ly to URLs
 		# CPM over numberOfSeconds for all stations
-		plot_url_cpm = makePlot(latestStationID,'CPM','CPM',G_cpmTitle,df,plotLengthString)
+		urlA = makePlot(latestStationID,'CPM','CPM',G_cpmTitle,df,plotLengthString)
 		# Rem over numberOfSeconds for all stations
-		plot_url_rem = makePlot(latestStationID,'REM','REM',G_remtitle,df,plotLengthString)
+		urlB = makePlot(latestStationID,'REM','REM',G_remtitle,df,plotLengthString)
 		# uSv over numberOfSeconds for all stations
-		plot_url_usv = makePlot(latestStationID,'USV','USV',G_usvTitle,df,plotLengthString)
-		t_url_list = (plot_url_cpm, plot_url_rem, plot_url_usv)
-		url_list.append(t_url_list)
-		resetURLs()
+		urlC = makePlot(latestStationID,'USV','USV',G_usvTitle,df,plotLengthString)
+		tempRow = urlA,urlB,urlC
+		urlList.extend(tempRow)
 	except Exception as e:
 		printPlotFail(e)
+	return urlList
 
 def setGeoJSONandCloseDB():
 	featurecollection = FeatureCollection(feature_list)
@@ -199,7 +210,7 @@ def setGeoJSONandCloseDB():
 	geojson_file = 'output.geojson'
 	f = open(geojson_file, 'w')
 	print >> f, dump
-	print("Finished execution!!")
+	print('Finished execution!!')
 	# disconnect from server
 	db.close()
 
@@ -214,30 +225,36 @@ def main():
 		# gets the stationID for insertion into the features
 		stationID = stnRowArrayList[station_row][1]
 		# get latest dose (cpm, rem, usv) and time for that measurement in the loop so we can display in exported GeoJSON file
-		sqlString = "SELECT MAX(dosnet.receiveTime) \
-					AS mostRecent, dosnet.cpm, dosnet.rem, dosnet.usv, stations.Name \
+		sqlString ="SELECT dosnet.stationID, stations.Name, dosnet.receiveTime, dosnet.cpm, dosnet.rem, dosnet.usv \
 					FROM dosnet \
 					INNER JOIN stations ON dosnet.stationID=stations.ID \
-					WHERE `stations`.`Name`='%s';" % stationID
+					WHERE dosnet.receiveTime = \
+					(SELECT MAX(dosnet.receiveTime) \
+						FROM dosnet \
+						INNER JOIN stations \
+						ON dosnet.stationID=stations.ID  \
+						WHERE stations.Name='%s') AND stations.Name='%s';" % (stationID, stationID)
 		cursor.execute(sqlString)
 		sqlString = ''
 		# dtRows --> Dose & time rows
 		dtRows = cursor.fetchall()
-		for dtRow in dtRows:
-			print stationID
+		for i in dtRows:
+			#print stationID
 			# L --> Latest ...
-			LTime = dtRow[0]
-			LCPM  = dtRow[1]
-			#Lrem  = dtRow[2]
-			#Lusv  = dtRow[3]
-			LstationID = dtRow[4]
-			pLengthString = ('Hour','Day','Month')
-			plotOverTime(LTime,LstationID,LCPM,point,pLengthString[0],secondsInHour)
-			plotOverTime(LTime,LstationID,LCPM,point,pLengthString[1],secondsInDay)
-			plotOverTime(LTime,LstationID,LCPM,point,pLengthString[2],secondsInMonth)
-			# Make feature - iterate through?
+			LstationName = i[1]
+			LTime = i[2]
+			LCPM  = i[3]
+			#Lrem  = i[4]
+			#Lusv  = i[5]
+			urlList = []
+			urlA = plotOverTime(LTime,LstationName,LCPM,point,pLengthString[0],secondsInHour)
+			urlB = plotOverTime(LTime,LstationName,LCPM,point,pLengthString[1],secondsInDay)
+			urlC = plotOverTime(LTime,LstationName,LCPM,point,pLengthString[2],secondsInMonth)
+			urlRow = (urlA,urlB,urlC)
+			urlList.extend(urlRow)
+			# Make feature - iterating through - each 
 			try:
-				setFeature(point,LstationID,pLengthString,LCPM,LTime,url_list)
+				setFeature(point,LstationName,pLengthString,LCPM,LTime,urlList)
 			except Exception as e:
 				printFeatureFail(e)
 
