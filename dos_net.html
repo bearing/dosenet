@@ -17,7 +17,7 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
 	<script src="http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.0/src/markerwithlabel.js" type="text/javascript"></script>
-	<script src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer_compiled.js"></script>
+	<!-- <script src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer_compiled.js"></script> !-->
 	<script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js"></script>
 	<style text="text/css">
 
@@ -27,8 +27,7 @@
 	}
 	#map-canvas {
 		width: 95%;
-		min-height: 40em;
-		height:	60em;
+		min-height: 65vh;
 		margin-left: auto;
 		margin-right: auto;
 	}
@@ -82,130 +81,140 @@
 		-moz-border-radius: 5px;
 		border-radius: 5px;
 	}
+	#text_field{
+		/*padding-bottom: 4em;*/
+	}
 	</style>
 	<script>
+	//Google Map Varibale, global scope over script
 	var map;
+	var berkeley = [37.872269, -122.258901];
 	var markers = [];
-	var marks = [];
-	var unitTime = "hour";
-	var unitDose = "CPM";
+	var marks = []; // contains all infoWindows 
 
-	function initialize() {
-		//Options fed into map initialiser
-		options = {
-			zoom: 16,
-			center: new google.maps.LatLng(37.872269, -122.258901),
-			mapTypeId: google.maps.MapTypeId.ROADMAP
-		}
-		map = new google.maps.Map(document.getElementById('map-canvas'),options);
+	// Gives ability to center map on array of two points
+	// Input: Array, coordinates latitutde longitude
+	function centerMap(center){
+		var mapCenter = new google.maps.LatLng(center[0], center[1])
+		map.setCenter(mapCenter)
 	}
 
+	function returnContent(val){
+		var time = getTimeframe();
+		var dose = getUnit();
+		var plotly_url = "URL_" + dose + "_" + time;
+
+		var iframeIntro = "<iframe width=\"500\" height=\"400\" frameborder=\"0\" seamless=\"seamless\" scrolling=\"no\" src=\"";
+		var markerURL = val.properties[plotly_url.toString()];
+		var iframeEnding = ".embed?width=500&height=400\"></iframe>";
+
+		console.log(markerURL)
+		
+		return iframeIntro + markerURL + iframeEnding;
+	}
+
+	// Can be used to get the units for the plot, called in returnContent
 	function getTimeframe(){
 		var sel_time = document.getElementById('time_dropdown');
-		unitTime = sel_time.options[sel_time.selectedIndex].value;
+		return sel_time.options[sel_time.selectedIndex].value;
 	}
 
+	// Can be used to get the timeframe for a plot, called in returnContent
 	function getUnit(){
 		var sel = document.getElementById('dose_dropdown');
-		unitDose = sel.options[sel.selectedIndex].value;
+		return sel.options[sel.selectedIndex].value;
 	}
 
 	$(document).ready(function(){
-		initialize();
+		// Run initialize to generate new map
+		map = new google.maps.Map(document.getElementById('map-canvas'), {
+			zoom: 16,
+		});
+
+		// Automatically centers map on Berkeley, this could be changed for any array of coorinates defined above
+		centerMap(berkeley);
+
+		// url for geoJSON file
 		// To solve browser caching issue
 		//var url = 'https://radwatch-test.berkeley.edu/sites/default/files/output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
 		var url = 'output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
+		var json = $($.parseJSON(JSON.stringify($.getJSON(url))))
 
+		// Fetch geoJSON file
+		// Runs function on complete, data is the data extracted from geoJSON
 		$.getJSON(url, function(data){
+			// For each item in "features" array inside data runs function
+			// key is the position of the item in the array Features
+			// val is the value in of the item
 			$.each(data.features, function(key, val){
-				markers.push(val);
-			});
-			for(var i = 0; i < markers.length; i++ ) {
-				//console.log(i);
-				var curr = markers[i];
-				var lat = curr.geometry.coordinates[1];
-				var lon = curr.geometry.coordinates[0];
-				var latest = "&nbsp"+(curr.properties["Latest dose (CPM)"]).toFixed(1)+"&nbsp";
-				var LatLng = new google.maps.LatLng(lat,lon);
-				var content = "";
+				// Get val info
+				// Geometry position
+				var lon = val.geometry.coordinates[0]
+				var lat = val.geometry.coordinates[1]
 
-				var marker = new MarkerWithLabel({
-					map: map,
-					title: name,
-					position: LatLng,
-					//animation: google.maps.Animation.DROP,
-					labelContent: latest,
-					labelAnchor: new google.maps.Point(5, 0),
-					labelClass: "labels",
+				//Latest Dose (CPM) value
+				var latest = "&nbsp"+(val.properties["Latest dose (CPM)"]).toFixed(1)+"&nbsp";
+		        
+		        // Creates Google Maps Objects
+		        // Infowindow
+		        var infowindow = new google.maps.InfoWindow();
+		        
+		        // Marker itself
+		        var marker = new MarkerWithLabel({
+		            map: map,
+		            title: name,
+		            position: new google.maps.LatLng(lat, lon),
+		            labelContent: latest,
+		            labelAnchor: new google.maps.Point(5, 0),
+		            labelClass: "labels",
+		        });
+
+		        markers.push(marker);
+
+		        // Sets Marker Icon to Red Icon
+		        // Can be changed to anything from [red, green, yellow, purple, green]
+		        marker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+
+		        // Adds listener to open infowindow with content from returnContent()
+				// returnConent() will allow you to enter the graphs from the geoJSON file
+				google.maps.event.addListener(marker, 'click', (function(marker) {
+			        return function() {
+			          	infowindow.setContent(returnContent(val));
+			          	infowindow.open(map, marker);
+			        }
+		      	})(marker));
+
+				// Self added this because otherwise it's annoying, 
+				// This closes any info windows when anyone clicks the map
+				//Makes navigation a lot easier!
+		      	google.maps.event.addListener(map, 'click', function() {
+					infowindow.close()
 				});
-				markers.push(marker);
-				var infowindow = new google.maps.InfoWindow();
+	      	});
 
-				/*google.maps.event.addListener(marker, 'mouseout', function(event){
-					
-				});*/
+			var mcOptions = {gridSize: 40, maxZoom: 15};
+			var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+		});	
 
-				google.maps.event.addListener(marker, 'click', (function(marker, i) {
-				//google.maps.event.addListener(marker, 'click', (function(event) {
-					return function(event) {
-						if (unitTime == "hour") {
-							if 		(unitDose == "CPM") {
-								plotly_url = "URL_CPM_Hour";
-								}
-							else if (unitDose == "REM") {
-								plotly_url = "URL_REM_Hour";
-								}
-							else if (unitDose == "USV") {
-								plotly_url = "URL_USV_Hour";
-								}
-							}
-						else if (unitTime == "day") {
-								if 		(unitDose == "CPM") {
-								plotly_url = "URL_CPM_Day";
-									}
-								else if (unitDose == "REM") {
-								plotly_url = "URL_REM_Day";
-								}
-								else if (unitDose == "USV") {
-								plotly_url = "URL_USV_Day";
-								}
-							}
-						else if (unitTime == "month") {
-							if 		(unitDose == "CPM") {
-								plotly_url = "URL_CPM_Month";
-								}
-							else if (unitDose == "REM") {
-								plotly_url = "URL_REM_Month";
-							}
-							else if (unitDose == "USV") {
-								plotly_url = "URL_USV_Month";
-							}
-						}
-						curr = markers[i];
-						//"<br>"+ "Name: "+curr.properties["Name"]
-						//"<br>"+"Latest dose (CPM): "+ curr.properties["Latest dose (CPM)"]
-						//"URL: "+curr.properties[plotly_url.toString()]+"<br>"
-						//"Latest measurement: "+"<br>"+curr.properties["Latest measurement"]+"<br>"
-						content = "<iframe width=\"500\" height=\"400\" frameborder=\"0\" seamless=\"seamless\" scrolling=\"no\" src=\""+curr.properties[plotly_url.toString()]+".embed?width=500&height=400\"></iframe>";
-						infowindow.setContent(content);
-						infowindow.open(map, marker);
-					}
-				})(marker, i));
-				marker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png')
-			}
-			var markerCluster = new MarkerClusterer(map, markers);
-		}); //End of $.getJSON(url, function(data)
-	}) //End of $(document).ready(function()
-</script>
+		var height = $("#bottomNav").height();
+		console.log(height);
+		$("#text_field").css("padding-bottom", height + "px");
+	});
+	$( window ).resize(function(){
+		var height = $("#bottomNav").height();
+		console.log(height);
+		$("#text_field").css("padding-bottom", height + "px");
+	});
+	</script>
 </head>
 <body>
 	<div class="container-fluid">
-		<nav class="navbar navbar-default navbar-static-top container header">
+		<div class="navbar navbar-default navbar-static-top container header">
 			<div class="jumbotron" style="padding:0.5em 2em 0em 2em; margin:0; background-color : transparent;">
 				<img class="header-image img-responsive center-block" src="http://www.nuc.berkeley.edu/sites/default/files/theme/NE-Banner.png">
 				<h5 class="header-text text-center">Dosimeter Network  -  UC Berkeley</h5>
 			</div>
-		</nav>
+		</div>
 		
 		<div class="row">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-7" style="padding-left:0;">
@@ -230,9 +239,9 @@
 						</label>
 						<select id="time_dropdown" onChange='getTimeframe()'>
 							<!-- <option value="" disabled="disabled" selected="selected">Please select the Length of Measurement</option -->>
-							<option value="hour">Last Hour</option>
-							<option value="day">Last Day</option>
-							<option value="month">Last Month</option>
+							<option value="Hour">Last Hour</option>
+							<option value="Day">Last Day</option>
+							<option value="Month">Last Month</option>
 						</select>
 						<span class="label label-info">
 							Dosimeters - <img src='http://maps.google.com/mapfiles/ms/icons/red-dot.png' class="marker"></img>
@@ -246,7 +255,7 @@
 				</div>
 			</div>
 			
-			<div id = "text_field" class="col-xs-12 col-sm-12 col-md-12 col-lg-5" align=center style="padding-left:0; padding-right:0; margin-bottom:1em;">
+			<div id="text_field" class="col-xs-12 col-sm-12 col-md-12 col-lg-5" align=center style="padding-left:0; padding-right:0; margin-bottom:1em;">
 				<div class ="jumbotron" >
 					<h5>
 						Units Used
@@ -258,7 +267,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="navbar navbar-default navbar-fixed-bottom">
+	<div class="navbar navbar-default navbar-fixed-bottom" id="bottomNav">
 		<div class="container">
 			
 			<span class="navbar-text text-left">
