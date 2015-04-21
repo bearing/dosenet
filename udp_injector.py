@@ -1,3 +1,4 @@
+# Tigran 21/04/2015
 import MySQLdb as mdb
 import socket
 from random import randint
@@ -16,15 +17,15 @@ sock = socket.socket(socket.AF_INET, # Internet
 sock.bind((UDP_IP, UDP_PORT))
 errorFlag = 1
 
-
 data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-#print "received message:", data
+print "received message:", data
 new = data.split(",")
 #stationID = new[0]
 #use station id 1 for testing purposes
 stationID = 1
-#time = new[1].replace(microsecond=0)
-cpm = float(new[2])
+time = new[2].replace(microsecond=0)
+cpm = float(new[1])
+print (cpm)
 rem = cpm * 8.76
 usv = rem
 errorFlag = randint(0,1)
