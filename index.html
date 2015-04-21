@@ -80,6 +80,7 @@
 		background: rgba(255,255,255,0.95);
 		-moz-border-radius: 5px;
 		border-radius: 5px;
+		/*filter: blur(20px);*/
 	}
 	#text_field{
 		/*padding-bottom: 4em;*/
@@ -153,7 +154,7 @@
 				var lat = val.geometry.coordinates[1]
 
 				//Latest Dose (CPM) value
-				var latest = "&nbsp"+(val.properties["Latest dose (CPM)"]).toFixed(1)+"&nbsp";
+				var latest = "&nbsp"+(val.properties["Latest dose (CPM)"]).toFixed(1)+getUnit()+"&nbsp";
 		        
 		        // Creates Google Maps Objects
 		        // Infowindow
@@ -247,7 +248,6 @@
 							Dosimeters - <img src='http://maps.google.com/mapfiles/ms/icons/red-dot.png' class="marker"></img>
 							<!-- Dosimeters - <img src='https://radwatch-test.berkeley.edu/sites/default/files/marker.png' class="marker"></img> -->
 						</span>
-						
 					</div>
 				</h6>
 
@@ -277,7 +277,7 @@
 				<button type="button" class="btn btn-link" onclick="map_explained()">How the Map Works</button>
 				<button type="button" class="btn btn-link" onclick="about_radiation()">About Radiation</button>
 				<button type="button" class="btn btn-link" onclick="about_dosnet()">About DosNet</button>
-				
+				<button type="button" class="btn btn-link" onclick="get_unit_type()">Unit explanation</button>
 			</span>
 		</div>
 	</div>
@@ -343,9 +343,11 @@
 	sv = "CPM";
 	function get_unit_type(){
 		var sel = document.getElementById('dose_dropdown');
+		console.log(sel);
 		sv = sel.options[sel.selectedIndex].value;
+		console.log(sv);
 		switch(sv) {
-			case 'plane':
+			/*case 'plane':
 			document.getElementById("text_field").innerHTML = 
 				"<div class =\"jumbotron\">" +  
 				"<h5>" + 
@@ -372,7 +374,7 @@
 				"<a href=\"http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html\">NRC - Daily lives</a>" + 
 				"</p>"
 				"</div>";
-			break;
+			break;*/
 			case 'mREM/hr':
 			document.getElementById("text_field").innerHTML = 
 				"<div class =\"jumbotron\">" + 
