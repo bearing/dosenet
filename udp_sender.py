@@ -1,5 +1,7 @@
+# Tigran 21/04/2015
 import socket
 import time
+import random
 
 UDP_IP = "192.168.1.101"
 UDP_PORT = 5005
@@ -7,14 +9,14 @@ UDP_PORT = 5005
 
 print "UDP target IP:", UDP_IP
 print "UDP target port:", UDP_PORT
-print "message:", MESSAGE
+#print "message:", MESSAGE
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 
 while True:
-	cpm = random.uniform(1,2)
-	tm = time.strftime("%H:%M:%S")
-	package = "1" + "," + str(cpm) + "," + tm
+    cpm = random.uniform(1,2)
+    tm = time.strftime("%H:%M:%S")
+    package = "1" + "," + str(cpm) + "," + tm	
     sock.sendto(package, (UDP_IP, UDP_PORT))
     print "Package sent"
-	time.sleep(1)
+    time.sleep(5)
