@@ -9,4 +9,4 @@ for response in socket.getaddrinfo('grim.nuc.berkeley.edu', 'http'):
     # Unpack the response tuple
     family, socktype, proto, canonname, sockaddr = response
     print 'Protocol: ', proto # Should be UDP if correct, could be TCP
-    print 'Address, port: ', sockaddr # Should be like this format ('IP Address',port)- eg. ('128.32.192.205',80)
+    print 'IP Address: ', sockaddr[0] # Format ('IP Address',port)- eg. ('128.32.192.205',80)
