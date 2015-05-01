@@ -6,7 +6,6 @@ class SQLObject:
         self.stn_list_key={'ID':0,'Name':1,'Lat':2,'Lon':3};
         self.v_stn_list=[];
         self.get_verified_station_list();
-        print self.v_stn_list[0][0];
     def __del__(self):
         self.db.close();
     def get_verified_station_list(self):
