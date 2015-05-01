@@ -14,12 +14,13 @@ de=ccrypt.public_d_encrypt(key_file_lst=key_file_lst);
 db=msqlt.SQLObject();
 
 UDP_IP = "192.168.1.101"
-UDP_PORT = 5000
+UDP_PORT = 5005
 sock=udpt.custSocket(ip=UDP_IP,port=UDP_PORT,decrypt=de);
 
-data = sock.listen();
-print "received message:", data
-db.inject(data);
+while True:
+    data = sock.listen();
+    print "received message:", data
+    db.inject(data);
 
 #close
 del db;

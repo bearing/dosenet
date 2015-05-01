@@ -5,6 +5,8 @@ class SQLObject:
         self.db=mdb.connect('localhost','ne170group','ne170groupSpring2015','dosimeter_network');
         self.stn_list_key={'ID':0,'Name':1,'Lat':2,'Lon':3};
         self.v_stn_list=[];
+        self.get_verified_station_list();
+        print self.v_stn_list[0][0];
     def __del__(self):
         self.db.close();
     def get_verified_station_list(self):
@@ -20,9 +22,9 @@ class SQLObject:
             data=self.parse_data(data);
             self.insert_into_dosenet(stationID=data[0],cpm=data[1],rem=data[2],usv=data[3],errorFlag=data[4]);
     def verify_data(self,data):
-        #bare bones implementation (NEEDS TO BE TESTED)
-        print self.v_stn_list;
-        print (data[0] in self.v_stn_list[self.stn_list_key['ID']])
+        #bare bones implementation (NEEDS TO BE REIMPLEMENTED)
+        easy_integer_list=[ x[0] for x in self.v_stn_list ];
+        print (int(data[0]) in easy_integer_list);
         return False;
     def parse_data(self,data):
         stationID=1;
