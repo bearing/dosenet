@@ -26,6 +26,7 @@ class SQLObject:
         print (int(data[0]) in easy_integer_list);
         return False;
     def parse_data(self,data):
+        data=data.split(',');
         stationID=1;
         time=data[2].replace(microsecond=0);
         cpm=float(new[1]);
