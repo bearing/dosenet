@@ -9,7 +9,7 @@ key_file_lst=['/home/testNE170/.ssh/id_rsa.pub'];
 pe=ccrypt.public_d_encrypt(key_file_lst=key_file_lst);
 
 udp_ip="192.168.1.101";
-udp_port=5000;
+udp_port=5005;
 message='';
 time.sleep(2);
 sock=[];
