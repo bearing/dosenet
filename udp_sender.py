@@ -45,7 +45,4 @@ while True:
     #print package
     sock.sendto(package, (UDP_IP, UDP_PORT))
     print "Package sent"
-    time.sleep(5)
-
-
-
+    time.sleep(60)
