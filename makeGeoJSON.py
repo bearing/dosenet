@@ -5,7 +5,7 @@
 # Nuclear Engineering 170A: Nuclear Design
 # University of California, Berkeley, U.S.A.
 # Created: Sat 21/02/15
-# Last updated: Sun 12/04/15
+# Last updated: Sun 03/05/15
 
 import MySQLdb as mdb
 import sys
@@ -40,15 +40,17 @@ def initialise():
 	global G_remtitle; G_remtitle = 'mREM/hr [J/kg/hr]'
 	global G_usvTitle; G_usvTitle = 'uSv/hr [J/kg/hr]'
 	global pLengthString; pLengthString = ('Hour','Day','Month')
+	global conversionFactor_cpm_to_rem; conversionFactor_cpm_to_rem = 0.01886792;  # COMPLETELY RANDOM (1/53)
+	global conversionFactor_cpm_to_usv; conversionFactor_cpm_to_usv = 0.00980392; # COMPLETELY RANDOM (1/102)
 	#global num_cores; num_cores = multiprocessing.cpu_count()
 
 def getStationInfoFromDB():
 	# Get # of stations, station name, longitude, latitude
-	cursor.execute("SELECT ID, `Name`, Lat, `Long` FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
+	cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
 	global station_rows; station_rows = cursor.fetchall()
 
 def setStationInfo(i):
-	stnRowArrayList.append((i[0], i[1], i[2], i[3]))
+	stnRowArrayList.append((i[0], i[1], i[2], i[3], i[4], i[5]))
 	return
 
 def setStationInfoForAll():
@@ -77,7 +79,7 @@ def initVariables():
 	global fname; fname = ''
 
 def sqlForPlot(stationID,startTime,endTime):
-	sqlString = "SELECT receiveTime, cpm, rem, usv \
+	sqlString = "SELECT receiveTime, cpm, cpmError \
 				FROM dosnet \
 				INNER JOIN stations \
 				ON dosnet.stationID=stations.ID \
@@ -98,36 +100,39 @@ def sqlForPlot(stationID,startTime,endTime):
 	# Pandas are easier to work with
 	df = pd.DataFrame( [[ij for ij in i] for i in dosePerStation] )
 	#sys.getsizeof(df_1d)
-	df.rename(columns={0:'receiveTime', 1:'CPM', 2:'REM', 3:'USV'}, 
+	df.rename(columns={0:'receiveTime', 1:'CPM', 2:'cpmError'}, 
 				inplace=True)
 	i = 0;
 	while len(df.index) > 200: # Reduce data for plotting
-		#print df
 		i += 1
-		df = df[::2]
-		#print df
+		df = df[::4]
 	if i!=0:
-		print 'Data was halved' ,i,'times'
+		print 'Data was quartered' ,i,'times'
 	return df
 
-def makePlot(stationID,unit,dfunit,plotTitle,df,plength):
+def makePlot(stationID,unit,error,plotTitle,df,plength):
 	# [unit] over numberOfSeconds for a specific named station [stationID]
 	try:
-		t0 = time.clock()                                                   ######################
+		t0 = time.clock()
 		# make the filename for Plot.ly export
 		# current station ID
 		fname = (str(stationID)+'_'+unit+'_'+plength)
 		# setup the plot.ly plot type as a Scatter with points with panda DataFrames (df)
 		trace = Scatter( 
 			x=df['receiveTime'],
-			y=df[dfunit], # changes depending on which units you are plotting
-			mode='markers'
+			y=df[unit], # changes depending on which units you are plotting
+			mode='lines+markers',
+			error_y=ErrorY(
+				type='data',
+				array=df[error],
+				visible=True
+				)
 			)
 		fontPref = Font(family='Arial, monospace',
 						size=16,
 						color='#000000')
 		layout = Layout(title=(str(stationID)+' '+unit+' '+plength),
-						xaxis=XAxis(title='Time',
+						xaxis=XAxis(title='Time (PDT)',
 						rangemode='nonzero',
 						autorange=True),
 						yaxis=YAxis(type='log',title=plotTitle),
@@ -137,8 +142,7 @@ def makePlot(stationID,unit,dfunit,plotTitle,df,plength):
 								layout=layout), 
 								filename=fname, 
 								auto_open=False)
-		print fname, 'Plot.ly:',time.clock() - t0, '(s)'                           ######################
-		#print plot_url
+		print fname, 'Plot.ly:',time.clock() - t0, '(s)'
 		return plot_url
 	except:
 		print 'This '+unit+' plot failed - '+fname
@@ -152,7 +156,6 @@ def printFeatureFail(error):
 	print error
 
 def setFeature(geometry,name,plength,latestCPM,latestTime,URLlist):
-	# Will have to iterate through here to go through a 3x3 --> plength x URLlist
 	feature = Feature(geometry=geometry,
 					properties={
 						'Name': name, 
@@ -176,7 +179,7 @@ def getNumberOfStations():
 
 def plotOverTime(latestTime,latestStationID,latestCPM,pointLatLong,plotLengthString,time):
 	plotLengthString = 'Past_' + plotLengthString
-	if latestTime=='':
+	if latestTime == '':
 		print 'Finished list?'
 		pass
 	else:
@@ -185,6 +188,10 @@ def plotOverTime(latestTime,latestStationID,latestCPM,pointLatLong,plotLengthStr
 		except Exception, e:
 			print "There probably isn't any data from this time.\n" + str(e)
 	df = sqlForPlot(latestStationID,startPlotTime,latestTime)
+	df['REM'] = df['CPM'] * conversionFactor_cpm_to_rem
+	df['USV'] = df['CPM'] * conversionFactor_cpm_to_usv
+	df['remError'] = df['cpmError'] * conversionFactor_cpm_to_rem    # CHECK WITH JOEY ETC
+	df['usvError'] = df['cpmError'] * conversionFactor_cpm_to_usv    # PRETTY SURE THIS IS INCORRECT
 	try:
 		urlA = ''
 		urlB = ''
@@ -192,11 +199,11 @@ def plotOverTime(latestTime,latestStationID,latestCPM,pointLatLong,plotLengthStr
 		urlList = []
 		#Plot scatters Plot.ly to URLs
 		# CPM over numberOfSeconds for all stations
-		urlA = makePlot(latestStationID,'CPM','CPM',G_cpmTitle,df,plotLengthString)
-		# Rem over numberOfSeconds for all stations
-		urlB = makePlot(latestStationID,'REM','REM',G_remtitle,df,plotLengthString)
-		# uSv over numberOfSeconds for all stations
-		urlC = makePlot(latestStationID,'USV','USV',G_usvTitle,df,plotLengthString)
+		urlA = makePlot(latestStationID,'CPM','cpmError',G_cpmTitle,df,plotLengthString)
+		# mREM/hr over numberOfSeconds for all stations
+		urlB = makePlot(latestStationID,'REM','remError',G_remtitle,df,plotLengthString)
+		# uSv/hr over numberOfSeconds for all stations
+		urlC = makePlot(latestStationID,'USV','usvError',G_usvTitle,df,plotLengthString)
 		tempRow = urlA,urlB,urlC
 		urlList.extend(tempRow)
 	except Exception as e:
@@ -210,7 +217,7 @@ def setGeoJSONandCloseDB():
 	geojson_file = 'output.geojson'
 	f = open(geojson_file, 'w')
 	print >> f, dump
-	print('Finished execution!!')
+	print('Navrit Bal - time is '+str(datetime.datetime.now()))
 	# disconnect from server
 	db.close()
 
@@ -224,8 +231,8 @@ def main():
 		point = Point(longlat)
 		# gets the stationID for insertion into the features
 		stationID = stnRowArrayList[station_row][1]
-		# get latest dose (cpm, rem, usv) and time for that measurement in the loop so we can display in exported GeoJSON file
-		sqlString ="SELECT dosnet.stationID, stations.Name, dosnet.receiveTime, dosnet.cpm, dosnet.rem, dosnet.usv \
+		# get latest dose (cpm) and time for that measurement in the loop so we can display in exported GeoJSON file
+		sqlString ="SELECT dosnet.stationID, stations.Name, dosnet.receiveTime, dosnet.cpm \
 					FROM dosnet \
 					INNER JOIN stations ON dosnet.stationID=stations.ID \
 					WHERE dosnet.receiveTime = \
@@ -244,8 +251,6 @@ def main():
 			LstationName = i[1]
 			LTime = i[2]
 			LCPM  = i[3]
-			#Lrem  = i[4]
-			#Lusv  = i[5]
 			urlList = []
 			urlA = plotOverTime(LTime,LstationName,LCPM,point,pLengthString[0],secondsInHour)
 			urlB = plotOverTime(LTime,LstationName,LCPM,point,pLengthString[1],secondsInDay)
