@@ -20,6 +20,7 @@ from plotly.graph_objs import *
 import pandas as pd
 import time
 import datetime
+import os
 #from joblib import Parallel, delayed  
 #import multiprocessing
 
@@ -217,7 +218,7 @@ def setGeoJSONandCloseDB():
 	geojson_file = 'output.geojson'
 	f = open(geojson_file, 'w')
 	print >> f, dump
-	print('Navrit Bal - time is '+str(datetime.datetime.now()))
+	print('Finished execution!!')
 	# disconnect from server
 	db.close()
 
@@ -270,3 +271,6 @@ setConstants()
 initVariables()
 main()
 setGeoJSONandCloseDB()
+
+#copy to DECF
+os.system("scp /home/dosenet/output.geojson kepler:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/")
