@@ -19,9 +19,13 @@ UDP_PORT = 5005
 sock=udpt.custSocket(ip=UDP_IP,port=UDP_PORT,decrypt=de);
 
 while True:
-    data = sock.listen();
-    print "received message:", data
-    db.inject(data);
-
-#close
-del db;
+    try:
+        data = sock.listen();
+        print "received message:", data
+        db.inject(data);
+    except KeyboardInterrupt:
+        print "Exiting cleaning"
+        del db
+        sys.exit(0)
+    except:
+        print "Cannot decrypt data..."
