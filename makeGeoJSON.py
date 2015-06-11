@@ -6,7 +6,7 @@
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 # Created: 		Sun 7/06/15
-# Last updated: Sun 7/06/15
+# Last updated: Thurs 11/06/15
 
 import os
 import MySQLdb as mdb
