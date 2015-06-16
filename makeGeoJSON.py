@@ -6,7 +6,7 @@
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 # Created: 		Sun 7/06/15
-# Last updated: Thurs 11/06/15
+# Last updated: Tue 16/06/15
 
 import os
 import MySQLdb as mdb
@@ -21,8 +21,9 @@ import datetime
 #arg = []; arg.extend(sys.argv)
 
 class Plot(object):
-	# Global class variables
-	#timeframe = arg[1] # Valid options >> Hour, Day, Week, Month, Year, All
+	#------------------------#
+	# Global class variables #
+	#------------------------#
 	# Open database connection
 	db = mdb.connect("localhost",
 					"ne170group",
@@ -194,8 +195,9 @@ class Plot(object):
 			try:
 				# Note the negative --> means that we're looking at the past relative to the latest measurement stored in the DB
 				startPlotTime = latestTime + datetime.timedelta(seconds=-time)
-			except (KeyboardInterrupt, SystemExit):
-				raise
+			except (KeyboardInterrupt, SystemExit), e:
+				raise e
+				sys.exit(0)
 			except Exception, e:
 				print "There probably isn't any data from this time.\n" + str(e)
 		df = Plot.getDataFromDB(self,latestStationID,startPlotTime,latestTime)
@@ -218,7 +220,7 @@ class Plot(object):
 			tempRow = urlA,urlB,urlC
 			urlList.extend(tempRow)
 		except (KeyboardInterrupt, SystemExit):
-			pass
+			sys.exit(0)
 		except Exception as e:
 			Plot.printPlotFail(self,e)
 		return urlList
@@ -268,7 +270,7 @@ class Plot(object):
 				try:
 					Plot.setFeature(self,point,LName,plotLength,LDose,LTime,urlList)
 				except (KeyboardInterrupt, SystemExit):
-					raise
+					sys.exit(0)
 				except Exception as e:
 					Plot.printFeatureFail(self,e)
 	def makeGeoJSON(self):
@@ -288,11 +290,11 @@ class Plot(object):
 	def scpToWebServer(self):
 		# copy to webserver - DECF Kepler
 		# Must be run under 'dosenet' linux user so that the SSH keypair setup between GRIM & DECF Kepler works without login
-		try:
-			outputLocation = " /home/dosenet/output.geojson "
-		except Exception, e:
-			raise e
-		webServerLocation = " kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/ "
+		# Not ideal: uses Joey's account for the SCP
+		# Will be: $ scp ... jcurtis@kepler/.../
+		#			         =======
+		outputLocation = " output.geojson "
+		webServerLocation = " nav@kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/ "
 		command = "scp" + outputLocation + webServerLocation
 		try:
 			os.system(command)
@@ -300,12 +302,21 @@ class Plot(object):
 			print 'Network Error: Cannot SCP to Kepler'
 			raise e
 	def printEndMessage(self):
-		print('Navrit Bal - time is '+ getDateTime())
+		print( u'\u00A9' +' Navrit Bal - time is '+ getDateTime())
 
 def getDateTime():
 	return str(datetime.datetime.now())
 
 def main(argv):
+	'''
+	Main makeGeoJSON function 
+
+	Parameters:
+		argv - command line arguments. Could be used for choosing which timeframes to plot, eg. $ python makeGeoJSON.py month year
+	Returns:
+		Plot.ly graphs - Updates dose over time graphs on plot.ly for ALL stations
+		output.geojson - GeoJSON file for the web page >> copied to Kepler (web server) via SCP (SSH CP) command
+	'''
 	t0 = time.time()
 	plot = Plot()
 	plot.getStationInfo()
@@ -316,14 +327,6 @@ def main(argv):
 	plot.scpToWebServer()
 	plot.printEndMessage()
 	print 'Total run time:', ("%.2f" % (time.time() - t0)), 's'
-	'''
-	Main makeGeoJSON function 
-
-	Parameters:
-		argv - command line arguments. Could be used for choosing which timeframes to plot, eg. $ python makeGeoJSON.py month year
-	Returns:
-		output.geojson - GeoJSON file for the web page >> copied to Kepler (web server) via SCP (SSH CP) command
-	'''
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
