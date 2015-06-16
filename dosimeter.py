@@ -5,7 +5,7 @@
 # DoseNet
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
-# Adapted from dosometer.py (Ryan Pavlovsky)
+# Adapted from dosimeter.py (Ryan Pavlovsky)
 # Last updated: Tue 16/06/15
 ##########################
 ## Run on Raspberry Pis ##
@@ -21,9 +21,9 @@ class dosimeter:
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24,GPIO.IN,pull_up_down=GPIO.PUD_UP) #Sets up radiation detection GPIO; Check if pulled up/need resistor?
         GPIO.setup(23,GPIO.IN,pull_up_down=GPIO.PUD_UP) #Sets up microphonics detection; Check if pulled up
-        GPIO.add_event_detect(24,GPIO.RISING,callback=self.UpdateCountCallback)
+        GPIO.add_event_detect(24,GPIO.RISING,callback=self.updateCountCallback)
         self.counts = []
-        sleep(1);
+        sleep(1)
 
     def __del__(self):
         print 'Dosimeter object just died - __del__'
@@ -37,11 +37,11 @@ class dosimeter:
         print ''
         GPIO.cleanup()
 
-    def UpdateCountCallback(self,channel):
+    def updateCountCallback(self,channel):
         microphonics = GPIO.input(23)
         #Checks to see if microphonics detected anything before counting it as a "count"
         if microphonics == GPIO.LOW: # 0V
-            self.counts.append(getDatetime())
+            self.counts.append(getDatetime()) # Stores counts as a list of datetimes
         if microphonics == GPIO.HIGH: # 3.3V
             print 'Stop shaking meeeeee'
 
