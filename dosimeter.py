@@ -10,11 +10,11 @@
 ##########################
 ## Run on Raspberry Pis ##
 ##########################
-import RPi.GPIO as GPIO;
-import numpy as np;
-import datetime;
-import time;
-from time import sleep;
+import RPi.GPIO as GPIO
+import numpy as np
+import datetime
+import time
+from time import sleep
 
 class dosimeter:
     def __init__(self):
