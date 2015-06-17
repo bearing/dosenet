@@ -252,14 +252,9 @@ class Plot(object):
 			# dtRows --> Data & time rows
 			dtRows = Plot.cursor.fetchall()
 			for i in dtRows:
-				#print stationID
 				# L --> Latest ...
-				########################## i.split(',') ???
-				LName = i[1]
-				LTime = i[2]
-				Lcpmtorem = i[4]
-				Lcpmtousv = i[5]
-				LDose  = i[3], i[3]*Lcpmtorem, i[3]*Lcpmtousv
+				LName, LTime, LDose, Lcpmtorem, Lcpmtousv = i
+				LDose = LDose, LDose*Lcpmtorem, LDose*Lcpmtousv
 				urlList = []
 				urlA = Plot.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],Plot.secondsInHour)
 				urlB = Plot.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],Plot.secondsInDay)
