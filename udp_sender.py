@@ -1,48 +1,45 @@
 #!/home/pi/miniconda/bin/python
-import RPi.GPIO as GPIO;
-import numpy as np;
-import socket;
-import datetime;
-import time;
-from time import sleep;
+import RPi.GPIO as GPIO
+import numpy as np
+import socket
+import datetime
+import time
+from time import sleep
 from dosimeter import dosimeter
-import crypt.cust_crypt as ccrypt;
+import crypt.cust_crypt as ccrypt
 
-key_file_lst=['id_rsa_dosenet.pub'];
-pe=ccrypt.public_d_encrypt(key_file_lst=key_file_lst);
+publicKey=['id_rsa_dosenet.pub']
+pe = ccrypt.public_d_encrypt(key_file_lst = publicKey)
 
-STATION_ID = 1
-UDP_IP = "192.168.1.101"
-UDP_PORT = 5005
+stationID = 1
+GRIM = 'grim.nuc.berkeley.edu'
+port = 5005
 
-#print "UDP target IP:", UDP_IP
-#print "UDP target port:", UDP_PORT
-#print "message:", MESSAGE
+#print "UDP target IP:", GRIM
+#print "UDP target port:", port
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
+det = dosimeter();  # Initialise dosimeter object from dosimeter.py
 
-det = dosimeter();  #Sets up dosimeter
+def getDatetime():
+    return datetime.datetime.now()
 
 while True:
-    cpm1 = det.get_cpm();
-    #mcpm = det.get_mcpm();  #Not sure if we should include this
-
-    cpm = cpm1[0] #returns just the cpm, and not the error
-    cpm_err = cpm1[1] #returns error in cpm
-    
-    ErrorCode = 0; #Default, no error codes
-    if len(det.counts) > 0:
-	if (datetime.datetime.now()-det.counts[-1]).total_seconds() >= 300: #Sets how long of a period of zero counts until it's considered an error
-        	ErrorCode = 12
-            
-    if cpm >= 1000: #Sets maximum threshold value over which count rate is considered an error
-        ErrorCode = 66;
- 
-    tm = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    package = str(STATION_ID) + "," + tm + "," + str(cpm) + "," + str(cpm_err) + "," + str(ErrorCode)   #2 corresponds to etcheverry
-    #print package
-    package =pe.encrypt_message(package)[0];
-    #print package
-    sock.sendto(package, (UDP_IP, UDP_PORT))
-    print "Package sent"
-    time.sleep(60)
+    cpm, cpmError = det.getCPMWithError()
+    errorCode = 0 # Default 'working' state - error code 0
+    #if len(det.counts) > 0: # Do not understand the purpose of this line
+	if (getDatetime() - det.counts[-1]).total_seconds() >= 300: #Sets how long of a period of zero counts until it's considered an error
+        	errorCode = 12
+    # ¿ THIS IS REALLY POINTLESS ?
+    # MAYBE A MAXIMUM RATE OF INCREASE COULD BE USEFUL?
+    #if cpm >= 1000: #Sets maximum threshold value over which count rate is considered an error
+    #    errorCode = 66
+    time = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
+    c = ','
+    package = str(stationID) +c+ time +c+ str(cpm) +c+ str(cpmError) +c+ str(errorCode)
+    #print packet
+    packet = pe.encrypt_message(package)[0]
+    #print packet
+    sock.sendto(packet, (GRIM, port))
+    print "Packet sent"
+    time.sleep(120)
