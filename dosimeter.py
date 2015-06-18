@@ -16,13 +16,22 @@ import datetime
 import time
 from time import sleep
 
+# SIG only >> -VE V
+# SIG + NS >> +VE V
+
 class dosimeter:
     def __init__(self):
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24,GPIO.IN,pull_up_down=GPIO.PUD_UP) #Sets up radiation detection GPIO; Check if pulled up/need resistor?
         GPIO.setup(23,GPIO.IN,pull_up_down=GPIO.PUD_UP) #Sets up microphonics detection; Check if pulled up
-        GPIO.add_event_detect(24,GPIO.RISING,callback=self.updateCountCallback)
+        # PRETTY SURE THIS NEEDS CHANGING
+        # The detector sends a NEGATIVE PULSE when it detects radiation (no noise)
+        # therefore the signal wouldn't rise when an event occurs
+        # it would fall if anything
+        GPIO.add_event_detect(24,GPIO.FALLING,callback=self.updateCount)
+        GPIO.add_event_detect(23,GPIO.RISING, callback=self.updateNoise)
         self.counts = []
+        self.noise  = []
         sleep(1)
 
     def __del__(self):
@@ -37,16 +46,26 @@ class dosimeter:
         print ''
         GPIO.cleanup()
 
-    def updateCountCallback(self,channel):
-        microphonics = GPIO.input(23)
+    def updateNoise(self):
+        print 'Stop shaking meeeeee'
+        d = getDatetime()
+        print d
+        self.noise.append(d)
+
+    def updateCount(self):
+        #microphonics = GPIO.input(23)
         #Checks to see if microphonics detected anything before counting it as a "count"
-        if microphonics == GPIO.LOW: # 0V
+        d = getDatetime()
+        print d
+        self.counts.append(d) # Stores counts as a list of datetimes
+        """if microphonics == GPIO.LOW: # 0V by GPIO standards
             self.counts.append(getDatetime()) # Stores counts as a list of datetimes
         if microphonics == GPIO.HIGH: # 3.3V
-            print 'Stop shaking meeeeee'
+            print 'Stop shaking meeeeee'"""
 
     def resetCounts(self):
         self.counts = self.counts[-120:] #Saves only the last 120 detected events before it resets for reaveraging
+        # Isn't this quite a lot of counts - too many?
         ###########################################################
         # Is this why we get the exponential decrease pattern???? #
         ###########################################################
@@ -54,6 +73,7 @@ class dosimeter:
     def getCounts(self):
         return float(len(self.counts))
 
+        #Discuss logic of this with Ryan - motivation behind numbers?
     def getCPMWithError(self):
         #########################
         # I need to change this #

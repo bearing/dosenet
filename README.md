@@ -2,6 +2,7 @@
 ## Code for the Berkeley RadWatch dosimeter network
 
 ### id_rsa_dosenet.pub
-> Where does it go?
-> What is it used for?
-> I think it goes on the Raspberry Pi SD cards /home/dosenet/ folder? This 
+> 1. **Where does it go?**
+>    - It goes on the Raspberry Pi SD cards ~/dosenet/ folder
+> 2. **What is this file used for?**
+>    - It is used for the 'half-encryption' 
