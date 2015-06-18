@@ -29,7 +29,7 @@ while True:
     errorCode = 0 # Default 'working' state - error code 0
     #if len(det.counts) > 0: # Do not understand the purpose of this line
 	if (getDatetime() - det.counts[-1]).total_seconds() >= 300: #Sets how long of a period of zero counts until it's considered an error
-        	errorCode = 12
+        errorCode = 12
     # ¿ THIS IS REALLY POINTLESS ?
     # MAYBE A MAXIMUM RATE OF INCREASE COULD BE USEFUL?
     #if cpm >= 1000: #Sets maximum threshold value over which count rate is considered an error
