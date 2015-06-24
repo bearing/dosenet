@@ -10,6 +10,7 @@
 #################
 ## Run on GRIM ##
 #################
+
 import sys
 import os
 # Extensible way for adding future imports
@@ -33,7 +34,7 @@ sock = udpTool.custSocket(ip=GRIM,port=port,decrypt=de)
 while True:
     try:
         data = sock.listen()
-        print "received message:", data
+        print "Received message:", data
         db.inject(data)
     except (KeyboardInterrupt, SystemExit), e:
         print "Exit cleaning"
