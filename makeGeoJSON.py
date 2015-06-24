@@ -7,6 +7,9 @@
 # Adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 # Created: 		Sun 7/06/15
 # Last updated: Tue 16/06/15
+#################
+## Run on GRIM ##
+#################
 
 import os
 import MySQLdb as mdb
@@ -21,71 +24,60 @@ import datetime
 #arg = []; arg.extend(sys.argv)
 
 class Plot(object):
-	#------------------------#
-	# Global class variables #
-	#------------------------#
-	# Open database connection
-	db = mdb.connect("localhost",
-					"ne170group",
-					"ne170groupSpring2015",
-					"dosimeter_network")
-	# prepare a cursor object using cursor() method
-	cursor = db.cursor()
-	# Titles of plots on Plot.ly
-	cpmTitle = 'Counts per minute (CPM)'
-	remTitle = 'mREM/hr'
-	usvTitle = 'uSv/hr'
-	# Should be retrieved from DB
-	calibrationFactor_cpm_to_rem = 0.01886792; # COMPLETELY RANDOM (1/53)
-	calibrationFactor_cpm_to_usv = 0.00980392; # COMPLETELY RANDOM (1/102)
-	# Constants used for plotting clarity
-	secondsInYear =  31557600 	# 365.23 days
-	secondsInMonth = 2592000 	# 30 days
-	secondsInWeek =  604800 	# 7 days
-	secondsInDay = 	 86400 		# 24 hours
-	secondsInHour =  3600 		# 60 minutes
-	secondsInMinute= 60 		# Duh
-	# Other global variables
-	stationRows = ''
-	stationRowArrayList = []
-	featureList = []
-	dataRowArrayList = []
-	dataForEachStationList =[]
-	stationRow = 0
-	filename = ''
 	def __init__(self):
+		#------------------------#
+		# Global class variables #
+		#------------------------#
+		# Open database connection
+		self.db = mdb.connect("localhost",
+						"ne170group",
+						"ne170groupSpring2015",
+						"dosimeter_network")
+		# prepare a cursor object using cursor() method
+		self.cursor = db.cursor()
+		# Titles of plots on Plot.ly
+		self.cpmTitle = 'Counts per minute (CPM)'
+		self.remTitle = 'mREM/hr'
+		self.usvTitle = 'uSv/hr'
+		# Should be retrieved from DB
+		self.calibrationFactor_cpm_to_rem = 0.01886792; # COMPLETELY RANDOM (1/53)
+		self.calibrationFactor_cpm_to_usv = 0.00980392; # COMPLETELY RANDOM (1/102)
+		# Other global variables
+		self.stationRows = ''
+		self.stationRowArrayList = []
+		self.featureList = []
+		self.dataRowArrayList = []
+		self.dataForEachStationList =[]
+		self.stationRow = 0
+		self.filename = ''
 		# Plot.ly sign in using ne170 login details
 		py.sign_in('ne170','ilo0p1671e')
 	def getStationInfo(self):
 		# Get number of stations, station name, longitude, latitude, CPM to mRem and uSv conversion calibration factors
-		Plot.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv \
+		self.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv \
 					FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
-		Plot.stationRows = Plot.cursor.fetchall()
+		self.stationRows = Plot.cursor.fetchall()
 	def setStationInfo(self,i):
 		#self.i = i
-		Plot.stationRowArrayList.append((i[0], i[1], i[2], i[3], i[4], i[5]))
+		self.stationRowArrayList.append((i[0], i[1], i[2], i[3], i[4], i[5]))
 		return
 	def setStationInfoForAll(self):
-		for i in Plot.stationRows:
-			Plot.setStationInfo(self,i)
+		for i in self.stationRows:
+			self.setStationInfo(self,i)
 	def getDataFromDB(self,stationID,startTime,endTime):
-		self.stationID = stationID
-		self.startTime = startTime
-		self.endTime = endTime
-		sqlString ="SELECT receiveTime, cpm, cpmError \
-					FROM dosnet \
-					INNER JOIN stations \
-					ON dosnet.stationID=stations.ID \
-					WHERE `stations`.`Name`='%s' \
-					AND receiveTime BETWEEN '%s' \
-					AND '%s';" % (stationID, startTime, endTime)
 		try:
-			Plot.cursor.execute(sqlString)
+			self.cursor.execute("SELECT receiveTime, cpm, cpmError \
+								FROM dosnet \
+								INNER JOIN stations \
+								ON dosnet.stationID=stations.ID \
+								WHERE `stations`.`Name`='%s' \
+								AND receiveTime BETWEEN '%s' \
+								AND '%s';" % (stationID, startTime, endTime))
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
-			print 'sqlString failure:' + str(e)
-		dosePerStation = Plot.cursor.fetchall()
+			print 'Could not get data from DB:' + str(e)
+		dosePerStation = self.cursor.fetchall()
 		#
 		# Populate time-restricted row array list of data
 		# Panda code to get SQL tuples of tuples into panda df tables which are 
@@ -95,7 +87,6 @@ class Plot(object):
 					inplace=True)
 		return df
 	def reduceData(self,df):
-		self.df = df
 		t0 = time.time()
 		i = 0;
 		while len(df.index) > 200: # Reduce data for plotting
@@ -106,13 +97,6 @@ class Plot(object):
 		return df
 	# [unit] over numberOfSeconds for a specific named station [stationID]
 	def makePlot(self,stationID,unit,error,plotTitle,df,plength):
-		self.stationID = stationID
-		self.unit = unit
-		self.error = error
-		self.plotTitle = plotTitle
-		self.df = df
-		self.plength = plength
-		# Start of function
 		try:
 			t0 = time.time()
 			# make the filename for Plot.ly export
@@ -156,9 +140,6 @@ class Plot(object):
 		print 'Iterative feature creation failed'
 		print error
 	def setFeature(self,point,name,plength,latestDose,latestTime,URLlist):
-		self.plength = plength
-		self.URLlist = URLlist
-		self.latestDose = latestDose
 		properties = {	'Name': name, 
 						'Latest dose (CPM)': latestDose[0],
 						'Latest dose (mREM/hr)': latestDose[1],
@@ -175,22 +156,13 @@ class Plot(object):
 						('URL_USV_'+plength[2]): URLlist[2][2]
 					}
 		feature = Feature(geometry=point, properties=properties)
-		Plot.featureList.append(feature)
+		self.featureList.append(feature)
 	def getNumberOfStations(self):
-		return range(len(Plot.stationRows))
+		return range(len(self.stationRows))
 	def makeAllPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
-		self.latestTime = latestTime
-		self.latestStationID = latestStationID
-		self.calibrationCPMtoREM = calibrationCPMtoREM
-		self.calibrationCPMtoUSV = calibrationCPMtoUSV
-		self.pointLatLong = pointLatLong
-		self.plotLengthString = plotLengthString
-		self.time = time
-		# Start of function
 		plotLengthString = 'Past_' + plotLengthString
 		if latestTime == '':
 			print 'Finished list?'
-			pass
 		else:
 			try:
 				# Note the negative --> means that we're looking at the past relative to the latest measurement stored in the DB
@@ -200,8 +172,8 @@ class Plot(object):
 				sys.exit(0)
 			except Exception, e:
 				print "There probably isn't any data from this time.\n" + str(e)
-		df = Plot.getDataFromDB(self,latestStationID,startPlotTime,latestTime)
-		df = Plot.reduceData(self,df)
+		df = self.getDataFromDB(self,latestStationID,startPlotTime,latestTime)
+		df = self.reduceData(self,df)
 		# Expands dataframe to include other units and their associated errors
 		df['REM'] = df['CPM'] * calibrationCPMtoREM
 		df['USV'] = df['CPM'] * calibrationCPMtoUSV
@@ -212,30 +184,37 @@ class Plot(object):
 			urlList = []
 			# Plot markers & lines - Plot.ly to URLs
 			# CPM over numberOfSeconds for all stations
-			urlA = Plot.makePlot(self,latestStationID,'CPM','cpmError',Plot.cpmTitle,df,plotLengthString)
+			urlA = self.makePlot(self,latestStationID,'CPM','cpmError',self.cpmTitle,df,plotLengthString)
 			# mREM/hr over numberOfSeconds for all stations
-			urlB = Plot.makePlot(self,latestStationID,'REM','remError',Plot.remTitle,df,plotLengthString)
+			urlB = self.makePlot(self,latestStationID,'REM','remError',self.remTitle,df,plotLengthString)
 			# uSv/hr over numberOfSeconds for all stations
-			urlC = Plot.makePlot(self,latestStationID,'USV','usvError',Plot.usvTitle,df,plotLengthString)
+			urlC = self.makePlot(self,latestStationID,'USV','usvError',self.usvTitle,df,plotLengthString)
 			tempRow = urlA,urlB,urlC
 			urlList.extend(tempRow)
 		except (KeyboardInterrupt, SystemExit):
 			sys.exit(0)
 		except Exception as e:
-			Plot.printPlotFail(self,e)
+			self.printPlotFail(self,e)
 		return urlList
 	# Used to be main()
 	def plotAll(self):
+		# Constants used for plotting clarity
+		secondsInYear =  31557600 	# 365.23 days
+		secondsInMonth = 2592000 	# 30 days
+		secondsInWeek =  604800 	# 7 days
+		secondsInDay = 	 86400 		# 24 hours
+		secondsInHour =  3600 		# 60 minutes
+		secondsInMinute= 60 		# Duh
 		plotLength = ('Hour','Day','Month')
 		#######################################################
 		## Iterate through to define all features (stations) ##
 		#######################################################
-		for station in Plot.getNumberOfStations(self):
+		for station in self.getNumberOfStations(self):
 			# builds up a tuple coordinates of the stations, longitude & latitude
-			longlat = [ Plot.stationRowArrayList[station][3], Plot.stationRowArrayList[station][2]]
+			longlat = [ self.stationRowArrayList[station][3], self.stationRowArrayList[station][2]]
 			point = Point(longlat)
 			# gets the stationID for insertion into the features
-			stationID = Plot.stationRowArrayList[station][1]
+			stationID = self.stationRowArrayList[station][1]
 			# get latest dose (CPM) and time for that measurement in the loop so we can display in exported GeoJSON file
 			# Don't need cpmError in this query
 			sqlString ="SELECT dosnet.stationID, stations.Name, dosnet.receiveTime, dosnet.cpm, stations.cpmtorem, stations.cpmtousv \
@@ -247,29 +226,29 @@ class Plot(object):
 							INNER JOIN stations \
 							ON dosnet.stationID=stations.ID  \
 							WHERE stations.Name='%s') AND stations.Name='%s';" % (stationID, stationID)
-			Plot.cursor.execute(sqlString)
+			self.cursor.execute(sqlString)
 			sqlString = ''
 			# dtRows --> Data & time rows
-			dtRows = Plot.cursor.fetchall()
+			dtRows = self.cursor.fetchall()
 			for i in dtRows:
 				# L --> Latest ...
 				LName, LTime, LDose, Lcpmtorem, Lcpmtousv = i
 				LDose = LDose, LDose*Lcpmtorem, LDose*Lcpmtousv
 				urlList = []
-				urlA = Plot.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],Plot.secondsInHour)
-				urlB = Plot.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],Plot.secondsInDay)
-				urlC = Plot.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],Plot.secondsInMonth)
+				urlA = self.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
+				urlB = self.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],secondsInDay)
+				urlC = self.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
 				urlRow = (urlA,urlB,urlC)
 				urlList.extend(urlRow)
 				# Make feature - iterating through each 
 				try:
-					Plot.setFeature(self,point,LName,plotLength,LDose,LTime,urlList)
+					self.setFeature(self,point,LName,plotLength,LDose,LTime,urlList)
 				except (KeyboardInterrupt, SystemExit):
 					sys.exit(0)
 				except Exception as e:
-					Plot.printFeatureFail(self,e)
+					self.printFeatureFail(self,e)
 	def makeGeoJSON(self):
-		featureCollection = FeatureCollection(Plot.featureList)
+		featureCollection = FeatureCollection(self.featureList)
 		# Export dump to GeoJSON file
 		dump = geojson.dumps(featureCollection)
 		f = open('output.geojson', 'w')

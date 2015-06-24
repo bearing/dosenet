@@ -7,9 +7,10 @@
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dosimeter.py (Ryan Pavlovsky)
 # Last updated: Tue 16/06/15
-##########################
-## Run on Raspberry Pis ##
-##########################
+#####################################
+## Indirectly run on Raspberry Pis ##
+#####################################
+
 import RPi.GPIO as GPIO
 import numpy as np
 import datetime

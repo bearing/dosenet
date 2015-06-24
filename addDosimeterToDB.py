@@ -15,19 +15,17 @@ import MySQLdb as mdb
 arg = []; arg.extend(sys.argv)
 
 class DBTool(object):
-	# Open database connection
-	db = mdb.connect("localhost",
-					"ne170group",
-					"ne170groupSpring2015",
-					"dosimeter_network")
-	# prepare a cursor object using cursor() method
-	cursor = db.cursor()
-	ID = ''
-	name = ''
-	md5hash = ''
-
 	def __init__(self):
-		pass
+		# Open database connection
+		self.db = mdb.connect("localhost",
+						"ne170group",
+						"ne170groupSpring2015",
+						"dosimeter_network")
+		# prepare a cursor object using cursor() method
+		self.cursor = db.cursor()
+		self.ID = ''
+		self.name = ''
+		self.md5hash = ''
 
 	def addDosimeter(self,name,lat,lon,cpmtorem,cpmtousv):
 		# Run some MySQL script
@@ -46,7 +44,7 @@ class DBTool(object):
 		runSQL(sql)
 
 	def removeDosimeterDataByID(self,ID):
-
+		# Implement later
 
 	def getID(self,name):
 		# The database uses auto-incremented ID numbers so we need to get 
