@@ -11,7 +11,7 @@ import crypt.cust_crypt as ccrypt
 ## Run on Raspberry Pis ##
 ##########################
 
-publicKey=['id_rsa_dosenet.pub']
+publicKey = ['id_rsa_dosenet.pub']
 pe = ccrypt.public_d_encrypt(key_file_lst = publicKey)
 
 ##################################
@@ -33,9 +33,9 @@ while True:
     try: 
         cpm, cpmError = det.getCPMWithError()
         errorCode = 0 # Default 'working' state - error code 0
-        datetime = getDatetime()
+        now = getDatetime()
         #if len(det.counts) > 0: # Do not understand the purpose of this line
-        if (datetime - det.counts[-1]).total_seconds() >= 300: #Sets how long of a period of zero counts until it's considered an error
+        if (now - det.counts[-1]).total_seconds() >= 300: #Sets how long of a period of zero counts until it's considered an error
             errorCode = 12
         # THIS IS REALLY POINTLESS ?
         # MAYBE A MAXIMUM RATE OF INCREASE COULD BE USEFUL?
@@ -48,7 +48,7 @@ while True:
         packet = pe.encrypt_message(package)[0]
         print packet
         sock.sendto(packet, (IP, port))
-        print "Packet sent @ " + datetime +' - '+ IP +':'+ port
+        print "Packet sent @ " + now +' - '+ IP +':'+ port
         time.sleep(120)
     except (KeyboardInterrupt, SystemExit):
         print '.... User interrupt ....\n Byyeeeeeeee'
