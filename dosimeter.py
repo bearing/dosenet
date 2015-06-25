@@ -23,16 +23,13 @@ from time import sleep
 class dosimeter:
     def __init__(self):
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
-        GPIO.setup(24,GPIO.IN,pull_up_down=GPIO.PUD_UP) #Sets up radiation detection GPIO; Check if pulled up/need resistor?
-        GPIO.setup(23,GPIO.IN,pull_up_down=GPIO.PUD_UP) #Sets up microphonics detection; Check if pulled up
-        # PRETTY SURE THIS NEEDS CHANGING
-        # The detector sends a NEGATIVE PULSE when it detects radiation (no noise)
-        # therefore the signal wouldn't rise when an event occurs
-        # it would fall if anything
+        GPIO.setup(24,GPIO.IN,pull_up_down=GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
+        GPIO.setup(23,GPIO.IN,pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
         GPIO.add_event_detect(24,GPIO.FALLING,callback=self.updateCount)
         GPIO.add_event_detect(23,GPIO.RISING, callback=self.updateNoise)
-        self.counts = []
-        self.noise  = []
+        self.counts = [] # Datetime and errorFlag list
+        self.noise  = [] # Datetime list
+        self.margin = datetime.timedelta(microseconds=100000) #100ms milliseconds is not an option
         sleep(1)
 
     def __del__(self):
@@ -49,23 +46,29 @@ class dosimeter:
 
     def updateNoise(self):
         print 'Stop shaking meeeeee'
-        d = getDatetime()
-        print d
-        self.noise.append(d)
+        now = getDatetime()
+        print now
+        self.noise.append(now)
 
     def updateCount(self):
         #microphonics = GPIO.input(23)
-        #Checks to see if microphonics detected anything before counting it as a "count"
-        d = getDatetime()
-        print d
-        self.counts.append(d) # Stores counts as a list of datetimes
-        """if microphonics == GPIO.LOW: # 0V by GPIO standards
-            self.counts.append(getDatetime()) # Stores counts as a list of datetimes
-        if microphonics == GPIO.HIGH: # 3.3V
-            print 'Stop shaking meeeeee'"""
+        now = getDatetime()
+        lastMicrophonics = self.noise[-1] # Last datetime object in the noise list
+        #Checks to see if microphonics detected within a 200ms window before deciding whether to change the 
+        # errorFlag to 'microphonics was HIGH' or leave as default
+        if not (now - self.margin) <= lastMicrophonics <= (now + self.margin):
+            self.counts.append(now,0) # Stores counts as a list of datetimes and an errorFlag
+                                     # errorFlag = 0 by default (no errror registered)
+        else:
+            self.counts.append(now,1) # Stores counts as a list of datetimes and an errorFlag
+            #print 'Stop shaking meeeeee'
+        # Note: GPIO.LOW  - 0V
+        #       GPIO.HIGH - 3.3V (RPi rail voltage)
+            
 
     def resetCounts(self):
         self.counts = self.counts[-120:] #Saves only the last 120 detected events before it resets for reaveraging
+        # CHANGE this to a timedelta of 2 minutes?
         # Isn't this quite a lot of counts - too many?
         ###########################################################
         # Is this why we get the exponential decrease pattern???? #
@@ -80,10 +83,12 @@ class dosimeter:
         # I need to change this #
         #########################
         counts = self.getCounts()
-        if (counts < 2):
+        now = getDatetime()
+        if (counts < 2): # ?????????? Ask Ryan
             return [0,0]
-        diff = (getDatetime() - self.counts[0]).total_seconds()
+        diff = (now - self.counts[0]).total_seconds()
         CPM = [ counts/diff*60., np.sqrt(counts)/diff*60 ]
+        # ?????????? Ask Ryan
         if( counts>300 or diff>200 ):  #Resets the averaging every 300 counts or every 200 seconds
             self.resetCounts()
         return CPM
