@@ -4,7 +4,7 @@ import datetime
 class SQLObject:
     def __init__(self):
         self.db = mdb.connect('localhost','ne170group','ne170groupSpring2015','dosimeter_network')
-        #self.stn_list_key = {'ID':0,'Name':1,'Lat':2,'Lon':3, 'cpmtorem':4,'cpmtousv':5,'IDLatLongHash':6}
+        # self.stn_list_key = {'ID':0,'Name':1,'Lat':2,'Lon':3, 'cpmtorem':4,'cpmtousv':5,'IDLatLongHash':6}
         self.verifiedStations = []
         self.getVerifiedStationList()
         self.cursor = self.db.cursor()
@@ -21,7 +21,7 @@ class SQLObject:
                                         FROM dosimeter_network.stations;')
     def checkHashFromRAM(self,ID):
         # Essentially the same as doing the following in MySQL
-        #  "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
+        # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
         try:
             for i in len(verifiedStations):
                 if self.verifiedStations[i][0] == ID:
@@ -36,7 +36,7 @@ class SQLObject:
         runSQL('INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
                 VALUES (%s,%s,%s,%s);',
                 (stationID,cpm,cpmError,errorFlag)) 
-        #Time is decided by the MySQL database hence 'receiveTime' field in DB
+        # Time is decided by the MySQL database hence 'receiveTime' field in DB
         self.db.commit()
 
     def inject(self,data):
