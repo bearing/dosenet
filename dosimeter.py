@@ -6,7 +6,7 @@
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dosimeter.py (Ryan Pavlovsky)
-# Last updated: Tue 16/06/15
+# Last updated: Thu 25/06/15
 #####################################
 ## Indirectly run on Raspberry Pis ##
 #####################################
@@ -33,21 +33,20 @@ class dosimeter:
         sleep(1)
 
     def __del__(self):
-        print 'Dosimeter object just died - __del__'
+        print ('Dosimeter object just died - __del__')
         self.close()
 
     def __exit__(self):
-        print 'Dosimeter object just exited - __exit__'
+        print ('Dosimeter object just exited - __exit__')
         self.close()
 
     def close(self):
-        print ''
         GPIO.cleanup()
 
     def updateNoise(self):
-        print 'Stop shaking meeeeee'
+        print ('Stop shaking meeeeee')
         now = getDatetime()
-        print now
+        print (now)
         self.noise.append(now)
 
     def updateCount(self):
@@ -84,14 +83,12 @@ class dosimeter:
         #########################
         counts = self.getCounts()
         now = getDatetime()
-        if (counts < 2): # ??????????
-            return [0,0]
-        diff = (now - self.counts[0]).total_seconds()
-        CPM = [ counts/diff*60., np.sqrt(counts)/diff*60 ]
-        # ??????????
-        if( counts>60 or diff>120 ):  #Resets the averaging every 300 counts or every 200 seconds
+        diff = (now - self.counts[0]).total_seconds()       ##################
+        data = [ counts/diff*60., np.sqrt(counts)/diff*60 ] # ADD FLAG HERE? #
+        # ??????????                                        ##################
+        if( counts>300 or diff>200 ):  #Resets the averaging every 300 counts or every 200 seconds
             self.resetCounts()
-        return CPM
+        return data
 
     def getCPMError(self):
         return np.sqrt(len(self.counts))
