@@ -21,24 +21,22 @@ class SQLObject:
                                         FROM dosimeter_network.stations;')
     def checkHashFromRAM(self,ID):
         # Essentially the same as doing the following in MySQL
-        #  "SELECT IDLatLongHash
-        #       FROM stations
-        #       WHERE `ID` = $$$ ;"
+        #  "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
         try:
             for i in len(verifiedStations):
                 if self.verifiedStations[i][0] == ID:
                     dbHash = self.verifiedStations[i][1]
                     return dbHash
-        except Exception, e:
+        except Exception as e:
             raise e
             return False
-        print 'Could not find a station matching that ID'
+            print ('Could not find a station matching that ID')
 
     def insertIntoDosenet(self,stationID,cpm,cpmError,errorFlag):
         runSQL('INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
                 VALUES (%s,%s,%s,%s);',
                 (stationID,cpm,cpmError,errorFlag)) 
-        #Time is decided by the MySQL database hence 'receiveTime'
+        #Time is decided by the MySQL database hence 'receiveTime' field in DB
         self.db.commit()
 
     def inject(self,data):
@@ -55,7 +53,6 @@ class SQLObject:
     def authenticatePacket(self,data):
         msgHash = data[0]
         ID      = data[1]
-        #dbHash  = getHashFromDB(ID)
         dbHash  = checkHashFromRAM(ID)
         if dbHash == msgHash:
             return True
@@ -86,7 +83,7 @@ class SQLObject:
         try:
             SQLObject.cursor.execute(sql)
         except (KeyboardInterrupt, SystemExit):
-            print '.... User interrupt ....\n Byyeeeeeeee'
+            print ('.... User interrupt ....\n Byyeeeeeeee')
             sys.exit(0)
-        except Exception, e:
+        except Exception as e:
             raise e

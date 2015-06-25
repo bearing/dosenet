@@ -6,7 +6,7 @@
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from udp_injector.py (Ryan Pavlovsky)
-# Last updated: Tue 16/06/15
+# Last updated: Thu 25/06/15
 #################
 ## Run on GRIM ##
 #################
@@ -26,7 +26,7 @@ privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
 de = ccrypt.public_d_encrypt(key_file_lst=privateKey) # Uses 1 private key ()
 db = mySQLTool.SQLObject()
 # Set up network information >> points to GRIM's internal static IP address at port 5005
-GRIM = "192.168.1.101"
+GRIM = '192.168.1.101'
 port = 5005
 sock = udpTool.custSocket(ip=GRIM,port=port,decrypt=de)
 
@@ -34,12 +34,12 @@ sock = udpTool.custSocket(ip=GRIM,port=port,decrypt=de)
 while True:
     try:
         data = sock.listen()
-        print "Received message:", data
+        print ('Received message:', data)
         db.inject(data)
-    except (KeyboardInterrupt, SystemExit), e:
-        print "Exit cleaning"
-        raise e
+    except (KeyboardInterrupt, SystemExit):
+        print ('Exit cleaning')
         del db # Manual garbage collection
         sys.exit(0)
-    except:
-        print "Exception: Cannot decrypt data..."
+    except (Exception) as e:
+        raise e
+        print ('Exception: Cannot decrypt data...')

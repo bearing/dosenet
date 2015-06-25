@@ -32,6 +32,7 @@ def getDatetime():
 while True:
     try: 
         cpm, cpmError = det.getCPMWithError()
+        # GET errorCode from det Object
         errorCode = 0 # Default 'working' state - error code 0
         now = getDatetime()
         #if len(det.counts) > 0: # Do not understand the purpose of this line
@@ -44,14 +45,14 @@ while True:
         #time = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
         c = ','
         package = str(msgHash) +c+ str(stationID) +c+ str(cpm) +c+ str(cpmError) +c+ str(errorCode)
-        print packet
+        print (packet)
         packet = pe.encrypt_message(package)[0]
-        print packet
+        print (packet)
         sock.sendto(packet, (IP, port))
         print "Packet sent @ " + now +' - '+ IP +':'+ port
         time.sleep(120)
     except (KeyboardInterrupt, SystemExit):
         print '.... User interrupt ....\n Byyeeeeeeee'
         sys.exit(0)
-    except Exception, e:
+    except Exception as e:
         raise e

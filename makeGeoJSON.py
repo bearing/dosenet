@@ -6,7 +6,7 @@
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 # Created: 		Sun 7/06/15
-# Last updated: Tue 16/06/15
+# Last updated: Thu 35/06/15
 #################
 ## Run on GRIM ##
 #################
@@ -75,8 +75,8 @@ class Plot(object):
 								AND '%s';" % (stationID, startTime, endTime))
 		except (KeyboardInterrupt, SystemExit):
 			pass
-		except Exception, e:
-			print 'Could not get data from DB:' + str(e)
+		except Exception as e:
+			print ('Could not get data from DB:' + str(e))
 		dosePerStation = self.cursor.fetchall()
 		#
 		# Populate time-restricted row array list of data
@@ -93,7 +93,7 @@ class Plot(object):
 			i += 1
 			df = df[::4]
 		if i!=0:
-			print 'Data was quartered' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
+			print ('Data was quartered' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s')
 		return df
 	# [unit] over numberOfSeconds for a specific named station [stationID]
 	def makePlot(self,stationID,unit,error,plotTitle,df,plength):
@@ -127,18 +127,18 @@ class Plot(object):
 									layout=layout), 
 									filename=fname, 
 									auto_open=False)
-			print fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's'
+			print (fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's')
 			return plotURL
 		except (KeyboardInterrupt, SystemExit):
 			raise
 		except:
-			print 'This '+unit+' plot failed - '+fname
+			print ('This '+unit+' plot failed - '+fname)
 	def printPlotFail(self,error):
-		print 'Plotting failed'
-		print error
+		print ('Plotting failed')
+		print (error)
 	def printFeatureFail(self,error):
-		print 'Iterative feature creation failed'
-		print error
+		print ('Iterative feature creation failed')
+		print (error)
 	def setFeature(self,point,name,plength,latestDose,latestTime,URLlist):
 		properties = {	'Name': name, 
 						'Latest dose (CPM)': latestDose[0],
@@ -162,16 +162,16 @@ class Plot(object):
 	def makeAllPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
 		plotLengthString = 'Past_' + plotLengthString
 		if latestTime == '':
-			print 'Finished list?'
+			print ('Finished list?')
 		else:
 			try:
 				# Note the negative --> means that we're looking at the past relative to the latest measurement stored in the DB
 				startPlotTime = latestTime + datetime.timedelta(seconds=-time)
-			except (KeyboardInterrupt, SystemExit), e:
+			except (KeyboardInterrupt, SystemExit) as e:
 				raise e
 				sys.exit(0)
-			except Exception, e:
-				print "There probably isn't any data from this time.\n" + str(e)
+			except Exception as e:
+				print ('There probably isn\'t any data from this time.\n' + str(e))
 		df = self.getDataFromDB(self,latestStationID,startPlotTime,latestTime)
 		df = self.reduceData(self,df)
 		# Expands dataframe to include other units and their associated errors
@@ -180,7 +180,6 @@ class Plot(object):
 		df['remError'] = df['cpmError'] * calibrationCPMtoREM    # CHECK WITH JOEY ETC
 		df['usvError'] = df['cpmError'] * calibrationCPMtoUSV    # PRETTY SURE THIS IS INCORRECT
 		try:
-			urlA = ''; urlB = ''; urlC = ''
 			urlList = []
 			# Plot markers & lines - Plot.ly to URLs
 			# CPM over numberOfSeconds for all stations
@@ -253,11 +252,11 @@ class Plot(object):
 		dump = geojson.dumps(featureCollection)
 		f = open('output.geojson', 'w')
 		try:
-			print >> f, dump
+			print >> (f, dump)
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception as e:
-			print str(e)
+			print (str(e))
 	def closeDB(self):
 		# Disconnect from DB server
 		Plot.db.close()
@@ -272,8 +271,8 @@ class Plot(object):
 		command = "scp" + outputLocation + webServerLocation
 		try:
 			os.system(command)
-		except Exception, e:
-			print 'Network Error: Cannot SCP to Kepler'
+		except Exception as e:
+			print ('Network Error: Cannot SCP to Kepler')
 			raise e
 	def printEndMessage(self):
 		print( u'\u00A9' +' Navrit Bal - time is '+ getDateTime())
@@ -300,7 +299,7 @@ def main(argv):
 	plot.makeGeoJSON()
 	plot.scpToWebServer()
 	plot.printEndMessage()
-	print 'Total run time:', ("%.2f" % (time.time() - t0)), 's'
+	print ('Total run time:', ("%.2f" % (time.time() - t0)), 's')
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
