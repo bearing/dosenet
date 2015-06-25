@@ -17,8 +17,8 @@ import datetime
 import time
 from time import sleep
 
-# SIG only >> -VE V
-# SIG + NS >> +VE V
+# SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
+# NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
 
 class dosimeter:
     def __init__(self):
@@ -84,12 +84,12 @@ class dosimeter:
         #########################
         counts = self.getCounts()
         now = getDatetime()
-        if (counts < 2): # ?????????? Ask Ryan
+        if (counts < 2): # ??????????
             return [0,0]
         diff = (now - self.counts[0]).total_seconds()
         CPM = [ counts/diff*60., np.sqrt(counts)/diff*60 ]
-        # ?????????? Ask Ryan
-        if( counts>300 or diff>200 ):  #Resets the averaging every 300 counts or every 200 seconds
+        # ??????????
+        if( counts>60 or diff>120 ):  #Resets the averaging every 300 counts or every 200 seconds
             self.resetCounts()
         return CPM
 
