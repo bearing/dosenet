@@ -20,16 +20,20 @@ from time import sleep
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
 
+# Note: GPIO.LOW  - 0V
+#       GPIO.HIGH - 3.3V (RPi rail voltage)
+
 class dosimeter:
     def __init__(self):
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
-        GPIO.setup(24,GPIO.IN,pull_up_down=GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
-        GPIO.setup(23,GPIO.IN,pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
-        GPIO.add_event_detect(24,GPIO.FALLING,callback=self.updateCount)
-        GPIO.add_event_detect(23,GPIO.RISING, callback=self.updateNoise)
-        self.counts = [] # Datetime and errorFlag list
+        GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
+        GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
+        GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount)
+        GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
+        self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
-        self.margin = datetime.timedelta(microseconds=100000) #100ms milliseconds is not an option
+        self.microphonics = [] # errorFlag list
+        self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
         sleep(1)
 
     def __del__(self):
@@ -41,55 +45,57 @@ class dosimeter:
         self.close()
 
     def close(self):
+        print('Actually closing now')
         GPIO.cleanup()
-
+    
     def updateNoise(self):
-        print ('Stop shaking meeeeee')
         now = datetime.datetime.now()
-        print (now)
+        print ('Stop shaking meeeeee', now)
         self.noise.append(now)
 
     def updateCount(self):
-        #microphonics = GPIO.input(23)
-        now = getDatetime()
+        now = datetime.datetime.now()
         lastMicrophonics = self.noise[-1] # Last datetime object in the noise list
-        #Checks to see if microphonics detected within a 200ms window before deciding whether to change the
+        # Checks to see if microphonics detected within a 200ms window before deciding whether to change the
         # errorFlag to 'microphonics was HIGH' or leave as default
         if not (now - self.margin) <= lastMicrophonics <= (now + self.margin):
-            self.counts.append(now,0) # Stores counts as a list of datetimes and an errorFlag
-                                     # errorFlag = 0 by default (no errror registered)
+            self.counts.append(now) # Stores counts as a list of datetimes
+            self.microphonics.append(False) # errorFlag = False by default (no errror registered)
+
         else:
-            self.counts.append(now,1) # Stores counts as a list of datetimes and an errorFlag
-            #print 'Stop shaking meeeeee'
-        # Note: GPIO.LOW  - 0V
-        #       GPIO.HIGH - 3.3V (RPi rail voltage)
+            self.counts.append(now) # Stores counts as a list of datetimes
+            self.microphonics.append(True)
+            # print ('Stop shaking meeeeee')
 
+    def countsToArr(self):
+        self.counts = np.array(self.counts, dtype='M8[us]')
 
-    def resetCounts(self):
-        # Saves only the last 120 detected events before it resets for reaveraging
-        self.counts = self.counts[-120:]
-        # CHANGE this to a timedelta of 2 minutes?
-        # Isn't this quite a lot of counts - too many?
-        ###########################################################
-        # Is this why we get the exponential decrease pattern???? #
-        ###########################################################
+    def countsToList(self):
+        self.counts = self.counts.tolist()
+
+    def resetCounts(self, seconds=120):
+        self.countsToArr()
+        # Saves only the last number of seconds of events
+        self.counts = self.counts[self.counts > self.counts[-1] - datetime.timedelta(seconds=seconds)] # self.counts[-1] to dt.now()?
+        self.countsToList()
 
     def getCounts(self):
         return float(len(self.counts))
 
-        # Discuss logic of this with Ryan - motivation behind numbers?
     def getCPM(self):
-        #########################
-        # I need to change this #
-        #########################
         counts = self.getCounts()
         counts_err = np.sqrt(counts)
         now = datetime.datetime.now()
         counting_time = (now - self.counts[0]).total_seconds()
-        cpm = counts / counting_time * 60.
-        cpm_err = counts_err / counting_time * 60.
+        cpm = counts / counting_time * 60
+        cpm_err = counts_err / counting_time * 60
         # Resets the averaging every 300 counts or every 200 seconds
         if(counts > 300 or counting_time > 200):
             self.resetCounts()
         err_flag = False
         return cpm, cpm_err, err_flag
+
+
+if __name__ == "__main__":
+    dose = dosimeter()
+    #TEST HERE
