@@ -10,7 +10,6 @@
 #################
 ## Run on GRIM ##
 #################
-
 import os
 import MySQLdb as mdb
 import sys
@@ -22,7 +21,6 @@ import pandas as pd
 import time
 import datetime
 #arg = []; arg.extend(sys.argv)
-
 class Plot(object):
 	def __init__(self):
 		#------------------------#
@@ -34,7 +32,7 @@ class Plot(object):
 						"ne170groupSpring2015",
 						"dosimeter_network")
 		# prepare a cursor object using cursor() method
-		self.cursor = db.cursor()
+		self.cursor = self.db.cursor()
 		# Titles of plots on Plot.ly
 		self.cpmTitle = 'Counts per minute (CPM)'
 		self.remTitle = 'mREM/hr'
@@ -55,15 +53,13 @@ class Plot(object):
 	def getStationInfo(self):
 		# Get number of stations, station name, longitude, latitude, CPM to mRem and uSv conversion calibration factors
 		self.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv \
-					FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
-		self.stationRows = Plot.cursor.fetchall()
+							FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
+		self.stationRows = self.cursor.fetchall()
 	def setStationInfo(self,i):
-		#self.i = i
 		self.stationRowArrayList.append((i[0], i[1], i[2], i[3], i[4], i[5]))
-		return
 	def setStationInfoForAll(self):
 		for i in self.stationRows:
-			self.setStationInfo(self,i)
+			self.setStationInfo(i)
 	def getDataFromDB(self,stationID,startTime,endTime):
 		try:
 			self.cursor.execute("SELECT receiveTime, cpm, cpmError \
@@ -73,11 +69,11 @@ class Plot(object):
 								WHERE `stations`.`Name`='%s' \
 								AND receiveTime BETWEEN '%s' \
 								AND '%s';" % (stationID, startTime, endTime))
+			dosePerStation = self.cursor.fetchall()
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception as e:
-			print ('Could not get data from DB:' + str(e))
-		dosePerStation = self.cursor.fetchall()
+			print 'Could not get data from DB:' + str(e)
 		#
 		# Populate time-restricted row array list of data
 		# Panda code to get SQL tuples of tuples into panda df tables which are 
@@ -93,7 +89,7 @@ class Plot(object):
 			i += 1
 			df = df[::4]
 		if i!=0:
-			print ('Data was quartered' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s')
+			print 'Data was quartered' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
 		return df
 	# [unit] over numberOfSeconds for a specific named station [stationID]
 	def makePlot(self,stationID,unit,error,plotTitle,df,plength):
@@ -104,47 +100,47 @@ class Plot(object):
 			fname = (str(stationID)+'_'+unit+'_'+plength)
 			# setup the plot.ly plot type as a Scatter with points with panda DataFrames (df)
 			trace = Scatter( 
-				x=df['receiveTime'],
-				y=df[unit], # changes depending on which units you are plotting
-				mode='lines+markers',
-				error_y=ErrorY(
-					type='data',
-					array=df[error],
-					visible=True
+				x = df['receiveTime'],
+				y = df[unit], # changes depending on which units you are plotting
+				mode = 'lines+markers',
+				error_y = ErrorY(
+					type = 'data',
+					array = df[error],
+					visible = True
 					)
 				)
-			fontPref = Font(family='Arial, monospace',
-							size=16,
-							color='#000000')
-			layout = Layout(title=(str(stationID)+' '+unit+' '+plength),
-							xaxis=XAxis(title='Time (PDT)',
-							rangemode='nonzero',
-							autorange=True),
-							yaxis=YAxis(type='log',title=plotTitle),
-							font=fontPref)
+			fontPref = Font(family = 'Arial, monospace',
+							size = 16,
+							color = '#000000')
+			layout = Layout(title = (str(stationID)+' '+unit+' '+plength),
+							xaxis = XAxis(title = 'Time (PDT)',
+							rangemode = 'nonzero',
+							autorange = True),
+							yaxis = YAxis(type = 'log',title = plotTitle),
+							font = fontPref)
 			# Plot.ly export, doesn't open a firefox window on the server
-			plotURL = py.plot(Figure(data=Data([trace]), 
-									layout=layout), 
-									filename=fname, 
-									auto_open=False)
-			print (fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's')
+			plotURL = py.plot(Figure(data = Data([trace]), 
+									layout = layout), 
+									filename = fname, 
+									auto_open = False)
+			print fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's'
 			return plotURL
 		except (KeyboardInterrupt, SystemExit):
 			raise
 		except:
 			print ('This '+unit+' plot failed - '+fname)
 	def printPlotFail(self,error):
-		print ('Plotting failed')
+		print 'Plotting failed'
 		print (error)
 	def printFeatureFail(self,error):
-		print ('Iterative feature creation failed')
+		print 'Iterative feature creation failed'
 		print (error)
 	def setFeature(self,point,name,plength,latestDose,latestTime,URLlist):
 		properties = {	'Name': name, 
 						'Latest dose (CPM)': latestDose[0],
 						'Latest dose (mREM/hr)': latestDose[1],
 						'Latest dose (&microSv/hr)': latestDose[2], 
-						'Latest measurement': str(self.latestTime),
+						'Latest measurement': str(latestTime),
 						('URL_CPM_'+plength[0]): URLlist[0][0], 
 						('URL_REM_'+plength[0]): URLlist[0][1], 
 						('URL_USV_'+plength[0]): URLlist[0][2],
@@ -155,7 +151,7 @@ class Plot(object):
 						('URL_REM_'+plength[2]): URLlist[2][1], 
 						('URL_USV_'+plength[2]): URLlist[2][2]
 					}
-		feature = Feature(geometry=point, properties=properties)
+		feature = Feature(geometry = point, properties = properties)
 		self.featureList.append(feature)
 	def getNumberOfStations(self):
 		return range(len(self.stationRows))
@@ -171,9 +167,9 @@ class Plot(object):
 				raise e
 				sys.exit(0)
 			except Exception as e:
-				print ('There probably isn\'t any data from this time.\n' + str(e))
-		df = self.getDataFromDB(self,latestStationID,startPlotTime,latestTime)
-		df = self.reduceData(self,df)
+				print 'There probably isn\'t any data from this time.\n' + str(e)
+		df = self.getDataFromDB(latestStationID,startPlotTime,latestTime)
+		df = self.reduceData(df)
 		# Expands dataframe to include other units and their associated errors
 		df['REM'] = df['CPM'] * calibrationCPMtoREM
 		df['USV'] = df['CPM'] * calibrationCPMtoUSV
@@ -183,17 +179,17 @@ class Plot(object):
 			urlList = []
 			# Plot markers & lines - Plot.ly to URLs
 			# CPM over numberOfSeconds for all stations
-			urlA = self.makePlot(self,latestStationID,'CPM','cpmError',self.cpmTitle,df,plotLengthString)
+			urlA = self.makePlot(latestStationID,'CPM','cpmError',self.cpmTitle,df,plotLengthString)
 			# mREM/hr over numberOfSeconds for all stations
-			urlB = self.makePlot(self,latestStationID,'REM','remError',self.remTitle,df,plotLengthString)
+			urlB = self.makePlot(latestStationID,'REM','remError',self.remTitle,df,plotLengthString)
 			# uSv/hr over numberOfSeconds for all stations
-			urlC = self.makePlot(self,latestStationID,'USV','usvError',self.usvTitle,df,plotLengthString)
+			urlC = self.makePlot(latestStationID,'USV','usvError',self.usvTitle,df,plotLengthString)
 			tempRow = urlA,urlB,urlC
 			urlList.extend(tempRow)
 		except (KeyboardInterrupt, SystemExit):
 			sys.exit(0)
 		except Exception as e:
-			self.printPlotFail(self,e)
+			self.printPlotFail(e)
 		return urlList
 	# Used to be main()
 	def plotAll(self):
@@ -205,10 +201,8 @@ class Plot(object):
 		secondsInHour =  3600 		# 60 minutes
 		secondsInMinute= 60 		# Duh
 		plotLength = ('Hour','Day','Month')
-		#######################################################
-		## Iterate through to define all features (stations) ##
-		#######################################################
-		for station in self.getNumberOfStations(self):
+		station = 0
+		for station in self.getNumberOfStations():
 			# builds up a tuple coordinates of the stations, longitude & latitude
 			longlat = [ self.stationRowArrayList[station][3], self.stationRowArrayList[station][2]]
 			point = Point(longlat)
@@ -216,50 +210,49 @@ class Plot(object):
 			stationID = self.stationRowArrayList[station][1]
 			# get latest dose (CPM) and time for that measurement in the loop so we can display in exported GeoJSON file
 			# Don't need cpmError in this query
-			sqlString ="SELECT dosnet.stationID, stations.Name, dosnet.receiveTime, dosnet.cpm, stations.cpmtorem, stations.cpmtousv \
-						FROM dosnet \
-						INNER JOIN stations ON dosnet.stationID=stations.ID \
-						WHERE dosnet.receiveTime = \
-						(SELECT MAX(dosnet.receiveTime) \
-							FROM dosnet \
-							INNER JOIN stations \
-							ON dosnet.stationID=stations.ID  \
-							WHERE stations.Name='%s') AND stations.Name='%s';" % (stationID, stationID)
-			self.cursor.execute(sqlString)
-			sqlString = ''
+			self.cursor.execute("SELECT stations.Name, dosnet.receiveTime, dosnet.cpm, stations.cpmtorem, stations.cpmtousv \
+									FROM dosnet \
+									INNER JOIN stations ON dosnet.stationID=stations.ID \
+									WHERE dosnet.receiveTime = \
+									(SELECT MAX(dosnet.receiveTime) \
+										FROM dosnet \
+										INNER JOIN stations \
+										ON dosnet.stationID=stations.ID  \
+										WHERE stations.Name='%s') AND stations.Name='%s';" % (stationID, stationID))
 			# dtRows --> Data & time rows
 			dtRows = self.cursor.fetchall()
 			for i in dtRows:
-				# L --> Latest ...
-				LName, LTime, LDose, Lcpmtorem, Lcpmtousv = i
+				(LName, LTime, LDose, Lcpmtorem, Lcpmtousv) = i # L --> Latest ...
 				LDose = LDose, LDose*Lcpmtorem, LDose*Lcpmtousv
 				urlList = []
-				urlA = self.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
-				urlB = self.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],secondsInDay)
-				urlC = self.makeAllPlots(self,LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
+				urlA = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
+				urlB = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],secondsInDay)
+				urlC = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
 				urlRow = (urlA,urlB,urlC)
 				urlList.extend(urlRow)
 				# Make feature - iterating through each 
 				try:
-					self.setFeature(self,point,LName,plotLength,LDose,LTime,urlList)
+					self.setFeature(point,LName,plotLength,LDose,LTime,urlList)
 				except (KeyboardInterrupt, SystemExit):
 					sys.exit(0)
 				except Exception as e:
-					self.printFeatureFail(self,e)
+					self.printFeatureFail(e)
 	def makeGeoJSON(self):
 		featureCollection = FeatureCollection(self.featureList)
 		# Export dump to GeoJSON file
-		dump = geojson.dumps(featureCollection)
-		f = open('output.geojson', 'w')
+		dump = str(geojson.dumps(featureCollection))
+		openfile = open('output.geojson','w')
 		try:
-			print >> (f, dump)
+			print >> (openfile, dump) # UNRESOLVED ERROR      'tuple' object has no attribute 'write'    WTF IS THIS
 		except (KeyboardInterrupt, SystemExit):
-			pass
+			sys.exit(0)
 		except Exception as e:
 			print (str(e))
+		finally:
+			openfile.close()
 	def closeDB(self):
 		# Disconnect from DB server
-		Plot.db.close()
+		self.db.close()
 	def scpToWebServer(self):
 		# copy to webserver - DECF Kepler
 		# Must be run under 'dosenet' linux user so that the SSH keypair setup between GRIM & DECF Kepler works without login
@@ -299,7 +292,7 @@ def main(argv):
 	plot.makeGeoJSON()
 	plot.scpToWebServer()
 	plot.printEndMessage()
-	print ('Total run time:', ("%.2f" % (time.time() - t0)), 's')
+	print 'Total run time:', ("%.1f" % (time.time() - t0)), 's'
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
