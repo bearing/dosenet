@@ -31,7 +31,7 @@ def getDatetime():
 
 while True:
     try: 
-        cpm, cpmError, errorFlag = det.getCPM()
+        cpm, cpmError = det.getCPM()
         # GET errorCode from det Object
         errorCode = 0 # Default 'working' state - error code 0
         now = getDatetime()
