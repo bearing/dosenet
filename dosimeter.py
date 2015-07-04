@@ -32,6 +32,7 @@ class dosimeter:
         GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
+        self.noise.append(datetime.datetime.now()) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
         self.microphonics = [] # errorFlag list
         self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
         sleep(1)
@@ -49,8 +50,7 @@ class dosimeter:
         GPIO.cleanup()
     
     def updateNoise(self):
-        now = datetime.datetime.now()
-        print ('Stop shaking meeeeee', now)
+        print ('Stop shaking meeeeee', str(datetime.datetime.now()))
         self.noise.append(now)
 
     def updateCount(self):
@@ -61,7 +61,6 @@ class dosimeter:
         if not (now - self.margin) <= lastMicrophonics <= (now + self.margin):
             self.counts.append(now) # Stores counts as a list of datetimes
             self.microphonics.append(False) # errorFlag = False by default (no errror registered)
-
         else:
             self.counts.append(now) # Stores counts as a list of datetimes
             self.microphonics.append(True)
@@ -76,24 +75,23 @@ class dosimeter:
     def resetCounts(self, seconds=120):
         self.countsToArr()
         # Saves only the last number of seconds of events
-        self.counts = self.counts[self.counts > self.counts[-1] - datetime.timedelta(seconds=seconds)] # self.counts[-1] to dt.now()?
+        self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # self.counts[-1] to dt.now()?
         self.countsToList()
 
-    def getCounts(self):
-        return float(len(self.counts))
+    def getCount(self):
+        return len(self.counts)
 
     def getCPM(self):
-        counts = self.getCounts()
-        counts_err = np.sqrt(counts)
+        count = self.getCount()
+        count_err = np.sqrt(count)
         now = datetime.datetime.now()
         counting_time = (now - self.counts[0]).total_seconds()
-        cpm = counts / counting_time * 60
-        cpm_err = counts_err / counting_time * 60
+        cpm = count / counting_time * 60
+        cpm_err = count_err / counting_time * 60
         # Resets the averaging every 300 counts or every 200 seconds
-        if(counts > 300 or counting_time > 200):
+        if(count > 300 or counting_time > 200):
             self.resetCounts()
-        err_flag = False
-        return cpm, cpm_err, err_flag
+        return cpm, cpm_err
 
 
 if __name__ == "__main__":
