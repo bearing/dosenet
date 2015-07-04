@@ -44,7 +44,9 @@ class DBTool(object):
 		runSQL(sql)
 
 	def removeDosimeterDataByID(self,ID):
-		# Implement later
+		sql = "DELETE FROM stations WHERE ID='%s';" % (ID)
+		runSQL(sql)
+		# TEST THIS
 
 	def getID(self,name):
 		# The database uses auto-incremented ID numbers so we need to get 
