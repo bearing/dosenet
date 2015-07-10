@@ -16,6 +16,7 @@ import numpy as np
 import datetime
 import time
 from time import sleep
+import os
 
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
@@ -89,7 +90,9 @@ class dosimeter:
         cpm = count / counting_time * 60
         cpm_err = count_err / counting_time * 60
         # Resets the averaging every 300 counts or every 200 seconds
-        if(count > 300 or counting_time > 200):
+        #if(count > 300 or counting_time > 200):
+        # Resets the averaging every 4 minutes
+        if(counting_time > 240):
             self.resetCounts()
         return cpm, cpm_err
 
