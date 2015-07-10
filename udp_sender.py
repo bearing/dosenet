@@ -28,6 +28,9 @@ def parseArguments():
             Make sure a resistor is attached otherwise I expect your LED \
             will blow up soon... \n')
     #
+    global args
+    global filePath
+    global LED_pin
     args = parser.parse_args()
     filePath = args.filename[0]
     LED_pin = args.led[0]
