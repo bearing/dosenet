@@ -50,7 +50,7 @@ class dosimeter:
         GPIO.cleanup()
     
     def updateNoise(self):
-        print ('Stop shaking meeeeee', str(datetime.datetime.now()))
+        print ('Stop shaking meeeeee - ', str(datetime.datetime.now()))
         self.noise.append(now)
 
     def updateCount(self):
@@ -67,7 +67,7 @@ class dosimeter:
             # print ('Stop shaking meeeeee')
 
     def countsToArr(self):
-        self.counts = np.array(self.counts, dtype='M8[us]')
+        self.counts = np.array(self.counts, dtype='M8[us]') # This dtype is super close to an open bug, this is a workaround?
 
     def countsToList(self):
         self.counts = self.counts.tolist()
@@ -93,7 +93,42 @@ class dosimeter:
             self.resetCounts()
         return cpm, cpm_err
 
+    def ping(self, hostname):
+        response = os.system("ping -c 1 " + hostname)
+        # and then check the response...
+        if response == 0:
+          print hostname, 'is up!'
+          return True
+        else:
+          print hostname, 'is down!'
+          return False
+
+    def activatePin(self,pin):
+        GPIO.output(pin,True)
+        print 'Pin ON #:',pin,' - ',datetime.datetime.now()
+
+    def deactivatePin(self,pin):
+        GPIO.output(pin,False)
+        print 'Pin OFF #:',pin,' - ',datetime.datetime.now()
+
+    def blink(self, pin, frequency = 0.2, number_of_flashes = 1):
+        try:
+            for i in range(0, number_of_flashes):
+                print 'Blinking on Pin #:',pin,' - ',datetime.datetime.now()
+                activatePin(pin)
+                time.sleep(frequency)
+                deactivatePin(pin)
+                print 'Just blinked Pin #:',pin,' - ',datetime.datetime.now()
+        except (KeyboardInterrupt, SystemExit):
+            print '.... User interrupt ....\n Byyeeeeeeee'
+            GPIO.cleanup()
+            sys.exit(0)
+        except Exception, e:
+            GPIO.cleanup()
+            raise e
+            sys.exit(1)
 
 if __name__ == "__main__":
-    dose = dosimeter()
-    #TEST HERE
+    det = dosimeter()
+    response = det.ping(hostname='berkeley.edu')
+    print 'Ping test berkeley.edu: ',response
