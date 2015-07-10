@@ -273,12 +273,12 @@ class Plot(object):
 def getDateTime():
 	return str(datetime.datetime.now())
 
-def main(argv):
+def main():
 	'''
 	Main makeGeoJSON function 
 
 	Parameters:
-		argv - command line arguments. Could be used for choosing which timeframes to plot, eg. $ python makeGeoJSON.py month year
+		argparse - command line arguments. Could be used for choosing which timeframes to plot, eg. $ python makeGeoJSON.py month year
 	Returns:
 		Plot.ly graphs - Updates dose over time graphs on plot.ly for ALL stations
 		output.geojson - GeoJSON file for the web page >> copied to Kepler (web server) via SCP (SSH CP) command
@@ -295,4 +295,4 @@ def main(argv):
 	print 'Total run time:', ("%.1f" % (time.time() - t0)), 's'
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	# Argparse stuff to go here
