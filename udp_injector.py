@@ -19,13 +19,17 @@ import_list = ['crypt','mysql','udp']
 for el in import_list:
     sys.path.append( os.path.abspath(os.path.join(os.getcwd(),el)) )
 from crypt import cust_crypt as ccrypt
-from mysql import mysql_tools as mySQLTool
 from udp import udp_tools as udpTool
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--ip',nargs=1,required=False,type=str,
     help='\n\t Listening on localhost:5005')
 args = parser.parse_args()
+
+if args.ip:
+    pass
+else:
+    from mysql import mysql_tools as mySQLTool
 
 # Initialise decryption & database objects
 privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
