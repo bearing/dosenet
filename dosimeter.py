@@ -24,8 +24,8 @@ import os
 # Note: GPIO.LOW  - 0V
 #       GPIO.HIGH - 3.3V (RPi rail voltage)
 
-class dosimeter:
-    def __init__(self):
+class Dosimeter:
+    def __init__(self,LED1):
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
         start = datetime.datetime.now()
@@ -36,20 +36,9 @@ class dosimeter:
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
         GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
+        GPIO.setup(LED1 , GPIO.OUT)
         GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount)
         GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
-
-    def __del__(self):
-        print ('Dosimeter object just died - __del__')
-        self.close()
-
-    def __exit__(self):
-        print ('Dosimeter object just exited - __exit__')
-        self.close()
-
-    def close(self):
-        print('Actually closing now')
-        GPIO.cleanup()
     
     def updateNoise(self):
         print ('Stop shaking meeeeee - ', str(datetime.datetime.now()))
@@ -76,8 +65,9 @@ class dosimeter:
 
     def resetCounts(self, seconds=120):
         self.countsToArr()
+        counts = self.counts
         # Saves only the last number of seconds of events
-        self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # self.counts[-1] to dt.now()?
+        self.counts = counts[counts > counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
         self.countsToList()
 
     def getCount(self):
@@ -98,13 +88,13 @@ class dosimeter:
         return cpm, cpm_err
 
     def ping(self, hostname):
-        response = os.system("ping -c 1 " + hostname)
+        response = os.system('ping -c 1'  + hostname)
         # and then check the response...
         if response == 0:
-          print hostname, 'is up!'
+          print '~ ', hostname, 'is up!'
           return True
         else:
-          print hostname, 'is down!'
+          print '~ ', hostname, 'is down!'
           return False
 
     def activatePin(self,pin):
@@ -132,8 +122,20 @@ class dosimeter:
             raise e
             sys.exit(1)
 
+    def __del__(self):
+        print ('Dosimeter object just died - __del__')
+        self.close()
+
+    def __exit__(self):
+        print ('Dosimeter object just exited - __exit__')
+        self.close()
+
+    def close(self):
+        print('Actually closing now')
+        GPIO.cleanup()
+
 if __name__ == "__main__":
-    det = dosimeter()
+    det = Dosimeter()
     response = det.ping(hostname='berkeley.edu')
     print 'Ping test berkeley.edu: ',response
     data = det.getCPM()
