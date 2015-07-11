@@ -6,7 +6,7 @@
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dosimeter.py (Ryan Pavlovsky)
-# Last updated: Thu 25/06/15
+# Last updated: Fri 10/07/15
 #####################################
 ## Indirectly run on Raspberry Pis ##
 #####################################
