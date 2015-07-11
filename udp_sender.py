@@ -104,15 +104,19 @@ else:
             if det.ping(hostname = 'berkeley.edu'):
                 #det.activatePin(LED_pin) # LIGHT UP
                 print '\t~~~ Activate LED ~~~\n'
+                print '1'
                 cpm, cpmError = det.getCPM()
+                print '2'
                 if len(det.counts) > 0: # Only run the next segment after the warm-up phase
                     # GET errorCode from det Object
                     errorCode = 0 # Default 'working' state - error code 0
+                    print '3'
                     now = getDatetime()
                     #if (now - det.counts[-1]).total_seconds() >= 300: #Sets how long of a period of zero counts until it's considered an error
                     #    errorCode = 12
                     #time = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
                     c = ','
+                    print '4'
                     package = str(msgHash) +c+ str(stationID) +c+ str(cpm) +c+ str(cpmError) +c+ str(errorCode)
                     print packet
                     try:
