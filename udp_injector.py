@@ -30,11 +30,11 @@ if args.ip:
     pass
 else:
     from mysql import mysql_tools as mySQLTool
+    db = mySQLTool.SQLObject()
 
 # Initialise decryption & database objects
 privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
 de = ccrypt.public_d_encrypt(key_file_lst=privateKey) # Uses 1 private key ()
-db = mySQLTool.SQLObject()
 # Set up network information >> points to GRIM's internal static IP address at port 5005
 IP = '192.168.1.101' #GRIM 'Database' IP
 port = 5005
