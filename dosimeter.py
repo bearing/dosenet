@@ -138,7 +138,6 @@ if __name__ == "__main__":
     print 'Ping test berkeley.edu: ',response
     data = det.getCPM()
     print data
-    now = datetime.datetime.now()
-    det.updateCount(now)
-    det.updateCount(now)
+    det.updateCount()
+    det.updateCount()
     print counts
