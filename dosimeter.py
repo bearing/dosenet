@@ -29,12 +29,13 @@ class dosimeter:
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
         GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
-        GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount)
-        GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
+        GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount())
+        GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise())
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
-        self.counts.append(datetime.datetime.now()) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
-        self.noise.append(datetime.datetime.now()) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
+        start = datetime.datetime.now()
+        self.counts.append(start) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
+        self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
         self.microphonics = [] # errorFlag list
         self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
         sleep(1)
