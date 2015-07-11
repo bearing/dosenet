@@ -27,6 +27,7 @@ parser.add_argument('--led','-l',nargs=1,required=True,type=int,
     help='\n\t The BCM pin number of the + end of the communications LED\n \
         Make sure a resistor is attached otherwise I expect your LED \
         will blow up soon... \n')
+parser.add_argument('ip',nargs=1,required=False,type=str)
 #
 args = parser.parse_args()
 filePath = args.filename[0]
@@ -94,7 +95,7 @@ port = 5005
 #print'UDP target IP @ port :', IP + ':' + port
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
 if args.test:
-    IP = '127.0.0.1' #Send to localhost if testing
+    IP = args.ip[0] #Send to localhost if testing
 
 #main()
 if args.test:
