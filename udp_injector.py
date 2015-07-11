@@ -26,7 +26,7 @@ parser.add_argument('--local',nargs=1,required=False,type=str,
     help='\n\t Listening on localhost:5005')
 args = parser.parse_args()
 
-if args.ip:
+if args.local:
     pass
 else:
     from mysql import mysql_tools as mySQLTool
