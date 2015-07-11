@@ -33,6 +33,7 @@ class dosimeter:
         GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
+        self.counts.append(datetime.datetime.now()) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
         self.noise.append(datetime.datetime.now()) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
         self.microphonics = [] # errorFlag list
         self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
