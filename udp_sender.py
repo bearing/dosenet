@@ -119,10 +119,7 @@ else:
                     print '4'
                     package = str(msgHash) +c+ str(stationID) +c+ str(cpm) +c+ str(cpmError) +c+ str(errorCode)
                     print package
-                    try:
-                        packet = pe.encrypt_message(package)[0]
-                    except Exception, e:
-                        raise e
+                    packet = pe.encrypt_message(package)[0]
                     print str(packet)
                     sock.sendto(packet, (IP, port))
                     print 'Packet sent @ ' + str(now) +' - '+ str(IP) +':'+ str(port)
