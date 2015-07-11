@@ -6,7 +6,7 @@
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from udp_injector.py (Ryan Pavlovsky)
-# Last updated: Thu 25/06/15
+# Last updated: Fri 10/07/15
 #################
 ## Run on GRIM ##
 #################
@@ -20,44 +20,52 @@ for el in import_list:
     sys.path.append( os.path.abspath(os.path.join(os.getcwd(),el)) )
 from crypt import cust_crypt as ccrypt
 from udp import udp_tools as udpTool
+# from mysql import mysql_tools as mySQLTool ##### NOTE: Done later depending on the argument
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--local',nargs=1,required=False,type=str,
-    help='\n\t Listening on localhost:5005')
-args = parser.parse_args()
-
-if args.local:
-    pass
-else:
-    from mysql import mysql_tools as mySQLTool
-    db = mySQLTool.SQLObject()
-
-# Initialise decryption & database objects
-privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
-de = ccrypt.public_d_encrypt(key_file_lst=privateKey) # Uses 1 private key ()
-# Set up network information >> points to GRIM's internal static IP address at port 5005
-port = 5005
-if args.local:
-    IP = '127.0.0.1' # Listen on localhost for testing
-else:
-    IP = '192.168.1.101' #GRIM 'Database' IP
-
-
-sock = udpTool.custSocket(ip=IP,port=port,decrypt=de)
-
-# Runs until keyboard interrupt or system exit 
-while True:
-    try:
-        data = sock.listen()
-        print ('Received message:', data)
-        if args.local:
-            print 'Message received on IP: ', IP
+class Injector:
+    def parseArguments(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--test',nargs=1,required=False,type=str,
+            help='\n\t Listening on localhost:5005')
+        self.args = parser.parse_args()
+        if self.args.test:
+            pass
         else:
-            db.inject(data)
-    except (KeyboardInterrupt, SystemExit):
-        print ('Exit cleaning')
-        del db # Manual garbage collection
-        sys.exit(0)
-    except (Exception) as e:
-        raise e
-        print ('Exception: Cannot decrypt data...')
+            from mysql import mysql_tools as mySQLTool
+            self.db = mySQLTool.SQLObject()
+
+    def initialise(self):
+        # Initialise decryption & database objects
+        self.privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
+        de = ccrypt.public_d_encrypt(key_file_lst = privateKey) # Uses 1 private key ()
+        # Set up network information >> points to GRIM's internal static IP address at port 5005
+        self.port = 5005
+        if self.args.test:
+            self.IP = '127.0.0.1' # Listen on localhost for testing
+        else:
+            self.IP = '192.168.1.101' #GRIM 'Database' IP - default behaviour
+        self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
+
+    def main(): # Runs until keyboard interrupt or system exit 
+        while True:
+            try:
+                data = self.socket.listen()
+                print ('Received message:', data)
+                if self.args.test:
+                    print 'Message received on IP:port @ ', self.IP ,':', self.port
+                else:
+                    # Verifying the packets happens in here
+                    self.db.inject(data)
+            except (KeyboardInterrupt, SystemExit):
+                print ('Exit cleaning')
+                del self.db # Manual garbage collection
+                sys.exit(0)
+            except (Exception) as e:
+                print str(e)
+                print ('Exception: Cannot decrypt data...')
+
+if __name__="__main__":
+    inj = Injector()
+    inj.parseArguments()
+    inj.initialise()
+    inj.main()
