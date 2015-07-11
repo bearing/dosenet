@@ -140,4 +140,4 @@ if __name__ == "__main__":
     print data
     det.updateCount()
     det.updateCount()
-    print counts
+    print det.counts
