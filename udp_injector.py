@@ -13,6 +13,7 @@
 
 import sys
 import os
+import argparse
 # Extensible way for adding future imports
 import_list = ['crypt','mysql','udp']
 for el in import_list:
@@ -21,14 +22,22 @@ from crypt import cust_crypt as ccrypt
 from mysql import mysql_tools as mySQLTool
 from udp import udp_tools as udpTool
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--test', '-t',action='store_true',
+    help='\n\t Testing - listening on localhost:5005')
+args = parser.parse_args()
+
 # Initialise decryption & database objects
 privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
 de = ccrypt.public_d_encrypt(key_file_lst=privateKey) # Uses 1 private key ()
 db = mySQLTool.SQLObject()
 # Set up network information >> points to GRIM's internal static IP address at port 5005
-GRIM = '192.168.1.101'
+IP = '192.168.1.101' #GRIM 'Database' IP
 port = 5005
-sock = udpTool.custSocket(ip=GRIM,port=port,decrypt=de)
+if args.test:
+    IP = '127.0.0.1' # Send to localhost for testing
+
+sock = udpTool.custSocket(ip=IP,port=port,decrypt=de)
 
 # Runs until keyboard interrupt or system exit 
 while True:

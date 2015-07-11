@@ -93,6 +93,8 @@ IP = 'grim.nuc.berkeley.edu'
 port = 5005
 #print'UDP target IP @ port :', IP + ':' + port
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
+if args.test:
+    IP = '127.0.0.1' #Send to localhost if testing
 
 #main()
 if args.test:
