@@ -100,7 +100,6 @@ if args.test:
 #main()
 if args.test:
     print 'Testing complete, now go run it on a Raspberry Pi!'
-    sys.exit(0)
 
 det = dosimeter()  # Initialise dosimeter object from dosimeter.py
 while True: # Run until error or KeyboardInterrupt (Ctrl + C)
