@@ -123,9 +123,9 @@ else:
                         packet = pe.encrypt_message(package)[0]
                     except Exception, e:
                         raise e
-                    #print packet
+                    print str(packet)
                     sock.sendto(packet, (IP, port))
-                    print 'Packet sent @ ' + str(now) +' - '+ IP +':'+ port
+                    print 'Packet sent @ ' + str(now) +' - '+ str(IP) +':'+ str(port)
                     time.sleep(120)
             else:
                 #det.blink(LED_pin,number_of_flashes = 10) # FLASH
