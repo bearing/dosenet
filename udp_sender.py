@@ -102,7 +102,8 @@ else:
     while True: # Run until error or KeyboardInterrupt (Ctrl + C)
         try:
             if det.ping(hostname = 'berkeley.edu'):
-                det.activatePin(LED_pin) # LIGHT UP
+                #det.activatePin(LED_pin) # LIGHT UP
+                print '\t~~~ Activate LED ~~~\n'
                 cpm, cpmError = det.getCPM()
                 if len(det.counts) > 0: # Only run the next segment after the warm-up phase
                     # GET errorCode from det Object
@@ -120,7 +121,8 @@ else:
                     print 'Packet sent @ ' + now +' - '+ IP +':'+ port
                     time.sleep(120)
             else:
-                det.blink(LED_pin,number_of_flashes = 10) # FLASH
+                #det.blink(LED_pin,number_of_flashes = 10) # FLASH
+                print '\t~~~ Blink LED ~~~\n'
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
             GPIO.cleanup()
