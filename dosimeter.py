@@ -36,8 +36,8 @@ class dosimeter:
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
         GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
-        GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount())
-        GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise())
+        GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount)
+        GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
 
     def __del__(self):
         print ('Dosimeter object just died - __del__')
