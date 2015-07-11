@@ -123,7 +123,7 @@ else:
                         packet = pe.encrypt_message(package)[0]
                     except Exception, e:
                         raise e
-                    print packet
+                    #print packet
                     sock.sendto(packet, (IP, port))
                     print 'Packet sent @ ' + now +' - '+ IP +':'+ port
                     time.sleep(120)
