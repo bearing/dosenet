@@ -72,6 +72,7 @@ else:
     try:
         import RPi.GPIO as GPIO
         from dosimeter import dosimeter
+        file_contents = getContents(filePath)
     except Exception, e:
         print 'Were you looking for the test run? Use the -t or --test flag'
         print '\n\tIs this running on a Raspberry Pi?'
