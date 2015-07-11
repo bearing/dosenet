@@ -78,6 +78,7 @@ else:
         print '\n\tIs this running on a Raspberry Pi?'
         print '\tIf so, make sure the \'RPi\' package is installed with conda and or pip\n'
         print '------- Importing RPi.GPIO failed -------\n'
+        raise e
         sys.exit(0)
 
 #initVariables():
