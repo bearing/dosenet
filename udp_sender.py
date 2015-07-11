@@ -123,7 +123,7 @@ while True: # Run until error or KeyboardInterrupt (Ctrl + C)
                 print str(packet)
                 sock.sendto(packet, (IP, port))
                 print 'Packet sent @ ' + str(now) +' - '+ str(IP) +':'+ str(port)
-                time.sleep(120)
+                time.sleep(1)
         else:
             #det.blink(LED_pin,number_of_flashes = 10) # FLASH
             print '\t~~~ Blink LED ~~~\n'

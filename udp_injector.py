@@ -23,8 +23,8 @@ from mysql import mysql_tools as mySQLTool
 from udp import udp_tools as udpTool
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--test', '-t',action='store_true',
-    help='\n\t Testing - listening on localhost:5005')
+parser.add_argument('--ip',nargs=1,required=False,type=str,
+    help='\n\t Listening on localhost:5005')
 args = parser.parse_args()
 
 # Initialise decryption & database objects
@@ -34,7 +34,7 @@ db = mySQLTool.SQLObject()
 # Set up network information >> points to GRIM's internal static IP address at port 5005
 IP = '192.168.1.101' #GRIM 'Database' IP
 port = 5005
-if args.test:
+if args.ip:
     IP = '127.0.0.1' # Send to localhost for testing
 
 sock = udpTool.custSocket(ip=IP,port=port,decrypt=de)
@@ -44,7 +44,10 @@ while True:
     try:
         data = sock.listen()
         print ('Received message:', data)
-        db.inject(data)
+        if args.ip:
+            print 'Message received on IP: ', IP
+        else:
+            db.inject(data)
     except (KeyboardInterrupt, SystemExit):
         print ('Exit cleaning')
         del db # Manual garbage collection
