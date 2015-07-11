@@ -118,7 +118,7 @@ else:
                     c = ','
                     print '4'
                     package = str(msgHash) +c+ str(stationID) +c+ str(cpm) +c+ str(cpmError) +c+ str(errorCode)
-                    print packet
+                    print package
                     try:
                         packet = pe.encrypt_message(package)[0]
                     except Exception, e:
