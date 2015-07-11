@@ -125,7 +125,7 @@ else:
                         raise e
                     #print packet
                     sock.sendto(packet, (IP, port))
-                    print 'Packet sent @ ' + now +' - '+ IP +':'+ port
+                    print 'Packet sent @ ' + str(now) +' - '+ IP +':'+ port
                     time.sleep(120)
             else:
                 #det.blink(LED_pin,number_of_flashes = 10) # FLASH
