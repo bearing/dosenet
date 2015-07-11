@@ -135,3 +135,5 @@ if __name__ == "__main__":
     det = dosimeter()
     response = det.ping(hostname='berkeley.edu')
     print 'Ping test berkeley.edu: ',response
+    data = det.getCPM()
+    print data

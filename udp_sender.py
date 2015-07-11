@@ -104,8 +104,7 @@ else:
             if det.ping(hostname = 'berkeley.edu'):
                 #det.activatePin(LED_pin) # LIGHT UP
                 print '\t~~~ Activate LED ~~~\n'
-                if args.test:
-                    print det.getCPM()
+                print det.getCPM()
                 cpm, cpmError = det.getCPM()
                 print '2'
                 if len(det.counts) > 0: # Only run the next segment after the warm-up phase
