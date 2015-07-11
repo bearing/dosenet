@@ -22,7 +22,7 @@ from crypt import cust_crypt as ccrypt
 from udp import udp_tools as udpTool
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--ip',nargs=1,required=False,type=str,
+parser.add_argument('--local',nargs=1,required=False,type=str,
     help='\n\t Listening on localhost:5005')
 args = parser.parse_args()
 
@@ -36,10 +36,12 @@ else:
 privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
 de = ccrypt.public_d_encrypt(key_file_lst=privateKey) # Uses 1 private key ()
 # Set up network information >> points to GRIM's internal static IP address at port 5005
-IP = '192.168.1.101' #GRIM 'Database' IP
 port = 5005
-if args.ip:
-    IP = '127.0.0.1' # Send to localhost for testing
+if args.local:
+    IP = '127.0.0.1' # Listen on localhost for testing
+else:
+    IP = '192.168.1.101' #GRIM 'Database' IP
+
 
 sock = udpTool.custSocket(ip=IP,port=port,decrypt=de)
 
@@ -48,7 +50,7 @@ while True:
     try:
         data = sock.listen()
         print ('Received message:', data)
-        if args.ip:
+        if args.local:
             print 'Message received on IP: ', IP
         else:
             db.inject(data)
