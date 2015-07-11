@@ -115,7 +115,10 @@ else:
                     c = ','
                     package = str(msgHash) +c+ str(stationID) +c+ str(cpm) +c+ str(cpmError) +c+ str(errorCode)
                     print packet
-                    packet = pe.encrypt_message(package)[0]
+                    try:
+                        packet = pe.encrypt_message(package)[0]
+                    except Exception, e:
+                        raise e
                     print packet
                     sock.sendto(packet, (IP, port))
                     print 'Packet sent @ ' + now +' - '+ IP +':'+ port
@@ -129,7 +132,7 @@ else:
             sys.exit(0)
         except Exception as e:
             GPIO.cleanup()
-            raise e
+            print str(e)
             sys.exit(1)
 
 #if __name__ == "__main__":
