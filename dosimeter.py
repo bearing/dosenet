@@ -41,7 +41,8 @@ class Dosimeter:
         GPIO.add_event_detect(23, GPIO.RISING, callback=self.updateNoise)
     
     def updateNoise(self):
-        print ('Stop shaking meeeeee - ', str(datetime.datetime.now()))
+        now = datetime.datetime.now()
+        print ('Stop shaking meeeeee - ', str(now))
         self.noise.append(now)
 
     def updateCount(self):
