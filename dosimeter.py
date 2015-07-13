@@ -40,12 +40,12 @@ class Dosimeter:
         GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount)
         GPIO.add_event_detect(23, GPIO.RISING, callback=self.updateNoise)
     
-    def updateNoise(self):
+    def updateNoise(self,channel=23):
         now = datetime.datetime.now()
         print ('Stop shaking meeeeee - ', str(now))
         self.noise.append(now)
 
-    def updateCount(self):
+    def updateCount(self,channel=24):
         now = datetime.datetime.now()
         lastMicrophonics = self.noise[-1] # Last datetime object in the noise list
         # Checks to see if microphonics detected within a 200ms window before deciding whether to change the
@@ -89,7 +89,7 @@ class Dosimeter:
         return cpm, cpm_err
 
     def ping(self, hostname):
-        response = os.system('ping -c 1'  + hostname)
+        response = os.system('ping -c 1 '  + hostname)
         # and then check the response...
         if response == 0:
           print '~ ', hostname, 'is up!'
