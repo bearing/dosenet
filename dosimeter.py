@@ -145,4 +145,4 @@ if __name__ == "__main__":
     det.updateCount()
     print det.counts
     det.updateNoise()
-    print det.noise()
+    print det.noise
