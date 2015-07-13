@@ -25,7 +25,7 @@ import os
 #       GPIO.HIGH - 3.3V (RPi rail voltage)
 
 class Dosimeter:
-    def __init__(self,LED1):
+    def __init__(self,LED1=7):
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
         start = datetime.datetime.now()
@@ -36,9 +36,9 @@ class Dosimeter:
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
         GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
-        GPIO.setup(LED1 , GPIO.OUT)
-        GPIO.add_event_detect(24, GPIO.FALLING, callback = self.updateCount)
-        GPIO.add_event_detect(23, GPIO.RISING, callback = self.updateNoise)
+        #GPIO.setup(LED1 , GPIO.OUT)
+        GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount)
+        GPIO.add_event_detect(23, GPIO.RISING, callback=self.updateNoise)
     
     def updateNoise(self):
         print ('Stop shaking meeeeee - ', str(datetime.datetime.now()))
@@ -143,3 +143,5 @@ if __name__ == "__main__":
     det.updateCount()
     det.updateCount()
     print det.counts
+    det.updateNoise()
+    print det.noise()
