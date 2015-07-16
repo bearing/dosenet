@@ -299,6 +299,3 @@ def main():
 	plot.scpToWebServer()
 	plot.printEndMessage()
 	print 'Total run time:', ("%.1f" % (time.time() - t0)), 's'
-
-if __name__ == "__main__":
-	# Argparse stuff to go here
