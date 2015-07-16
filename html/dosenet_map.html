@@ -294,6 +294,11 @@
 	.jumbotron .container {
 	  max-width: 100%;
 	}
+	#logo-canvas {
+		width: 75%;
+		margin-bottom:1em !important;
+		margin-top: 1em !important;
+  	}
 	@media screen and (min-width: 768px) {
 	  .jumbotron {
 	    padding: 1em 0;
@@ -369,10 +374,10 @@
 		document.getElementById("text_field").innerHTML = 
 			"<div class =\"jumbotron\" >" +
 			"<div class =\"jh5\">" +
-				"About DoseNet" + 
+				"About the Devices" + 
 			"</div>" + 
 			"<div class =\"jp\">" +
-			"DoseNet is a collection of radiation detectors that are placed throughout the UC Berkeley campus and Berkeley area more generally. These dosimeters measure the amount of radiation that enters the detector and deposits energy every minute. This value is then converted to a count rate and used to calculate the amount of dose that is exposed to people.  Each dosimeter then takes this measurement and sends it to a central server, where it is displayed on RadWatch.  This system is unique in that it allows for real-time monitoring of radiation levels." + 
+			"The DoseNet devices are radiation detectors placed throughout the UC Berkeley campus, Berkeley and the bay area more generally. These dosimeters measure the amount of radiation that enters the detector and deposits energy every minute. This value is then converted to a count rate and used to calculate the amount of dose that is exposed to people.  Each dosimeter then takes this measurement and sends it to a central server, where it is displayed on RadWatch.  This system is unique in that it allows for real-time monitoring of radiation levels." + 
 			"</div>" + 
 			"</div>";
 	}
@@ -583,6 +588,13 @@
 	</script>
 </head>
 <body>
+
+	<a href="https://radwatch.berkeley.edu/dosenet-0"><input type="button" class="button color" value="About DoseNet" style="margin-right:15px;"></a>
+	<a href="https://radwatch.berkeley.edu/join-dosenet"><input type="button" class="button color" value="Learn about Joining"></a>
+	<div id=logo-canvas>
+		<img src="/sites/default/files/pictures/DoseNet-logo-transparentbg.png"/>
+	</div>
+
 	<div class="roundedwrapper">
 		<table class="center "style="float: left;">
 			<tr>
@@ -624,18 +636,18 @@
 		<div id="map-canvas"></div>
 	</div>
 	<div class="center paddingtop">
-		<button type="button" class="btn btn-info btn-sm" onclick="map_explained()">How the Map Works</button>
+		<button type="button" class="btn btn-info btn-sm" onclick="about_dosenet()">About the Devices</button>
 		<button type="button" class="btn btn-info btn-sm" onclick="about_radiation()">About Radiation</button>
-		<button type="button" class="btn btn-info btn-sm" onclick="about_dosenet()">About DoseNet</button>
+		<button type="button" class="btn btn-info btn-sm" onclick="map_explained()">How the Map Works</button>
 		<button type="button" class="btn btn-info btn-sm" onclick="units_used()">Units Used</button>
 	</div>
 	<div id="text_field">
 		<div class="jumbotron">
 			<div class="jh5">
-				Units Used
+				About the Devices
 			</div>
 			<div class="jp">
-				Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities.
+				The DoseNet devices are radiation detectors placed throughout the UC Berkeley campus, Berkeley and the bay area more generally. These dosimeters measure the amount of radiation that enters the detector and deposits energy every minute. This value is then converted to a count rate and used to calculate the amount of dose that is exposed to people.  Each dosimeter then takes this measurement and sends it to a central server, where it is displayed on RadWatch.  This system is unique in that it allows for real-time monitoring of radiation levels.
 			</div>
 		</div>
 	</div>
