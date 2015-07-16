@@ -64,10 +64,10 @@ class SQLObject:
         data = data.split(',')
         msg_hash = data[0]
         if len(msg_hash) == 32: #All is good
-            stationID   = data[1]
+            stationID   = int(data[1])
             cpm         = float(data[2])
             cpm_error   = float(data[3])
-            error_flag  = data[4]
+            error_flag  = int(data[4])
             return (msg_hash, stationID, cpm, cpm_error, error_flag)
         else:
             return False

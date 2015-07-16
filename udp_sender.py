@@ -67,7 +67,7 @@ class Sender:
             print '~ Normal run, loading Raspberry Pi specific modules'
             try:
                 import RPi.GPIO as GPIO
-                from dosimeter import dosimeter
+                from dosimeter import Dosimeter
                 self.file_contents = self.getContents(self.file_path)
             except Exception, e:
                 print 'Were you looking for the test run? Use the -t or --test flag'
@@ -97,7 +97,7 @@ class Sender:
     def main(self):
         if self.args.test:
             print 'Testing complete, try a Raspberry Pi!'
-        det = dosimeter(LED1)  # Initialise dosimeter object from dosimeter.py
+        det = dosimeter(LED1=LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
