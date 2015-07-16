@@ -50,6 +50,11 @@ class Plot(object):
 		self.filename = ''
 		# Plot.ly sign in using ne170 login details
 		py.sign_in('ne170','ilo0p1671e')
+		############################
+		#### ~~~ ATTENTION ~~~ #####
+		self.KEPLER_USERNAME = 'nav'
+		#### ~~~~~~~~~~~~~~~~~ #####
+		############################
 	def getStationInfo(self):
 		# Get number of stations, station name, longitude, latitude, CPM to mRem and uSv conversion calibration factors
 		self.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv \
@@ -260,7 +265,7 @@ class Plot(object):
 		# Will be: $ scp ... jcurtis@kepler/.../
 		#			         =======
 		outputLocation = " output.geojson "
-		webServerLocation = " nav@kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/ "
+		webServerLocation = " '%s'@kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/ " % (self.KEPLER_USERNAME)
 		command = "scp" + outputLocation + webServerLocation
 		try:
 			os.system(command)
