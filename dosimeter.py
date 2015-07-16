@@ -17,20 +17,21 @@ import datetime
 import time
 from time import sleep
 import os
+import sys
 
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
 
 # Note: GPIO.LOW  - 0V
-#       GPIO.HIGH - 3.3V (RPi rail voltage)
+#       GPIO.HIGH - 3.3V or 5V ???? (RPi rail voltage)
 
 class Dosimeter:
     def __init__(self,LED1=7):
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
-        start = datetime.datetime.now()
-        self.counts.append(start) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
-        self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
+        #start = datetime.datetime.now()
+        #self.counts.append(start) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
+        #self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
         self.microphonics = [] # errorFlag list
         self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
@@ -39,24 +40,37 @@ class Dosimeter:
         #GPIO.setup(LED1 , GPIO.OUT)
         GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount)
         GPIO.add_event_detect(23, GPIO.RISING, callback=self.updateNoise)
+        self.first_count = True
+        self.first_noise = True
+        sleep(1)
     
-    def updateNoise(self,channel=23):
-        now = datetime.datetime.now()
-        print ('Stop shaking meeeeee - ', str(now))
-        self.noise.append(now)
-
-    def updateCount(self,channel=24):
-        now = datetime.datetime.now()
-        lastMicrophonics = self.noise[-1] # Last datetime object in the noise list
-        # Checks to see if microphonics detected within a 200ms window before deciding whether to change the
-        # errorFlag to 'microphonics was HIGH' or leave as default
-        if not (now - self.margin) <= lastMicrophonics <= (now + self.margin):
-            self.counts.append(now) # Stores counts as a list of datetimes
-            self.microphonics.append(False) # errorFlag = False by default (no errror registered)
+    def updateNoise(self,channel):
+        # self.blink(pin= SOMETHING, frequency=1, number_of_flashes=1)
+        if not self.first_noise:
+            #Avoids IndexError from the initialisation issue
+            print 'Stop shaking meeeeee - ', str(datetime.datetime.now())
+            self.noise.append(datetime.datetime.now())
         else:
-            self.counts.append(now) # Stores counts as a list of datetimes
-            self.microphonics.append(True)
-            # print ('Stop shaking meeeeee')
+            self.first_noise = False
+            print '\t~~ Haven\'t got any noise yet ~~'
+
+    def updateCount(self,channel):
+        # self.blink(pin= SOMETHING, frequency=1, number_of_flashes=1)
+        if not self.first_count:
+            now = datetime.datetime.now()
+            lastMicrophonics = self.noise[-1] # Last datetime object in the noise list
+            # Checks to see if microphonics detected within a 200ms window before deciding whether to change the
+            # errorFlag to 'microphonics was HIGH' or leave as default
+            if not (now - self.margin) <= lastMicrophonics <= (now + self.margin):
+                self.counts.append(datetime.datetime.now()) # Stores counts as a list of datetimes
+                self.microphonics.append(False) # errorFlag = False by default (no errror registered)
+            else:
+                self.counts.append(datetime.datetime.now()) # Stores counts as a list of datetimes
+                self.microphonics.append(True)
+                # print 'Stop shaking meeeeee'
+        else:
+            self.first_count = False
+            print '\t~~ Haven\'t got any counts yet ~~'
 
     def countsToArr(self):
         self.counts = np.array(self.counts, dtype='M8[us]') # This dtype is super close to an open bug, this is a workaround?
@@ -64,15 +78,15 @@ class Dosimeter:
     def countsToList(self):
         self.counts = self.counts.tolist()
 
-    def resetCounts(self, seconds=120):
+    def resetCounts(self, seconds=300):
         self.countsToArr()
-        counts = self.counts
+        counts = self.counts # For shortening the next line
         # Saves only the last number of seconds of events
         self.counts = counts[counts > counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
         self.countsToList()
 
     def getCount(self):
-        return len(self.counts)
+        return float(len(self.counts))
 
     def getCPM(self):
         count = self.getCount()
@@ -83,8 +97,8 @@ class Dosimeter:
         cpm_err = count_err / counting_time * 60
         # Resets the averaging every 300 counts or every 200 seconds
         #if(count > 300 or counting_time > 200):
-        # Resets the averaging every 4 minutes
-        if(counting_time > 240):
+        # Resets the averaging every 5 minutes
+        if(counting_time > 300): ############## Last 5 mintues of data
             self.resetCounts()
         return cpm, cpm_err
 
@@ -106,7 +120,7 @@ class Dosimeter:
         GPIO.output(pin,False)
         print 'Pin OFF #:',pin,' - ',datetime.datetime.now()
 
-    def blink(self, pin, frequency = 0.2, number_of_flashes = 1):
+    def blink(self, pin, frequency = 0.5, number_of_flashes = 10):
         try:
             for i in range(0, number_of_flashes):
                 print 'Blinking on Pin #:',pin,' - ',datetime.datetime.now()
