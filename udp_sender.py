@@ -109,7 +109,7 @@ class Sender:
                         print '\t~~~ Activate LED ~~~\n'
                     else:
                         det.activatePin(self.LED) # LIGHT UP
-                    if len(det.counts) > 0: # Only run the next segment after the warm-up phase
+                    if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         # GET errorCode from det Object??????
                         error_code = 0 # Default 'working' state - error code 0
                         now = datetime.datetime.now()
@@ -118,9 +118,10 @@ class Sender:
                         print package
                         packet = self.pe.encrypt_message(package)[0]
                         print str(packet) # This really screws up Raspberry Pi terminal... without str()
+                        print self.IP, self.port
                         self.socket.sendto(packet, (self.IP, self.port))
                         print 'Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port)
-                        time.sleep(120)
+                        time.sleep(2)
                 else:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~\n'
