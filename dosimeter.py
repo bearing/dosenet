@@ -19,6 +19,7 @@ import time
 from time import sleep
 import os
 import sys
+import random
 
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
@@ -188,7 +189,6 @@ if __name__ == "__main__":
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print '~~~~ Testing done. Entering while True loop ~~~~'
     print ' Waiting for Ctrl + C'
-    import random
     MEASURE_TIME = 60
     while True:
         try: # getCPM
