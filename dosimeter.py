@@ -191,9 +191,9 @@ if __name__ == "__main__":
     while True:
         try: # getCPM
             sleep(1)
-            count = self.getCount()
+            count = det.getCount()
             print count
-            cpm, cpm_err = self.getCPM(accumulation_time=MEASURE_TIME)
+            cpm, cpm_err = det.getCPM(accumulation_time=MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
