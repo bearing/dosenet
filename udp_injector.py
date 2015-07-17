@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 # 
 # Ryan Pavlovsky (until Mon Jun 15 2015)
 # Navrit Bal (after Jun 15 2015)

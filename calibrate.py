@@ -1,4 +1,5 @@
 #!/home/pi/miniconda/bin/python
+# -*- coding: utf-8 -*-
 ##########################
 ## Run on Raspberry Pis ##
 ##########################
