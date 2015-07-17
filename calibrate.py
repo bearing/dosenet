@@ -11,7 +11,7 @@ import RPi.GPIO as GPIO
 from dosimeter import Dosimeter
 
 class Calibrate:
-    def __init__():
+    def __init__(self):
         self.MEASURE_TIME = 5 # seconds
         print '\n\t ~~~~ You\'re running this fun calibration class. \
                 \n Now go get your source(s). Maybe that Uranium ore on the bench will be useful...\n'
@@ -39,7 +39,7 @@ class Calibrate:
             print '\t\t\t ~~~ Reset ~~~'
 
     def main(self):
-        det = dosimeter()
+        det = Dosimeter()
         while True:
             try: # getCPM
                 sleep(1)
