@@ -59,20 +59,20 @@ class Dosimeter:
         noiseInput = GPIO.input(23)
         if not self.first_count:
             now = datetime.datetime.now()
-            if noiseInput:
+            if noiseInput: # == 1/True
                 print 'updateCount \t\t Noise: ',noiseInput
                 self.noise.append(now)
-            elif not noiseInput:
+            elif not noiseInput: # ==0/False
                 lastNoise = self.noise[-1] # Last datetime object in the noise list
                 # Checks to see if microphonics detected within a 200ms window before deciding whether to change the
                 # errorFlag to 'microphonics was HIGH' or leave as default
                 if not (now - self.margin) <= lastNoise <= (now + self.margin):
-                    print '.'
+                    print '. ', self.getCount()
                     self.counts.append(now) # Stores counts as a list of datetimes
                     self.microphonics.append(False) # errorFlag = False by default (no errror registered)
                 else:
-                    print 'updateCount - NS - in window'
                     self.counts.append(now) # Stores counts as a list of datetimes
+                    print self.getCount(), '\t NS: True'
                     self.microphonics.append(True)
                     # print 'Stop shaking meeeeee'
             else:
