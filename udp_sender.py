@@ -26,14 +26,13 @@ class Sender:
                 Default is \"config-files/test-onerow.csv\" - no \"')
         #
         parser.add_argument('--led',nargs='?',required=False,type=int, default=20,
-            help='\n\t The BCM pin number of the + end of the communications LED\n \
-                Make sure a resistor is attached otherwise I expect your LED \
-                will blow up soon... \n')                           # nargs='?' means 0-or-1 arguments
+            help='\n\t The BCM pin number of the + end of the communications LED\n')
+                                       # nargs='?' means 0-or-1 arguments
         parser.add_argument('--ip',nargs=1,required=False,type=str)
         #
         self.args = parser.parse_args()
-        self.file_path = self.args.filename[0]
-        self.LED = self.args.led[0] #Default BCM Pin 7
+        self.file_path = self.args.filename
+        self.LED = self.args.led #Default BCM Pin 7
 
     def getContents(self,file_path):
         content = [] #list()
@@ -89,21 +88,23 @@ class Sender:
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
         self.IP = 'grim.nuc.berkeley.edu'
         self.port = 5005
-        if self.arg.test:
-            print 'UDP target IP @ port :', self.IP + ':' + self.port
+        if self.args.test:
+            print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
         if self.args.test:
-            self.IP = args.test[0] #Send to custom IP if testing
+            self.IP = self.args.ip #Send to custom IP if testing
 
     def main(self):
         if self.args.test:
-            print 'Testing complete, try a Raspberry Pi!'
-        det = dosimeter(LED1=LED)  # Initialise dosimeter object from dosimeter.py
+            print '\t\t ~~~~ Testing complete, try a Raspberry Pi! ~~~~'
+        import RPi.GPIO as GPIO
+        from dosimeter import Dosimeter
+        det = Dosimeter(LED=self.LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM()
-                    if self.arg.test:
+                    if self.args.test:
                         print 'CPM: ',cpm,' - ','CPM Error: ',cpm_error
                         print '\t~~~ Activate LED ~~~\n'
                     else:
@@ -118,10 +119,10 @@ class Sender:
                         packet = self.pe.encrypt_message(package)[0]
                         print str(packet) # This really screws up Raspberry Pi terminal... without str()
                         self.socket.sendto(packet, (self.IP, self.port))
-                        print 'Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port) 
+                        print 'Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port)
                         time.sleep(120)
                 else:
-                    if self.arg.test:
+                    if self.args.test:
                         print '\t~~~ Blink LED ~~~\n'
                     else: 
                         det.blink(self.LED, number_of_flashes = 10) # FLASH
@@ -134,10 +135,10 @@ class Sender:
                 print str(e)
                 sys.exit(1)
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     sen = Sender()
     sen.parseArguments()
     sen.initialise()
-    self.getDatafromCSV()
+    sen.getDatafromCSV()
     sen.initVariables()
     sen.main()

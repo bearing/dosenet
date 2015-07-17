@@ -17,8 +17,9 @@ class SQLObject:
         self.db.close()
 
     def getVerifiedStationList(self):
-        self.verified_stations = runSQL('SELECT `ID`, `IDLatLongHash` \
-                                        FROM dosimeter_network.stations;')
+        self.cursor.execute("SELECT `ID`, `IDLatLongHash` FROM dosimeter_network.stations;")
+        self.verified_stations = self.cursor.fetchall()
+
     def checkHashFromRAM(self,ID):
         # Essentially the same as doing the following in MySQL
         # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
@@ -33,9 +34,9 @@ class SQLObject:
             print ('Could not find a station matching that ID')
 
     def insertIntoDosenet(self,stationID,cpm,cpm_error,error_flag):
-        runSQL('INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
-                VALUES (%s,%s,%s,%s);',
-                (stationID,cpm,cpm_error,error_flag)) 
+        self.cursor.execute("INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
+                VALUES (%s,%s,%s,%s);",
+                (stationID,cpm,cpm_error,error_flag))
         # Time is decided by the MySQL database / GRIM hence 'receiveTime' field in DB
         self.db.commit()
 
@@ -77,14 +78,7 @@ class SQLObject:
         # RUN "SELECT IDLatLongHash
         #       FROM stations
         #       WHERE `ID` = $$$ ;"
-        return runSQL("SELECT IDLatLongHash FROM stations \
+        self.cursor.execute("SELECT IDLatLongHash FROM stations \
                         WHERE `ID` = '%s';" % (ID) )
-
-    def runSQL(self,sql):
-        try:
-            SQLObject.cursor.execute(sql)
-        except (KeyboardInterrupt, SystemExit):
-            print ('.... User interrupt ....\n Byyeeeeeeee')
-            sys.exit(0)
-        except Exception as e:
-            raise e
+        dbHash = self.cursor.fetchall()
+        return dbHash
