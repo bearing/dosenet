@@ -56,6 +56,7 @@ class Dosimeter:
             print '\t~~ Haven\'t got any noise yet ~~'
 
     def updateCount(self,channel):
+        GPIO.setmode(GPIO.BCM)
         noiseInput = GPIO.input(23)
         if not self.first_count:
             now = datetime.datetime.now()
@@ -69,13 +70,13 @@ class Dosimeter:
                 if not (now - self.margin) <= lastNoise <= (now + self.margin):
                     print '. #', int(self.getCount())
                     self.counts.append(now) # Stores counts as a list of datetimes
-                    self.blink(frequency=0.5)
+                    self.blink()
                     self.microphonics.append(False) # errorFlag = False by default (no errror registered)
                     # Remove later
                     cpm, err = self.getCPM(); print cpm
                 else:
                     self.counts.append(now) # Stores counts as a list of datetimes
-                    self.blink(frequency=0.5)
+                    self.blink()
                     self.microphonics.append(True)
                     print 'counts + ** NOISE **'
                     # Remove later
@@ -146,7 +147,6 @@ class Dosimeter:
         #print 'Pin OFF #:',pin,' - ',datetime.datetime.now()
 
     def blink(self, pin=20, frequency = 0.5, number_of_flashes = 1):
-        GPIO.setmode(GPIO.BCM)
         try:
             for i in range(0, number_of_flashes):
                 #print 'Blinking on Pin #:',pin,' - ',datetime.datetime.now()
