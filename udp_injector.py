@@ -52,7 +52,7 @@ class Injector:
         while True:
             try:
                 data = self.socket.listen()
-                print ('Received message:', data)
+                print 'Received message:', data
                 if self.args.test:
                     print 'Message received on IP:port @ ', self.IP ,':', self.port
                 else:

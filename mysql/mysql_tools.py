@@ -31,7 +31,7 @@ class SQLObject:
         except Exception as e:
             raise e
             return False
-            print ('Could not find a station matching that ID')
+            print 'Could not find a station matching that ID'
 
     def insertIntoDosenet(self,stationID,cpm,cpm_error,error_flag):
         self.cursor.execute("INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
