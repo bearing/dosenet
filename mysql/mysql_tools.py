@@ -6,8 +6,8 @@ class SQLObject:
         self.db = mdb.connect('localhost','ne170group','ne170groupSpring2015','dosimeter_network')
         # self.stn_list_key = {'ID':0,'Name':1,'Lat':2,'Lon':3, 'cpmtorem':4,'cpmtousv':5,'IDLatLongHash':6}
         self.verified_stations = []
-        self.getVerifiedStationList()
         self.cursor = self.db.cursor()
+        self.getVerifiedStationList()
 
     def __del__(self):
         self.close()
