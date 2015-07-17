@@ -27,24 +27,12 @@ class Calibrate:
         print('Actually closing now')
         GPIO.cleanup()
         sys.exit(0)
-    def getCPM(self):
-        counts = self.det.getCount()
-        counts_err = np.sqrt(counts)
-        now = datetime.datetime.now()
-        counting_time = (now - counts[0]).total_seconds()
-        cpm = counts / counting_time * 60
-        cpm_err = counts_err / counting_time * 60
-        print ' Counts: ',counts,u'±',counts_err,'\t','CPM: ',cpm,u'±',cpm_err,'\n'
-        if (counting_time >= self.MEASURE_TIME):
-            self.det.resetCounts(seconds=self.MEASURE_TIME)
-            print '\t\t\t ~~~ Reset ~~~'
-
     def main(self):
-        self.det = Dosimeter()
+        det = Dosimeter()
         while True:
             try: # getCPM
                 sleep(1)
-                self.getCPM()
+                det.getCPM(accumulation_time=10)
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
                 GPIO.cleanup()

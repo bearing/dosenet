@@ -106,19 +106,20 @@ class Dosimeter:
     def getCount(self):
         return float(len(self.counts))
 
-    def getCPM(self):
+    def getCPM(self,accumulation_time=10):
         count = self.getCount()
         if count < 2:
             return 0, 0
         count_err = np.sqrt(count)
-        print '\t\t\t\t\t~~~',count, count_err,'~~~'
         now = datetime.datetime.now()
         counting_time = (now - self.counts[0]).total_seconds()
         cpm = count / counting_time * 60
         cpm_err = count_err / counting_time * 60
-        print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
+        if __name__=='udp_sender':
+            print '\t\t\t\t\t~~~',count, count_err,'~~~'
+            print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
         # Resets the averaging every 5 minutes
-        if(counting_time > 10): ############## Last 5 mintues of data
+        if(counting_time > accumulation_time): ############## Last 5 mintues of data
             if __name__=='calibrate':
                 print '\t ~~~~ RESET ~~~~'
             self.resetCounts()
