@@ -47,7 +47,7 @@ class Injector:
             self.IP = '192.168.1.101' #GRIM 'Database' IP - default behaviour
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
-    def main(): # Runs until keyboard interrupt or system exit 
+    def main(self): # Runs until keyboard interrupt or system exit 
         while True:
             try:
                 data = self.socket.listen()
