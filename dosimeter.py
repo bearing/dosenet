@@ -45,7 +45,7 @@ class Dosimeter:
         self.first_noise = True
         sleep(1)
     
-    def updateNoise(self,channel):
+    def updateNoise(self,channel=23):
         if not self.first_noise:
             #Avoids IndexError from the initialisation issue
             #print 'updateNoise - ', str(datetime.datetime.now())
@@ -55,7 +55,7 @@ class Dosimeter:
             self.first_noise = False
             print '\t~~ Haven\'t got any noise yet ~~'
 
-    def updateCount(self,channel):
+    def updateCount(self,channel=24):
         GPIO.setmode(GPIO.BCM)
         noiseInput = GPIO.input(23)
         if not self.first_count:
