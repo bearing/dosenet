@@ -92,11 +92,14 @@ class Dosimeter:
 
     def countsToList(self):
         self.counts = self.counts.tolist()
+        print '\t\t\t',self.counts
 
     def resetCounts(self, seconds=10):
         self.countsToArr()
         # Saves only the last number of seconds of events
+        print '\t\t\t',self.counts
         self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
+        print '\t\t\t',self.counts
         self.countsToList()
 
     def getCount(self):
