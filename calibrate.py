@@ -27,7 +27,7 @@ class Calibrate:
         GPIO.cleanup()
         sys.exit(0)
     def getCPM(self):
-        counts = det.getCount()
+        counts = self.det.getCount()
         counts_err = np.sqrt(counts)
         now = datetime.datetime.now()
         counting_time = (now - self.counts[0]).total_seconds()
