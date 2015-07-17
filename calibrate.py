@@ -35,11 +35,11 @@ class Calibrate:
         cpm_err = counts_err / counting_time * 60
         print ' Counts: ',counts,u'±',counts_err,'\t','CPM: ',cpm,u'±',counts_err,'\n'
         if (counting_time >= self.MEASURE_TIME):
-            det.resetCounts(seconds=self.MEASURE_TIME)
+            self.det.resetCounts(seconds=self.MEASURE_TIME)
             print '\t\t\t ~~~ Reset ~~~'
 
     def main(self):
-        det = Dosimeter()
+        self.det = Dosimeter()
         while True:
             try: # getCPM
                 sleep(1)
