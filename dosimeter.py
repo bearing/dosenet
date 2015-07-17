@@ -119,7 +119,11 @@ class Dosimeter:
         print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
         # Resets the averaging every 5 minutes
         if(counting_time > 10): ############## Last 5 mintues of data
+            if __name__='calibrate':
+                print '\t ~~~~ RESET ~~~~'
             self.resetCounts()
+        if __name__='calibrate':
+            print ' Count: ',count,u'±',count_err,'\t','CPM: ',cpm,u'±',cpm_err,'\n'
         return cpm, cpm_err
 
     def ping(self, hostname):

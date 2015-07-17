@@ -34,7 +34,7 @@ class Calibrate:
         counting_time = (now - counts[0]).total_seconds()
         cpm = counts / counting_time * 60
         cpm_err = counts_err / counting_time * 60
-        print ' Counts: ',counts,u'±',counts_err,'\t','CPM: ',cpm,u'±',counts_err,'\n'
+        print ' Counts: ',counts,u'±',counts_err,'\t','CPM: ',cpm,u'±',cpm_err,'\n'
         if (counting_time >= self.MEASURE_TIME):
             self.det.resetCounts(seconds=self.MEASURE_TIME)
             print '\t\t\t ~~~ Reset ~~~'
