@@ -101,6 +101,7 @@ class Sender:
         from dosimeter import Dosimeter
         det = Dosimeter(LED=self.LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
+            time.sleep(5)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM()
@@ -121,7 +122,6 @@ class Sender:
                         print self.IP, self.port
                         self.socket.sendto(packet, (self.IP, self.port))
                         print 'Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port)
-                        time.sleep(5)
                 else:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~\n'
