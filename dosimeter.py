@@ -184,14 +184,17 @@ if __name__ == "__main__":
     print det.counts
     det.updateNoise()
     print det.noise
+    #
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print '~~~~ Testing done. Entering while True loop ~~~~'
     print ' Waiting for Ctrl + C'
+    import random
     MEASURE_TIME = 60
     while True:
         try: # getCPM
             sleep(1)
-            count = det.getCount()
+            if random.random() >= 0.5:
+                count += 1
             print count
             cpm, cpm_err = det.getCPM(accumulation_time=MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
