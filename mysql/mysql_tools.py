@@ -43,7 +43,7 @@ class SQLObject:
     def inject(self,data):
         data = self.parsePacket(data)
         if data == False:
-            pass
+            print '~~ FAILED TO INJECT ~~'
         else: 
             if(self.authenticatePacket(data)):
                 self.insertIntoDosenet( 
@@ -59,6 +59,7 @@ class SQLObject:
         if db_hash == msg_hash:
             return True
         else:
+            print '~~ FAILED AUTHENTICATION'
             return False
 
     def parsePacket(self,data):
