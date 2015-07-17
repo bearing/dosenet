@@ -38,7 +38,7 @@ class Injector:
     def initialise(self):
         # Initialise decryption & database objects
         self.privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
-        de = ccrypt.public_d_encrypt(key_file_lst = privateKey) # Uses 1 private key ()
+        de = ccrypt.public_d_encrypt(key_file_lst = self.privateKey) # Uses 1 private key ()
         # Set up network information >> points to GRIM's internal static IP address at port 5005
         self.port = 5005
         if self.args.test:
