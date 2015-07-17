@@ -31,7 +31,7 @@ class Calibrate:
         counts = self.det.getCount()
         counts_err = np.sqrt(counts)
         now = datetime.datetime.now()
-        counting_time = (now - self.counts[0]).total_seconds()
+        counting_time = (now - counts[0]).total_seconds()
         cpm = counts / counting_time * 60
         cpm_err = counts_err / counting_time * 60
         print ' Counts: ',counts,u'±',counts_err,'\t','CPM: ',cpm,u'±',counts_err,'\n'
