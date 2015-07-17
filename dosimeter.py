@@ -146,6 +146,7 @@ class Dosimeter:
         #print 'Pin OFF #:',pin,' - ',datetime.datetime.now()
 
     def blink(self, pin=20, frequency = 0.5, number_of_flashes = 1):
+        GPIO.setmode(GPIO.BCM)
         try:
             for i in range(0, number_of_flashes):
                 #print 'Blinking on Pin #:',pin,' - ',datetime.datetime.now()
