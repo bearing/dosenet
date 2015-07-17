@@ -116,9 +116,8 @@ class Dosimeter:
         counting_time = (now - self.counts[0]).total_seconds()
         cpm = count / counting_time * 60
         cpm_err = count_err / counting_time * 60
-        if __name__=='udp_sender':
-            print '\t\t\t\t\t~~~',count, count_err,'~~~'
-            print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
+        print '\t\t\t\t\t~~~',count, count_err,'~~~'
+        print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
         # Resets the averaging every 5 minutes
         if(counting_time > accumulation_time): ############## Last 5 mintues of data
             if __name__=='calibrate':
