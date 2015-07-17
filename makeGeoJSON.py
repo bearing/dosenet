@@ -249,7 +249,7 @@ class Plot(object):
 		dump = str(geojson.dumps(featureCollection))
 		openfile = open('output.geojson','w')
 		try:
-			print >> (openfile, dump) # UNRESOLVED ERROR      'tuple' object has no attribute 'write'    WTF IS THIS
+			print >> openfile, dump # UNRESOLVED ERROR      'tuple' object has no attribute 'write'    WTF IS THIS
 		except (KeyboardInterrupt, SystemExit):
 			sys.exit(0)
 		except Exception as e:
@@ -279,7 +279,7 @@ class Plot(object):
 def getDateTime():
 	return str(datetime.datetime.now())
 
-def main():
+if __name__ == '__main__':
 	'''
 	Main makeGeoJSON function 
 
