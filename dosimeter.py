@@ -181,7 +181,25 @@ if __name__ == "__main__":
     data = det.getCPM()
     print data
     det.updateCount()
-    det.updateCount()
     print det.counts
     det.updateNoise()
     print det.noise
+    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print '~~~~ Testing done. Entering while True loop ~~~~'
+    print ' Waiting for Ctrl + C'
+    MEASURE_TIME = 60
+    while True:
+        try: # getCPM
+            sleep(1)
+            count = self.getCount()
+            print count
+            cpm, cpm_err = self.getCPM(accumulation_time=MEASURE_TIME)
+            print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
+        except (KeyboardInterrupt, SystemExit):
+            print '.... User interrupt ....\n Byyeeeeeeee'
+            GPIO.cleanup()
+            sys.exit(0)
+        except Exception as e:
+            GPIO.cleanup()
+            print str(e)
+            sys.exit(1)
