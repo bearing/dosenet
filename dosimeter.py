@@ -108,6 +108,8 @@ class Dosimeter:
 
     def getCPM(self):
         count = self.getCount()
+        if count < 2:
+            return 0, 0
         count_err = np.sqrt(count)
         print '\t\t\t\t\t~~~',count, count_err,'~~~'
         now = datetime.datetime.now()
