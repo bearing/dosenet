@@ -73,6 +73,7 @@ class Dosimeter:
                     self.microphonics.append(False) # errorFlag = False by default (no errror registered)
                 else:
                     self.counts.append(now) # Stores counts as a list of datetimes
+                    self.blink(frequency=1)
                     print self.getCount(), '\t NS: True'
                     self.microphonics.append(True)
                     # print 'Stop shaking meeeeee'
