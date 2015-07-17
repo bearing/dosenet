@@ -24,7 +24,7 @@ class SQLObject:
         # Essentially the same as doing the following in MySQL
         # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
         try:
-            for i in len(verified_stations):
+            for i in len(self.verified_stations):
                 if self.verified_stations[i][0] == ID:
                     dbHash = self.verified_stations[i][1]
                     return dbHash
