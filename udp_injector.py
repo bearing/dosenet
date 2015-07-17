@@ -65,7 +65,7 @@ class Injector:
                 print str(e)
                 print ('Exception: Cannot decrypt data...')
 
-if __name__="__main__":
+if __name__=="__main__":
     inj = Injector()
     inj.parseArguments()
     inj.initialise()
