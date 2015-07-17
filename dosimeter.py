@@ -93,7 +93,7 @@ class Dosimeter:
     def countsToList(self):
         self.counts = self.counts.tolist()
 
-    def resetCounts(self, seconds=300):
+    def resetCounts(self, seconds=10):
         self.countsToArr()
         # Saves only the last number of seconds of events
         self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
@@ -112,7 +112,7 @@ class Dosimeter:
         cpm_err = count_err / counting_time * 60
         print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
         # Resets the averaging every 5 minutes
-        if(counting_time > 300): ############## Last 5 mintues of data
+        if(counting_time > 10): ############## Last 5 mintues of data
             self.resetCounts()
         return cpm, cpm_err
 
