@@ -86,7 +86,7 @@ class Sender:
     def initVariables(self):    
         public_key = ['id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
-        self.IP = 'grim.nuc.berkeley.edu'
+        self.IP = '192.168.1.101' #'grim.nuc.berkeley.edu'
         self.port = 5005
         if self.args.test:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
