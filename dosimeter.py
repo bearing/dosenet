@@ -29,9 +29,9 @@ class Dosimeter:
     def __init__(self,LED=20):
         self.counts = [] # Datetime list
         self.noise  = [] # Datetime list
-        #start = datetime.datetime.now()
-        #self.counts.append(start) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
-        #self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
+        start = datetime.datetime.now()
+        self.counts.append(start) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
+        self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
         self.microphonics = [] # errorFlag list
         self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
