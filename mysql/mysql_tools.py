@@ -55,7 +55,7 @@ class SQLObject:
     def authenticatePacket(self,data):
         msg_hash = data[0]
         ID       = data[1]
-        db_hash  = checkHashFromRAM(ID)
+        db_hash  = self.checkHashFromRAM(ID)
         if db_hash == msg_hash:
             return True
         else:
