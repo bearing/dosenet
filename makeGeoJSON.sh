@@ -1,2 +1,2 @@
 #!/bin/bash
-python makeGeoJSON.py
+python /home/dosenet/dosenet/makeGeoJSON.py
