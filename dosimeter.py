@@ -45,46 +45,46 @@ class Dosimeter:
         sleep(1)
     
     def updateNoise(self,channel):
-        # self.blink(pin= SOMETHING, frequency=1, number_of_flashes=1)
         if not self.first_noise:
             #Avoids IndexError from the initialisation issue
-            print 'updateNoise - ', str(datetime.datetime.now())
+            #print 'updateNoise - ', str(datetime.datetime.now())
             self.noise.append(datetime.datetime.now())
+            print '\t\t\t\t NOISE only'
         else:
             self.first_noise = False
             print '\t~~ Haven\'t got any noise yet ~~'
 
     def updateCount(self,channel):
-        # self.blink(pin= SOMETHING, frequency=1, number_of_flashes=1)
         noiseInput = GPIO.input(23)
         if not self.first_count:
             now = datetime.datetime.now()
             if noiseInput: # == 1/True
-                print 'updateCount \t\t Noise: ',noiseInput
                 self.noise.append(now)
+                print '\t\t\t\t NOISE only'
             elif not noiseInput: # ==0/False
                 lastNoise = self.noise[-1] # Last datetime object in the noise list
                 # Checks to see if microphonics detected within a 200ms window before deciding whether to change the
                 # errorFlag to 'microphonics was HIGH' or leave as default
                 if not (now - self.margin) <= lastNoise <= (now + self.margin):
-                    print '. ', self.getCount()
+                    print '. #', int(self.getCount())
                     self.counts.append(now) # Stores counts as a list of datetimes
-                    self.blink(frequency=1)
+                    self.blink(frequency=0.5)
                     self.microphonics.append(False) # errorFlag = False by default (no errror registered)
+                    # Remove later
+                    cpm, err = self.getCPM(); print cpm
                 else:
                     self.counts.append(now) # Stores counts as a list of datetimes
-                    self.blink(frequency=1)
-                    print self.getCount(), '\t NS: True'
+                    self.blink(frequency=0.5)
                     self.microphonics.append(True)
+                    print 'counts + ** NOISE **'
+                    # Remove later
+                    cpm, err = self.getCPM(); print cpm
                     # print 'Stop shaking meeeeee'
             else:
                 print '\n\t\t\t NS was not GPIO.HIGH or GPIO.LOW'
         else:
             self.first_count = False
             print '\t~~ Haven\'t got any counts yet ~~'
-        # Remove later
-        cpm, err = self.getCPM(); 
-        print cpm, err
 
     def countsToArr(self):
         self.counts = np.array(self.counts, dtype='M8[us]') # This dtype is super close to an open bug, this is a workaround?
