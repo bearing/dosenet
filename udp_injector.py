@@ -48,6 +48,7 @@ class Injector:
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
     def main(self): # Runs until keyboard interrupt or system exit 
+        print '\t\t\t ~~~~ Listening ~~~~'
         while True:
             try:
                 data = self.socket.listen()
