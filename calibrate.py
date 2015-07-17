@@ -13,7 +13,7 @@ from dosimeter import Dosimeter
 
 class Calibrate:
     def __init__(self):
-        self.MEASURE_TIME = 5 # seconds
+        self.MEASURE_TIME = 10 # seconds
         print '\n\t ~~~~ You\'re running this fun calibration class. \
                 \n Now go get your source(s). Maybe that Uranium ore on the bench will be useful...\n'
         print 'Accumulation Time: ', self.MEASURE_TIME
@@ -32,7 +32,7 @@ class Calibrate:
         while True:
             try: # getCPM
                 sleep(1)
-                det.getCPM(accumulation_time=10)
+                cpm, cpm_err = det.getCPM(accumulation_time=self.MEASURE_TIME)
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
                 GPIO.cleanup()
