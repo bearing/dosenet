@@ -14,7 +14,7 @@ class custSocket:
         except Exception, e:
             print '\n\t\t ~~ IP address already in use ~~'
             print '\t\t ~~~~ This script is probably running already ~~~~'
-            print '\t ~~ If not, there\'s some network issue. Good luck... ~~'
+            print '\t ~~ If not, there\'s some network issue. Good luck... ~~\n'
             raise e
 
     def listen(self):
