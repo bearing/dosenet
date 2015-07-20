@@ -190,6 +190,7 @@ if __name__ == "__main__":
     print '~~~~ Testing done. Entering while True loop ~~~~'
     print ' Waiting for Ctrl + C'
     MEASURE_TIME = 60
+    count = 0
     while True:
         try: # getCPM
             sleep(1)
