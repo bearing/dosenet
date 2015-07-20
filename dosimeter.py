@@ -121,8 +121,7 @@ class Dosimeter:
         print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
         # Resets the averaging every 5 minutes
         if(counting_time > accumulation_time): ############## Last 5 mintues of data
-            if __name__=='calibrate':
-                print '\t ~~~~ RESET ~~~~'
+            print '\t ~~~~ RESET ~~~~'
             self.resetCounts()
         return cpm, cpm_err
 
