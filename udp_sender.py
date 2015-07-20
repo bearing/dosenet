@@ -88,11 +88,12 @@ class Sender:
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
         self.IP = '192.168.1.101' #'grim.nuc.berkeley.edu'
         self.port = 5005
+        if self.args.ip:
+            print '\n\t PS. 192.168.1.101 is GRIM'
+            self.IP = self.args.ip[0] #Send to custom IP if testing
         if self.args.test:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
-        if self.args.test:
-            self.IP = self.args.ip[0] #Send to custom IP if testing
 
     def main(self):
         if self.args.test:
