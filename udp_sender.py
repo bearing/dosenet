@@ -92,7 +92,7 @@ class Sender:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
         if self.args.test:
-            self.IP = self.args.ip #Send to custom IP if testing
+            self.IP = self.args.ip[0] #Send to custom IP if testing
 
     def main(self):
         if self.args.test:
