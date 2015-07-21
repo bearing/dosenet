@@ -41,25 +41,36 @@ class SQLObject:
         self.db.commit()
 
     def inject(self,data):
-        data = self.parsePacket(data)
-        if data == False:
-            print '~~ FAILED TO INJECT ~~'
+        if not self.authenticatePacket(data):
+            print '~~ FAILED AUTHENTICATION'
         else: 
-            if(self.authenticatePacket(data)):
+            data = self.parsePacket(data)
+            if(data):
                 self.insertIntoDosenet( 
                     stationID   = data[1],
                     cpm         = data[2],
                     cpm_error   = data[3],
                     error_flag  = data[4])
+            else:
+                print '~~ FAILED TO INJECT/PARSE ~~'
+
+    def getHashList(self):
+        return self.verified_stations[:][1];
 
     def authenticatePacket(self,data):
-        msg_hash = data[0]
-        ID       = data[1]
+        hash_list= self.getHashList();
+
+        #Verify the hash is in the list
+        msg_hash = data[:32];
+        if( not msg_hash in hash_list ):
+            return False;
+
+        #Ok, we think this could be a real station
+        ID       = int(data.split(',')[1]);
         db_hash  = self.checkHashFromRAM(ID)
         if db_hash == msg_hash:
             return True
         else:
-            print '~~ FAILED AUTHENTICATION'
             return False
 
     def parsePacket(self,data):
