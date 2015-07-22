@@ -1,23 +1,24 @@
-from Crypto.PublicKey import RSA as rsa;
+from Crypto.PublicKey import RSA as rsa
 
 class public_d_encrypt:
-    def __init__(self,key_file_lst=[]):
+    def __init__(self, key_file_lst = [])
         for key_file in key_file_lst:
-            key=self.read_key_file(key_file);
+            key = self.read_key_file(key_file)
             if(not key):
-                continue;
+                continue
             if( key.has_private()):
-                self.private_key=key;
+                self.private_key = key
             elif(key.can_encrypt()):
-                self.public_key=key;
+                self.public_key = key
     def encrypt_message(self,message):
-        return self.public_key.encrypt(message,32);
+        return self.public_key.encrypt(message, 32)
     def read_key_file(self,key_file):
         try:
-            f=open(key_file,'r');
+            f = open(key_file, 'r')
         except:
-            print "could not find key_file";
-            return [];
-        return rsa.importKey(f.read());
+            print '\t\t\t\t\t ERROR'
+            print '\t\t\t\t ~~~~ Could not find key file - where is it? ~~~~'
+            return []
+        return rsa.importKey(f.read())
     def decrypt_message(self,message):
-        return self.private_key.decrypt(message);
+        return self.private_key.decrypt(message)
