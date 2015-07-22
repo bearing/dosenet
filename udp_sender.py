@@ -41,14 +41,12 @@ class Sender:
             dictReader = csv.DictReader(csvfile) #read the CSV file into a dictionary
             for row in dictReader:
                 content.append(row)
-                if __name__ == '__main__':
-                    print '\t',type(row),row
         return content # List of dicts
 
     def initialise(self):
         if self.args.test:
             print '~ Testing CSV handling\n\n'
-            #print a list of available dialects
+            #print a list of available CSV dialects, eg. Unix, Excel, Excel tab...
             print 'CSV Dialects:\t',csv.list_dialects()
             print '- '*64
             print 'Test file:\t',self.file_path
@@ -56,13 +54,11 @@ class Sender:
             print '- '*64
             print '\t',type(self.file_contents),self.file_contents
             print '- '*64
-            print '\n1st line:\t\t',self.file_contents[0]
+            print '\n1st line dictonary object:\t\t',self.file_contents[0]
             print 'stationID element:\t',self.file_contents[0]['stationID']
             print 'message_hash element:\t',self.file_contents[0]['message_hash']
             print 'lat element:\t\t',self.file_contents[0]['lat']
             print 'long element:\t\t',self.file_contents[0]['long']
-            print 'cpmtorem element:\t',self.file_contents[0]['cpmtorem']
-            print 'cpmtousv element:\t',self.file_contents[0]['cpmtousv']
         else:
             print '~ Normal run, loading Raspberry Pi specific modules'
             try:
