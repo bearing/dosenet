@@ -43,10 +43,10 @@ class SQLObject:
     def inject(self,data):
         if not self.authenticatePacket(data):
             print '~~ FAILED AUTHENTICATION'
-        else: 
+        else:
             data = self.parsePacket(data)
             if(data):
-                self.insertIntoDosenet( 
+                self.insertIntoDosenet(
                     stationID   = data[1],
                     cpm         = data[2],
                     cpm_error   = data[3],
@@ -55,18 +55,18 @@ class SQLObject:
                 print '~~ FAILED TO INJECT/PARSE ~~'
 
     def getHashList(self):
-        return self.verified_stations[:][1];
+        return self.verified_stations[:][1]
 
     def authenticatePacket(self,data):
-        hash_list= self.getHashList();
+        hash_list = self.getHashList()
 
         #Verify the hash is in the list
         msg_hash = data[:32];
         if( not msg_hash in hash_list ):
-            return False;
+            return False
 
         #Ok, we think this could be a real station
-        ID       = int(data.split(',')[1]);
+        ID       = int(data.split(',')[1])
         db_hash  = self.checkHashFromRAM(ID)
         if db_hash == msg_hash:
             return True
