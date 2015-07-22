@@ -7,7 +7,7 @@
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 # Created: 		Sun 7/06/15
-# Last updated: Thu 35/06/15
+# Last updated: Thu 25/06/15
 #################
 ## Run on GRIM ##
 #################
@@ -82,10 +82,10 @@ class Plot(object):
 			print 'Could not get data from DB:' + str(e)
 		#
 		# Populate time-restricted row array list of data
-		# Panda code to get SQL tuples of tuples into panda df tables which are 
+		# Panda code to get SQL tuples of tuples into panda df tables which are
 		# WAAAY easier to work with (and apparently are faster?)
 		df = pd.DataFrame( [[ij for ij in i] for i in dosePerStation] )
-		df.rename(columns={0:'receiveTime', 1:'CPM', 2:'cpmError'}, 
+		df.rename(columns={0:'receiveTime', 1:'CPM', 2:'cpmError'},
 					inplace=True)
 		return df
 	def reduceData(self,df):
@@ -105,7 +105,7 @@ class Plot(object):
 			# current station ID
 			fname = (str(stationID)+'_'+unit+'_'+plength)
 			# setup the plot.ly plot type as a Scatter with points with panda DataFrames (df)
-			trace = Scatter( 
+			trace = Scatter(
 				x = df['receiveTime'],
 				y = df[unit], # changes depending on which units you are plotting
 				mode = 'lines+markers',
@@ -125,9 +125,9 @@ class Plot(object):
 							yaxis = YAxis(type = 'log',title = plotTitle),
 							font = fontPref)
 			# Plot.ly export, doesn't open a firefox window on the server
-			plotURL = py.plot(Figure(data = Data([trace]), 
-									layout = layout), 
-									filename = fname, 
+			plotURL = py.plot(Figure(data = Data([trace]),
+									layout = layout),
+									filename = fname,
 									auto_open = False)
 			print fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's'
 			return plotURL
@@ -142,19 +142,19 @@ class Plot(object):
 		print 'Iterative feature creation failed'
 		print (error)
 	def setFeature(self,point,name,plength,latestDose,latestTime,URLlist):
-		properties = {	'Name': name, 
+		properties = {	'Name': name,
 						'Latest dose (CPM)': latestDose[0],
 						'Latest dose (mREM/hr)': latestDose[1],
-						'Latest dose (&microSv/hr)': latestDose[2], 
+						'Latest dose (&microSv/hr)': latestDose[2],
 						'Latest measurement': str(latestTime),
-						('URL_CPM_'+plength[0]): URLlist[0][0], 
-						('URL_REM_'+plength[0]): URLlist[0][1], 
+						('URL_CPM_'+plength[0]): URLlist[0][0],
+						('URL_REM_'+plength[0]): URLlist[0][1],
 						('URL_USV_'+plength[0]): URLlist[0][2],
-						('URL_CPM_'+plength[1]): URLlist[1][0], 
-						('URL_REM_'+plength[1]): URLlist[1][1], 
-						('URL_USV_'+plength[1]): URLlist[1][2], 
-						('URL_CPM_'+plength[2]): URLlist[2][0], 
-						('URL_REM_'+plength[2]): URLlist[2][1], 
+						('URL_CPM_'+plength[1]): URLlist[1][0],
+						('URL_REM_'+plength[1]): URLlist[1][1],
+						('URL_USV_'+plength[1]): URLlist[1][2],
+						('URL_CPM_'+plength[2]): URLlist[2][0],
+						('URL_REM_'+plength[2]): URLlist[2][1],
 						('URL_USV_'+plength[2]): URLlist[2][2]
 					}
 		feature = Feature(geometry = point, properties = properties)
@@ -236,7 +236,7 @@ class Plot(object):
 				urlC = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
 				urlRow = (urlA,urlB,urlC)
 				urlList.extend(urlRow)
-				# Make feature - iterating through each 
+				# Make feature - iterating through each
 				try:
 					self.setFeature(point,LName,plotLength,LDose,LTime,urlList)
 				except (KeyboardInterrupt, SystemExit):
@@ -249,7 +249,7 @@ class Plot(object):
 		dump = str(geojson.dumps(featureCollection))
 		openfile = open('output.geojson','w')
 		try:
-			print >> openfile, dump # UNRESOLVED ERROR      'tuple' object has no attribute 'write'    WTF IS THIS
+			print >> openfile, dump
 		except (KeyboardInterrupt, SystemExit):
 			sys.exit(0)
 		except Exception as e:
@@ -280,19 +280,16 @@ def getDateTime():
 	return str(datetime.datetime.now())
 
 if __name__ == '__main__':
-	'''
-	Main makeGeoJSON function 
+	"""Main makeGeoJSON function 
 
-	Parameters:
-		argparse - command line arguments. Could be used for choosing which timeframes to plot, eg. $ python makeGeoJSON.py month year
 	Returns:
 		Plot.ly graphs - Updates dose over time graphs on plot.ly for ALL stations
 		output.geojson - GeoJSON file for the web page >> copied to Kepler (web server) via SCP (SSH CP) command
-	'''
+	"""
 	t0 = time.time()
 	plot = Plot()
 	plot.getStationInfo()
-	plot.setStationInfoForAll()	
+	plot.setStationInfoForAll()
 	plot.plotAll()
 	plot.closeDB()
 	plot.makeGeoJSON()
