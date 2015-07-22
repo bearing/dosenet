@@ -36,7 +36,7 @@ class Sender:
 
     def getContents(self,file_path):
         content = [] #list()
-        with open(file_path, 'r') as csvfile: 
+        with open(file_path, 'r') as csvfile:
             csvfile.seek(0)
             dictReader = csv.DictReader(csvfile) #read the CSV file into a dictionary
             for row in dictReader:
@@ -74,12 +74,12 @@ class Sender:
                 sys.exit(0)
 
     def getDatafromCSV(self):
-        # LOAD FROM CONFIG FILE          
+        # LOAD FROM CONFIG FILE
         self.stationID = self.file_contents[0]['stationID']
         self.msg_hash =  self.file_contents[0]['message_hash']
         ##################################
 
-    def initVariables(self):    
+    def initVariables(self):
         public_key = ['id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
         self.IP = '192.168.1.101' #'grim.nuc.berkeley.edu'
@@ -108,7 +108,6 @@ class Sender:
                     else:
                         det.activatePin(self.LED) # LIGHT UP
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
-                        # GET errorCode from det Object??????
                         error_code = 0 # Default 'working' state - error code 0
                         now = datetime.datetime.now()
                         c = ','
@@ -122,7 +121,7 @@ class Sender:
                 else:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~\n'
-                    else: 
+                    else:
                         det.blink(self.LED, number_of_flashes = 10) # FLASH
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
