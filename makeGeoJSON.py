@@ -21,7 +21,7 @@ from plotly.graph_objs import *
 import pandas as pd
 import time
 import datetime
-#arg = []; arg.extend(sys.argv)
+
 class Plot(object):
 	def __init__(self):
 		#------------------------#
