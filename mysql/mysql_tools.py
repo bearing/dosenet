@@ -61,7 +61,7 @@ class SQLObject:
                     (stationID,cpm,cpm_error,error_flag)
 
     def getHashList(self):
-        return self.verified_stations[:][1]
+        return self.verified_stations#[:][1]
 
     def authenticatePacket(self,data):
         hash_list = self.getHashList()
