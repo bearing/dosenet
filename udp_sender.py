@@ -80,7 +80,7 @@ class Sender:
     def initVariables(self):
         public_key = ['id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
-        self.IP = '192.168.1.101' #'grim.nuc.berkeley.edu'
+        self.IP = '192.168.1.101' # local static IP for grim.nuc.berkeley.edu
         self.port = 5005
         if self.args.ip:
             print '\n\t PS. 192.168.1.101 is GRIM'
@@ -100,25 +100,28 @@ class Sender:
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM()
+                    count = det.getCount()
                     if self.args.test:
-                        print 'CPM: ',cpm,' - ','CPM Error: ',cpm_error
-                        print '\t~~~ Activate LED ~~~\n'
+                        print 'Count: ',count,' - CPM: ',cpm
+                        print '\t~~~ Activate LED ~~~'
                     else:
                         det.activatePin(self.LED) # LIGHT UP
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         error_code = 0 # Default 'working' state - error code 0
                         now = datetime.datetime.now()
                         c = ','
-                        package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ str(cpm_error) +c+ str(error_code)
-                        print package
+                        package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
+                                  str(cpm_error) +c+ str(error_code)
+                        if self.args.test:
+                            print '- '*64, '\nRaw message: ',package
                         packet = self.pe.encrypt_message(package)[0]
-                        print str(packet) # This really screws up Raspberry Pi terminal... without str()
-                        print self.IP, self.port
+                        if self.args.test:
+                            print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
                         self.socket.sendto(packet, (self.IP, self.port))
-                        print 'Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port)
+                        print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
                 else:
                     if self.args.test:
-                        print '\t~~~ Blink LED ~~~\n'
+                        print '\t~~~ Blink LED ~~~'
                     else:
                         det.blink(self.LED, number_of_flashes = 10) # FLASH
             except (KeyboardInterrupt, SystemExit):

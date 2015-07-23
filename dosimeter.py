@@ -115,11 +115,10 @@ class Dosimeter:
         counting_time = (now - self.counts[0]).total_seconds()
         cpm = count / counting_time * 60
         cpm_err = count_err / counting_time * 60
-        print '\t\t\t\t\t~~~',count, count_err,'~~~'
-        print '\t\t\t\t\t~~~',cpm, cpm_err,'~~~'
+        #print '\t\t~~ Count: ',count,' ~~ CPM: ', cpm
         # Resets the averaging every 5 minutes
         if(counting_time > accumulation_time): ########## Last 5 mintues of data
-            print '\t ~~~~ RESET ~~~~'
+            print '\n\t\t ~~~~ RESET ~~~~\n'
             self.resetCounts()
         return cpm, cpm_err
 
@@ -130,7 +129,7 @@ class Dosimeter:
           print '~ ', hostname, 'is up!'
           return True
         else:
-          print '~ ', hostname, 'is down!'
+          print '~ ', hostname, 'is DOWN!'
           return False
 
     def activatePin(self,pin):
