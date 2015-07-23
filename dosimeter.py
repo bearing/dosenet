@@ -178,6 +178,7 @@ if __name__ == "__main__":
     print data
     det.updateCount_basic()
     print det.counts
+    det.counts = []
     #det.updateNoise()
     #print det.noise
     #
@@ -189,9 +190,6 @@ if __name__ == "__main__":
     while True:
         try: # getCPM
             sleep(1)
-            """if random.random() >= 0.5:
-                count += 1
-            print count"""
             cpm, cpm_err = det.getCPM(accumulation_time = MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
