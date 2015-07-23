@@ -1,4 +1,4 @@
-#!/usr/bin/env /usr/bin/sudo /home/pi/miniconda/bin/python
+#!/home/pi/miniconda/bin/python
 # -*- coding: utf-8 -*-
 ##########################
 ## Run on Raspberry Pis ##
