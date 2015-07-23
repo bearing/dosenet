@@ -28,7 +28,7 @@ import random
 #       GPIO.HIGH - 3.3V or 5V ???? (RPi rail voltage)
 
 class Dosimeter:
-    def __init__(self,LED=20):
+    def __init__(self, LED=20):
         self.counts = [] # Datetime list
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
@@ -44,7 +44,7 @@ class Dosimeter:
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
         sleep(1)
 
-    def updateCount_basic(self,channel=24):
+    def updateCount_basic(self, channel=24):
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '  COUNT:',now            # Print to screen
@@ -96,14 +96,11 @@ class Dosimeter:
 
     def countsToList(self):
         self.counts = self.counts.tolist()
-        print '\t\t\t',self.counts
 
     def resetCounts(self, seconds = 300):
         self.countsToArr()
         # Saves only the last number of seconds of events
-        print '\t\t\t',self.counts
         self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
-        print '\t\t\t',self.counts
         self.countsToList()
 
     def getCount(self):
