@@ -73,11 +73,9 @@ class Sender:
                 raise e
                 sys.exit(0)
 
-    def getDatafromCSV(self):
-        # LOAD FROM CONFIG FILE
+    def getDatafromCSV(self): # Load from config files
         self.stationID = self.file_contents[0]['stationID']
         self.msg_hash =  self.file_contents[0]['message_hash']
-        ##################################
 
     def initVariables(self):
         public_key = ['id_rsa_dosenet.pub']
