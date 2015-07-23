@@ -69,6 +69,7 @@ class SQLObject:
         print hash_list
         msg_hash = data[:32] # Is it the correct hash length?
         print msg_hash
+        print any(str(msg_hash) in i for i in hash_list)
         if any(str(msg_hash) in i for i in hash_list): # Verify the hash is in the list
             print 'Hash is not in list'
             return False
