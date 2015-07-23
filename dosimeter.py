@@ -191,10 +191,10 @@ if __name__ == "__main__":
     while True:
         try: # getCPM
             sleep(1)
-            if random.random() >= 0.5:
+            """if random.random() >= 0.5:
                 count += 1
-            print count
-            cpm, cpm_err = det.getCPM(accumulation_time=MEASURE_TIME)
+            print count"""
+            cpm, cpm_err = det.getCPM(accumulation_time = MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
