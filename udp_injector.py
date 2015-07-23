@@ -38,7 +38,7 @@ class Injector:
         """ Deeply integrated parsing - to be decoupled from the main class later.
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('--test', nargs = 0, required = False,
+        parser.add_argument('--test', action="store_true", required = False,
             help = '\n\t Listening on localhost:5005')
         self.args = parser.parse_args()
         if self.args.test:
