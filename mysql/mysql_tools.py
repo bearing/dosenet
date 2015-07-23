@@ -64,16 +64,16 @@ class SQLObject:
         return self.verified_stations#[:][1]
 
     def authenticatePacket(self,data):
-        msg_hash = data[0]
-        ID       = data[1]
-        """hash_list = self.getHashList()
+        hash_list = self.getHashList()
         print hash_list
         msg_hash = data[:32] # Is it the correct hash length?
+        print msg_hash
         if( not msg_hash in hash_list): # Verify the hash is in the list
             print 'Hash is not in list'
             return False
         # Ok, we think this could be a real station
-        ID       = int(data.split(',')[1])"""
+        ID       = int(data.split(',')[1])
+        print ID
         db_hash  = self.checkHashFromRAM(ID)
         if db_hash == msg_hash: # Is it an authenticated station with a matching database entry?
             return True
