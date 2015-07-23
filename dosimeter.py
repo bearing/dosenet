@@ -45,6 +45,7 @@ class Dosimeter:
         sleep(1)
 
     def updateCount_basic(self,channel=24):
+        now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '  COUNT:',now            # Print to screen
         cpm, err = self.getCPM()        # Get cpm, cpm_err
@@ -178,7 +179,7 @@ if __name__ == "__main__":
     print 'Ping test berkeley.edu: ',response
     data = det.getCPM()
     print data
-    det.updateCount()
+    det.updateCount_basic()
     print det.counts
     #det.updateNoise()
     #print det.noise
