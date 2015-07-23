@@ -144,7 +144,7 @@ class Dosimeter:
         try:
             for i in range(0, number_of_flashes):
                 #print 'Blinking on Pin #:',pin,' - ',datetime.datetime.now()
-                print '\t\t *' # Flash
+                print '\t\t Flash' # Flash
                 self.activatePin(pin)
                 time.sleep(frequency/2)
                 self.deactivatePin(pin)
