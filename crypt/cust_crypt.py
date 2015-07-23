@@ -1,7 +1,7 @@
 from Crypto.PublicKey import RSA as rsa
 
 class public_d_encrypt:
-    def __init__(self, key_file_lst = [])
+    def __init__(self, key_file_lst = []):
         for key_file in key_file_lst:
             key = self.read_key_file(key_file)
             if(not key):
