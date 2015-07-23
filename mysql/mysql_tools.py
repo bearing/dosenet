@@ -63,10 +63,6 @@ class SQLObject:
     def getHashList(self):
         return self.verified_stations
 
-    def isMsgHashInHashList(self):
-        for t in hash_list:
-
-
     def authenticatePacket(self,data):
         print data
         hash_list = self.getHashList()
