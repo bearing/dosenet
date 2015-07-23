@@ -65,6 +65,7 @@ class SQLObject:
 
     def authenticatePacket(self,data):
         hash_list = self.getHashList()
+        print hash_list
         msg_hash = data[:32] # Is it the correct hash length?
         if( not msg_hash in hash_list): # Verify the hash is in the list
             print 'Hash is not in list'
