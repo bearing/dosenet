@@ -38,8 +38,8 @@ class Injector:
         """ Deeply integrated parsing - to be decoupled from the main class later.
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('--test',nargs=0,required=False,
-            help='\n\t Listening on localhost:5005')
+        parser.add_argument('--test', nargs = 0, required = False,
+            help = '\n\t Listening on localhost:5005')
         self.args = parser.parse_args()
         if self.args.test:
             pass # Cannot import these modules on Macs - test other features.
