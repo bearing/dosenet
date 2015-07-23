@@ -67,10 +67,7 @@ class Injector:
         self.privateKey = ['/home/dosenet/.ssh/id_rsa_dosenet']
         de = ccrypt.public_d_encrypt(key_file_lst = self.privateKey) # Uses 1 private key
         self.port = 5005
-        if self.args.test:
-            self.IP = '127.0.0.1' # Listen on localhost for testing
-        else:
-            self.IP = '192.168.1.101' #GRIM 'Database' IP - default behaviour
+        self.IP = '192.168.1.101' #GRIM 'Database' IP - default behaviour
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
     def main(self):
