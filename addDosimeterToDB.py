@@ -29,14 +29,12 @@ class DBTool(object):
 		# Adds a row to dosimeter_network.stations
 		self.name = name
 		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
-				VALUES ('%s','%s','%s','%s','%s');"
-				% (name, lat, lon, cpmtorem, cpmtousv)
+				VALUES ('%s','%s','%s','%s','%s');" % (name, lat, lon, cpmtorem, cpmtousv)
 		runSQL(sql)
 
 	def addDosimeterWithID(self,ID,name,lat,lon,cpmtorem,cpmtousv):
 		sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
-				VALUES ('%s','%s','%s','%s','%s','%s');"
-				% (ID, name, lat, lon, cpmtorem, cpmtousv)
+				VALUES ('%s','%s','%s','%s','%s','%s');" % (ID, name, lat, lon, cpmtorem, cpmtousv)
 		runSQL(sql)
 
 	def getID(self,name):
