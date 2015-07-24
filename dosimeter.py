@@ -47,9 +47,9 @@ class Dosimeter:
         RPIO.setmode(GPIO.BCM)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(LED, GPIO.OUT)
-        RPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        RPIO.setup(24, GPIO.IN, pull_up_down=PUD_UP)
         RPIO.add_interrupt_callback(24, updateCount_basic, edge='falling',
-            pull_up_down=RPIO.PUD_OFF, threaded_callback=False, debounce_timeout_ms=200)
+            threaded_callback=False, debounce_timeout_ms=200)
         sleep(1)
 
     def updateCount_basic(self, channel=24):
