@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Navrit Bal
 # DoseNet
@@ -12,23 +12,20 @@
 
 import sys
 import MySQLdb as mdb
-arg = []; arg.extend(sys.argv)
+import argparse
 
 class DBTool(object):
 	def __init__(self):
-		# Open database connection
-		self.db = mdb.connect("localhost",
+		self.db = mdb.connect("localhost", # Open database connection
 						"ne170group",
 						"ne170groupSpring2015",
 						"dosimeter_network")
-		# prepare a cursor object using cursor() method
-		self.cursor = db.cursor()
+		self.cursor = db.cursor() # prepare a cursor object using cursor() method
 		self.ID = ''
 		self.name = ''
 		self.md5hash = ''
 
 	def addDosimeter(self,name,lat,lon,cpmtorem,cpmtousv):
-		# Run some MySQL script
 		# Adds a row to dosimeter_network.stations
 		self.name = name
 		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
@@ -36,20 +33,14 @@ class DBTool(object):
 				% (name, lat, lon, cpmtorem, cpmtousv)
 		runSQL(sql)
 
-	def addDosimeterWithID(self,ID):
-		self.name = name
+	def addDosimeterWithID(self,ID,name,lat,lon,cpmtorem,cpmtousv):
 		sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
 				VALUES ('%s','%s','%s','%s','%s','%s');"
 				% (ID, name, lat, lon, cpmtorem, cpmtousv)
 		runSQL(sql)
 
-	def removeDosimeterDataByID(self,ID):
-		sql = "DELETE FROM stations WHERE ID='%s';" % (ID)
-		runSQL(sql)
-		# TEST THIS
-
 	def getID(self,name):
-		# The database uses auto-incremented ID numbers so we need to get 
+		# The database uses auto-incremented ID numbers so we need to get
 		# the ID from the `dosimeter_network.stations` table for when we
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
@@ -67,20 +58,17 @@ class DBTool(object):
 		self.md5hash = runSQL(sql)
 
 	def setHash(self):
-		# Adds a MD5 hash of the ID, Latitude & Longitude
-		# for security reasons...
+		# Sets a MD5 hash of the ID, Latitude & for security reasons...
 		# RUN "UPDATE stations
 		#		SET IDLatLongHash = 'SOME MD5 HASH'
 		# 		WHERE ID = $$$ ;"
 		sql = "UPDATE stations SET IDLatLongHash = '%s' \
 		 		WHERE ID = '%s';" % (self.md5hash, self.ID)
 		runSQL(sql)
-		import datetime
-		print 'Time is: ' + str(datetime.datetime.now())
 
 	def runSQL(self,sql):
 		try:
-			DBTool.cursor.execute(sql)
+			self.cursor.execute(sql)
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
