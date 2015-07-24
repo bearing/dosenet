@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Navrit Bal (after Jun 15 2015)
@@ -33,6 +33,7 @@ class Injector:
 
     Attributes:
         db (SQLObject): Custom MySQL database object for injecting into.
+        cursor (db.cursor): Used for accessing database returns.
     """
     def parseArguments(self):
         """ Deeply integrated parsing - to be decoupled from the main class later.
