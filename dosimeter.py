@@ -47,7 +47,7 @@ class Dosimeter:
         RPIO.setmode(GPIO.BCM)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(LED, GPIO.OUT)
-        RPIO.setup(24, GPIO.IN, pull_up_down=PUD_UP)
+        RPIO.setup(24, GPIO.IN, pull_up_down=RPIO.PUD_UP)
         RPIO.add_interrupt_callback(24, updateCount_basic, edge='falling',
             threaded_callback=False, debounce_timeout_ms=200)
         sleep(1)
