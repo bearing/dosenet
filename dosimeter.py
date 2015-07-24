@@ -30,6 +30,8 @@ import RPIO
 
 class Dosimeter:
     def __init__(self, LED=20):
+        def testthing(self, channel=24):
+            print 'This worked'
         self.counts = [] # Datetime list
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
@@ -48,7 +50,7 @@ class Dosimeter:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(LED, GPIO.OUT)
         RPIO.setup(24, GPIO.IN, pull_up_down=RPIO.PUD_UP)
-        RPIO.add_interrupt_callback(24, updateCount_basic, edge='falling',
+        RPIO.add_interrupt_callback(24, testthing, edge='falling',
             threaded_callback=False, debounce_timeout_ms=200)
         sleep(1)
 
