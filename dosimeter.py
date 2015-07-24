@@ -20,6 +20,7 @@ from time import sleep
 import os
 import sys
 import random
+import RPIO
 
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
@@ -33,15 +34,21 @@ class Dosimeter:
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
         self.counts.append(start) # Initialise with the starting time so getCPM doesn't get IndexError - needs a 1 item minimum for [0] to work
-        #self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
-        #self.microphonics = [] # errorFlag list
-        #self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
-        GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
-        GPIO.setup(24, GPIO.IN, pull_up_down = GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
-        GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
-        GPIO.setup(LED , GPIO.OUT)
+        """self.noise.append(start) # Initialise with the starting time so updateCount doesn't get IndexError - needs a 1 item minimum for [-1] to work
+        self.microphonics = [] # errorFlag list
+        self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
+        """
+        """GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
+        GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
+        GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
         GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=100)
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
+        """
+        RPIO.setmode(GPIO.BCM)
+        RPIO.setup(LED, GPIO.OUT)
+        RPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        RPIO.add_interrupt_callback(24, updateCount_basic, edge='falling',
+            pull_up_down=RPIO.PUD_OFF, threaded_callback=False, debounce_timeout_ms=200)
         sleep(1)
 
     def updateCount_basic(self, channel=24):
