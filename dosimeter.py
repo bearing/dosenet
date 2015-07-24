@@ -30,8 +30,6 @@ import RPIO
 
 class Dosimeter:
     def __init__(self, LED=20):
-        def testthing(self, channel=24):
-            print 'This worked'
         self.counts = [] # Datetime list
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
@@ -40,26 +38,27 @@ class Dosimeter:
         self.microphonics = [] # errorFlag list
         self.margin = datetime.timedelta(microseconds = 100000) #100ms milliseconds is not an option
         """
-        """GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
+        GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
-        GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
+        #GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
         GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=100)
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
-        """
-        RPIO.setmode(GPIO.BCM)
-        GPIO.setmode(GPIO.BCM)
         GPIO.setup(LED, GPIO.OUT)
+
+        """RPIO.setmode(GPIO.BCM
         RPIO.setup(24, GPIO.IN, pull_up_down=RPIO.PUD_UP)
         RPIO.add_interrupt_callback(24, callback=testthing, edge='both',
-            threaded_callback=False, debounce_timeout_ms=1)
+            threaded_callback=False, debounce_timeout_ms=1)"""
         sleep(1)
 
     def updateCount_basic(self, channel=24):
+        GPIO.remove_event_detect(24)
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '  COUNT:',now            # Print to screen
         cpm, err = self.getCPM()        # Get cpm, cpm_err
         self.blink(pin=20, frequency=2) # Blink count LED (#20)
+        GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=100)
 
     """def updateNoise(self,channel=23):
         if not self.first_noise:
