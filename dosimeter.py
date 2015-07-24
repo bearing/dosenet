@@ -45,7 +45,8 @@ class Dosimeter:
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
         """
         RPIO.setmode(GPIO.BCM)
-        RPIO.setup(LED, GPIO.OUT)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(LED, GPIO.OUT)
         RPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         RPIO.add_interrupt_callback(24, updateCount_basic, edge='falling',
             pull_up_down=RPIO.PUD_OFF, threaded_callback=False, debounce_timeout_ms=200)
