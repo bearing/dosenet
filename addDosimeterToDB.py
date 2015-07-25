@@ -43,9 +43,9 @@ class DBTool:
 		self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
 		self.md5hash = ''
 		if ID:
-			dbTool.addDosimeterWithID()
+			self.addDosimeterWithID()
 		else:
-			dbTool.addDosimeter()
+			self.addDosimeter()
 	def addDosimeter(self): # Adds a row to dosimeter_network.stations
 		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
 				VALUES ('%s','%s','%s','%s','%s');" \
