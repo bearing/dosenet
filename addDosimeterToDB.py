@@ -167,7 +167,7 @@ class resetAutoIncrement:
 						"ne170groupSpring2015",
 						"dosimeter_network")
 		self.cursor = self.db.cursor()
-		sql = "ALTER TABLE stations AUTO_INCREMENT='%s';" % (index)
+		sql = "ALTER TABLE stations AUTO_INCREMENT=%s;" % index
 		print 'Resetting auto_increment in stations table. Confirm with "yes"'
 		if raw_input() == 'yes':
 			print 'Running the reset...'
