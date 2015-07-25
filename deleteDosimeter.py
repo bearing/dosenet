@@ -72,6 +72,7 @@ class DataDestroyer:
                                     "%s"' % self.secure_password
         self.could_not_append = 'ERROR: Could not append change to log file: ', \
                                 self.LOG_NAME, '\n EXITING NOW'
+        print log
         if log:
             self.log = True
         else:
@@ -80,31 +81,37 @@ class DataDestroyer:
     def getArguments(self,ID,**kwargs):
         self.ID = ID
         try:
-            self.before = kwargs['before']
+            try:
+                self.before = kwargs['before']
+                self.deleteDataBefore()
+            except:
+                pass
+            try:
+                self.after = args['after']
+                self.deleteDataAfter()
+            except:
+                pass
+            try:
+                self.dropdata = args['dropdata']
+                self.deleteAllData()
+            except:
+                pass
+            try:
+                self.dropstations = args['dropstations']
+                self.deleteAllStations()
+            except:
+                pass
+            try:
+                self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s';") % self.ID, least=True)
+                print 'Operating on ',self.name
+            except Exception as e:
+                print 'ERROR: Could not get name of station. You should stop...'
+                raise e
+                sys.exit(1)
+            if self.log:
+                print 'Logging to ', self.LOG_NAME
         except:
-            pass
-        try:
-            self.after = args['after']
-        except:
-            pass
-        try:
-            self.dropdata = args['dropdata']
-        except:
-            pass
-        try:
-            self.dropstations = args['dropstations']
-        except:
-            pass
-        try:
-            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID, least=True)
-            print 'Operating on ',self.name
-        except Exception as e:
-            print 'ERROR: Could not get name of station. You should stop...'
-            raise e
-            sys.exit(1)
-        if self.log:
-            print 'Logging to ', self.LOG_NAME
-
+            deleteStation()
 
     def deleteStation(self):
         # Get station row that we're about to delete - append to log
