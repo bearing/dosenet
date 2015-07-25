@@ -59,7 +59,7 @@ class DataDestroyer:
         db (SQLObject): Custom MySQL database object for injecting into.
         cursor (db.cursor): Used for accessing database returns.
     """
-    def __init__(self):
+    def __init__(self,*log):
         self.db = mdb.connect("localhost", # Open database connection
                               "ne170group",
                               "ne170groupSpring2015",
@@ -72,7 +72,10 @@ class DataDestroyer:
                                     "%s"' % self.secure_password
         self.could_not_append = 'ERROR: Could not append change to log file: ', \
                                 self.LOG_NAME, '\n EXITING NOW'
-        self.log = False
+        if log:
+            self.log = log
+        else:
+            self.log = False
 
     def getArguments(self,ID,**kwargs):
         self.ID = ID
@@ -90,10 +93,6 @@ class DataDestroyer:
             pass
         try:
             self.dropstations = args['dropstations']
-        except:
-            pass
-        try:
-            self.log = args['log']
         except:
             pass
         try:
@@ -242,34 +241,34 @@ if __name__ == "__main__":
     if raw_input() == 'yes':
         par = Parser()
         ID = par.args.ID[0]
+        if par.args.log:
+            deleter = DataDestroyer(log=par.args.log)
+        else:
+            deleter = DataDestroyer()
         if par.args.daterange:
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
         try:
             before = par.args.before[0]
+            deleter.getArguments(ID,before)
         except:
             print 'No --before flag'
         try:
             after = par.args.after[0]
+            deleter.getArguments(ID,after)
         except:
             print 'No --after flag'
         try:
             dropdata = par.args.dropalldata[0]
+            deleter.getArguments(ID,dropdata)
         except:
             print 'No --dropalldata flag'
         try:
             dropstations = par.args.dropallstations[0]
+            deleter.getArguments(ID,dropstations)
         except:
             print 'No --dropallstations flag'
-        try:
-            log = par.args.log[0]
-            if log:
-                print '\n\tLOGGING BITCHEZ - ', log
-        except:
-            print 'No --log flag'
-        deleter = DataDestroyer()
-        deleter.getArguments(ID,before,after,dropdata,dropstations,log)
     else:
         print 'You have decided not to delete data, thanks!'
         print 'If this was a mistake, type "yes" next time...'
