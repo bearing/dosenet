@@ -71,9 +71,10 @@ class DBTool:
 		ID_tuple = self.runSQL(sql)
 		ID_list = []
 		for t in ID_tuple:
-			ID_list.append(int(t[0]))
-		self.ID = self.ID(0)
-		print self.ID
+			self.ID = t
+			print self.ID
+		test = ID_tuple[0]
+		print test
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
