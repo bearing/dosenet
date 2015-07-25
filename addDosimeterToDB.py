@@ -37,7 +37,7 @@ class DBTool:
 						"dosimeter_network")
 		try:
 			self.ID = ID[0]
-			print 'ID is :', ID
+			print 'ID is :', self.ID
 		except Exception as e:
 			print 'Auto generating ID, good choice.'
 		self.name = name
