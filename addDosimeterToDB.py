@@ -68,14 +68,8 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		ID_tuple = self.runSQL(sql)
-		print ID_tuple
-		ID_list = []
-		for t in ID_tuple:
-			self.ID = t
-			print self.ID
-		test = ID_tuple[0]
-		print test
+		ID_nested_tuple = self.runSQL(sql)
+		self.ID = ID_nested_tuple[0][0]
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
