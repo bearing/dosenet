@@ -69,9 +69,10 @@ class DBTool:
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
 		ID_tuple = self.runSQL(sql)
-		for result in itertools.chain(*ID_tuple):
-    		print result
-			self.ID = result
+		ID_list = []
+		for t in result:
+			ID_list.append(int(t[0]))
+		self.ID = self.ID(0)
 		print self.ID
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
