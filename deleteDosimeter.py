@@ -5,7 +5,7 @@
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Created: 		Mon 15/06/15
-# Last updated: Thu 23/06/15
+# Last updated: Fri 24/06/15
 
 # Delete from row stations table (append log)
     # --station [int]
@@ -59,11 +59,11 @@ class DataDestroyer:
         cursor (db.cursor): Used for accessing database returns.
     """
     def __init__(self):
-		self.db = mdb.connect("localhost", # Open database connection
-						      "ne170group",
+        self.db = mdb.connect("localhost", # Open database connection
+                              "ne170group",
                               "ne170groupSpring2015",
                               "dosimeter_network")
-		self.cursor = db.cursor() # prepare a cursor object using cursor() method
+        self.cursor = db.cursor() # prepare a cursor object using cursor() method
         self.LOG_NAME = 'deleteDosimeter.log'
         self.limit = 10
         self.secure_password = 'FORREALSUPERSERIOUSOMGOMGOMG'
@@ -200,23 +200,23 @@ class DataDestroyer:
             return False
 
     def runSQL(self,sql, least=False, less=False, everything=False):
-		print '\t\t\t SQL: ',sql
-		try:
-			self.cursor.execute(sql)
-			if least:
-				result = self.cursor.fetchall()[0][0]
-				return result
-			if less:
-				result = self.cursor.fetchall()[0]
-				return result
-			if everything:
-				result = self.cursor.fetchall()
-				return result
-		except (KeyboardInterrupt, SystemExit):
-			pass
-		except Exception, e:
-			print sql
-			raise e
+        print '\t\t\t SQL: ',sql
+        try:
+            self.cursor.execute(sql)
+            if least:
+                result = self.cursor.fetchall()[0][0]
+                return result
+            if less:
+                result = self.cursor.fetchall()[0]
+                return result
+            if everything:
+                result = self.cursor.fetchall()
+                return result
+        except (KeyboardInterrupt, SystemExit):
+            pass
+        except Exception, e:
+            print sql
+            raise e
 
 if __name__ == "__main__":
     print 'Hi Joey!'
