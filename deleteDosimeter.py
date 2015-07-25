@@ -262,8 +262,7 @@ class DataDestroyer:
         elif self.dropstations:
             pass
         else: # default, delete stations
-            remaining_stations = self.runSQL(("SELECT * FROM stations;" % self.ID))
-            print remaining_stations
+            print self.runSQL("SELECT * FROM stations;")
             print '~~~ Remaining stations above! ~~~'
 
 if __name__ == "__main__":
