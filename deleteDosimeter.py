@@ -252,6 +252,18 @@ class DataDestroyer:
         else: # default, delete stations
             self.deleteStation()
         self.db.commit()
+        # REVIEW
+        if self.before:
+            pass
+        elif self.after:
+            pass
+        elif self.dropdata:
+            pass
+        elif self.dropstations:
+            pass
+        else: # default, delete stations
+            print self.runSQL(("SELECT * FROM stations;" % self.ID))
+            print '~~~ Remaining stations above! ~~~'
 
 if __name__ == "__main__":
     print 'Hi Joey!'
