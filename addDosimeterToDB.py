@@ -29,12 +29,15 @@ class Parser:
 		self.args = parser.parse_args()
 
 class DBTool:
-	def __init__(self,ID,name,lat,lon,cpmtorem,cpmtousv):
+	def __init__(self,name,lat,lon,cpmtorem,cpmtousv,*ID):
 		self.db = mdb.connect("localhost", # Open database connection
 						"ne170group",
 						"ne170groupSpring2015",
 						"dosimeter_network")
-		self.ID = ID
+		try:
+			self.ID = ID
+		except Exception as e:
+			print 'Auto generating ID, good choice.'
 		self.name = name
 		self.lat = lat
 		self.lon = lon
@@ -101,9 +104,9 @@ if __name__=="__main__":
 	lon = parse.args.latlong[1]
 	cpmtorem = parse.args.conv[0]
 	cpmtousv = parse.args.conv[1]
-	if parse.args.ID:
+	if not parse.args.ID:
+		dbtool = DBTool(name,lat,lon,cpmtorem,cpmtousv)
+	else:
 		ID = parse.args.ID[0]
 		print 'Forced ID: ', ID
-		dbtool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
-	else:
-		dbtool = DBTool(name,lat,lon,cpmtorem,cpmtousv)
+		dbtool = DBTool(name,lat,lon,cpmtorem,cpmtousv,ID)
