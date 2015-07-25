@@ -69,9 +69,9 @@ class DBTool:
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
 		ID_tuple = self.runSQL(sql)
+		print ID_tuple
 		ID_list = []
 		for t in ID_tuple:
-			print t
 			self.ID = t
 			print self.ID
 		test = ID_tuple[0]
