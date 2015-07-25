@@ -80,6 +80,10 @@ class DataDestroyer:
 
     def getArguments(self,ID,**kwargs):
         self.ID = ID
+        self.before = False
+        self.after = False
+        self.dropdata = False
+        self.dropstations = False
         try:
             self.before = kwargs['before']
         except:
@@ -236,13 +240,13 @@ class DataDestroyer:
             raise e
 
     def main(self):
-        if not self.before is None:
+        if self.before:
             deleteDataBefore()
-        elif not self.after is None:
+        elif self.after:
             deleteDataAfter()
-        elif not self.dropdata is None:
+        elif self.dropdata:
             deleteAllData()
-        elif not self.dropstations is None:
+        elif self.dropstations:
             deleteAllStations()
         else: # default, delete stations
             deleteStation()
