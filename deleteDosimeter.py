@@ -226,18 +226,32 @@ if __name__ == "__main__":
     if raw_input() == 'yes':
         par = Parser()
         ID = par.args.ID[0]
-        if par.args.daterange: # not is None?
+        if par.args.daterange:
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
-        else:
-            print 'No date range, default to --before or --after'
+        try:
             before = par.args.before[0]
+        except:
+            print 'No --before flag'
+        try:
             after = par.args.after[0]
-        dropdata = par.args.dropalldata[0]
-        dropstations = par.args.dropallstations[0]
-        log = par.args.log[0]
-        print '\n\tLOGGING BITCHEZ - ', log
+        except:
+            print 'No --after flag'
+        try:
+            dropdata = par.args.dropalldata[0]
+        except:
+            print 'No --dropalldata flag'
+        try:
+            dropstations = par.args.dropallstations[0]
+        except:
+            print 'No --dropallstations flag'
+        try:
+            log = par.args.log[0]
+            if log:
+                print '\n\tLOGGING BITCHEZ - ', log
+        except:
+            print 'No --log flag'
         deleter = DataDestroyer()
         deleter.getArguments(ID,before,after,dropdata,dropstations,log)
     else:
