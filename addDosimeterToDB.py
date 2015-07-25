@@ -67,7 +67,9 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
+		print sql
 		self.ID = self.runSQL(sql)
+		print self.ID
 		if self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 	def getHash(self):
