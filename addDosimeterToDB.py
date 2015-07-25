@@ -53,7 +53,7 @@ class DBTool:
 			self.addDosimeter()
 
 	def getInitialState(self):
-		sql = "SELECT `Name` FROM stations;"
+		sql = "SELECT `ID`, `Name`, IDLatLongHash FROM stations;"
 		return self.runSQL(sql, everything=True)
 
 	def addDosimeter(self): # Adds a row to dosimeter_network.stations
@@ -108,16 +108,14 @@ class DBTool:
 		return self.runSQL(sql, less=True)
 
 	def checkIfDuplicate(self): # Check for MD5 hash collision (duplicate entry)
-		sql = "SELECT `ID`, IDLatLongHash FROM stations;"
-		check_list = self.runSQL(sql, everything=True)
 		print 'Checking for duplicates...'
 		if any(str(self.name) in i for i in self.initialState):
 			print 'ERROR: Duplicate NAME detected, not commiting changes. Byyeeeeeeee'
 			return True
-		elif any(str(self.md5hash) in i for i in check_list):
+		elif any(str(self.md5hash) in i for i in self.initialState):
 			print 'ERROR: Duplicate HASH detected, not commiting changes. Byyeeeeeeee'
 			return True
-		elif any(str(self.ID) in i for i in check_list):
+		elif any(str(self.ID) in i for i in self.initialState):
 			print 'ERROR: Duplicate ID detected, not commiting changes. Byyeeeeeeee'
 			return True
 		else:
