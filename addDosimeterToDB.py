@@ -73,8 +73,9 @@ class DBTool:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
 			print 'ID less than 0?? There\'s a problem afoot'
-		elif not self.ID:
-			print 'ID is empty...'
+		elif self.ID is None:
+			print 'ID is None... Byyeeeeeeee'
+			sys.exit(1)
 		else:
 			print 'ID looks good'
 	def getHash(self):
@@ -92,21 +93,18 @@ class DBTool:
 		 		WHERE ID = '%s';" % (self.md5hash, self.ID)
 		self.runSQL(sql)
 	def runSQL(self,sql):
-		print sql
 		try:
 			self.cursor.execute(sql)
-			return self.cursor.fetchall()
+			return self.cursor.fetchall()[0]
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
+			print sql
 			raise e
 	def main(self):
 		try:
-			print 'Get ID'
 			self.getID(self.name)
-			print 'Generate Hash'
 			self.getHash()
-			print 'Set Hash'
 			self.setHash()
 		except Exception as e:
 			print '\t ~~~~ FAILED ~~~~'
