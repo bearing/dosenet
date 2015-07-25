@@ -37,6 +37,7 @@ class DBTool:
 						"dosimeter_network")
 		try:
 			self.ID = ID
+			print 'ID is :', ID
 		except Exception as e:
 			print 'Auto generating ID, good choice.'
 		self.name = name
@@ -47,10 +48,10 @@ class DBTool:
 		self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
 		self.md5hash = ''
 		self.initialState = self.getInitialState()
-		if ID:
-			self.addDosimeterWithID()
-		else:
+		if not ID:
 			self.addDosimeter()
+		else:
+			self.addDosimeterWithID()
 
 	def getInitialState(self):
 		sql = "SELECT `ID`, `Name`, IDLatLongHash FROM stations;"
