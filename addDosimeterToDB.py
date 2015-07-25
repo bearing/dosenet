@@ -14,9 +14,8 @@ import sys
 import MySQLdb as mdb
 import argparse
 
-class DBTool:
-	def parseArguments(self):
-		print 'Parsing'
+class Parser:
+	def __init__(self):
 		parser = argparse.ArgumentParser()
 		parser.add_argument('--ID',type=int,nargs=1,required=False,
 			help='Auto generated if not manually set. Does not compensate for \
@@ -27,26 +26,23 @@ class DBTool:
 			help='')
 		parser.add_argument('--conv',type=float,nargs=2,required=True,
 			help='')
-		print 'Starting to parse now'
 		self.args = parser.parse_args()
-		print 'ID: '
-		self.ID = parse.args.ID
-		print ID
-		self.name = parse.args.name
-		print name
-		self.lat = parse.args.latlong[0]
-		self.lon = parse.args.latlong[1]
-		self.cpmtorem = parse.args.conv[0]
-		self.cpmtousv = parse.args.conv[1]
-		self.start()
-	def start(self):
+
+class DBTool:
+	def __init__(self,ID,name,lat,lon,cpmtorem,cpmtousv):
 		self.db = mdb.connect("localhost", # Open database connection
 						"ne170group",
 						"ne170groupSpring2015",
 						"dosimeter_network")
+		self.ID = ID
+		self.name = name
+		self.lat = lat
+		self.lon = lon
+		self.cpmtorem = cpmtorem
+		self.cpmtousb = cpmtousv
 		self.cursor = db.cursor() # prepare a cursor object using cursor() method
 		self.md5hash = ''
-		if parse.args.ID:
+		if ID:
 			dbTool.addDosimeterWithID()
 		else:
 			dbTool.addDosimeter()
@@ -98,8 +94,14 @@ class DBTool:
 			raise e
 
 if __name__=="__main__":
-	print 'Made a DBTool'
-	dbtool = DBTool()
-	dbtool.parseArguments()
-	print 'Starting up'
-	dbtool.start()
+	parse = Parser()
+	print 'ID: '
+	ID = parse.args.ID
+	print ID
+	name = parse.args.name
+	print name
+	lat = parse.args.latlong[0]
+	lon = parse.args.latlong[1]
+	cpmtorem = parse.args.conv[0]
+	cpmtousv = parse.args.conv[1]
+	dbtool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
