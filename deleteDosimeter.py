@@ -101,7 +101,7 @@ class DataDestroyer:
         except:
             pass
         try:
-            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s';") % self.ID, least=True)
+            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
             print 'Operating on ',self.name
         except Exception as e:
             print 'ERROR: Could not get name of station. You should stop...'
@@ -120,7 +120,7 @@ class DataDestroyer:
                 separately with addDosimeterToDB.py. \n \
                 If there was more than one return above, you should QUIT.'
         if self.confirm():
-            sql = "DELETE FROM stations WHERE ID = %s;" % self.ID
+            sql = "DELETE FROM stations WHERE ID = %s LIMIT 1;" % self.ID
             self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
