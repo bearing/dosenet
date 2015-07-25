@@ -119,7 +119,7 @@ class DBTool:
 			if firstelement:
 				result = self.cursor.fetchall()[0][0]
 				return result
-			if getNewStation:
+			if secondelement:
 				result = self.cursor.fetchall()[0]
 				return result
 		except (KeyboardInterrupt, SystemExit):
