@@ -61,7 +61,7 @@ class DataDestroyer:
     def __init__(self):
 		self.db = mdb.connect("localhost", # Open database connection
 						      "ne170group",
-                              "ne170groupSpring2015,
+                              "ne170groupSpring2015",
                               "dosimeter_network")
 		self.cursor = db.cursor() # prepare a cursor object using cursor() method
         self.LOG_NAME = 'deleteDosimeter.log'
