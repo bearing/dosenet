@@ -59,8 +59,8 @@ class DBTool:
 		self.main()
 
 	def addDosimeterWithID(self):
-		sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
-				VALUES ('%s','%s','%s','%s','%s','%s');" \
+		sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) \
+				VALUES ('%s','%s','%s','%s','%s','%s','This should not be here :(');" \
 				% (self.ID, self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
 		self.runSQL(sql)
 		self.main()
@@ -100,7 +100,17 @@ class DBTool:
 
 	def getNewStation(self):
 		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
-		print self.runSQL(sql,getNewStation=True)
+		return self.runSQL(sql,getNewStation=True)
+
+	def checkIfDuplicate(self)
+		sql = ";"
+		warning_msg = 'This should not be here :('
+		if any(str(warning_msg) in i for i in self.new_station):
+			print 'ERROR: Duplicate detected, not commiting changes. Byyeeeeeeee'
+			return True
+		else:
+			print 'Good news: no duplicates'
+			return False
 
 	def runSQL(self,sql,firstelement=False,getNewStation=False):
 		print '\t\t\t SQL: ',sql
@@ -110,7 +120,7 @@ class DBTool:
 				result = self.cursor.fetchall()[0][0]
 				return result
 			if getNewStation:
-				result = self.cursor.fetchall()
+				result = self.cursor.fetchall()[0]
 				return result
 		except (KeyboardInterrupt, SystemExit):
 			pass
@@ -119,12 +129,15 @@ class DBTool:
 			raise e
 
 	def main(self):
+		self.duplicate = True
 		try:
 			self.getID(self.name)
 			self.getHash()
 			self.setHash()
-			self.db.commit()
-			self.getNewStation()
+			self.new_station = self.getNewStation()
+			print self.new_station
+			if not self.checkIfDuplicate():
+				self.db.commit()
 		except Exception as e:
 			print '\t ~~~~ FAILED ~~~~'
 			raise e
