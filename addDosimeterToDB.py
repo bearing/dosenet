@@ -97,7 +97,7 @@ class DBTool:
 		except Exception, e:
 			raise e
 
-if __name__ == "main":
+if __name__=="__main__":
 	print 'Made a DBTool'
 	dbtool = DBTool()
 	dbtool.parseArguments()
