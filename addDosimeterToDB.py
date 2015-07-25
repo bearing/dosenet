@@ -13,6 +13,7 @@
 import sys
 import MySQLdb as mdb
 import argparse
+import itertools
 
 class Parser:
 	def __init__(self):
@@ -67,8 +68,10 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		self.ID = self.runSQL(sql)
-		self.ID = self.ID[0]
+		ID_tuple = self.runSQL(sql)
+		for result in itertools.chain(*ID_tuple):
+    		print result
+			self.ID = result
 		print self.ID
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
