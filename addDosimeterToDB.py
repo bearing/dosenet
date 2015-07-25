@@ -68,8 +68,7 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		ID_nested_tuple = self.runSQL(sql)
-		self.ID = ID_nested_tuple[0][0]
+		self.ID = self.runSQL(sql)
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
@@ -85,7 +84,7 @@ class DBTool:
 		# 		WHERE `ID` = $$$ ;"
 		sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
 				WHERE `ID` = '%s' ;" % (self.ID)
-		self.md5hash = self.runSQL(sql)[0]
+		self.md5hash = self.runSQL(sql)
 	def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
 		# RUN "UPDATE stations
 		#		SET IDLatLongHash = 'SOME MD5 HASH'
@@ -96,7 +95,8 @@ class DBTool:
 	def runSQL(self,sql):
 		try:
 			self.cursor.execute(sql)
-			return self.cursor.fetchall()
+			result = self.cursor.fetchall()[0][0]
+			return result
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
