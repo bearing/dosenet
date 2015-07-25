@@ -17,7 +17,7 @@ import argparse
 class Parser(object):
 	def __init__(self):
 		parser = argparse.ArgumentParser()
-        parser.add_argument('--ID',type=int,nargs=1,required=False,\
+		parser.add_argument('--ID',type=int,nargs=1,required=False,\
 			help='')
 		parser.add_argument('--name',type=str,nargs=1,required=True,\
 			help='')
