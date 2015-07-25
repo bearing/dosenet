@@ -96,7 +96,7 @@ class DataDestroyer:
         except:
             pass
         try:
-            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID, everything=True)
+            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID, least=True)
             print 'Operating on ',self.name
         except Exception as e:
             print 'ERROR: Could not get name of station. You should stop...'
