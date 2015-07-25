@@ -46,10 +46,15 @@ class DBTool:
 		self.cpmtousv = cpmtousv
 		self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
 		self.md5hash = ''
+		self.initialState = self.getInitialState()
 		if ID:
 			self.addDosimeterWithID()
 		else:
 			self.addDosimeter()
+
+	def getInitialState(self):
+		sql = "SELECT `Name` FROM stations;"
+		return self.runSQL(sql, everything=True)
 
 	def addDosimeter(self): # Adds a row to dosimeter_network.stations
 		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) \
@@ -71,7 +76,7 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		self.ID = self.runSQL(sql,firstelement=True)
+		self.ID = self.runSQL(sql, least=True)
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
@@ -88,7 +93,7 @@ class DBTool:
 		# 		WHERE `ID` = $$$ ;"
 		sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
 				WHERE `ID` = '%s' ;" % (self.ID)
-		self.md5hash = self.runSQL(sql,firstelement=True)
+		self.md5hash = self.runSQL(sql, least=True)
 
 	def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
 		# RUN "UPDATE stations
@@ -100,14 +105,13 @@ class DBTool:
 
 	def getNewStation(self):
 		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
-		return self.runSQL(sql,secondelement=True)
+		return self.runSQL(sql, less=True)
 
 	def checkIfDuplicate(self): # Check for MD5 hash collision (duplicate entry)
-		self.cursor.execute("SELECT `ID`, `Name`, IDLatLongHash FROM stations;")
-		check_list = self.cursor.fetchall()
+		sql = "SELECT `ID`, IDLatLongHash FROM stations;"
+		check_list = self.runSQL(sql, everything=True)
 		print 'Checking for duplicates...'
-		print check_list
-		if any(str(self.name) in i for i in check_list):
+		if any(str(self.name) in i for i in self.initialState):
 			print 'ERROR: Duplicate NAME detected, not commiting changes. Byyeeeeeeee'
 			return True
 		elif any(str(self.md5hash) in i for i in check_list):
@@ -120,15 +124,18 @@ class DBTool:
 			print 'Good news: no duplicates'
 			return False
 
-	def runSQL(self,sql,firstelement=False,secondelement=False):
+	def runSQL(self,sql, least=False, less=False, everything=False):
 		print '\t\t\t SQL: ',sql
 		try:
 			self.cursor.execute(sql)
-			if firstelement:
+			if least:
 				result = self.cursor.fetchall()[0][0]
 				return result
-			if secondelement:
+			if less:
 				result = self.cursor.fetchall()[0]
+				return result
+			if everything:
+				result = self.cursor.fetchall()
 				return result
 		except (KeyboardInterrupt, SystemExit):
 			pass
