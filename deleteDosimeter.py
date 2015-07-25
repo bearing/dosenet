@@ -78,14 +78,24 @@ class DataDestroyer:
         self.ID = ID
         try:
             self.before = kwargs['before']
+        except:
+            pass
         try:
             self.after = args['after']
+        except:
+            pass
         try:
             self.dropdata = args['dropdata']
+        except:
+            pass
         try:
             self.dropstations = args['dropstations']
+        except:
+            pass
         try:
             self.log = args['log']
+        except:
+            pass
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID)
             print 'Operating on ',self.name
