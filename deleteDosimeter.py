@@ -120,8 +120,9 @@ class DataDestroyer:
                 separately with addDosimeterToDB.py. \n \
                 If there was more than one return above, you should QUIT.'
         if self.confirm():
+            print self.ID
             sql = "DELETE FROM stations WHERE ID = '%s';" % self.ID
-            self.cursor.execute(sql)
+            self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
@@ -135,7 +136,7 @@ class DataDestroyer:
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE ID = '%s' \
                     AND `receiveTime` < '%s';" % (self.ID, self.before)
-            self.cursor.execute(sql)
+            self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
@@ -149,7 +150,7 @@ class DataDestroyer:
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE ID = '%s' \
                     AND `receiveTime` > '%s';" % (self.ID, self.after)
-            self.cursor.execute(sql)
+            self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
@@ -163,7 +164,7 @@ class DataDestroyer:
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE ID = '%s' \
                 AND (`receiveTime` BETWEEN '%s' AND '%s');" % (self.ID, self.before, self.after)
-            self.cursor.execute(sql)
+            self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
@@ -178,7 +179,7 @@ class DataDestroyer:
             print 'Enter the super secure secret password: \t $ '
             if raw_input() == self.secure_password:
                 sql = "TRUNCATE TABLE dosnet;"
-                self.cursor.execute(sql)
+                self.runSQL(sql)
             else:
                 print self.exit_serious_message
             if self.log:
@@ -191,7 +192,7 @@ class DataDestroyer:
             print 'Enter the super secure secret password: \t $ '
             if raw_input() == self.secure_password:
                 sql = "TRUNCATE TABLE stations;"
-                self.cursor.execute(sql)
+                self.runSQL(sql)
             else:
                 print self.exit_serious_message
             if self.log:
