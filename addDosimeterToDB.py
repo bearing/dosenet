@@ -67,7 +67,7 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		self.ID = self.runSQL(sql)
+		self.ID = self.runSQL(sql)[0]
 		print self.ID
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
@@ -84,7 +84,7 @@ class DBTool:
 		# 		WHERE `ID` = $$$ ;"
 		sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
 				WHERE `ID` = '%s' ;" % (self.ID)
-		self.md5hash = self.runSQL(sql)
+		self.md5hash = self.runSQL(sql)[0]
 	def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
 		# RUN "UPDATE stations
 		#		SET IDLatLongHash = 'SOME MD5 HASH'
@@ -95,7 +95,7 @@ class DBTool:
 	def runSQL(self,sql):
 		try:
 			self.cursor.execute(sql)
-			return self.cursor.fetchall()[0]
+			return self.cursor.fetchall()
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
