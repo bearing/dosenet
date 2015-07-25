@@ -242,7 +242,7 @@ class DataDestroyer:
             deleteDataAfter()
         elif not self.dropdata is None:
             deleteAllData()
-        elif not self.dropstationsis None:
+        elif not self.dropstations is None:
             deleteAllStations()
         else: # default, delete stations
             deleteStation()
