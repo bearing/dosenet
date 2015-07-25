@@ -28,18 +28,19 @@ class Parser(object):
 		self.args = parser.parse_args()
 
 class DBTool(object):
-	def __init__(self):
+	def __init__(self,ID,name,lat,lon,cpmtorem,cpmtousv):
 		self.db = mdb.connect("localhost", # Open database connection
 						"ne170group",
 						"ne170groupSpring2015",
 						"dosimeter_network")
 		self.cursor = db.cursor() # prepare a cursor object using cursor() method
-		self.ID = Parser.args.ID
-		self.name = Parser.args.name
-		self.lat = Parser.args.latlong[0]
-		self.lon = Parser.args.latlong[1]
-		self.cpmtorem = Parser.args.conv[0]
-		self.cpmtousv = Parser.args.conv[1]
+		self.ID = ID
+		self.name = name
+		self.lat = lat
+		self.lon = lon
+		self.cpmtorem = cpmtorem
+		self.cpmtousv = cpmtousv
+		print self.name
 		self.md5hash = ''
 
 	def addDosimeter(self):
@@ -98,7 +99,13 @@ class DBTool(object):
 
 if __name__ == "main":
 	parse  = Parser()
-	dbTool = DBTool()
+	ID = Parser.args.ID
+	name = Parser.args.name
+	lat = Parser.args.latlong[0]
+	lon = Parser.args.latlong[1]
+	cpmtorem = Parser.args.conv[0]
+	cpmtousv = Parser.args.conv[1]
+	dbTool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
 	if parse.args.ID:
 		dbTool.addDosimeterWithID()
 	else:
