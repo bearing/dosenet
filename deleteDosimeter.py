@@ -64,7 +64,7 @@ class DataDestroyer:
                               "ne170group",
                               "ne170groupSpring2015",
                               "dosimeter_network")
-        self.cursor = db.cursor() # prepare a cursor object using cursor() method
+        self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
         self.LOG_NAME = 'deleteDosimeter.log'
         self.limit = 10
         self.secure_password = 'FORREALSUPERSERIOUSOMGOMGOMG'
