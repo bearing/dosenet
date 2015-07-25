@@ -70,7 +70,7 @@ class DBTool:
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
 		ID_tuple = self.runSQL(sql)
 		ID_list = []
-		for t in result:
+		for t in ID_tuple:
 			ID_list.append(int(t[0]))
 		self.ID = self.ID(0)
 		print self.ID
