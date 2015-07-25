@@ -37,7 +37,6 @@ class DBTool:
 						"dosimeter_network")
 		try:
 			self.ID = ID[0]
-			print 'ID is :', self.ID
 		except Exception as e:
 			print 'Auto generating ID, good choice.'
 		self.name = name
@@ -54,7 +53,7 @@ class DBTool:
 			self.addDosimeterWithID()
 
 	def getInitialState(self):
-		sql = "SELECT `ID`, `Name`, IDLatLongHash FROM stations;"
+		sql = "SELECT `Name`, IDLatLongHash FROM stations;"
 		return self.runSQL(sql, everything=True)
 
 	def addDosimeter(self): # Adds a row to dosimeter_network.stations
@@ -108,16 +107,13 @@ class DBTool:
 		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
 		return self.runSQL(sql, less=True)
 
-	def checkIfDuplicate(self): # Check for MD5 hash collision (duplicate entry)
+	def checkIfDuplicate(self): # Check for Name or MD5 hash collision (duplicate entry)
 		print 'Checking for duplicates...'
 		if any(str(self.name) in i for i in self.initialState):
 			print 'ERROR: Duplicate NAME detected, not commiting changes. Byyeeeeeeee'
 			return True
 		elif any(str(self.md5hash) in i for i in self.initialState):
 			print 'ERROR: Duplicate HASH detected, not commiting changes. Byyeeeeeeee'
-			return True
-		elif any(str(self.ID) in i for i in self.initialState):
-			print 'ERROR: Duplicate ID detected, not commiting changes. Byyeeeeeeee'
 			return True
 		else:
 			print 'Good news: no duplicates'
