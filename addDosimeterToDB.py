@@ -50,8 +50,8 @@ class DBTool:
 		else:
 			self.addDosimeter()
 	def addDosimeter(self): # Adds a row to dosimeter_network.stations
-		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
-				VALUES ('%s','%s','%s','%s','%s');" \
+		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) \
+				VALUES ('%s','%s','%s','%s','%s','This should not be here :(');" \
 				% (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
 		self.runSQL(sql)
 		self.main()
@@ -100,12 +100,17 @@ class DBTool:
 		except Exception, e:
 			raise e
 	def main(self):
-		print 'Get ID'
-		self.getID(self.name)
-		print 'Generate Hash'
-		self.getHash()
-		print 'Set Hash'
-		self.setHash()
+		try:
+			print 'Get ID'
+			self.getID(self.name)
+			print 'Generate Hash'
+			self.getHash()
+			print 'Set Hash'
+			self.setHash()
+		except Exception as e:
+			print '\t ~~~~ FAILED ~~~~'
+			raise e
+
 if __name__=="__main__":
 	parse = Parser()
 	name = parse.args.name[0]
