@@ -4,7 +4,7 @@
 # DoseNet
 # Applied Nuclear Physics Division
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
-# Created:      Mon 15/06/15
+# Created:         Mon 15/06/15
 # Last updated: Fri 24/06/15
 #################
 ## Run on GRIM ##
@@ -89,18 +89,18 @@ class DBTool:
 
     def getHash(self):
         # RUN "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`))
-        #       FROM stations
-        #       WHERE `ID` = $$$ ;"
+        #         FROM stations
+        #         WHERE `ID` = $$$ ;"
         sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
                 WHERE `ID` = '%s' ;" % (self.ID)
         self.md5hash = self.runSQL(sql, least=True)
 
     def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
         # RUN "UPDATE stations
-        #       SET IDLatLongHash = 'SOME MD5 HASH'
-        #       WHERE ID = $$$ ;"
+        #        SET IDLatLongHash = 'SOME MD5 HASH'
+        #         WHERE ID = $$$ ;"
         sql = "UPDATE stations SET IDLatLongHash = '%s' \
-                WHERE ID = '%s';" % (self.md5hash, self.ID)
+                 WHERE ID = '%s';" % (self.md5hash, self.ID)
         self.runSQL(sql)
 
     def getNewStation(self):
@@ -141,6 +141,22 @@ class DBTool:
     def main(self):
         self.duplicate = True
         try:
+            print 'GET ID'
+            self.getID(self.name)
+            print 'GET HASH'
+            self.getHash()
+            print 'SET HASH'
+            self.setHash()
+            print 'GET NEW STATION'
+            self.new_station = self.getNewStation()
+            print self.new_station
+            if not self.checkIfDuplicate():
+                print 'Good news: Committing changes. That\'s it.'
+                self.db.commit()
+                print 'SUCESSSSSS'
+        except Exception as e:
+            print '\t ~~~~ FAILED ~~~~'
+            raise e
 
 if __name__=="__main__":
     parse = Parser()
