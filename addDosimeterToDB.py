@@ -102,7 +102,7 @@ class DBTool:
 		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
 		return self.runSQL(sql,getNewStation=True)
 
-	def checkIfDuplicate(self)
+	def checkIfDuplicate(self):
 		sql = ";"
 		warning_msg = 'This should not be here :('
 		if any(str(warning_msg) in i for i in self.new_station):
