@@ -106,6 +106,7 @@ class DBTool:
 		self.cursor.execute("SELECT `ID`, `Name`, IDLatLongHash FROM stations;")
 		check_list = self.cursor.fetchall()
 		print 'Checking for duplicates...'
+		print check_list
 		if any(str(self.name) in i for i in check_list):
 			print 'ERROR: Duplicate NAME detected, not commiting changes. Byyeeeeeeee'
 			return True
