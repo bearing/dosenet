@@ -68,7 +68,7 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		self.ID = self.runSQL(sql)
+		self.ID = self.runSQL(sql)[0]
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
@@ -95,8 +95,12 @@ class DBTool:
 	def runSQL(self,sql):
 		try:
 			self.cursor.execute(sql)
-			result = self.cursor.fetchall()[0][0]
-			return result
+			try:
+				result = self.cursor.fetchall()[0][0]
+				return result
+			except Exception as e:
+				raise e
+				return 
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
