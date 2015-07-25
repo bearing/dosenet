@@ -95,9 +95,9 @@ class DBTool:
 
 if __name__=="__main__":
 	parse = Parser()
-	print 'ID: '
-	ID = parse.args.ID[0]
-	print ID
+	if parse.args.ID:
+		ID = parse.args.ID[0]
+		print 'Forced ID: ', ID
 	name = parse.args.name[0]
 	print name
 	lat = parse.args.latlong[0]
