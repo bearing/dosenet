@@ -103,6 +103,6 @@ class DBTool(object):
 			raise e
 
 if __name__ == "main":
-	dbTool = DBTool()
+	dbtool = DBTool()
 	dbtool.parseArguments()
 	dbtool.start()
