@@ -122,7 +122,7 @@ class DataDestroyer:
             sql = "DELETE FROM stations WHERE ID = '%s';" % self.ID
             self.cursor.execute(sql)
             if self.log:
-                appendLog(sql,msg)
+                self.appendLog(sql,msg)
 
     def deleteDataBefore(self):
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
@@ -136,7 +136,7 @@ class DataDestroyer:
                     AND `receiveTime` < '%s';" % (self.ID, self.before)
             self.cursor.execute(sql)
             if self.log:
-                appendLog(sql,msg)
+                self.appendLog(sql,msg)
 
     def deleteDataAfter(self):
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
@@ -150,7 +150,7 @@ class DataDestroyer:
                     AND `receiveTime` > '%s';" % (self.ID, self.after)
             self.cursor.execute(sql)
             if self.log:
-                appendLog(sql,msg)
+                self.appendLog(sql,msg)
 
     def deleteDataRange(self):
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
@@ -164,7 +164,7 @@ class DataDestroyer:
                 AND (`receiveTime` BETWEEN '%s' AND '%s');" % (self.ID, self.before, self.after)
             self.cursor.execute(sql)
             if self.log:
-                appendLog(sql,msg)
+                self.appendLog(sql,msg)
 
     def getDataSample(self,select,limit):
         rows = self.runSQL(select)
@@ -181,7 +181,7 @@ class DataDestroyer:
             else:
                 print self.exit_serious_message
             if self.log:
-                appendLog(sql,msg)
+                self.appendLog(sql,msg)
 
     def deleteAllStations(self):
         msg = 'Truncating table stations - all data in the table will be gone.'
@@ -194,7 +194,7 @@ class DataDestroyer:
             else:
                 print self.exit_serious_message
             if self.log:
-                appendLog(sql,msg)
+                self.appendLog(sql,msg)
 
     def appendLog(self,*some_text):
         for text in some_text:
