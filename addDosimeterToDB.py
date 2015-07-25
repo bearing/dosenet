@@ -100,19 +100,19 @@ class DBTool:
 
 	def getNewStation(self):
 		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
-		return self.runSQL(sql,getNewStation=True)
+		return self.runSQL(sql,secondelement=True)
 
-	def checkIfDuplicate(self):
-		sql = ";"
-		warning_msg = 'This should not be here :('
-		if any(str(warning_msg) in i for i in self.new_station):
+	def checkIfDuplicate(self): # Check for MD5 hash collision (duplicate entry)
+		sql = "SELECT IDLatLongHash FROM stations;"
+		hash_list = runSQL(sql,secondelement=True)
+		if any(str(self.md5hash) in i for i in hash_list):
 			print 'ERROR: Duplicate detected, not commiting changes. Byyeeeeeeee'
 			return True
 		else:
 			print 'Good news: no duplicates'
 			return False
 
-	def runSQL(self,sql,firstelement=False,getNewStation=False):
+	def runSQL(self,sql,firstelement=False,secondelement=False):
 		print '\t\t\t SQL: ',sql
 		try:
 			self.cursor.execute(sql)
