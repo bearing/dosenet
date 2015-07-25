@@ -114,56 +114,56 @@ class DataDestroyer:
     def deleteStation(self):
         # Get station row that we're about to delete - append to log
         msg = 'DELETING A STATION'
-        select = ("SELECT * FROM stations WHERE ID = '%s';" % self.ID)
+        select = ("SELECT * FROM stations WHERE ID = %s;" % self.ID)
         self.getDataSample(select=select,limit=self.limit)
         print 'This will disable authentication of a dosimeter until readded \
                 separately with addDosimeterToDB.py. \n \
                 If there was more than one return above, you should QUIT.'
         if self.confirm():
             print self.ID
-            sql = "DELETE FROM stations WHERE ID = '%s';" % self.ID
+            sql = "DELETE FROM stations WHERE ID = %s;" % self.ID
             self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
     def deleteDataBefore(self):
-        select = "SELECT * FROM dosnet WHERE ID = '%s' \
-                    AND `receiveTime` < '%s' LIMIT '%s'" \
+        select = "SELECT * FROM dosnet WHERE ID = %s \
+                    AND `receiveTime` < %s LIMIT %s" \
                     % (self.ID, self.before, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
         print msg
         if self.confirm():
-            sql = "DELETE FROM dosnet WHERE ID = '%s' \
-                    AND `receiveTime` < '%s';" % (self.ID, self.before)
+            sql = "DELETE FROM dosnet WHERE ID = %s \
+                    AND `receiveTime` < %s;" % (self.ID, self.before)
             self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
     def deleteDataAfter(self):
-        select = "SELECT * FROM dosnet WHERE ID = '%s' \
-                            AND `receiveTime` > '%s' LIMIT '%s'" \
+        select = "SELECT * FROM dosnet WHERE ID = %s \
+                            AND `receiveTime` > %s LIMIT %s" \
                             % (self.ID, self.after, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA AFTER: ',after, 'for ID: ', self.ID
         print msg
         if self.confirm():
-            sql = "DELETE FROM dosnet WHERE ID = '%s' \
-                    AND `receiveTime` > '%s';" % (self.ID, self.after)
+            sql = "DELETE FROM dosnet WHERE ID = %s \
+                    AND `receiveTime` > %s;" % (self.ID, self.after)
             self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
 
     def deleteDataRange(self):
-        select = "SELECT * FROM dosnet WHERE ID = '%s' \
-                    AND (`receiveTime` BETWEEN '%s' AND '%s') LIMIT '%s'" \
+        select = "SELECT * FROM dosnet WHERE ID = %s \
+                    AND (`receiveTime` BETWEEN %s AND %s) LIMIT %s" \
                     % (self.ID, self.before, self.after, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
         print msg
         if self.confirm():
-            sql = "DELETE FROM dosnet WHERE ID = '%s' \
-                AND (`receiveTime` BETWEEN '%s' AND '%s');" % (self.ID, self.before, self.after)
+            sql = "DELETE FROM dosnet WHERE ID = %s \
+                AND (`receiveTime` BETWEEN %s AND %s);" % (self.ID, self.before, self.after)
             self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
@@ -237,7 +237,7 @@ class DataDestroyer:
                 return result
         except (KeyboardInterrupt, SystemExit):
             pass
-        except Exception, e:
+        except Exception as e:
             print sql
             raise e
 
