@@ -14,19 +14,20 @@ import sys
 import MySQLdb as mdb
 import argparse
 
-class DBTool(object):
+class DBTool:
 	def parseArguments(self):
 		print 'Parsing'
 		parser = argparse.ArgumentParser()
-		parser.add_argument('--ID',type=int,nargs=1,required=False,\
+		parser.add_argument('--ID',type=int,nargs=1,required=False,
 			help='Auto generated if not manually set. Does not compensate for \
 			collisions that you may make.')
-		parser.add_argument('--name',type=str,nargs=1,required=True,\
+		parser.add_argument('--name',type=str,nargs=1,required=True,
 			help='')
-		parser.add_argument('--latlong',type=float,nargs=2,required=True,\
+		parser.add_argument('--latlong',type=float,nargs=2,required=True,
 			help='')
-		parser.add_argument('--conv',type=float,nargs=2,required=True,\
+		parser.add_argument('--conv',type=float,nargs=2,required=True,
 			help='')
+		print 'Starting to parse now'
 		self.args = parser.parse_args()
 		print 'ID: '
 		self.ID = parse.args.ID

@@ -23,7 +23,7 @@ import datetime
 import sys
 import argparse
 
-class Parser(object):
+class Parser:
     def __init__(self):
         parser = argparse.ArgumentParser()
         parser.add_argument('--ID',type=int,nargs=1,required=True,\
@@ -42,7 +42,7 @@ class Parser(object):
             help='')
         self.args = parser.parse_args()
 
-class DataDestroyer(object):
+class DataDestroyer:
     """ API for cleaning up and managing removal of data from the database safely.
 
     Args:
