@@ -67,11 +67,16 @@ class DBTool:
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		print sql
 		self.ID = self.runSQL(sql)
 		print self.ID
-		if self.ID <= 3:
+		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
+		elif self.ID <= 0:
+			print 'ID less than 0?? There\'s a problem afoot'
+		elif not self.ID:
+			print 'ID is empty...'
+		else:
+			print 'ID looks good'
 	def getHash(self):
 		# RUN "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`))
 		# 		FROM stations
@@ -87,6 +92,7 @@ class DBTool:
 		 		WHERE ID = '%s';" % (self.md5hash, self.ID)
 		self.runSQL(sql)
 	def runSQL(self,sql):
+		print sql
 		try:
 			self.cursor.execute(sql)
 		except (KeyboardInterrupt, SystemExit):
