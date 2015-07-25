@@ -241,15 +241,15 @@ class DataDestroyer:
 
     def main(self):
         if self.before:
-            deleteDataBefore()
+            self.deleteDataBefore()
         elif self.after:
-            deleteDataAfter()
+            self.deleteDataAfter()
         elif self.dropdata:
-            deleteAllData()
+            self.deleteAllData()
         elif self.dropstations:
-            deleteAllStations()
+            self.deleteAllStations()
         else: # default, delete stations
-            deleteStation()
+            self.deleteStation()
 
 if __name__ == "__main__":
     print 'Hi Joey!'
