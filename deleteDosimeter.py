@@ -236,15 +236,15 @@ class DataDestroyer:
             raise e
 
     def main(self):
-        if self.before:
+        if not self.beforeis None:
             deleteDataBefore()
-        elif self.after:
+        elif not self.after is None:
             deleteDataAfter()
-        elif self.dropdata:
+        elif not self.dropdata is None:
             deleteAllData()
-        elif self.dropstations:
+        elif not self.dropstationsis None:
             deleteAllStations()
-        else:
+        else: # default, delete stations
             deleteStation()
 
 if __name__ == "__main__":
