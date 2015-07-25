@@ -105,6 +105,8 @@ if __name__ == "main":
 	lon = Parser.args.latlong[1]
 	cpmtorem = Parser.args.conv[0]
 	cpmtousv = Parser.args.conv[1]
+	print ID
+	print name
 	dbTool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
 	if parse.args.ID:
 		dbTool.addDosimeterWithID()
