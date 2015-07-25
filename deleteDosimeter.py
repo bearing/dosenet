@@ -251,6 +251,7 @@ class DataDestroyer:
             self.deleteAllStations()
         else: # default, delete stations
             self.deleteStation()
+        self.db.commit()
 
 if __name__ == "__main__":
     print 'Hi Joey!'
