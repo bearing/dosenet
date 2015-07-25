@@ -26,20 +26,20 @@ import argparse
 class Parser(object):
     def __init__(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('--ID',type=int,nargs=1,required=True,
-                            help='')
-        parser.add_argument('--before',type=str,nargs=1,required=False,
-                            help='')
-        parser.add_argument('--after',type=str,nargs=1,required=False,
-                            help='')
-        parser.add_argument('--range',type=str,nargs=2,required=False,
-                            help='')
-        parser.add_argument('--dropalldata',type=str,required=False,
-                            help='')
-        parser.add_argument('--dropallstations',type=str,required=False,
-                            help='')
-        parser.add_argument('--log',required=False,default=True,
-                            help='')
+        parser.add_argument('--ID',type=int,nargs=1,required=True,\
+            help='')
+        parser.add_argument('--before',type=str,nargs=1,required=False,\
+            help='')
+        parser.add_argument('--after',type=str,nargs=1,required=False,\
+            help='')
+        parser.add_argument('--range',type=str,nargs=2,required=False,\
+            help='')
+        parser.add_argument('--dropalldata',type=str,required=False,\
+            help='')
+        parser.add_argument('--dropallstations',type=str,required=False,\
+            help='')
+        parser.add_argument('--log',required=False,default=True,\
+            help='')
         self.args = parser.parse_args()
 
 class DataDestroyer(object):

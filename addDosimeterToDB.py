@@ -17,14 +17,14 @@ import argparse
 class Parser(object):
 	def __init__(self):
 		parser = argparse.ArgumentParser()
-        parser.add_argument('--ID',type=int,nargs=1,required=False,
-                            help='')
-		parser.add_argument('--name',type=str,nargs=1,required=True,
-                            help='')
-		parser.add_argument('--latlong',type=float,nargs=2,required=True,
-                            help='')
-		parser.add_argument('--conv',type=float,nargs=2,required=True,
-                            help='')
+        parser.add_argument('--ID',type=int,nargs=1,required=False,\
+			help='')
+		parser.add_argument('--name',type=str,nargs=1,required=True,\
+			help='')
+		parser.add_argument('--latlong',type=float,nargs=2,required=True,\
+			help='')
+		parser.add_argument('--conv',type=float,nargs=2,required=True,\
+			help='')
 		self.args = parser.parse_args()
 
 class DBTool(object):
