@@ -225,18 +225,19 @@ if __name__ == "__main__":
     print 'Are you sure you want to proceed??? (Type "yes" to proceed) \n$ '
     if raw_input() == 'yes':
         par = Parser()
-        ID = par.args.ID
+        ID = par.args.ID[0]
         if par.args.daterange: # not is None?
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
         else:
             print 'No date range, default to --before or --after'
-            before = par.args.before
-            after = par.args.after
-        dropdata = par.args.dropalldata
-        dropstations = par.args.dropallstations
-        log = par.args.log
+            before = par.args.before[0]
+            after = par.args.after[0]
+        dropdata = par.args.dropalldata[0]
+        dropstations = par.args.dropallstations[0]
+        log = par.args.log[0]
+        print '\n\tLOGGING BITCHEZ - ', log
         deleter = DataDestroyer()
         deleter.getArguments(ID,before,after,dropdata,dropstations,log)
     else:
