@@ -98,15 +98,18 @@ class DBTool(object):
 			raise e
 
 if __name__ == "main":
+	print 'Parsing'
 	parse  = Parser()
+	print 'ID: '
 	ID = parse.args.ID
+	print ID
 	name = parse.args.name
+	print name
 	lat = parse.args.latlong[0]
 	lon = parse.args.latlong[1]
 	cpmtorem = parse.args.conv[0]
 	cpmtousv = parse.args.conv[1]
-	print ID
-	print name
+	print 'MAiking a DBTool'
 	dbTool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
 	if parse.args.ID:
 		dbTool.addDosimeterWithID()
