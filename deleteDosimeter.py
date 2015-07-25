@@ -236,7 +236,7 @@ class DataDestroyer:
             raise e
 
     def main(self):
-        if not self.beforeis None:
+        if not self.before is None:
             deleteDataBefore()
         elif not self.after is None:
             deleteDataAfter()
