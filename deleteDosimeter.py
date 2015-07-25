@@ -58,8 +58,7 @@ class DataDestroyer:
         db (SQLObject): Custom MySQL database object for injecting into.
         cursor (db.cursor): Used for accessing database returns.
     """
-
-	def __init__(self):
+    def __init__(self):
 		self.db = mdb.connect("localhost", # Open database connection
 						      "ne170group",
                               "ne170groupSpring2015,
@@ -219,7 +218,7 @@ class DataDestroyer:
 			print sql
 			raise e
 
-if __name__ == "main":
+if __name__ == "__main__":
     print 'Hi Joey!'
     print 'This script deletes data from the dosimeter network database on GRIM'
     print 'Are you sure you want to proceed??? (Type "yes" to proceed) \n$ '
