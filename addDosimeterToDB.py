@@ -71,6 +71,7 @@ class DBTool:
 		ID_tuple = self.runSQL(sql)
 		ID_list = []
 		for t in ID_tuple:
+			print t
 			self.ID = t
 			print self.ID
 		test = ID_tuple[0]
