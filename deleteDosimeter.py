@@ -120,7 +120,6 @@ class DataDestroyer:
                 separately with addDosimeterToDB.py. \n \
                 If there was more than one return above, you should QUIT.'
         if self.confirm():
-            print self.ID
             sql = "DELETE FROM stations WHERE ID = %s;" % self.ID
             self.runSQL(sql)
             if self.log:
@@ -224,8 +223,8 @@ class DataDestroyer:
 
     def runSQL(self,sql, least=False, less=False, everything=False):
         print '\t\t\t SQL: ',sql
+        self.cursor.execute(sql)
         try:
-            self.cursor.execute(sql)
             if least:
                 result = self.cursor.fetchall()[0][0]
                 return result
