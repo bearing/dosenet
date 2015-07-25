@@ -59,7 +59,7 @@ class DataDestroyer:
         db (SQLObject): Custom MySQL database object for injecting into.
         cursor (db.cursor): Used for accessing database returns.
     """
-    def __init__(self,*log):
+    def __init__(self,log=False):
         self.db = mdb.connect("localhost", # Open database connection
                               "ne170group",
                               "ne170groupSpring2015",
@@ -73,7 +73,7 @@ class DataDestroyer:
         self.could_not_append = 'ERROR: Could not append change to log file: ', \
                                 self.LOG_NAME, '\n EXITING NOW'
         if log:
-            self.log = log
+            self.log = True
         else:
             self.log = False
 
@@ -242,7 +242,7 @@ if __name__ == "__main__":
         par = Parser()
         ID = par.args.ID[0]
         if par.args.log:
-            deleter = DataDestroyer(log=par.args.log)
+            deleter = DataDestroyer(log=True)
         else:
             deleter = DataDestroyer()
         if par.args.daterange:
