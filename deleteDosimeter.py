@@ -133,7 +133,7 @@ class DataDestroyer:
 
     def deleteDataRange(self):
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
-                    AND (`receiveTime` BETWEEN '%s' AND '%s') LIMIT '%s'"
+                    AND (`receiveTime` BETWEEN '%s' AND '%s') LIMIT '%s'" \
                     % (self.ID, self.before, self.after, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
