@@ -27,8 +27,6 @@ class Parser:
 			help='')
 		parser.add_argument('--conv',type=float,nargs=2,required=True,
 			help='')
-		parser.add_argument('--resetAutoIncrement',type=int,nargs=1,required=False,
-			help='')
 		self.args = parser.parse_args()
 
 class DBTool:
@@ -143,47 +141,9 @@ class DBTool:
 	def main(self):
 		self.duplicate = True
 		try:
-			print 'GET ID'
-			self.getID(self.name)
-			print 'GET HASH'
-			self.getHash()
-			print 'SET HASH'
-			self.setHash()
-			print 'GET NEW STATION'
-			self.new_station = self.getNewStation()
-			print self.new_station
-			if not self.checkIfDuplicate():
-				print 'Good news: Committing changes. That\'s it.'
-				self.db.commit()
-				print 'SUCESSSSSS'
-		except Exception as e:
-			print '\t ~~~~ FAILED ~~~~'
-			raise e
-
-class resetAutoIncrement:
-	def __init__(self,index):
-		self.db = mdb.connect("localhost", # Open database connection
-						"ne170group",
-						"ne170groupSpring2015",
-						"dosimeter_network")
-		self.cursor = self.db.cursor()
-		sql = "ALTER TABLE stations AUTO_INCREMENT=%s;" % index
-		print 'Resetting auto_increment in stations table. Confirm with "yes"'
-		if raw_input() == 'yes':
-			print 'Running the reset...'
-			try:
-				self.cursor.execute(sql)
-			except Exception as e:
-				raise e
-				sys.exit(1)
-		else:
-			print 'Cancelling, no reset.'
-			sys.exit(0)
 
 if __name__=="__main__":
 	parse = Parser()
-	if parse.args.resetAutoIncrement:
-		res = resetAutoIncrement(index = parse.args.resetAutoIncrement[0])
 	name = parse.args.name[0]
 	print name
 	lat = parse.args.latlong[0]
