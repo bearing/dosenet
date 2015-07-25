@@ -81,37 +81,31 @@ class DataDestroyer:
     def getArguments(self,ID,**kwargs):
         self.ID = ID
         try:
-            try:
-                self.before = kwargs['before']
-                self.deleteDataBefore()
-            except:
-                pass
-            try:
-                self.after = args['after']
-                self.deleteDataAfter()
-            except:
-                pass
-            try:
-                self.dropdata = args['dropdata']
-                self.deleteAllData()
-            except:
-                pass
-            try:
-                self.dropstations = args['dropstations']
-                self.deleteAllStations()
-            except:
-                pass
-            try:
-                self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s';") % self.ID, least=True)
-                print 'Operating on ',self.name
-            except Exception as e:
-                print 'ERROR: Could not get name of station. You should stop...'
-                raise e
-                sys.exit(1)
-            if self.log:
-                print 'Logging to ', self.LOG_NAME
+            self.before = kwargs['before']
         except:
-            deleteStation()
+            pass
+        try:
+            self.after = args['after']
+        except:
+            pass
+        try:
+            self.dropdata = args['dropdata']
+        except:
+            pass
+        try:
+            self.dropstations = args['dropstations']
+        except:
+            pass
+        try:
+            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s';") % self.ID, least=True)
+            print 'Operating on ',self.name
+        except Exception as e:
+            print 'ERROR: Could not get name of station. You should stop...'
+            raise e
+            sys.exit(1)
+        if self.log:
+            print 'Logging to ', self.LOG_NAME
+        self.main()
 
     def deleteStation(self):
         # Get station row that we're about to delete - append to log
@@ -240,6 +234,18 @@ class DataDestroyer:
         except Exception, e:
             print sql
             raise e
+
+    def main(self):
+        if self.before:
+            deleteDataBefore()
+        elif self.after:
+            deleteDataAfter()
+        elif self.dropdata:
+            deleteAllData()
+        elif self.dropstations:
+            deleteAllStations()
+        else:
+            deleteStation()
 
 if __name__ == "__main__":
     print 'Hi Joey!'
