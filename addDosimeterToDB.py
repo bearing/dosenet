@@ -95,13 +95,15 @@ class DBTool:
 
 if __name__=="__main__":
 	parse = Parser()
-	if parse.args.ID:
-		ID = parse.args.ID[0]
-		print 'Forced ID: ', ID
 	name = parse.args.name[0]
 	print name
 	lat = parse.args.latlong[0]
 	lon = parse.args.latlong[1]
 	cpmtorem = parse.args.conv[0]
 	cpmtousv = parse.args.conv[1]
-	dbtool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
+	if parse.args.ID:
+		ID = parse.args.ID[0]
+		print 'Forced ID: ', ID
+		dbtool = DBTool(ID,name,lat,lon,cpmtorem,cpmtousv)
+	else:
+		dbtool = DBTool(name,lat,lon,cpmtorem,cpmtousv)
