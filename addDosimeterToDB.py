@@ -84,7 +84,7 @@ class DBTool:
 		# 		WHERE `ID` = $$$ ;"
 		sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
 				WHERE `ID` = '%s' ;" % (self.ID)
-		self.md5hash = self.runSQL(sql)
+		self.md5hash = self.runSQL(sql)[0]
 	def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
 		# RUN "UPDATE stations
 		#		SET IDLatLongHash = 'SOME MD5 HASH'
@@ -96,11 +96,11 @@ class DBTool:
 		try:
 			self.cursor.execute(sql)
 			try:
-				result = self.cursor.fetchall()[0][0]
+				result = self.cursor.fetchall()[0]
 				return result
 			except Exception as e:
 				raise e
-				return 
+				return
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
