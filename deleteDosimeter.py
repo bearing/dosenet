@@ -28,15 +28,15 @@ class Parser:
         parser = argparse.ArgumentParser()
         parser.add_argument('--ID',type=int,nargs=1,required=True,\
             help='')
-        parser.add_argument('--before',type=str,nargs=1,required=False,\
+        parser.add_argument('--before',nargs=1,required=False,\
             help='')
-        parser.add_argument('--after',type=str,nargs=1,required=False,\
+        parser.add_argument('--after',nargs=1,required=False,\
             help='')
-        parser.add_argument('--range',type=str,nargs=2,required=False,\
+        parser.add_argument('--daterange',nargs=2,required=False,\
             help='')
-        parser.add_argument('--dropalldata',type=str,required=False,\
+        parser.add_argument('--dropalldata',required=False,\
             help='')
-        parser.add_argument('--dropallstations',type=str,required=False,\
+        parser.add_argument('--dropallstations',required=False,\
             help='')
         parser.add_argument('--log',required=False,default=True,\
             help='')
@@ -65,18 +65,7 @@ class DataDestroyer:
                               "ne170groupSpring2015,
                               "dosimeter_network")
 		self.cursor = db.cursor() # prepare a cursor object using cursor() method
-        self.ID = Parser.args.ID
-        try:
-            self.cursor.execute("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID
-            self.name = self.cursor.fetchall()
-            print 'Operating on ',self.name
-        except Exception as e:
-            print 'ERROR: Could not get name of station. You should stop...'
-            raise e
-            sys.exit(1)
-        if Parser.args.log:
-            self.LOG_NAME = 'deleteDosimeter.log'
-            print 'Logging to ', LOG_NAME
+        self.LOG_NAME = 'deleteDosimeter.log'
         self.limit = 10
         self.secure_password = 'FORREALSUPERSERIOUSOMGOMGOMG'
         self.exit_serious_message = 'Exiting: did not receive confirmation: \
@@ -84,69 +73,81 @@ class DataDestroyer:
         self.could_not_append = 'ERROR: Could not append change to log file: ', \
                                 self.LOG_NAME, '\n EXITING NOW'
 
+    def getArguments(self,ID,before,after,dropdata,dropstations,log):
+        self.ID = ID
+        self.log = log
+        self.before = before
+        self.after = after
+        self.dropdata = dropdata
+        self.dropstations = dropstations
+        try:
+            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID)
+            print 'Operating on ',self.name
+        except Exception as e:
+            print 'ERROR: Could not get name of station. You should stop...'
+            raise e
+            sys.exit(1)
+        if self.log:
+            print 'Logging to ', LOG_NAME
+
+
     def deleteStation(self):
         # Get station row that we're about to delete - append to log
-        select = "SELECT * FROM stations WHERE ID = '%s'" % self.ID
+        select = ("SELECT * FROM stations WHERE ID = '%s'" % self.ID)
         self.getDataSample(select=select,limit=self.limit)
-        print msg
         print 'This will disable authentication of a dosimeter until readded \
                 separately with addDosimeterToDB.py. \n \
                 If there was more than one return above, you should QUIT.'
         if self.confirm():
             sql = "DELETE FROM stations WHERE ID = '%s';" % self.ID
             self.cursor.execute(sql)
-            if Parser.args.log:
+            if self.log:
                 appendLog(sql,msg)
 
     def deleteDataBefore(self):
-        before = Parser.args.before
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
                     AND `receiveTime` < '%s' LIMIT '%s'" \
-                    % (self.ID, before, self.limit)
+                    % (self.ID, self.before, self.limit)
         self.getDataSample(select=select,limit=self.limit)
-        msg = 'DELETING ALL DATA BEFORE: ',before, 'for ID: ', self.ID
+        msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
         print msg
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE ID = '%s' \
-                    AND `receiveTime` < '%s';" % (self.ID, before)
+                    AND `receiveTime` < '%s';" % (self.ID, self.before)
             self.cursor.execute(sql)
-            if Parser.args.log:
+            if self.log:
                 appendLog(sql,msg)
 
     def deleteDataAfter(self):
-        after = Parser.args.after
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
                             AND `receiveTime` > '%s' LIMIT '%s'" \
-                            % (self.ID, after, self.limit)
+                            % (self.ID, self.after, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA AFTER: ',after, 'for ID: ', self.ID
         print msg
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE ID = '%s' \
-                    AND `receiveTime` > '%s';" % (self.ID, after)
+                    AND `receiveTime` > '%s';" % (self.ID, self.after)
             self.cursor.execute(sql)
-            if Parser.args.log:
+            if self.log:
                 appendLog(sql,msg)
 
     def deleteDataRange(self):
-        before = Parser.args.before
-        after = Parser.args.after
         select = "SELECT * FROM dosnet WHERE ID = '%s' \
                     AND (`receiveTime` BETWEEN '%s' AND '%s') LIMIT '%s'"
-                    % (self.ID, before, after, self.limit)
+                    % (self.ID, self.before, self.after, self.limit)
         self.getDataSample(select=select,limit=self.limit)
-        msg = 'DELETING ALL DATA BEFORE: ',before, 'for ID: ', self.ID
+        msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
         print msg
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE ID = '%s' \
-                AND (`receiveTime` BETWEEN '%s' AND '%s');" % (self.ID, before, after)
+                AND (`receiveTime` BETWEEN '%s' AND '%s');" % (self.ID, self.before, self.after)
             self.cursor.execute(sql)
-            if Parser.args.log:
+            if self.log:
                 appendLog(sql,msg)
 
     def getDataSample(self,select,limit):
-        self.cursor.execute(select)
-        rows = self.cursor.fetchall()
+        rows = self.runSQL(select)
         print 'Sample of data you\'re about to delete (Max: "%s"): \n "%s"' % (limit, rows)
 
     def deleteAllData(self):
@@ -159,7 +160,7 @@ class DataDestroyer:
                 self.cursor.execute(sql)
             else:
                 print self.exit_serious_message
-            if Parser.args.log:
+            if self.log:
                 appendLog(sql,msg)
 
     def deleteAllStations(self):
@@ -172,7 +173,7 @@ class DataDestroyer:
                 self.cursor.execute(sql)
             else:
                 print self.exit_serious_message
-            if Parser.args.log:
+            if self.log:
                 appendLog(sql,msg)
 
     def appendLog(self,*some_text):
@@ -199,13 +200,45 @@ class DataDestroyer:
             print 'Exiting with no changes: did not read "yes"'
             return False
 
+    def runSQL(self,sql, least=False, less=False, everything=False):
+		print '\t\t\t SQL: ',sql
+		try:
+			self.cursor.execute(sql)
+			if least:
+				result = self.cursor.fetchall()[0][0]
+				return result
+			if less:
+				result = self.cursor.fetchall()[0]
+				return result
+			if everything:
+				result = self.cursor.fetchall()
+				return result
+		except (KeyboardInterrupt, SystemExit):
+			pass
+		except Exception, e:
+			print sql
+			raise e
+
 if __name__ == "main":
     print 'Hi Joey!'
     print 'This script deletes data from the dosimeter network database on GRIM'
     print 'Are you sure you want to proceed??? (Type "yes" to proceed) \n$ '
     if raw_input() == 'yes':
         par = Parser()
+        ID = par.args.ID
+        if par.args.daterange: # not is None?
+            print '--before and --after arguments ignored'
+            before = par.args.daterange[0]
+            after = par.args.daterange[1]
+        else:
+            print 'No date range, default to --before or --after'
+            before = par.args.before
+            after = par.args.after
+        dropdata = par.args.dropalldata
+        dropstations = par.args.dropallstations
+        log = par.args.log
         deleter = DataDestroyer()
+        deleter.getArguments(ID,before,after,dropdata,dropstations,log)
     else:
         print 'You have decided not to delete data, thanks!'
         print 'If this was a mistake, type "yes" next time...'
