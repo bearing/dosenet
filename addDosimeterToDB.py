@@ -104,3 +104,5 @@ class DBTool(object):
 
 if __name__ == "main":
 	dbTool = DBTool()
+	dbtool.parseArguments()
+	dbtool.start()
