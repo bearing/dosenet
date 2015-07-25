@@ -95,6 +95,7 @@ class DBTool:
 		print sql
 		try:
 			self.cursor.execute(sql)
+			return self.cursor.fetchall()
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
