@@ -54,17 +54,13 @@ class DBTool:
 				VALUES ('%s','%s','%s','%s','%s');" \
 				% (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
 		self.runSQL(sql)
-		self.getID(self.name)
-		self.getHash()
-		self.setHash()
+		self.main()
 	def addDosimeterWithID(self):
 		sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
 				VALUES ('%s','%s','%s','%s','%s','%s');" \
 				% (self.ID, self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
 		self.runSQL(sql)
-		self.getID(self.name)
-		self.getHash()
-		self.setHash()
+		self.main()
 	def getID(self,name):
 		# The database uses auto-incremented ID numbers so we need to get
 		# the ID from the `dosimeter_network.stations` table for when we
@@ -95,7 +91,13 @@ class DBTool:
 			pass
 		except Exception, e:
 			raise e
-
+	def main(self):
+		print 'Get ID'
+		self.getID(self.name)
+		print 'Generate Hash'
+		self.getHash()
+		print 'Set Hash'
+		self.setHash()
 if __name__=="__main__":
 	parse = Parser()
 	name = parse.args.name[0]
