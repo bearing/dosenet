@@ -40,7 +40,7 @@ class DBTool:
 		self.lon = lon
 		self.cpmtorem = cpmtorem
 		self.cpmtousb = cpmtousv
-		self.cursor = db.cursor() # prepare a cursor object using cursor() method
+		self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
 		self.md5hash = ''
 		if ID:
 			dbTool.addDosimeterWithID()
