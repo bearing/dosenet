@@ -50,25 +50,28 @@ class DBTool:
 			self.addDosimeterWithID()
 		else:
 			self.addDosimeter()
+
 	def addDosimeter(self): # Adds a row to dosimeter_network.stations
 		sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) \
 				VALUES ('%s','%s','%s','%s','%s','This should not be here :(');" \
 				% (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
 		self.runSQL(sql)
 		self.main()
+
 	def addDosimeterWithID(self):
 		sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`) \
 				VALUES ('%s','%s','%s','%s','%s','%s');" \
 				% (self.ID, self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
 		self.runSQL(sql)
 		self.main()
+
 	def getID(self,name):
 		# The database uses auto-incremented ID numbers so we need to get
 		# the ID from the `dosimeter_network.stations` table for when we
 		# add the hash
 		# RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
 		sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-		self.ID = self.runSQL(sql,withreturn=True)
+		self.ID = self.runSQL(sql,firstelement=True)
 		if 1 <= self.ID <= 3:
 			print 'Check the DB (stations) - there\'s probably an ID collision'
 		elif self.ID <= 0:
@@ -78,13 +81,15 @@ class DBTool:
 			sys.exit(1)
 		else:
 			print 'ID looks good'
+
 	def getHash(self):
 		# RUN "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`))
 		# 		FROM stations
 		# 		WHERE `ID` = $$$ ;"
 		sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
 				WHERE `ID` = '%s' ;" % (self.ID)
-		self.md5hash = self.runSQL(sql,withreturn=True)
+		self.md5hash = self.runSQL(sql,firstelement=True)
+
 	def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
 		# RUN "UPDATE stations
 		#		SET IDLatLongHash = 'SOME MD5 HASH'
@@ -92,21 +97,27 @@ class DBTool:
 		sql = "UPDATE stations SET IDLatLongHash = '%s' \
 		 		WHERE ID = '%s';" % (self.md5hash, self.ID)
 		self.runSQL(sql)
+
 	def getNewStation(self):
 		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
-		print self.runSQL(sql,withreturn=True)
-	def runSQL(self,sql,withreturn=False):
-		print sql
+		print self.runSQL(sql,getNewStation=True)
+
+	def runSQL(self,sql,firstelement=False,getNewStation=False):
+		print '\t\t\t SQL: ',sql
 		try:
 			self.cursor.execute(sql)
-			if withreturn:
+			if firstelement:
 				result = self.cursor.fetchall()[0][0]
+				return result
+			if getNewStation:
+				result = self.cursor.fetchall()
 				return result
 		except (KeyboardInterrupt, SystemExit):
 			pass
 		except Exception, e:
 			print sql
 			raise e
+
 	def main(self):
 		try:
 			self.getID(self.name)
