@@ -74,18 +74,18 @@ class DataDestroyer:
                                 self.LOG_NAME, '\n EXITING NOW'
         self.log = False
 
-    def getArguments(self,ID,*before,*after,*dropdata,*dropstations,*log):
+    def getArguments(self,ID,**kwargs):
         self.ID = ID
         try:
-            self.log = log
+            self.before = kwargs['before']
         try:
-            self.before = before
+            self.after = args['after']
         try:
-            self.after = after
+            self.dropdata = args['dropdata']
         try:
-            self.dropdata = dropdata
+            self.dropstations = args['dropstations']
         try:
-            self.dropstations = dropstations
+            self.log = args['log']
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID)
             print 'Operating on ',self.name
