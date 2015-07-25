@@ -269,6 +269,7 @@ if __name__ == "__main__":
             deleter.getArguments(ID,dropstations)
         except:
             print 'No --dropallstations flag'
+        deleter.getArguments(ID)
     else:
         print 'You have decided not to delete data, thanks!'
         print 'If this was a mistake, type "yes" next time...'
