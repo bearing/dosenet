@@ -131,9 +131,13 @@ class DBTool:
 	def main(self):
 		self.duplicate = True
 		try:
+			print 'GET ID'
 			self.getID(self.name)
+			print 'GET HASH'
 			self.getHash()
+			print 'SET HASH'
 			self.setHash()
+			print 'GET NEW STATION'
 			self.new_station = self.getNewStation()
 			print self.new_station
 			if not self.checkIfDuplicate():
