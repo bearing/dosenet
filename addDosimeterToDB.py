@@ -93,6 +93,7 @@ class DBTool:
 		 		WHERE ID = '%s';" % (self.md5hash, self.ID)
 		self.runSQL(sql)
 	def runSQL(self,sql,withreturn=False):
+		print sql
 		try:
 			self.cursor.execute(sql)
 			if withreturn:
