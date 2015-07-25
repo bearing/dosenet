@@ -103,8 +103,9 @@ class DBTool:
 		return self.runSQL(sql,secondelement=True)
 
 	def checkIfDuplicate(self): # Check for MD5 hash collision (duplicate entry)
-		sql = "SELECT `ID`, `Name`, IDLatLongHash FROM stations;"
-		check_list = self.runSQL(sql,secondelement=True)
+		self.cursor.execute()"SELECT `ID`, `Name`, IDLatLongHash FROM stations;")
+		check_list = self.cursor.fetchall()
+		print 'Checking for duplicates...'
 		if any(str(self.name) in i for i in check_list):
 			print 'ERROR: Duplicate NAME detected, not commiting changes. Byyeeeeeeee'
 			return True
@@ -147,7 +148,9 @@ class DBTool:
 			self.new_station = self.getNewStation()
 			print self.new_station
 			if not self.checkIfDuplicate():
+				print 'Good news: Committing changes. That\'s it.'
 				self.db.commit()
+				print 'SUCESSSSSS'
 		except Exception as e:
 			print '\t ~~~~ FAILED ~~~~'
 			raise e
