@@ -72,14 +72,20 @@ class DataDestroyer:
                                     "%s"' % self.secure_password
         self.could_not_append = 'ERROR: Could not append change to log file: ', \
                                 self.LOG_NAME, '\n EXITING NOW'
+        self.log = False
 
-    def getArguments(self,ID,before,after,dropdata,dropstations,log):
+    def getArguments(self,ID,*before,*after,*dropdata,*dropstations,*log):
         self.ID = ID
-        self.log = log
-        self.before = before
-        self.after = after
-        self.dropdata = dropdata
-        self.dropstations = dropstations
+        try:
+            self.log = log
+        try:
+            self.before = before
+        try:
+            self.after = after
+        try:
+            self.dropdata = dropdata
+        try:
+            self.dropstations = dropstations
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID)
             print 'Operating on ',self.name
