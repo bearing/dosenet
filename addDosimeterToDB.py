@@ -14,9 +14,9 @@ import sys
 import MySQLdb as mdb
 import argparse
 
-
 class DBTool(object):
 	def parseArguments(self):
+		print 'Parsing'
 		parser = argparse.ArgumentParser()
 		parser.add_argument('--ID',type=int,nargs=1,required=False,\
 			help='Auto generated if not manually set. Does not compensate for \
@@ -97,6 +97,8 @@ class DBTool(object):
 			raise e
 
 if __name__ == "main":
+	print 'Made a DBTool'
 	dbtool = DBTool()
 	dbtool.parseArguments()
+	print 'Starting up'
 	dbtool.start()
