@@ -22,6 +22,7 @@
 import datetime
 import sys
 import argparse
+import MySQLdb as mdb
 
 class Parser:
     def __init__(self):
