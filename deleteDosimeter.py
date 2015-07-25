@@ -88,7 +88,7 @@ class DataDestroyer:
             raise e
             sys.exit(1)
         if self.log:
-            print 'Logging to ', LOG_NAME
+            print 'Logging to ', self.LOG_NAME
 
 
     def deleteStation(self):
