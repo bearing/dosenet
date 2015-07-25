@@ -93,7 +93,7 @@ class DBTool:
 		 		WHERE ID = '%s';" % (self.md5hash, self.ID)
 		self.runSQL(sql)
 	def getNewStation(self):
-		sql = "SELECT * FROM STATIONS WHERE ID = '%s'" % (self.ID)
+		sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
 		print self.runSQL(sql,withreturn=True)
 	def runSQL(self,sql,withreturn=False):
 		print sql
