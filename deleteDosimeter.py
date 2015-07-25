@@ -96,7 +96,7 @@ class DataDestroyer:
         except:
             pass
         try:
-            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID)
+            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = '%s'") % self.ID, everything=True)
             print 'Operating on ',self.name
         except Exception as e:
             print 'ERROR: Could not get name of station. You should stop...'
@@ -108,7 +108,7 @@ class DataDestroyer:
 
     def deleteStation(self):
         # Get station row that we're about to delete - append to log
-        select = ("SELECT * FROM stations WHERE ID = '%s'" % self.ID)
+        select = ("SELECT * FROM stations WHERE ID = '%s';" % self.ID)
         self.getDataSample(select=select,limit=self.limit)
         print 'This will disable authentication of a dosimeter until readded \
                 separately with addDosimeterToDB.py. \n \
