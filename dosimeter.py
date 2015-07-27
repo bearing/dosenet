@@ -51,13 +51,13 @@ class Dosimeter:
         sleep(1)
 
     def updateCount_basic(self, channel=24):
-        GPIO.remove_event_detect(24)
+        #GPIO.remove_event_detect(24)
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '  COUNT:',now            # Print to screen
         cpm, err = self.getCPM()        # Get cpm, cpm_err
         self.blink(pin=20, frequency=2) # Blink count LED (#20)
-        GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=100)
+        #GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=100)
 
     """def updateNoise(self,channel=23):
         if not self.first_noise:
