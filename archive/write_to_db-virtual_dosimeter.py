@@ -14,6 +14,7 @@ import time
 from random import randrange, randint, random
 import datetime
 import math
+import sys
 
 db = mdb.connect("localhost",
 				"ne170group",
@@ -46,8 +47,10 @@ for t in range(0, 1440): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
 			except Exception as e:
 				print 'SQL query failed'
 				print str(e)
+				sys.exit(1)
 		except Exception as e:
 			raise e
+			sys.exit(1)
 try:
 	db.commit()
 except Exception as e:
