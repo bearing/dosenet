@@ -50,7 +50,7 @@ for t in range(0, int(iterations)): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 -
 	#for i in range(2,ID+1): # Set one station at a time - 2 is first test station
 	try:
 		#stationID = i
-		cpm = abs(random()* (math.sin(i)* 10. ** 1))
+		cpm = abs(random()* (math.sin(stationID)* 10. ** 1))
 		cpmError = math.sqrt(cpm)
 		errorFlag = randint(0,1)
 		# without time
