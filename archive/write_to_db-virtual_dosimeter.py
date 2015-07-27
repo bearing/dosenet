@@ -42,7 +42,7 @@ for t in range(0, 1440): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
 			# cursor.execute("""INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s);""",(stationID,cpm,cpmError,errorFlag))
 			try:
 				cursor.execute("INSERT INTO dosnet(receiveTime, stationID, \
-					cpm, cpmError, errorFlag) VALUES (%s,%s,,%s,%s,%s);",\
+					cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s,%s);",\
 					(receiveTime, stationID, cpm, cpmError, errorFlag)) # WITH time
 			except Exception as e:
 				print 'SQL query failed'
