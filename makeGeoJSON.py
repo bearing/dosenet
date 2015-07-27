@@ -24,23 +24,18 @@ import datetime
 
 class Plot(object):
 	def __init__(self):
-		#------------------------#
-		# Global class variables #
-		#------------------------#
-		# Open database connection
 		self.db = mdb.connect("localhost",
 						"ne170group",
 						"ne170groupSpring2015",
 						"dosimeter_network")
-		# prepare a cursor object using cursor() method
-		self.cursor = self.db.cursor()
+		self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
 		# Titles of plots on Plot.ly
 		self.cpmTitle = 'Counts per minute (CPM)'
 		self.remTitle = 'mREM/hr'
 		self.usvTitle = 'uSv/hr'
 		# Should be retrieved from DB
-		self.calibrationFactor_cpm_to_rem = 0.01886792; # COMPLETELY RANDOM (1/53)
-		self.calibrationFactor_cpm_to_usv = 0.00980392; # COMPLETELY RANDOM (1/102)
+		self.calibrationFactor_cpm_to_rem = 0.01886792 # COMPLETELY RANDOM (1/53)
+		self.calibrationFactor_cpm_to_usv = 0.00980392 # COMPLETELY RANDOM (1/102)
 		# Other global variables
 		self.stationRows = ''
 		self.stationRowArrayList = []
@@ -56,16 +51,20 @@ class Plot(object):
 		self.KEPLER_USERNAME = 'nav'
 		#### ~~~~~~~~~~~~~~~~~ #####
 		############################
+
 	def getStationInfo(self):
 		# Get number of stations, station name, longitude, latitude, CPM to mRem and uSv conversion calibration factors
 		self.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv \
 							FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
 		self.stationRows = self.cursor.fetchall()
+
 	def setStationInfo(self,i):
 		self.stationRowArrayList.append((i[0], i[1], i[2], i[3], i[4], i[5]))
+
 	def setStationInfoForAll(self):
 		for i in self.stationRows:
 			self.setStationInfo(i)
+
 	def getDataFromDB(self,stationID,startTime,endTime):
 		try:
 			self.cursor.execute("SELECT receiveTime, cpm, cpmError \
@@ -80,23 +79,23 @@ class Plot(object):
 			pass
 		except Exception as e:
 			print 'Could not get data from DB:' + str(e)
-		#
 		# Populate time-restricted row array list of data
-		# Panda code to get SQL tuples of tuples into panda df tables which are
-		# WAAAY easier to work with (and apparently are faster?)
+		# Panda code to get SQL tuples of tuples into panda df tables
 		df = pd.DataFrame( [[ij for ij in i] for i in dosePerStation] )
 		df.rename(columns={0:'receiveTime', 1:'CPM', 2:'cpmError'},
 					inplace=True)
 		return df
+
 	def reduceData(self,df):
 		t0 = time.time()
-		i = 0;
+		i = 0
 		while len(df.index) > 200: # Reduce data for plotting
 			i += 1
 			df = df[::4]
 		if i!=0:
 			print 'Data was quartered' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
 		return df
+
 	# [unit] over numberOfSeconds for a specific named station [stationID]
 	def makePlot(self,stationID,unit,error,plotTitle,df,plength):
 		try:
@@ -135,12 +134,15 @@ class Plot(object):
 			raise
 		except:
 			print ('This '+unit+' plot failed - '+fname)
+
 	def printPlotFail(self,error):
 		print 'Plotting failed'
 		print (error)
+
 	def printFeatureFail(self,error):
 		print 'Iterative feature creation failed'
 		print (error)
+
 	def setFeature(self,point,name,plength,latestDose,latestTime,URLlist):
 		properties = {	'Name': name,
 						'Latest dose (CPM)': latestDose[0],
@@ -155,12 +157,17 @@ class Plot(object):
 						('URL_USV_'+plength[1]): URLlist[1][2],
 						('URL_CPM_'+plength[2]): URLlist[2][0],
 						('URL_REM_'+plength[2]): URLlist[2][1],
-						('URL_USV_'+plength[2]): URLlist[2][2]
+						('URL_USV_'+plength[2]): URLlist[2][2],
+						('URL_CPM_'+plength[3]): URLlist[3][0],
+						('URL_REM_'+plength[3]): URLlist[3][1],
+						('URL_USV_'+plength[3]): URLlist[3][2]
 					}
 		feature = Feature(geometry = point, properties = properties)
 		self.featureList.append(feature)
+
 	def getNumberOfStations(self):
 		return range(len(self.stationRows))
+
 	def makeAllPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
 		plotLengthString = 'Past_' + plotLengthString
 		if latestTime == '':
@@ -197,8 +204,8 @@ class Plot(object):
 		except Exception as e:
 			self.printPlotFail(e)
 		return urlList
-	# Used to be main()
-	def plotAll(self):
+
+	def plotAll(self): # main()
 		# Constants used for plotting clarity
 		secondsInYear =  31557600 	# 365.23 days
 		secondsInMonth = 2592000 	# 30 days
@@ -206,7 +213,7 @@ class Plot(object):
 		secondsInDay = 	 86400 		# 24 hours
 		secondsInHour =  3600 		# 60 minutes
 		secondsInMinute= 60 		# Duh
-		plotLength = ('Hour','Day','Month')
+		plotLength = ('Hour','Day','Month','Year')
 		station = 0
 		for station in self.getNumberOfStations():
 			# builds up a tuple coordinates of the stations, longitude & latitude
@@ -215,18 +222,18 @@ class Plot(object):
 			# gets the stationID for insertion into the features
 			stationID = self.stationRowArrayList[station][1]
 			# get latest dose (CPM) and time for that measurement in the loop so we can display in exported GeoJSON file
-			# Don't need cpmError in this query
-			self.cursor.execute("SELECT stations.Name, dosnet.receiveTime, dosnet.cpm, stations.cpmtorem, stations.cpmtousv \
+			self.cursor.execute("SELECT Name, receiveTime, cpm, cpmtorem, cpmtousv \
+								FROM dosnet \
+								INNER JOIN stations \
+								ON dosnet.stationID = stations.ID \
+								WHERE receiveTime = \
+									(SELECT MAX(receiveTime) \
 									FROM dosnet \
-									INNER JOIN stations ON dosnet.stationID=stations.ID \
-									WHERE dosnet.receiveTime = \
-									(SELECT MAX(dosnet.receiveTime) \
-										FROM dosnet \
-										INNER JOIN stations \
-										ON dosnet.stationID=stations.ID  \
-										WHERE stations.Name='%s') AND stations.Name='%s';" % (stationID, stationID))
-			# dtRows --> Data & time rows
-			dtRows = self.cursor.fetchall()
+									INNER JOIN stations \
+									ON dosnet.stationID = stations.ID  \
+									WHERE Name='%s') AND Name='%s';" \
+									% (stationID, stationID))
+			dtRows = self.cursor.fetchall() # dtRows --> Data & time rows
 			for i in dtRows:
 				(LName, LTime, LDose, Lcpmtorem, Lcpmtousv) = i # L --> Latest ...
 				LDose = LDose, LDose*Lcpmtorem, LDose*Lcpmtousv
@@ -234,7 +241,8 @@ class Plot(object):
 				urlA = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
 				urlB = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],secondsInDay)
 				urlC = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
-				urlRow = (urlA,urlB,urlC)
+				urlD = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[3],secondsInYear)
+				urlRow = (urlA, urlB, urlC, urlD)
 				urlList.extend(urlRow)
 				# Make feature - iterating through each
 				try:
@@ -243,6 +251,7 @@ class Plot(object):
 					sys.exit(0)
 				except Exception as e:
 					self.printFeatureFail(e)
+
 	def makeGeoJSON(self):
 		featureCollection = FeatureCollection(self.featureList)
 		# Export dump to GeoJSON file
@@ -256,11 +265,11 @@ class Plot(object):
 			print (str(e))
 		finally:
 			openfile.close()
+
 	def closeDB(self):
-		# Disconnect from DB server
-		self.db.close()
-	def scpToWebServer(self):
-		# copy to webserver - DECF Kepler
+		self.db.close() # Disconnect from DB server
+
+	def scpToWebServer(self): # copy to webserver - DECF Kepler
 		# Must be run under 'dosenet' linux user so that the SSH keypair setup between GRIM & DECF Kepler works without login
 		# Not ideal: uses Joey's account for the SCP
 		# Will be: $ scp ... jcurtis@kepler/.../
@@ -273,6 +282,7 @@ class Plot(object):
 		except Exception as e:
 			print ('Network Error: Cannot SCP to Kepler')
 			raise e
+
 	def printEndMessage(self):
 		print( u'\u00A9' +' Navrit Bal - time is '+ getDateTime())
 
