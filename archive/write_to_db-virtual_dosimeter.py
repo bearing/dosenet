@@ -24,7 +24,7 @@ parser.add_argument('--iterations',type=int,nargs=1,required=False,
     help='Intervals of 5 minutes, eg. 2016 = 1 week')
 parser.add_argument('--weeks',type=float,nargs=1,required=False,
 	help='Number[Int] of weeks to inject, eg. 4 = 1 month')
-self.args = parser.parse_args()
+args = parser.parse_args()
 
 db = mdb.connect("localhost",
 				"ne170group",
@@ -33,11 +33,11 @@ db = mdb.connect("localhost",
 cursor = db.cursor()
 # Globals
 iterations = 2016 # Default is 1 week (10080 mins / 5 mins)
-stationID = parser.args.ID[0]
-if parser.args.iterations:
-	iterations = parser.args.iterations[0]
-if parser.args.weeks:
-	iterations = parser.args.weeks[0]*10080/5 # number of minutes in a week / 5 minute interval
+stationID = args.ID[0]
+if args.iterations:
+	iterations = args.iterations[0]
+if args.weeks:
+	iterations = args.weeks[0]*10080/5 # number of minutes in a week / 5 minute interval
 cpm = 1.0
 cpmError = 1.0
 errorFlag = 0
@@ -49,7 +49,7 @@ for t in range(0, iterations): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 
 	receiveTime = receiveTime + datetime.timedelta(minutes = 5)
 	#for i in range(2,ID+1): # Set one station at a time - 2 is first test station
 	try:
-		stationID = ID
+		#stationID = i
 		cpm = abs(random()* (math.sin(i)* 10. ** 1))
 		cpmError = math.sqrt(cpm)
 		errorFlag = randint(0,1)
