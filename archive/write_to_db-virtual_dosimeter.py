@@ -47,25 +47,25 @@ for t in range(0, iterations): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 
 	# TIME INCREMENT --> add 5 minutes
 	receiveTime = receiveTime.replace(microsecond = 0)
 	receiveTime = receiveTime + datetime.timedelta(minutes = 5)
-	for i in range(2,ID+1): # Set one station at a time - 2 is first test station
+	#for i in range(2,ID+1): # Set one station at a time - 2 is first test station
+	try:
+		stationID = ID
+		cpm = abs(random()* (math.sin(i)* 10. ** 1))
+		cpmError = math.sqrt(cpm)
+		errorFlag = randint(0,1)
+		# without time
+		# cursor.execute("""INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s);""",(stationID,cpm,cpmError,errorFlag))
 		try:
-			stationID = i
-			cpm = abs(random()* (math.sin(i)* 10. ** 1))
-			cpmError = math.sqrt(cpm)
-			errorFlag = randint(0,1)
-			# without time
-			# cursor.execute("""INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s);""",(stationID,cpm,cpmError,errorFlag))
-			try:
-				cursor.execute("INSERT INTO dosnet(receiveTime, stationID, \
-					cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s,%s);",\
-					(receiveTime, stationID, cpm, cpmError, errorFlag)) # WITH time
-			except Exception as e:
-				print 'SQL query failed'
-				print str(e)
-				sys.exit(1)
+			cursor.execute("INSERT INTO dosnet(receiveTime, stationID, \
+				cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s,%s);",\
+				(receiveTime, stationID, cpm, cpmError, errorFlag)) # WITH time
 		except Exception as e:
-			raise e
+			print 'SQL query failed'
+			print str(e)
 			sys.exit(1)
+	except Exception as e:
+		raise e
+		sys.exit(1)
 try:
 	db.commit()
 except Exception as e:
