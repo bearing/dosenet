@@ -21,17 +21,17 @@ db = mdb.connect("localhost",
 				"ne170groupSpring2015",
 				"dosimeter_network")
 cursor = db.cursor()
-
+# Globals
 stationID= 1
 cpm = 1.0
 cpmError = 1.0
 errorFlag = 0
-receiveTime = datetime.datetime.now() + datetime.timedelta(hours=-1) #+ 22*one_min
+receiveTime = datetime.datetime.now() + datetime.timedelta(hours = -1)
 
 for t in range(0, 1440): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
 	# TIME INCREMENT --> add 5 minutes
-	receiveTime = receiveTime.replace(microsecond=0)
-	receiveTime = receiveTime + datetime.timedelta(minutes=5)
+	receiveTime = receiveTime.replace(microsecond = 0)
+	receiveTime = receiveTime + datetime.timedelta(minutes = 5)
 	for i in range(2,3): # Set one station at a time
 		try:
 			stationID = i
