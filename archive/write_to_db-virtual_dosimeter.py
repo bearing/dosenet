@@ -23,9 +23,8 @@ cursor = db.cursor()
 
 stationID= 1
 cpm = 1.0
+cpmError = 1.0
 errorFlag = 0
-rem = 1.0
-rad = 1.0
 receiveTime = datetime.datetime.now() + datetime.timedelta(hours=-1) #+ 22*one_min
 
 for t in range(0, 1440): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
@@ -36,15 +35,14 @@ for t in range(0, 1440): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
 		try:
 			stationID = i
 			cpm = abs(random()* (math.sin(i)* 10. ** 1))
-			rem = cpm * 0.01886792 # mREM/hr
-			rad = cpm * 0.00980392 # uSv/hr
+			cpmError = math.sqrt(cpm)
 			errorFlag = randint(0,1)
 			# without time
-			# cursor.execute("""INSERT INTO dosnet(stationID, cpm, rem, rad, errorFlag) VALUES (%s,%s,%s,%s,%s);""",(stationID,cpm,rem,rad,errorFlag))
+			# cursor.execute("""INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s);""",(stationID,cpm,cpmError,errorFlag))
 			try:
 				cursor.execute("INSERT INTO dosnet(receiveTime, stationID, \
-					cpm, rem, rad, errorFlag) VALUES (%s,%s,%s,%s,%s,%s);",\
-					(receiveTime, stationID,cpm,rem,rad,errorFlag)) # WITH time
+					cpm, cpmError, errorFlag) VALUES (%s,%s,,%s,%s,%s);",\
+					(receiveTime, stationID, cpm, cpmError, errorFlag)) # WITH time
 			except Exception as e:
 				print 'SQL query failed'
 				print str(e)
