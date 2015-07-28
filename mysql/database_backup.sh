@@ -22,7 +22,8 @@ Google Drive /DoseNet/DatabaseAndNetworking/${GREEN}Networking Details.gdoc${NC}
 
 if [[ $CHOICE='all' ]]; then
    printf "%s\n" "~ Backing up the whole dosimeter_network database"
-   printf "%b\n" "\e~~ Using: ${BLUE}`mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql`${NC}"
+   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql${NC}"
+   mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql
 elif [[ $CHOICE='stations' ]]; then
    printf "%s\n" "~ Just backing up the stations table of the dosimeter_network database"
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql"
