@@ -66,7 +66,8 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 > Needs to be renamed or appended (>>) to authorized_keys and id_rsa.pub
 
 	~/.ssh/id_rsa
-> Rename the 'id_rsa kepler private key' 
+> Rename the 'id_rsa kepler private key' to id_rsa in ~/.ssh
+
 ---
 # Appendix
 
