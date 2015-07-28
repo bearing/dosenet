@@ -36,3 +36,5 @@ else
    printf "\t%b\n" "${RED}INVALID INPUT.${NC}"
    printf "%b\n" "Valid options: ${GREEN}all, stations or data${NC} \n ${BLUE}Try again!?${NC}"
 fi
+
+ls ~/*.sql
