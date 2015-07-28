@@ -394,40 +394,40 @@
 		sv = sel.options[sel.selectedIndex].value;
 		switch(sv) {
 			case 'cigarette':
-			        document.getElementById("text_field").innerHTML = 
+		        document.getElementById("text_field").innerHTML = 
 				"<div class =\"jumbotron\" >" +
 				"<div class =\"jh5\">" + 
-				"Cigarettes" +  
+				"Cigarettes (1.5 cartons = 9 µSv)</a>" +  
 				"</div>" +  
 				"<div class =\"jp\">" +
-				"'While cigarette smoke is not an obvious source of radiation exposure, it contains small amounts of radioactive materials which smokers bring into their lungs as they inhale. The radioactive particles lodge in lung tissue and over time contribute a huge radiation dose. Radioactivity may be one of the key factors in lung cancer among smokers.' See <a href=\"http://www.epa.gov/radiation/sources/tobacco.html\">U.S. Environmental Protection Agency</a>" + 
+				"'While cigarette smoke is not an obvious source of radiation exposure, it contains small amounts of radioactive materials [polonium-210 and lead-210] which smokers bring into their lungs as they inhale. The radioactive particles lodge in lung tissue and over time contribute a huge radiation dose. Radioactivity may be one of the key factors in lung cancer among smokers.' See <a href=\"http://www.epa.gov/radiation/sources/tobacco.html\">U.S. Environmental Protection Agency</a>" + 
 				"<br><br><a href=\"http://www.ncrponline.org/Learn_More/Did_You_Know_95.html\">Equivalent dose estimation</a>" +
-				"...'greatest contributor to the effective population dose equivalent of all consumer products. In fact, tobacco products probably would have been the greatest single contributor to the effective population dose equivalent of all radiation sources, including natural background sources and medical radiation [NCRP Report No. 93 summarizing exposures from all sources (NCRP, 1987a)].'"
+				"...'greatest contributor to the effective population dose equivalent of all consumer products. In fact, tobacco products probably would have been the greatest single contributor to the effective population dose equivalent of all radiation sources, including natural background sources and medical radiation [NCRP Report No. 93 summarizing exposures from all sources (NCRP, 1987a)].'" +
+				"<br><br>This unit compares how many cigarettes would give you the same dose as standing at this location for 10 minutes. <br><a href=\"http://www.rmeswi.com/36.html\">Radiation Measurement and Elimination Services</a>" +
 				"</div>" +  
 				"</div>";
 			break;
 			case 'plane':
-			        document.getElementById("text_field").innerHTML = 
+		        document.getElementById("text_field").innerHTML = 
 				"<div class =\"jumbotron\" >" +
 				"<div class =\"jh5\">" + 
-				"Minutes on Airplane (2.38 µSv per hour)" +  
+				"Time on Airplane (2.38 µSv per hour)" +  
 				"</div>" +  
 				"<div class =\"jp\">" +
-				"Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude means the air is thinner. With thinner air, there is less protection from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground. This unit compares how many minutes on an airplane would give you the same dose as standing at this location for 10 minutes. <br><a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public information</a>" + 
+				"Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude means the air is thinner. With thinner air, there is less protection from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground." +
+				"<br><br>This unit compares how many minutes on an airplane would give you the same dose as standing at this location for 10 minutes. <br><a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public information</a>" + 
 				"</div>" +  
 				"</div>";
 			break;
 			case 'medical':
-			        document.getElementById("text_field").innerHTML = 
+		        document.getElementById("text_field").innerHTML = 
 				"<div class =\"jumbotron\">" +  
 				"<div class =\"jh5\">" + 
-				"Medical Procedures" + 
+				"Medical Procedures (X-ray = 5 - 15 µSv, Chest CT = 7 mSv)" + 
 				"</div>" + 
 				"<div class =\"jp\">" + 
-				"Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure. The units here compare how many of each type of image would need to be taken to give you the same dose as standing at this location for 10 minutes." + 
-				"Dental X-Ray (5 to 15 µSv)" + 
-				"Hand X-Ray (5 uSv)" + 
-				"Chest CT Scan (7mSv)" + 
+				"Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure." + 
+				"<br><br>The units here compare how many 5 µSv X-rays would need to be taken to give you the same dose as standing at this location for 10 minutes." + 
 				"<br><a href=\"http://www.radiologyinfo.org/en/pdf/sfty_xray.pdf\">Radiology information</a>" + 
 				"<br><a href=\"http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html\">NRC - Daily lives</a>" + 
 				"</div>"
@@ -440,7 +440,7 @@
 				"CPM" + 
 				"</div>" + 
 				"<div class =\"jp\">" + 
-				"Counts per minute on that detector scaled from a $$$ minute measurement time" + 
+				"Counts per minute on that detector scaled from a 5 minute measurement time" + 
 				"</div>" + 
 				"</div>";
 			break;
@@ -500,17 +500,77 @@
 		return iframeIntro + markerURL + iframeEnding;
 	}
 
-	// Can be used to get the units for the plot, called in returnContent
+	// Can be used to get the timeframe for a plot, called in returnContent
 	function getTimeframe(){
 		var sel_time = document.getElementById('time_dropdown');
 		return sel_time.options[sel_time.selectedIndex].value;
 	}
 
-	// Can be used to get the timeframe for a plot, called in returnContent
+	// Can be used to get the units for the plot, called in returnContent
 	function getUnit(){
 		var sel = document.getElementById('dose_dropdown');
 		return sel.options[sel.selectedIndex].value;
 	}
+
+	function getData(){
+		get_unit_type();
+
+		var sel = document.getElementById('dose_dropdown');
+		sv = sel.options[sel.selectedIndex].value;
+
+		// url for geoJSON file
+		// To solve browser caching issue
+        var url = 'https://radwatch.berkeley.edu/sites/default/files/output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
+		var json = $($.parseJSON(JSON.stringify($.getJSON(url))))
+
+		// Fetch geoJSON file
+		// Runs function on complete, data is the data extracted from geoJSON
+		$.getJSON(url, function(data){
+			// For each item in "features" array inside data runs function
+			// key is the position of the item in the array Features
+			// val is the value in of the item
+			var i = 0;
+			$.each(data.features, function(key, val){
+				// Get val info
+				// Geometry position
+				var lon = val.geometry.coordinates[0]
+				var lat = val.geometry.coordinates[1]
+
+				//Latest Dose (CPM) value
+				var sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				//var	sel_unit = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+				switch(sv) {
+					case 'CPM':
+						sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
+					break;
+					case 'REM':
+						sel_unit = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+					break;
+					case 'USV':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
+					break;
+					case 'plane':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
+					break;
+					case 'cigarette':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
+					break;
+					case 'medical':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
+					break;
+				}
+				var latest = "&nbsp"+sel_unit+"&nbsp"+getUnit()+"&nbsp";
+		        
+		        var marker = markers[i];
+		        marker.setContent(latest);
+		        i++;
+	      	});
+
+			var mcOptions = {gridSize: 40, maxZoom: 15};
+			var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+		});	
+	}
+
 	$(document).ready(function(){
 		// Run initialize to generate new map
 		map = new google.maps.Map(document.getElementById('map-canvas'), {
@@ -518,6 +578,8 @@
 			disableDefaultUI: true
 		});
 
+		var sel = document.getElementById('dose_dropdown');
+		sv = sel.options[sel.selectedIndex].value;
 		// Automatically centers map on Berkeley, this could be changed for any array of coorinates defined above
 		centerMap(berkeley);
 
@@ -539,7 +601,29 @@
 				var lat = val.geometry.coordinates[1]
 
 				//Latest Dose (CPM) value
-				var latest = "&nbsp"+(val.properties["Latest dose (CPM)"]).toFixed(1)+"&nbsp"+getUnit()+"&nbsp";
+				var sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				//var	sel_unit = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+				switch(sv) {
+					case 'CPM':
+						sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
+					break;
+					case 'REM':
+						sel_unit = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+					break;
+					case 'USV':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
+					break;
+					case 'plane':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
+					break;
+					case 'cigarette':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
+					break;
+					case 'medical':
+						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
+					break;
+				}
+				var latest = "&nbsp"+sel_unit+"&nbsp"+getUnit()+"&nbsp";
 		        
 		        // Creates Google Maps Objects
 		        // Infowindow
@@ -554,9 +638,10 @@
 		            labelAnchor: new google.maps.Point(20, 0),
 		            labelClass: "labels",
 		        });
+		        marker.setContent(latest);
 
 		        markers.push(marker);
-
+		        console.log(marker);
 		        // Sets Marker Icon to Red Icon
 		        // Can be changed to anything from [red, green, yellow, purple, green]
 		        marker.setIcon('https://maps.google.com/mapfiles/ms/icons/red-dot.png');
@@ -576,6 +661,7 @@
 		      	google.maps.event.addListener(map, 'click', function() {
 					infowindow.close()
 				});
+				google.maps.event.addListener(marker, 'property changed', setVisible() );
 	      	});
 
 			var mcOptions = {gridSize: 40, maxZoom: 15};
@@ -583,7 +669,7 @@
 		});	
 	});
 	// How to implement these agin without using a 'main' function wrapper?
-	//google.maps.event.addDomListener(window, 'load', main);
+	//google.maps.event.addListener(map, 'click', main);
 	//setInterval(main, 1000);
 	</script>
 </head>
@@ -600,8 +686,8 @@
 					<div class="label label-info">
 						Units to Display on Plots
 					</div>
-					<select id="dose_dropdown" class="dropdown" onChange='get_unit_type()'>
-					<!--<select id="dose_dropdown" class="dropdown" onChange='getUnit()'>!-->
+					<select id="dose_dropdown" class="dropdown" onChange='getData()'>
+					<!--<select id="dose_dropdown" class="dropdown" onChange='get_unit_type()'>!-->
 						<option value="CPM">CPM</option>
 						<option value="REM">Millirem per Hour</option>
 						<option value="USV">µSv per Hour</option>
