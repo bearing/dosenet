@@ -23,15 +23,15 @@ STATIONS='stations'
 printf "%b\n" ">> You will need the database password for these operations - look in the \
 Google Drive /DoseNet/DatabaseAndNetworking/${GREEN}Networking Details.gdoc${NC}"
 
-if [[ $CHOICE=$ALL ]]; then
+if [[ "$CHOICE"="$ALL" ]]; then
    printf "%s\n" "~ Backing up the whole dosimeter_network database"
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql${NC}"
    mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql
-elif [[ $CHOICE=$STATIONS ]]; then
+elif [[ "$CHOICE"="$STATIONS" ]]; then
    printf "%s\n" "~ Just backing up the stations table of the dosimeter_network database"
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql"
    mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql
-elif [[ $CHOICE=$DATA ]]; then
+elif [[ "$CHOICE"="$DATA" ]]; then
    printf "%s\n" "~ Just backing up the dosnet (data) table of the dosimeter_network database"
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql"
    mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql
