@@ -11,7 +11,7 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 
 >		sudo ./udp_sender.py -f config-files/etchhall.csv
 
-> Must be launched as sudo (it accesses GPIO pins and low-level networking APIs) 
+> Must be launched as sudo (it accesses GPIO pins and low-level networking APIs)
 > `sudo ./udp_sender.py`
 
 	dosimeter.py
@@ -44,11 +44,29 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 	deleteDosimeter.py
 >
 
+	/mysql/backup_database.sh  all|stations|data
+> BASH script that backups subsets of the database (tables) or the whole thing to .sql files in /home/dosenet/ (~/). 
+   Example:
+
+		./database_backup.sh all
+		Password: ne170groupSpring2015  
+
+   Output files: *.sql in /home/dosenet/ (~/). 
+
+> 		backup_all_dosenet.sql
+> 		backup_dosnet_dosenet.sql
+> 		backup_stations_dosenet.sql
+
 ---
 ### DECF Kepler - Website & Drupal
 	/html/*
 > Copied into [Drupal interface](https://radwatch.berkeley.edu/user)
 
+	~/.ssh/id_rsa_dosenet.pub
+> Needs to be renamed or appended (>>) to authorized_keys and id_rsa.pub
+
+	~/.ssh/id_rsa
+> Rename the 'id_rsa kepler private key' 
 ---
 # Appendix
 
@@ -66,7 +84,7 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 + **GRIM** - open UDP injector
 
 		No logging:  ./udp_injector.sh
-		Log to file: ./udp_injector.sh > udp_injector.log 
+		Log to file: ./udp_injector.sh > udp_injector.log
 
    + Print encrypted message
    + Print decrypted message
