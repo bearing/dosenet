@@ -15,7 +15,7 @@ BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 printf "%b\n" "\e~ Using shell: ${GREEN}`which bash`${NC}"
 args=("$@")
-printf "\n%s" "Number of arguments passed: " $#
+printf "\n%s\n" "Number of arguments passed: " $#
 CHOICE={args[0]}
 printf "%b\n" ">> You will need the database password for these operations - look in the \
 Google Drive /DoseNet/DatabaseAndNetworking/${GREEN}Networking Details.gdoc${NC}"
@@ -31,6 +31,6 @@ elif [[ $CHOICE = "data" ]]; then
    printf "%b\n" "~~ Using: ${BLUE}`mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql`"
 else
    printf "%b\n" "${RED}INVALID INPUT.${NC}"
-   printf "%s\n" "Valid options: all, stations or data"
+   printf "%b\n" "${GREEN}Valid options: all, stations or data${NC}"
    printf "%s\n" "Try again!?"
 fi
