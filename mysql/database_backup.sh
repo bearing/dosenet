@@ -17,6 +17,7 @@ printf "%b\n" "\e~ Using shell: ${GREEN}`which bash`${NC}"
 args=("$@")
 printf "\n%s\n" "Number of arguments passed: " $#
 CHOICE={args[0]}
+echo $CHOICE
 printf "%b\n" ">> You will need the database password for these operations - look in the \
 Google Drive /DoseNet/DatabaseAndNetworking/${GREEN}Networking Details.gdoc${NC}"
 
