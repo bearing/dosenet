@@ -26,11 +26,11 @@ if [[ "$CHOICE" == "all" ]]; then
    mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql
 elif [[ "$CHOICE" == "stations" ]]; then
    printf "%s\n" "~ Just backing up the stations table of the dosimeter_network database"
-   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql"
+   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql${NC}"
    mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql
 elif [[ "$CHOICE" == "data" ]]; then
    printf "%s\n" "~ Just backing up the dosnet (data) table of the dosimeter_network database"
-   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql"
+   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql${NC}"
    mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql
 else
    printf "\t%b\n" "${RED}INVALID INPUT.${NC}"
