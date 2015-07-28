@@ -3,7 +3,7 @@
 #description: :This shall backup subsets of the dosimeter_network database.
 #author:      :Navrit Bal
 #date:        :20150728
-#version:     :0.1
+#version:     :1.0
 #usage:       :./database_backup.sh
 #notes:       :Have fun Joey!
 #bash_version :4.2.25(1)-release
@@ -25,21 +25,21 @@ if [[ "$CHOICE" == "all" ]]; then
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql${NC}"
    mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql
    stat ~/backup_all_dosenet.sql | grep File
-   stat ~/backup_all_dosenet.sql | grep Size
+   ls -lah ~/backup_all_dosenet.sql | awk -F " " {'print $5'}
    stat ~/backup_all_dosenet.sql | grep Modify
 elif [[ "$CHOICE" == "stations" ]]; then
    printf "%s\n" "~ Just backing up the stations table of the dosimeter_network database"
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql${NC}"
    mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql
    stat ~/backup_stations_dosenet.sql | grep File
-   stat ~/backup_stations_dosenet.sql | grep Size
+   ls -lah ~/backup_stations_dosenet.sql | awk -F " " {'print $5'}
    stat ~/backup_stations_dosenet.sql | grep Modify
 elif [[ "$CHOICE" == "data" ]]; then
    printf "%s\n" "~ Just backing up the dosnet (data) table of the dosimeter_network database"
    printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql${NC}"
    mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql
    stat ~/backup_dosnet_dosenet.sql | grep File
-   stat ~/backup_dosnet_dosenet.sql | grep Size
+   ls -lah ~/backup_dosnet_dosenet.sql | awk -F " " {'print $5'}
    stat ~/backup_dosnet_dosenet.sql | grep Modify
 else
    printf "\t%b\n" "${RED}INVALID INPUT.${NC}"
