@@ -124,6 +124,12 @@ class DataDestroyer:
             self.runSQL(sql)
             if self.log:
                 self.appendLog(sql,msg)
+        print '\t ~ Delete all the data for this stations? ~'
+        if self.confirm():
+            sql = "DELETE FROM dosnet WHERE ID = %s;" % self.ID
+        self.runSQL(sql)
+        if self.log:
+            self.appendLog(sql,msg)
 
     def deleteDataBefore(self):
         select = "SELECT * FROM dosnet WHERE ID = %s \
@@ -261,7 +267,7 @@ class DataDestroyer:
             pass
         elif self.dropstations:
             pass
-        else: # default, delete stations            
+        else: # default, delete stations
             remaining = self.runSQL("SELECT Name FROM stations;",everything=True)
             print '~~~ Remaining stations! ~~~'
             print remaining
