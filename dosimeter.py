@@ -100,16 +100,18 @@ class Dosimeter:
 
     def countsToArr(self):
         self.counts = np.array(self.counts, dtype='M8[us]')
-            # This dtype is super close to an open bug, this is a workaround?
 
     def countsToList(self):
         self.counts = self.counts.tolist()
 
     def resetCounts(self, seconds = 300):
-        self.countsToArr()
-        # Saves only the last number of seconds of events
-        self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
-        self.countsToList()
+        try:
+            self.countsToArr()
+            # Saves only the last number of seconds of events
+            self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
+            self.countsToList()
+        except Exception as e:
+            pass
 
     def getCount(self):
         return float(len(self.counts))
