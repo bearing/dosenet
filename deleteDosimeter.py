@@ -273,7 +273,7 @@ If there was more than one return above, you should QUIT.'
             print remaining
 
 if __name__ == "__main__":
-    print 'Hi Joey!'
+    print '\t\t\t ~~ Hai Joey! ~~'
     print 'This script deletes data from the dosimeter network database on GRIM'
     print 'Are you sure you want to proceed??? (Type "yes" to proceed) \n$ '
     if raw_input() == 'yes':
