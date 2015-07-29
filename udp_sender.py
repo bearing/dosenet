@@ -80,8 +80,13 @@ class Sender:
     def initVariables(self):
         public_key = ['id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
-        self.IP = 'grim.local' # Dynamic local IP for GRIM (when the router settings are purged, this should still work...)
-            #'192.168.1.101' # local static IP for grim.nuc.berkeley.edu
+        # Gets GRIM's actual local IP address
+        self.IP = ([(s.connect(('8.8.8.8', 80)),
+                s.getsockname()[0],
+                s.close()) for s in [socket.socket(socket.AF_INET,
+                                                    socket.SOCK_DGRAM)]][0][1])
+        # Dynamic local IP for GRIM (when the router settings are purged, this should still work...)
+        #'192.168.1.101' # local static IP for grim.nuc.berkeley.edu
         self.port = 5005
         if self.args.ip:
             print '\n\t PS. %s is GRIM' % self.IP

@@ -20,6 +20,7 @@ for el in import_list:
     sys.path.append( os.path.abspath(os.path.join(os.getcwd(),el)) )
 from crypt import cust_crypt as ccrypt
 from udp import udp_tools as udpTool
+import socket
 
 # class Parser:
     # Do this later
