@@ -74,6 +74,7 @@ class Injector:
                 s.getsockname()[0],
                 s.close()) for s in [socket.socket(socket.AF_INET,
                                                     socket.SOCK_DGRAM)]][0][1])
+        print self.IP
         #'192.168.1.101' #GRIM 'Database' IP - default behaviour
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
