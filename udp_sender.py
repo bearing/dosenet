@@ -80,10 +80,11 @@ class Sender:
     def initVariables(self):
         public_key = ['id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
-        self.IP = '192.168.1.101' # local static IP for grim.nuc.berkeley.edu
+        self.IP = 'grim.local' # Dynamic local IP for GRIM (when the router settings are purged, this should still work...)
+            #'192.168.1.101' # local static IP for grim.nuc.berkeley.edu
         self.port = 5005
         if self.args.ip:
-            print '\n\t PS. 192.168.1.101 is GRIM'
+            print '\n\t PS. %s is GRIM' % self.IP
             self.IP = self.args.ip[0] #Send to custom IP if testing
         if self.args.test:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
