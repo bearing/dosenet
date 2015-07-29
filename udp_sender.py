@@ -97,7 +97,10 @@ class Sender:
         from dosimeter import Dosimeter
         det = Dosimeter(LED=self.LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            time.sleep(300)
+            if self.args.test:
+                time.sleep(5)
+            else:
+                time.sleep(300)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM(accumulation_time = 300)
