@@ -21,7 +21,7 @@ class Sender:
             help='\n\t Testing CSV file handling, you should probably use --filename to specify a \
                 non-default CSV file. \n Note: CSV - Comma Separated Variable text file')
         #
-        parser.add_argument('--filename','-f',nargs='?',type=str,default='config-files/test-onerow.csv',
+        parser.add_argument('--filename','-f',nargs='?',type=str,default='/home/pi/dosenet/config-files/test-onerow.csv',
             help='\n\t Must link to a CSV file with  \n \
                 Default is \"config-files/test-onerow.csv\" - no \"')
         #
