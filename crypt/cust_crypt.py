@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Crypto.PublicKey import RSA as rsa
 
 class public_d_encrypt:
