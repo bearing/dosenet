@@ -9,6 +9,7 @@
 # X-Interactive:     false
 # Short-Description: DoseNet - sends UDP packets to the GRIM for the DoseNet project
 ### END INIT INFO
+CONFIGFILE=etchhall.csv
 HOME=/home/pi
 DOSENET=$HOME/dosenet
 CONDA=$HOME/miniconda/bin
@@ -18,7 +19,7 @@ date >> $LOG
 case "$1" in
   start)
     echo "Starting DoseNet script" >> $LOG
-    $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/etchhall.csv >> $LOG &
+    $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/$CONFIGFILE >> $LOG &
     date >> $LOG
     ;;
   stop)
