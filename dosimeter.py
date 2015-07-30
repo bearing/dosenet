@@ -50,16 +50,9 @@ class Dosimeter:
             threaded_callback=False, debounce_timeout_ms=1)"""
 
     def updateCount_basic(self, channel=24):
-        # WHICH IS FASTER??~?!?!!
-        t0 = time.time()
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '  COUNT:',now            # Print to screen
-        print time.time() - t0
-        t0 = time.time()
-        self.counts.append(datetime.datetime.now())         # Update datetime List
-        print '  COUNT:',datetime.datetime.now()            # Print to screen
-        print time.time() - t0
         self.blink(pin=20, frequency=1) # Blink count LED (#20)
 
     """def updateNoise(self,channel=23):
