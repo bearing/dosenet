@@ -105,11 +105,9 @@ class Dosimeter:
             self.countsToArr()
             """Saves only the last number of seconds of events
             Moving window
-                self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
             Will lead to exponential decay behaviour...
-            Changing to fixed window scheme.
-            """
-            self.counts = []
+            Change to fixed window scheme?"""
+            self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
             self.countsToList()
         except Exception as e:
             pass
