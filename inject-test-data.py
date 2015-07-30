@@ -41,7 +41,7 @@ if args.weeks:
 cpm = 1.0
 cpmError = 1.0
 errorFlag = 0
-receiveTime = datetime.datetime.now() #+ datetime.timedelta(hours = -1)
+receiveTime = datetime.datetime.now() + datetime.timedelta(years = 1)
 
 for t in range(0, int(iterations)): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
 	# TIME INCREMENT --> add 5 minutes
@@ -52,7 +52,7 @@ for t in range(0, int(iterations)): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 -
 		#stationID = i
 		cpm = abs(random()* (math.sin(stationID)* 10. ** 1))
 		cpmError = math.sqrt(cpm)
-		errorFlag = randint(0,1)
+		errorFlag = 127 # Test data error code
 		# without time
 		# cursor.execute("""INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) VALUES (%s,%s,%s,%s);""",(stationID,cpm,cpmError,errorFlag))
 		try:
