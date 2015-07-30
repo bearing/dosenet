@@ -19,7 +19,7 @@ date >> $LOG
 case "$1" in
   start)
     echo "Starting DoseNet script" >> $LOG
-    $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/$CONFIGFILE >> $LOG &
+    sudo $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/$CONFIGFILE >> $LOG &
     date >> $LOG
     ;;
   stop)
