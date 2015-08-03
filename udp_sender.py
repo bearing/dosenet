@@ -13,6 +13,7 @@ import os
 import csv
 import sys
 import argparse
+import RPi.GPIO as GPIO
 
 class Sender:
     def parseArguments(self):
@@ -95,12 +96,14 @@ class Sender:
             print '\t\t ~~~~ Testing complete ~~~~'
         import RPi.GPIO as GPIO
         from dosimeter import Dosimeter
-        det = Dosimeter(LED=self.LED)  # Initialise dosimeter object from dosimeter.py
+        det = Dosimeter(LED = self.LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             if self.args.test:
-                pass #sleep(10)
+                sleep(5)
             else:
                 sleep(300)
+            GPIO.remove_event_detect(24)
+            GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM(accumulation_time = 10)
