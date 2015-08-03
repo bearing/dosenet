@@ -40,14 +40,11 @@ class Injector:
         """ Deeply integrated parsing - to be decoupled from the main class later.
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('--test', action="store_true", required = False,
-            help = '\n\t Listening on localhost:5005')
+        parser.add_argument('-v', action="store_true", required = False,
+            help = '\n\t Will print ')
         self.args = parser.parse_args()
-        if self.args.test:
-            pass # Cannot import these modules on Macs - test other features.
-        else:
-            from mysql import mysql_tools as mySQLTool
-            self.db = mySQLTool.SQLObject()
+        from mysql import mysql_tools as mySQLTool
+        self.db = mySQLTool.SQLObject()
 
     def initialise(self):
         """ Effectively __init__ - makes all class attributes (encryption and networking objects).
@@ -60,9 +57,9 @@ class Injector:
             port (int) - Which port to listen for any traffic on. Depends on what Ryan
                 chooses to open for us on the 1110C subnet.
                 Default: 5005
-            IP (String) - Which address is the database (GRIM) at.
-                Default: '192.168.1.101'
-                Testing: '127.0.0.1'
+            IP (String) - Which address is the database (GRIM) at - dynamically determined.
+                Default: '192.168.1.105'
+                Note: this address is not necessarily static
             socket (custSocket) - Refer to the udp_tools.py in the udp folder.
                 Sets up UDP only socket to listen on given IP, port and a decryption object.
         """
@@ -74,8 +71,7 @@ class Injector:
                 s.getsockname()[0],
                 s.close()) for s in [socket.socket(socket.AF_INET,
                                                     socket.SOCK_DGRAM)]][0][1])
-        print self.IP
-        #'192.168.1.101' #GRIM 'Database' IP - default behaviour
+        print self.IP # '192.168.1.105' - current GRIM 'Database' IP - default behaviour
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
     def main(self):
@@ -95,8 +91,7 @@ class Injector:
                 print 'Received message:', data
                 if self.args.test:
                     print 'Message received on IP:port @ ', self.IP ,':', self.port
-                else:
-                    self.db.inject(data) # Verifying the packets happens in here
+                self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
                 print ('Exit cleaning')
                 del self.db # Manual garbage collection
