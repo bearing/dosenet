@@ -100,11 +100,11 @@ class Sender:
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             if self.args.test:
                 GPIO.remove_event_detect(24)
-                GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=100)
+                GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
                 sleep(5)
             else:
                 GPIO.remove_event_detect(24)
-                GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=100)
+                GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
                 sleep(10)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
