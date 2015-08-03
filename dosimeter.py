@@ -41,7 +41,7 @@ class Dosimeter:
         GPIO.setmode(GPIO.BCM) # Use Broadcom GPIO numbers - GPIO numbering system eg. GPIO 23 > pin 16. Not BOARD numbers, eg. 1, 2 ,3 etc.
         GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP) # SIG Sets up radiation detection; Uses pull up resistor on RPi
         #GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
-        #GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=200)
+        GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=100)
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
         GPIO.setup(LED, GPIO.OUT)
         """RPIO.setmode(GPIO.BCM
@@ -52,8 +52,8 @@ class Dosimeter:
     def updateCount_basic(self, channel=24):
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
-        print '  COUNT:',now            # Print to screen
-        #self.blink(pin=20, frequency=1) # Blink count LED (#20)
+        print '~~~  COUNT:',now            # Print to screen
+        self.blink(pin=20, frequency=1) # Blink count LED (#20)
 
     """def updateNoise(self,channel=23):
         if not self.first_noise:
@@ -200,12 +200,12 @@ if __name__ == "__main__":
     print ' Waiting for Ctrl + C'
     MEASURE_TIME = 10
     count = 0
-    GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
+    GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=100)
     while True:
         try: # getCPM
             sleep(1)
             GPIO.remove_event_detect(24)
-            GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
+            GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=100)
             cpm, cpm_err = det.getCPM(accumulation_time = MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
