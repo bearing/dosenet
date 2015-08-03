@@ -90,7 +90,7 @@ class Injector:
             try:
                 data = self.socket.listen()
                 print 'Received message:', data
-                if self.args.test:
+                if self.args.v:
                     print 'Message received on IP:port @ ', self.IP ,':', self.port
                 self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
