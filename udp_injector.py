@@ -94,7 +94,7 @@ class Injector:
                     print 'Message received on IP:port @ ', self.IP ,':', self.port
                 self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
-                print ('Exit cleaning')
+                print ('\nExit cleaning')
                 del self.db # Manual garbage collection
                 sys.exit(0)
             except (Exception) as e:

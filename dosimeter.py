@@ -117,12 +117,16 @@ class Dosimeter:
 
     def getCPM(self, accumulation_time = 300):
         now = datetime.datetime.now()
+        print 'Now:', now
         count = self.getCount()
+        print 'Count:', count
         if count < 2:
             return 0, 0
         count_err = np.sqrt(count)
         counting_time = (now - self.counts[0]).total_seconds()
+        print 'Counting time:', counting_time
         cpm = count / counting_time * 60
+        print 'CPM:', cpm
         cpm_err = count_err / counting_time * 60
         #print '\t\t~~ Count: ',count,' ~~ CPM: ', cpm
         # Resets the averaging every 5 minutes
@@ -190,7 +194,7 @@ if __name__ == "__main__":
     #det.updateNoise()
     #print det.noise
     #
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print '~~~~ Basic testing done. Entering while True loop ~~~~'
     print ' Waiting for Ctrl + C'
     MEASURE_TIME = 60

@@ -92,7 +92,7 @@ class Sender:
 
     def main(self):
         if self.args.test:
-            print '\t\t ~~~~ Testing complete, try a Raspberry Pi! ~~~~'
+            print '\t\t ~~~~ Testing complete ~~~~'
         import RPi.GPIO as GPIO
         from dosimeter import Dosimeter
         det = Dosimeter(LED=self.LED)  # Initialise dosimeter object from dosimeter.py
@@ -103,7 +103,7 @@ class Sender:
                 time.sleep(300)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
-                    cpm, cpm_error = det.getCPM(accumulation_time = 300)
+                    cpm, cpm_error = det.getCPM(accumulation_time = 10)
                     count = det.getCount()
                     if self.args.test:
                         print 'Count: ',count,' - CPM: ',cpm
