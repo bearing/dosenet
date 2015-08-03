@@ -125,7 +125,9 @@ class Sender:
                         packet = self.pe.encrypt_message(package)[0]
                         if self.args.test:
                             print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
+                        t0 = time.time()
                         self.socket.sendto(packet, (self.IP, self.port))
+                        print time.time() - t0
                         print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
                 else:
                     if self.args.test:
