@@ -118,16 +118,12 @@ class Dosimeter:
 
     def getCPM(self, accumulation_time = 300):
         now = datetime.datetime.now()
-        print 'Now:', now
         count = self.getCount()
-        print 'Count:', count
         if count < 2:
             return 0, 0
         count_err = np.sqrt(count)
         counting_time = (now - self.counts[0]).total_seconds()
-        print 'Counting time:', counting_time
         cpm = count / counting_time * 60
-        print 'CPM:', cpm
         cpm_err = count_err / counting_time * 60
         #print '\t\t~~ Count: ',count,' ~~ CPM: ', cpm
         # Resets the averaging every 5 minutes
@@ -157,13 +153,10 @@ class Dosimeter:
     def blink(self, pin=20, frequency = 1, number_of_flashes = 1):
         try:
             for i in range(0, number_of_flashes):
-                #print 'Blinking on Pin #:',pin,' - ',datetime.datetime.now()
-                print '\t\t Flash' # Flash
+                print '\t\t Flash #', pin # Flash
                 self.activatePin(pin)
-                time.sleep(frequency/2)
+                sleep(frequency/2)
                 self.deactivatePin(pin)
-                time.sleep(frequency/2)
-                #print 'Just blinked Pin #:',pin,' - ',datetime.datetime.now()
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
             GPIO.cleanup()
