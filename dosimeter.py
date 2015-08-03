@@ -102,17 +102,17 @@ class Dosimeter:
 
     def resetCounts(self, seconds = 300):
         try:
-            print counts
+            print self.counts
             self.countsToArr()
             """Saves only the last number of seconds of events
             Moving window
             Will lead to exponential decay behaviour...
             Change to fixed window scheme?"""
-            print counts
+            print self.counts
             self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
-            print counts
+            print self.counts
             self.countsToList()
-            print counts
+            print self.counts
         except Exception as e:
             raise e
             pass
