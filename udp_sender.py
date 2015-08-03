@@ -96,8 +96,8 @@ class Sender:
             print '\t\t ~~~~ Testing complete ~~~~'
         import RPi.GPIO as GPIO
         from dosimeter import Dosimeter
-        GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=200)
         det = Dosimeter(LED = self.LED)  # Initialise dosimeter object from dosimeter.py
+        GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             if self.args.test:
                 sleep(5)
