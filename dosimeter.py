@@ -102,13 +102,17 @@ class Dosimeter:
 
     def resetCounts(self, seconds = 300):
         try:
+            print counts
             self.countsToArr()
             """Saves only the last number of seconds of events
             Moving window
             Will lead to exponential decay behaviour...
             Change to fixed window scheme?"""
+            print counts
             self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
+            print counts
             self.countsToList()
+            print counts
         except Exception as e:
             pass
 
@@ -132,7 +136,7 @@ class Dosimeter:
         # Resets the averaging every 5 minutes
         if(counting_time > accumulation_time): ########## Last 5 mintues of data
             print '\n\t\t ~~~~ RESET ~~~~\n'
-            self.resetCounts()
+            self.resetCounts(seconds = accumulation_time)
         return cpm, cpm_err
 
     def ping(self, hostname):
