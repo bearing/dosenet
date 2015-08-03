@@ -29,7 +29,7 @@ import random
 #       GPIO.HIGH - 3.3V or 5V ???? (RPi rail voltage)
 
 class Dosimeter:
-    def __init__(self, LED=20):
+    def __init__(self, LED = 20):
         self.counts = [] # Datetime list
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
