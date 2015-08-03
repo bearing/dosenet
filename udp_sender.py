@@ -101,7 +101,7 @@ class Sender:
             if self.args.test:
                 GPIO.remove_event_detect(24)
                 GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
-                sleep(5)
+                sleep(10)
             else:
                 GPIO.remove_event_detect(24)
                 GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
@@ -114,6 +114,7 @@ class Sender:
                         print 'Count: ',count,' - CPM: ',cpm
                         print '\t~~~ Activate LED ~~~'
                     else:
+                        print 'Count: ',count,' - CPM: ',cpm
                         det.activatePin(self.LED) # LIGHT UP
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         error_code = 0 # Default 'working' state - error code 0
