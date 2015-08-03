@@ -45,7 +45,7 @@ class Injector:
         self.args = parser.parse_args()
         from mysql import mysql_tools as mySQLTool
         self.db = mySQLTool.SQLObject()
-        print db
+        print self.db
 
     def initialise(self):
         """ Effectively __init__ - makes all class attributes (encryption and networking objects).
