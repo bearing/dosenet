@@ -102,17 +102,13 @@ class Dosimeter:
 
     def resetCounts(self, seconds = 300):
         try:
-            print self.counts
             self.countsToArr()
             """Saves only the last number of seconds of events
             Moving window
             Will lead to exponential decay behaviour...
             Change to fixed window scheme?"""
-            print self.counts
             self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
-            print self.counts
             self.countsToList()
-            print self.counts
         except Exception as e:
             raise e
             pass
@@ -204,7 +200,7 @@ if __name__ == "__main__":
     print ' Waiting for Ctrl + C'
     MEASURE_TIME = 10
     count = 0
-    GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=200)
+    GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
     while True:
         try: # getCPM
             sleep(1)
