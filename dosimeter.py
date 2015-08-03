@@ -153,7 +153,7 @@ class Dosimeter:
     def blink(self, pin=20, frequency = 1, number_of_flashes = 1):
         try:
             for i in range(0, number_of_flashes):
-                print '\t\t * #', pin # Flash
+                print '\t\t * #%s' % pin # Flash
                 self.activatePin(pin)
                 sleep(frequency/2)
                 self.deactivatePin(pin)
