@@ -114,7 +114,7 @@ class Sender:
                         print 'Count: ',count,' - CPM: ',cpm
                         print '\t~~~ Activate LED ~~~'
                     else:
-                        print 'Count: ',count,' - CPM: ',cpm
+                        print 'Count: ',count,' - CPM: ',cpm,u'±',cpm_error
                         det.activatePin(self.LED) # LIGHT UP
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         error_code = 0 # Default 'working' state - error code 0
