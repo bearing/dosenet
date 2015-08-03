@@ -105,6 +105,7 @@ class Sender:
                 GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
             else:
                 sleep(300)
+            t0 = time.time()
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM(accumulation_time = 10)
@@ -125,10 +126,9 @@ class Sender:
                         packet = self.pe.encrypt_message(package)[0]
                         if self.args.test:
                             print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
-                        t0 = time.time()
                         self.socket.sendto(packet, (self.IP, self.port))
-                        print time.time() - t0
                         print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
+                        print time.time() - t0
                 else:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~'
