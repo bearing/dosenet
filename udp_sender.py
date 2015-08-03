@@ -103,10 +103,10 @@ class Sender:
             if self.args.test:
                 sleep(10)
             else:
-                sleep(10)
+                sleep(300)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
-                    cpm, cpm_error = det.getCPM(accumulation_time = 10)
+                    cpm, cpm_error = det.getCPM(accumulation_time = 300)
                     count = det.getCount()
                     if self.args.test:
                         print 'Count: ',count,' - CPM: ',cpm
