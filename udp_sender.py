@@ -98,7 +98,7 @@ class Sender:
         det = Dosimeter(LED=self.LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             if self.args.test:
-                sleep(10)
+                #sleep(10)
             else:
                 sleep(300)
             try:
