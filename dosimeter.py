@@ -206,7 +206,7 @@ if __name__ == "__main__":
     while True:
         try: # getCPM
             sleep(1)
-            GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=200)
+            GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
             cpm, cpm_err = det.getCPM(accumulation_time = MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
