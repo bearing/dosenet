@@ -20,7 +20,7 @@ from time import sleep
 import os
 import sys
 import random
-import RPIO
+#import RPIO
 
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
@@ -53,7 +53,7 @@ class Dosimeter:
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '  COUNT:',now            # Print to screen
-        self.blink(pin=20, frequency=1) # Blink count LED (#20)
+        #self.blink(pin=20, frequency=1) # Blink count LED (#20)
 
     """def updateNoise(self,channel=23):
         if not self.first_noise:
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print '~~~~ Basic testing done. Entering while True loop ~~~~'
     print ' Waiting for Ctrl + C'
-    MEASURE_TIME = 60
+    MEASURE_TIME = 10
     count = 0
     while True:
         try: # getCPM
