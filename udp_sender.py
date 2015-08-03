@@ -104,7 +104,7 @@ class Sender:
                 GPIO.remove_event_detect(24)
                 GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=200)
             else:
-                sleep(300)
+                sleep(10)
             try:
                 if det.ping(hostname = 'berkeley.edu'):
                     cpm, cpm_error = det.getCPM(accumulation_time = 10)
