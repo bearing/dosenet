@@ -114,6 +114,7 @@ class Dosimeter:
             self.countsToList()
             print counts
         except Exception as e:
+            raise e
             pass
 
     def getCount(self):
