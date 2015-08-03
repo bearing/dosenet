@@ -96,6 +96,8 @@ class Sender:
             print '\t\t ~~~~ Testing complete ~~~~'
         import RPi.GPIO as GPIO
         from dosimeter import Dosimeter
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         det = Dosimeter(LED = self.LED)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             if self.args.test:
