@@ -79,7 +79,7 @@ class Sender:
         self.msg_hash =  self.file_contents[0]['message_hash']
 
     def initVariables(self):
-        public_key = ['id_rsa_dosenet.pub']
+        public_key = ['/home/pi/dosenet/id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
         # Gets GRIM's actual local IP address
         self.IP = '192.168.1.105' # Gateway to GRIM from 1110B
