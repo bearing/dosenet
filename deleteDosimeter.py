@@ -285,13 +285,13 @@ if __name__ == "__main__":
             after = par.args.daterange[1]
         try:
             before = par.args.before
-            print before
+            print 'Before: ', before
             deleter.getArguments(ID,before)
         except:
             print 'No --before flag'
         try:
             after = par.args.after
-            print after
+            print 'After: ', after
             deleter.getArguments(ID,after)
         except:
             print 'No --after flag'
