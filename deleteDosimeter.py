@@ -79,29 +79,23 @@ class DataDestroyer:
         else:
             self.log = False
 
-    def getArguments(self,ID,**kwargs):
+    def getArguments(self,ID,arg):
         self.ID = ID
-        print kwargs
+        print arg
         self.before = False
         self.after = False
         self.dropdata = False
         self.dropstations = False
-        try:
-            self.before = kwargs['before']
-        except:
-            pass
-        try:
-            self.after = kwargs['after']
-        except:
-            pass
-        try:
-            self.dropdata = kwargs['dropdata']
-        except:
-            pass
-        try:
-            self.dropstations = kwargs['dropstations']
-        except:
-            pass
+        if arg == 'before':
+            self.before = True
+        elif arg == 'after':
+            self.after = True
+        elif arg == 'dropdata':
+            self.dropdata = True
+        elif arg == 'dropstations':
+            self.dropstations = True
+        else:
+            print '\t\t ~~~ No extra flags given ~~~'
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
             print 'Operating on ',self.name
