@@ -73,7 +73,6 @@ class DataDestroyer:
                                     "%s"' % self.secure_password
         self.could_not_append = 'ERROR: Could not append change to log file: ', \
                                 self.LOG_NAME, '\n EXITING NOW'
-        print log
         if log:
             self.log = True
         else:
@@ -97,24 +96,24 @@ class DataDestroyer:
             print '\t\t ~~~ No extra flags given ~~~'
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
-            print 'Operating on ',self.name
+            print '\t\t ~~~ Operating on ',self.name, ' ~~~'
         except Exception as e:
-            print 'ERROR: Could not get name of station. You should stop...'
+            print '\n\tERROR: Could not get name of station. You should stop...'
             print str(e)
             print '\n\t\t\t~~ EXIT? ~~'
             if self.confirm():
                 sys.exit(1)
         if self.log:
-            print 'Logging to ', self.LOG_NAME
+            print '\t\t ~~~ Logging to ', self.LOG_NAME, ' ~~~'
         self.main()
 
     def deleteStation(self):
         # Get station row that we're about to delete - append to log
-        msg = 'DELETING A STATION'
+        msg = '\t\t\t ~~~ DELETING A STATION ~~~'
         print msg
         select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT %s;" % (self.ID, self.limit))
         self.getDataSample(select=select,limit=self.limit)
-        print 'This will disable authentication of a dosimeter until readded \
+        print '\nThis will disable authentication of a dosimeter until readded \
 separately with addDosimeterToDB.py. \n \
 If there was more than one station above, you should QUIT.'
         if self.confirm():
@@ -271,9 +270,9 @@ If there was more than one station above, you should QUIT.'
             print remaining
 
 if __name__ == "__main__":
-    print '\t\t\t ~~ Hai Joey! ~~'
+    print '\n\t\t\t ~~ Hai Joey! ~~'
     print '\tThis script deletes data from the dosimeter network database on GRIM'
-    print '\tAre you sure you want to proceed??? (Type yes to proceed) \n$ '
+    print '\tAre you sure you want to proceed??? (Type yes to proceed)'
     if raw_input() == 'yes':
         par = Parser()
         ID = par.args.ID[0]
