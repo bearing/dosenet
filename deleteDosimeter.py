@@ -100,7 +100,7 @@ class DataDestroyer:
             print 'Operating on ',self.name
         except Exception as e:
             print 'ERROR: Could not get name of station. You should stop...'
-            raise e
+            print str(e)
             print '\n\t\t\t~~ EXIT? ~~'
             if self.confirm():
                 sys.exit(1)
