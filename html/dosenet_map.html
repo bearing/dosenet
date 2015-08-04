@@ -471,19 +471,20 @@
 		}
 
 	}
-	</script>
-	<script>
+</script>
+<script>
 	//Google Map Variable, global scope over script
 	var map;
 	var berkeley = [37.872269, -122.258901];
 	var markers = [];
+	var markerCluster;
 	var marks = []; // contains all infoWindows 
 
 	// Gives ability to center map on array of two points
 	// Input: Array, coordinates latitude longitude
 	function centerMap(center){
-		var mapCenter = new google.maps.LatLng(center[0], center[1])
-		map.setCenter(mapCenter)
+		var mapCenter = new google.maps.LatLng(center[0], center[1]);
+		map.setCenter(mapCenter);
 	}
 
 	function returnContent(val){
@@ -512,7 +513,39 @@
 		return sel.options[sel.selectedIndex].value;
 	}
 
+	function clearMarkers() {
+	  for (var i = 0; i < markers.length; i++) {
+	    markers[i].setMap(null);
+	  }
+	  markers = [];
+	}
+
+	function SetMarkerProperties(marker, infowindow, val)
+	{
+        // Sets Marker Icon to Red Icon
+        // Can be changed to anything from [red, green, yellow, purple, green]
+        marker.setIcon('https://maps.google.com/mapfiles/ms/icons/red-dot.png');
+
+        // Adds listener to open infowindow with content from returnContent()
+		// returnConent() will allow you to enter the graphs from the geoJSON file
+		google.maps.event.addListener(marker, 'click', (function(marker) {
+			return function() {
+				infowindow.setContent(returnContent(val));
+				infowindow.open(map, marker);
+			};
+		})(marker));
+
+		// Self added this because otherwise it's annoying, 
+		// This closes any info windows when anyone clicks the map
+		//Makes navigation a lot easier!
+		google.maps.event.addListener(map, 'click', function() {
+			infowindow.close();
+		});
+	}
+
 	function getData(){
+		markerCluster.clearMarkers();
+		clearMarkers();
 		get_unit_type();
 
 		var sel = document.getElementById('dose_dropdown');
@@ -521,7 +554,7 @@
 		// url for geoJSON file
 		// To solve browser caching issue
         var url = 'https://radwatch.berkeley.edu/sites/default/files/output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
-		var json = $($.parseJSON(JSON.stringify($.getJSON(url))))
+		var json = $($.parseJSON(JSON.stringify($.getJSON(url))));
 
 		// Fetch geoJSON file
 		// Runs function on complete, data is the data extracted from geoJSON
@@ -561,13 +594,25 @@
 				}
 				var latest = "&nbsp"+sel_unit+"&nbsp"+getUnit()+"&nbsp";
 		        
-		        var marker = markers[i];
-		        marker.setContent(latest);
-		        i++;
+		        // Infowindow
+		        var infowindow = new google.maps.InfoWindow();
+
+		        // Marker itself
+		        var marker = new MarkerWithLabel({
+		            map: map,
+		            title: name,
+		            position: new google.maps.LatLng(lat, lon),
+		            labelContent: latest,
+		            labelAnchor: new google.maps.Point(20, 0),
+		            labelClass: "labels",
+		        });
+
+		        markers.push(marker);
+
+		        SetMarkerProperties(marker, infowindow, val);
 	      	});
 
-			var mcOptions = {gridSize: 40, maxZoom: 15};
-			var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+			markerCluster.addMarkers(markers);
 		});	
 	}
 
@@ -624,11 +669,11 @@
 					break;
 				}
 				var latest = "&nbsp"+sel_unit+"&nbsp"+getUnit()+"&nbsp";
-		        
+
 		        // Creates Google Maps Objects
 		        // Infowindow
 		        var infowindow = new google.maps.InfoWindow();
-		        
+
 		        // Marker itself
 		        var marker = new MarkerWithLabel({
 		            map: map,
@@ -638,34 +683,14 @@
 		            labelAnchor: new google.maps.Point(20, 0),
 		            labelClass: "labels",
 		        });
-		        marker.setContent(latest);
 
 		        markers.push(marker);
-		        console.log(marker);
-		        // Sets Marker Icon to Red Icon
-		        // Can be changed to anything from [red, green, yellow, purple, green]
-		        marker.setIcon('https://maps.google.com/mapfiles/ms/icons/red-dot.png');
 
-		        // Adds listener to open infowindow with content from returnContent()
-				// returnConent() will allow you to enter the graphs from the geoJSON file
-				google.maps.event.addListener(marker, 'click', (function(marker) {
-			        return function() {
-			          	infowindow.setContent(returnContent(val));
-			          	infowindow.open(map, marker);
-			        }
-		      	})(marker));
-
-				// Self added this because otherwise it's annoying, 
-				// This closes any info windows when anyone clicks the map
-				//Makes navigation a lot easier!
-		      	google.maps.event.addListener(map, 'click', function() {
-					infowindow.close()
-				});
-				google.maps.event.addListener(marker, 'property changed', setVisible() );
+		        SetMarkerProperties(marker, infowindow, val);
 	      	});
 
 			var mcOptions = {gridSize: 40, maxZoom: 15};
-			var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+			markerCluster = new MarkerClusterer(map, markers, mcOptions);
 		});	
 	});
 	// How to implement these agin without using a 'main' function wrapper?
