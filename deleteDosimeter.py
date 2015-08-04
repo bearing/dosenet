@@ -266,7 +266,7 @@ If there was more than one station above, you should QUIT.'
         elif self.dropstations:
             pass
         else: # default, delete stations
-            remaining = self.runSQL("SELECT Name FROM stations;",less=True)
+            remaining = self.runSQL("SELECT Name FROM stations;", everything=True)
             print '~~~ Remaining stations! ~~~'
             print remaining
 
