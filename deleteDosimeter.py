@@ -81,7 +81,6 @@ class DataDestroyer:
 
     def getArguments(self,ID,arg):
         self.ID = ID
-        print arg
         self.before = False
         self.after = False
         self.dropdata = False
@@ -285,12 +284,13 @@ if __name__ == "__main__":
             before = par.args.daterange[0]
             after = par.args.daterange[1]
         try:
-            before = par.args.before[0]
+            before = par.args.before
+            print before
             deleter.getArguments(ID,before)
         except:
             print 'No --before flag'
         try:
-            after = par.args.after[0]
+            after = par.args.after
             print after
             deleter.getArguments(ID,after)
         except:
