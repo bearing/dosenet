@@ -297,6 +297,7 @@ if __name__ == "__main__":
             print 'No --before flag'
         try:
             after = par.args.after[0]
+            print after
             deleter.getArguments(ID,after)
         except:
             print 'No --after flag'
