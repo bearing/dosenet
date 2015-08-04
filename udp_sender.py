@@ -14,6 +14,7 @@ import csv
 import sys
 import argparse
 import RPi.GPIO as GPIO
+from dosimeter import Dosimeter
 
 class Sender:
     def parseArguments(self):
@@ -21,19 +22,25 @@ class Sender:
         parser.add_argument('--test', '-t',action='store_true',
             help='\n\t Testing CSV file handling, you should probably use --filename to specify a \
                 non-default CSV file. \n Note: CSV - Comma Separated Variable text file')
-        #
         parser.add_argument('--filename','-f',nargs='?',type=str,default='/home/pi/dosenet/config-files/test-onerow.csv',
             help='\n\t Must link to a CSV file with  \n \
                 Default is \"config-files/test-onerow.csv\" - no \"')
-        #
-        parser.add_argument('--led',nargs='?',required=False,type=int, default=20,
-            help='\n\t The BCM pin number of the + end of the communications LED\n')
+        parser.add_argument('--led_counts',nargs='?',required=False,type=int, default=20,
+            help='\n\t The BCM pin number of the + end of the count LED\n')
+        parser.add_argument('--led_power',nargs='?',required=False,type=int, default=19,
+            help='\n\t The BCM pin number of the + end of the power LED\n') # CHANGE DEFAULT
+        parser.add_argument('--led_network',nargs='?',required=False,type=int, default=18,
+            help='\n\t The BCM pin number of the + end of the networking LED - pings berkeley.edu\n') # CHANGE DEFAULT
                                        # nargs='?' means 0-or-1 arguments
         parser.add_argument('--ip',nargs=1,required=False,type=str)
-        #
         self.args = parser.parse_args()
         self.file_path = self.args.filename
-        self.LED = self.args.led #Default BCM Pin 7
+        self.led_network = self.args.led_network
+        self.led_power = self.args.led_power
+        self.led_counts = self.args.led_counts
+        self.LEDS = dict(led_network = self.led_network,
+                        led_power = self.led_power,
+                        led_counts = self.led_counts)
 
     def getContents(self,file_path):
         content = [] #list()
@@ -61,16 +68,13 @@ class Sender:
             print 'lat element:\t\t',self.file_contents[0]['lat']
             print 'long element:\t\t',self.file_contents[0]['long']
         else:
-            print '~ Normal run, loading Raspberry Pi specific modules'
+            print '~ Normal run, loading CSV configuration file'
             try:
-                import RPi.GPIO as GPIO
-                from dosimeter import Dosimeter
                 self.file_contents = self.getContents(self.file_path)
             except Exception, e:
-                print 'Were you looking for the test run? Use the -t or --test flag'
                 print '\n\tIs this running on a Raspberry Pi?'
                 print '\tIf so, make sure the \'RPi\' package is installed with conda and or pip\n'
-                print '------- Importing RPi.GPIO, dosimeter.py or getting the CSV file contents failed -------\n'
+                print '------- Getting the CSV file contents failed -------\n'
                 raise e
                 sys.exit(0)
 
@@ -86,7 +90,7 @@ class Sender:
         self.port = 5005
         if self.args.ip:
             print '\n\t PS. %s is GRIM' % self.IP
-            self.IP = self.args.ip[0] #Send to custom IP if testing
+            self.IP = self.args.ip #Send to custom IP if testing
         if self.args.test:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
@@ -94,10 +98,9 @@ class Sender:
     def main(self):
         if self.args.test:
             print '\t\t ~~~~ Testing complete ~~~~'
-        import RPi.GPIO as GPIO
-        from dosimeter import Dosimeter
-        det = Dosimeter(LED = self.LED)  # Initialise dosimeter object from dosimeter.py
+        det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
+            det.activatePin(self.LEDS['power'])
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             if self.args.test:
@@ -105,25 +108,20 @@ class Sender:
             else:
                 sleep(300)
             try:
-                if det.ping(hostname = 'berkeley.edu'):
+                if det.ping():
                     cpm, cpm_error = det.getCPM(accumulation_time = 300)
                     count = det.getCount()
-                    if self.args.test:
-                        print 'Count: ',count,' - CPM: ',cpm
-                        print '\t~~~ Activate LED ~~~'
-                    else:
-                        print 'Count: ',count,' - CPM: ',cpm,u'±',cpm_error
-                        det.activatePin(self.LED) # LIGHT UP
+                    det.activatePin(self.LEDS['network']) # LIGHT UP
+                    print 'Count: ',count,' - CPM: ',cpm,u'±',cpm_error
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         error_code = 0 # Default 'working' state - error code 0
                         now = datetime.datetime.now()
                         c = ','
                         package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
                                   str(cpm_error) +c+ str(error_code)
-                        if self.args.test:
-                            print '- '*64, '\nRaw message: ',package
                         packet = self.pe.encrypt_message(package)[0]
                         if self.args.test:
+                            print '- '*64, '\nRaw message: ',package
                             print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
                         self.socket.sendto(packet, (self.IP, self.port))
                         print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
@@ -131,15 +129,16 @@ class Sender:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~'
                     else:
-                        det.blink(self.LED, number_of_flashes = 10) # FLASH
+                        det.blink(self.LEDS['network'], number_of_flashes = 10) # FLASH
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
-                GPIO.cleanup()
-                sys.exit(0)
             except Exception as e:
-                GPIO.cleanup()
                 print str(e)
-                sys.exit(1)
+            finally:
+                GPIO.deactivatePin(self.LEDS['power'])
+                GPIO.deactivatePin(self.LEDS['network'])
+                GPIO.deactivatePin(self.LEDS['counts'])
+                GPIO.cleanup()
 
 if __name__ == "__main__":
     sen = Sender()

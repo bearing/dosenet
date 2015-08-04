@@ -29,7 +29,11 @@ import random
 #       GPIO.HIGH - 3.3V or 5V ???? (RPi rail voltage)
 
 class Dosimeter:
-    def __init__(self, LED = 20):
+    def __init__(self, led_network, led_power, led_counts):
+        self.LEDS = dict(led_network = led_network,
+                        led_power = led_power,
+                        led_counts = led_counts)
+        print 'LED pins (BCM): ', self.LEDS
         self.counts = [] # Datetime list
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
@@ -44,10 +48,6 @@ class Dosimeter:
         GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=1)
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
         GPIO.setup(LED, GPIO.OUT)
-        """RPIO.setmode(GPIO.BCM
-        RPIO.setup(24, GPIO.IN, pull_up_down=RPIO.PUD_UP)
-        RPIO.add_interrupt_callback(24, callback=testthing, edge='both',
-            threaded_callback=False, debounce_timeout_ms=1)"""
 
     def updateCount_basic(self, channel=24):
         now = datetime.datetime.now()
@@ -125,14 +125,12 @@ class Dosimeter:
         counting_time = (now - self.counts[0]).total_seconds()
         cpm = count / counting_time * 60
         cpm_err = count_err / counting_time * 60
-        #print '\t\t~~ Count: ',count,' ~~ CPM: ', cpm
-        # Resets the averaging every 5 minutes
         if(counting_time > accumulation_time): ########## Last 5 mintues of data
             print '\n\t\t ~~~~ RESET ~~~~\n'
             self.resetCounts(seconds = accumulation_time)
         return cpm, cpm_err
 
-    def ping(self, hostname):
+    def ping(self, hostname='berkeley.edu'):
         response = os.system('ping -c 1 '  + hostname + '> /dev/null')
         # and then check the response...
         if response == 0:
@@ -159,12 +157,8 @@ class Dosimeter:
                 self.deactivatePin(pin)
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
-            GPIO.cleanup()
-            sys.exit(0)
-        except Exception, e:
-            GPIO.cleanup()
+        except Exception as e:
             raise e
-            sys.exit(1)
 
     def __del__(self):
         print ('Dosimeter object just died - __del__')
@@ -178,16 +172,13 @@ class Dosimeter:
 
 if __name__ == "__main__":
     det = Dosimeter()
-    response = det.ping(hostname='berkeley.edu')
+    response = det.ping()
     print 'Ping test berkeley.edu: ',response
     data = det.getCPM()
     print data
     det.updateCount_basic()
     print det.counts
     det.counts = []
-    #det.updateNoise()
-    #print det.noise
-    #
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print '~~~~ Basic testing done. Entering while True loop ~~~~'
     print ' Waiting for Ctrl + C'
@@ -195,10 +186,10 @@ if __name__ == "__main__":
     count = 0
     GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
     while True:
-        try: # getCPM
-            sleep(1)
+        try:
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
+            sleep(1)
             cpm, cpm_err = det.getCPM(accumulation_time = MEASURE_TIME)
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
@@ -207,5 +198,5 @@ if __name__ == "__main__":
             sys.exit(0)
         except Exception as e:
             GPIO.cleanup()
-            print str(e)
+            raise e
             sys.exit(1)
