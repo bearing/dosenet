@@ -112,8 +112,7 @@ class DataDestroyer:
         msg = 'DELETING A STATION'
         print msg
         select = ("SELECT * FROM dosnet WHERE stationID = %s;" % self.ID)
-        #self.getDataSample(select=select,limit=self.limit)
-        print self.runSQL(select)
+        self.getDataSample(select=select,limit=self.limit)
         print 'This will disable authentication of a dosimeter until readded \
 separately with addDosimeterToDB.py. \n \
 If there was more than one return above, you should QUIT.'
@@ -172,7 +171,7 @@ If there was more than one return above, you should QUIT.'
                 self.appendLog(sql,msg)
 
     def getDataSample(self,select,limit):
-        rows = self.runSQL(select)
+        rows = self.runSQL(select, everything = True)
         print 'Sample of data you\'re about to delete (Max: "%s"): \n "%s"' % (limit, rows)
 
     def deleteAllData(self):
