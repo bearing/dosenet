@@ -40,7 +40,7 @@ if args.weeks:
 cpm = 1.0
 cpmError = 1.0
 errorFlag = 0
-receiveTime = datetime.datetime.now() + datetime.timedelta(years = 1)
+receiveTime = datetime.datetime.now() + datetime.timedelta(days = 365)
 
 for t in range(0, int(iterations)): # 0,60 --> 1 hr #0,1440 --> 1 day #0,10080 --> 1 week
 	# TIME INCREMENT --> add 5 minutes
