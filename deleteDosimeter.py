@@ -111,11 +111,11 @@ class DataDestroyer:
         # Get station row that we're about to delete - append to log
         msg = 'DELETING A STATION'
         print msg
-        select = ("SELECT * FROM dosnet WHERE stationID = %s;" % self.ID)
+        select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT = %s;" % (self.ID, self.limit))
         self.getDataSample(select=select,limit=self.limit)
         print 'This will disable authentication of a dosimeter until readded \
 separately with addDosimeterToDB.py. \n \
-If there was more than one return above, you should QUIT.'
+If there was more than one station above, you should QUIT.'
         if self.confirm():
             sql = "DELETE FROM stations WHERE ID = %s LIMIT 1;" % self.ID
             self.runSQL(sql)
@@ -305,7 +305,7 @@ if __name__ == "__main__":
             deleter.getArguments(ID,dropstations)
         except:
             print 'No --dropallstations flag'
-        deleter.getArguments(ID)
+        deleter.getArguments(ID,)
     else:
         print 'You have decided not to delete data, thanks!'
         print 'If this was a mistake, type yes next time...'
