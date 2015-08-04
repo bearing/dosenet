@@ -111,7 +111,7 @@ class DataDestroyer:
         # Get station row that we're about to delete - append to log
         msg = 'DELETING A STATION'
         print msg
-        select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT = %s;" % (self.ID, self.limit))
+        select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT %s;" % (self.ID, self.limit))
         self.getDataSample(select=select,limit=self.limit)
         print 'This will disable authentication of a dosimeter until readded \
 separately with addDosimeterToDB.py. \n \
