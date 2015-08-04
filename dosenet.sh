@@ -24,6 +24,7 @@ case "$1" in
     ;;
   stop)
     echo "Stopping DoseNet script"  >> $LOG
+    date >> $LOG
     sudo killall python
     ;;
   *)
