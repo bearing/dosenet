@@ -283,29 +283,22 @@ if __name__ == "__main__":
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
-        try:
+        elif par.args.before:
             before = par.args.before
             print 'Before: ', before
             deleter.getArguments(ID,before)
-        except:
-            print 'No --before flag'
-        try:
+        elif par.args.after:
             after = par.args.after
             print 'After: ', after
             deleter.getArguments(ID,after)
-        except:
-            print 'No --after flag'
-        try:
+        elif par.args.dropalldata:
             dropdata = par.args.dropalldata[0]
             deleter.getArguments(ID,dropdata)
-        except:
-            print 'No --dropalldata flag'
-        try:
+        elif par.args.dropallstations:
             dropstations = par.args.dropallstations[0]
             deleter.getArguments(ID,dropstations)
-        except:
-            print 'No --dropallstations flag'
-        deleter.getArguments(ID,)
+        else:
+            deleter.getArguments(ID,'null')
     else:
         print 'You have decided not to delete data, thanks!'
         print 'If this was a mistake, type yes next time...'
