@@ -112,7 +112,8 @@ class DataDestroyer:
         msg = 'DELETING A STATION'
         print msg
         select = ("SELECT * FROM dosnet WHERE stationID = %s;" % self.ID)
-        self.getDataSample(select=select,limit=self.limit)
+        #self.getDataSample(select=select,limit=self.limit)
+        print self.runSQL(select)
         print 'This will disable authentication of a dosimeter until readded \
 separately with addDosimeterToDB.py. \n \
 If there was more than one return above, you should QUIT.'
