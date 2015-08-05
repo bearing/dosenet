@@ -47,13 +47,15 @@ class Dosimeter:
         #GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP) # NS  Sets up microphonics detection; Uses pull up resistor on RPi
         GPIO.add_event_detect(24, GPIO.FALLING, callback=self.updateCount_basic, bouncetime=1)
         #GPIO.add_event_detect(23, GPIO.FALLING, callback=self.updateNoise, bouncetime=1000)
-        GPIO.setup(LED, GPIO.OUT)
+        GPIO.setup(led_network, GPIO.OUT)
+        GPIO.setup(led_power, GPIO.OUT)
+        GPIO.setup(led_counts, GPIO.OUT)
 
     def updateCount_basic(self, channel=24):
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '~~~  COUNT:',now            # Print to screen
-        self.blink(pin=20, frequency=1) # Blink count LED (#20)
+        self.blink(pin = LEDS['counts'], frequency = 1) # Blink count LED (#20)
 
     """def updateNoise(self,channel=23):
         if not self.first_noise:
