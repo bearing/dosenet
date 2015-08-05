@@ -203,5 +203,5 @@ if __name__ == "__main__":
             sys.exit(0)
         except Exception as e:
             GPIO.cleanup()
-            raise e
+            print str(e)
             sys.exit(1)
