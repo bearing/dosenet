@@ -100,7 +100,7 @@ class Sender:
             print '\t\t ~~~~ Testing complete ~~~~'
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            det.activatePin(self.LEDS['power'])
+            det.activatePin(self.led_power)
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             if self.args.test:
@@ -111,7 +111,7 @@ class Sender:
                 if det.ping():
                     cpm, cpm_error = det.getCPM(accumulation_time = 300)
                     count = det.getCount()
-                    det.activatePin(self.LEDS['network']) # LIGHT UP
+                    det.activatePin(self.led_network) # LIGHT UP
                     print 'Count: ',count,' - CPM: ',cpm,u'±',cpm_error
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         error_code = 0 # Default 'working' state - error code 0
@@ -129,15 +129,15 @@ class Sender:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~'
                     else:
-                        det.blink(self.LEDS['network'], number_of_flashes = 10) # FLASH
+                        det.blink(self.led_network, number_of_flashes = 10) # FLASH
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
             except Exception as e:
                 print str(e)
             finally:
-                GPIO.deactivatePin(self.LEDS['power'])
-                GPIO.deactivatePin(self.LEDS['network'])
-                GPIO.deactivatePin(self.LEDS['counts'])
+                GPIO.deactivatePin(self.led_power)
+                GPIO.deactivatePin(self.led_network)
+                GPIO.deactivatePin(self.led_counts)
                 GPIO.cleanup()
 
 if __name__ == "__main__":
