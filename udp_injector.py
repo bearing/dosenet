@@ -89,14 +89,15 @@ class Injector:
         while True:
             try:
                 data = self.socket.listen()
-                print 'Received message:', data
-                if self.args.v:
-                    print 'Message received on IP:port @ ', self.IP ,':', self.port
+            except (KeyboardInterrupt, SystemExit):
+                print ('\nExit cleaning')
+            print 'Received message:', data
+            if self.args.v:
+                print 'Message received on IP:port @ ', self.IP ,':', self.port
+            try:
                 self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
                 print ('\nExit cleaning')
-                del self.db # Manual garbage collection
-                sys.exit(0)
             except (Exception) as e:
                 print str(e)
                 print ('Exception: Cannot decrypt data...')
