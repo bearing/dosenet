@@ -105,15 +105,23 @@ class Dosimeter:
     def resetCounts(self, seconds = 300):
         try:
             self.countsToArr()
+        except:
+            print '~~ Error: could not convert to array. ~~'
+            print str(e)
+        try:
             """Saves only the last number of seconds of events
             Moving window
             Will lead to exponential decay behaviour...
             Change to fixed window scheme?"""
             self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
+        except:
+            print '~~ Error: Could not clip counts. ~~'
+            print str(e)
+        try:
             self.countsToList()
         except Exception as e:
+            print '~~ Error: Could not convert to list. ~~'
             print str(e)
-            pass
 
     def getCount(self):
         return float(len(self.counts))
