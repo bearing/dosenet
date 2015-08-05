@@ -113,6 +113,8 @@ class Dosimeter:
             Moving window
             Will lead to exponential decay behaviour...
             Change to fixed window scheme?"""
+            print 'Last count: ', self.counts[-1]
+            print 'All counts: ', self.counts
             self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
         except Exception as e:
             print '~~ Error: Could not clip counts. ~~'
