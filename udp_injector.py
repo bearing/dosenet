@@ -29,8 +29,7 @@ class Injector:
     """ Inserts decrypted and validated data from the Raspberry Pis into a MySQL database.
 
     Args:
-        --test (Optional): Listens on localhost at port 5005 (localhost:5005).
-            $ udp_injector.py --test
+        -v (Optional): Is more verbose.
 
     Attributes:
         db (SQLObject): Custom MySQL database object for injecting into.
@@ -41,7 +40,7 @@ class Injector:
         """
         parser = argparse.ArgumentParser()
         parser.add_argument('-v', action="store_true", required = False,
-            help = '\n\t Will print ')
+            help = '\n\t Will print: Message received on IP:port... ')
         self.args = parser.parse_args()
         from mysql import mysql_tools as mySQLTool
         self.db = mySQLTool.SQLObject()
