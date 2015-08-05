@@ -8,7 +8,7 @@ class SQLObject:
         self.verified_stations = []
         self.cursor = self.db.cursor()
         self.getVerifiedStationList()
-        print 'Database instance and cursor: ', db, cursor
+        print 'Database instance and cursor: ', self.db, self.cursor
 
     def __del__(self):
         self.close()
