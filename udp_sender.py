@@ -131,15 +131,15 @@ class Sender:
                     else:
                         det.blink(self.led_network, number_of_flashes = 10) # FLASH
             except (KeyboardInterrupt, SystemExit):
+                det.deactivatePin(self.led_power)
+                det.deactivatePin(self.led_network)
+                det.deactivatePin(self.led_counts)
                 print '.... User interrupt ....\n Byyeeeeeeee'
-                det.deactivatePin(self.led_power)
-                det.deactivatePin(self.led_network)
-                det.deactivatePin(self.led_counts)
             except Exception as e:
-                print str(e)
                 det.deactivatePin(self.led_power)
                 det.deactivatePin(self.led_network)
                 det.deactivatePin(self.led_counts)
+                print str(e)
 
 if __name__ == "__main__":
     sen = Sender()
