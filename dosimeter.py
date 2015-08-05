@@ -155,8 +155,9 @@ class Dosimeter:
             for i in range(0, number_of_flashes):
                 print '\t\t * #%s' % pin # Flash
                 self.activatePin(pin)
-                sleep(frequency/2)
+                sleep(frequency)
                 self.deactivatePin(pin)
+                sleep(0.1)
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
         except Exception as e:
