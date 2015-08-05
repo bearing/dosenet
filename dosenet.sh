@@ -34,6 +34,7 @@ case "$1" in
     echo "Testing DoseNet Script"
     date >> $LOG
     sudo $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/$CONFIGFILE --test
+    ;;
   *)
     echo "Usage: /etc/init.d/dosenet {start|stop}"
     exit 1
