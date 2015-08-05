@@ -186,7 +186,6 @@ if __name__ == "__main__":
     print ' Waiting for Ctrl + C'
     MEASURE_TIME = 10
     count = 0
-    GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
     while True:
         try:
             GPIO.remove_event_detect(24)
