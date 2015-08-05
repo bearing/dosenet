@@ -53,7 +53,6 @@ class Dosimeter:
 
     def updateCount_basic(self, channel=24):
         now = datetime.datetime.now()
-        self.countsToList()
         self.counts.append(now)         # Update datetime List
         print '~~~  COUNT:',now            # Print to screen
         self.blink(pin = self.LEDS['led_counts'], frequency = 1) # Blink count LED (#20)
