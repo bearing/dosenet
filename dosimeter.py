@@ -171,6 +171,9 @@ class Dosimeter:
         self.close()
     def close(self):
         print('Actually closing now')
+        self.deactivatePin(20)
+        self.deactivatePin(21)
+        self.deactivatePin(26)
         GPIO.cleanup()
 
 if __name__ == "__main__":
