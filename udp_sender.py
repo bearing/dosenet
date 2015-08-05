@@ -25,11 +25,11 @@ class Sender:
         parser.add_argument('--filename','-f',nargs='?',type=str,default='/home/pi/dosenet/config-files/test-onerow.csv',
             help='\n\t Must link to a CSV file with  \n \
                 Default is \"config-files/test-onerow.csv\" - no \"')
-        parser.add_argument('--led_counts',nargs='?',required=False,type=int, default=20,
+        parser.add_argument('--led_counts',nargs='?',required=False,type=int, default=21,
             help='\n\t The BCM pin number of the + end of the count LED\n')
         parser.add_argument('--led_power',nargs='?',required=False,type=int, default=26,
             help='\n\t The BCM pin number of the + end of the power LED\n')
-        parser.add_argument('--led_network',nargs='?',required=False,type=int, default=21,
+        parser.add_argument('--led_network',nargs='?',required=False,type=int, default=20,
             help='\n\t The BCM pin number of the + end of the networking LED - pings berkeley.edu\n')
                                        # nargs='?' means 0-or-1 arguments
         parser.add_argument('--ip',nargs=1,required=False,type=str)
@@ -132,8 +132,14 @@ class Sender:
                         det.blink(self.led_network, number_of_flashes = 10) # FLASH
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
+                det.deactivatePin(self.led_power)
+                det.deactivatePin(self.led_network)
+                det.deactivatePin(self.led_counts)
             except Exception as e:
                 print str(e)
+                det.deactivatePin(self.led_power)
+                det.deactivatePin(self.led_network)
+                det.deactivatePin(self.led_counts)
 
 if __name__ == "__main__":
     sen = Sender()
@@ -142,4 +148,5 @@ if __name__ == "__main__":
     sen.getDatafromCSV()
     sen.initVariables()
     sen.main()
+
     GPIO.cleanup()
