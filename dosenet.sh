@@ -1,12 +1,12 @@
 #! /bin/sh
 # /etc/init.d/dosenet
 ### BEGIN INIT INFO
-# Provides:          dosenet
-# Required-Start:    networking
-# Required-Stop:     networking
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# X-Interactive:     false
+# Provides: dosenet
+# Required-Start: networking
+# Required-Stop: networking
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# X-Interactive: false
 # Short-Description: DoseNet - sends UDP packets to the GRIM for the DoseNet project
 ### END INIT INFO
 CONFIGFILE=etchhall.csv
