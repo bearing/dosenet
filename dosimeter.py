@@ -112,7 +112,7 @@ class Dosimeter:
             self.counts = self.counts[self.counts > self.counts[-1] - np.timedelta64(seconds,'s')] # Courtesy of Joey
             self.countsToList()
         except Exception as e:
-            raise e
+            print str(e)
             pass
 
     def getCount(self):
