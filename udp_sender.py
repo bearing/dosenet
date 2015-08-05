@@ -134,11 +134,6 @@ class Sender:
                 print '.... User interrupt ....\n Byyeeeeeeee'
             except Exception as e:
                 print str(e)
-            finally:
-                GPIO.deactivatePin(self.led_power)
-                GPIO.deactivatePin(self.led_network)
-                GPIO.deactivatePin(self.led_counts)
-                GPIO.cleanup()
 
 if __name__ == "__main__":
     sen = Sender()
@@ -147,3 +142,4 @@ if __name__ == "__main__":
     sen.getDatafromCSV()
     sen.initVariables()
     sen.main()
+    GPIO.cleanup()
