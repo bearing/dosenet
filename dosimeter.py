@@ -55,7 +55,7 @@ class Dosimeter:
         now = datetime.datetime.now()
         self.counts.append(now)         # Update datetime List
         print '~~~  COUNT:',now            # Print to screen
-        self.blink(pin = self.LEDS['led_counts'], frequency = .05) # Blink count LED (#20)
+        self.blink(pin = self.LEDS['led_counts'], frequency = .01) # Blink count LED (#20)
 
     """def updateNoise(self,channel=23):
         if not self.first_noise:
@@ -167,7 +167,7 @@ class Dosimeter:
                 self.activatePin(pin)
                 sleep(frequency)
                 self.deactivatePin(pin)
-                sleep(0.05)
+                sleep(0.01)
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
         except Exception as e:
