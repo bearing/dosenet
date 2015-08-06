@@ -113,7 +113,7 @@ class Sender:
                     cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                     count = det.getCount()
                     det.activatePin(self.led_network) # LIGHT UP
-                    print 'Count: ',count,' - CPM: ',cpm,u'±',cpm_error
+                    print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
                     if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                         error_code = 0 # Default 'working' state - error code 0
                         now = datetime.datetime.now()
@@ -130,10 +130,14 @@ class Sender:
                     if self.args.test:
                         print '\t~~~ Blink LED ~~~'
                     else:
-                        det.blink(self.led_network, number_of_flashes = 10) # FLASH
+                        det.blink(self.led_network, number_of_flashes = 1) # FLASH
             except (KeyboardInterrupt, SystemExit):
+                det.deactivatePin(self.led_power)
+                det.deactivatePin(self.led_network)
                 print '.... User interrupt ....\n Byyeeeeeeee'
             except Exception as e:
+                det.deactivatePin(self.led_power)
+                det.deactivatePin(self.led_network)
                 print str(e)
 
 if __name__ == "__main__":
