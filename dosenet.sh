@@ -1,5 +1,5 @@
 #! /bin/sh
-# /etc/init.d/dosenet
+# /etc/init.d/dosenet.sh
 ### BEGIN INIT INFO
 # Provides: dosenet
 # Required-Start: networking
