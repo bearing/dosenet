@@ -104,12 +104,13 @@ class Sender:
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             if self.args.test:
-                sleep(10)
+                sleep_time = 10
             else:
-                sleep(300)
+                sleep_time = 300
+            sleep(sleep_time)
             try:
                 if det.ping():
-                    cpm, cpm_error = det.getCPM(accumulation_time = 300)
+                    cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                     count = det.getCount()
                     det.activatePin(self.led_network) # LIGHT UP
                     print 'Count: ',count,' - CPM: ',cpm,u'±',cpm_error
