@@ -137,11 +137,11 @@ class Plot(object):
 
 	def printPlotFail(self,error):
 		print 'Plotting failed'
-		print (error)
+		print str(error)
 
 	def printFeatureFail(self,error):
 		print 'Iterative feature creation failed'
-		print (error)
+		print str(error)
 
 	def setFeature(self,point,name,plength,latestDose,latestTime,URLlist):
 		properties = {	'Name': name,
@@ -171,7 +171,7 @@ class Plot(object):
 	def makeAllPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
 		plotLengthString = 'Past_' + plotLengthString
 		if latestTime == '':
-			print ('Finished list?')
+			print 'Finished list?'
 		else:
 			try:
 				# Note the negative --> means that we're looking at the past relative to the latest measurement stored in the DB
@@ -280,11 +280,11 @@ class Plot(object):
 		try:
 			os.system(command)
 		except Exception as e:
-			print ('Network Error: Cannot SCP to Kepler')
+			print 'Network Error: Cannot SCP to Kepler'
 			raise e
 
 	def printEndMessage(self):
-		print( u'\u00A9' +' Navrit Bal - time is '+ getDateTime())
+		print ' Navrit Bal - time is '+ getDateTime()
 
 def getDateTime():
 	return str(datetime.datetime.now())
