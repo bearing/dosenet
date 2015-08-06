@@ -164,6 +164,8 @@ class Dosimeter:
         try:
             for i in range(0, number_of_flashes):
                 print '\t\t * #%s' % pin # Flash
+                self.deactivatePin(pin)
+                sleep(0.01)
                 self.activatePin(pin)
                 sleep(frequency)
                 self.deactivatePin(pin)
@@ -175,9 +177,15 @@ class Dosimeter:
 
     def __del__(self):
         print ('Dosimeter object just died - __del__')
+        self.deactivatePin(20)
+        self.deactivatePin(21)
+        self.deactivatePin(26)
         self.close()
     def __exit__(self):
         print ('Dosimeter object just exited - __exit__')
+        self.deactivatePin(20)
+        self.deactivatePin(21)
+        self.deactivatePin(26)
         self.close()
     def close(self):
         print('Actually closing now')
