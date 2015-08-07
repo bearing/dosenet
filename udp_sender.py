@@ -95,6 +95,17 @@ class Sender:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
 
+    def deactivatePins(self):
+        print GPIO.input(self.led_power)
+        print GPIO.input(self.led_network)
+        print GPIO.input(self.led_counts)
+        det.deactivatePin(self.led_power)
+        det.deactivatePin(self.led_network)
+        det.deactivatePin(self.led_counts)
+        print GPIO.input(self.led_power)
+        print GPIO.input(self.led_network)
+        print GPIO.input(self.led_counts)
+
     def main(self):
         GPIO.cleanup()
         if self.args.test:
@@ -146,7 +157,5 @@ if __name__ == "__main__":
         print str(e)
     finally:
         print '~~ Deactivating pins and cleaning up. ~~'
-        det.deactivatePin(self.led_power)
-        det.deactivatePin(self.led_network)
-        det.deactivatePin(self.led_counts)
+        sen.deactivatePins()
         GPIO.cleanup()
