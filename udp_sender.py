@@ -96,19 +96,12 @@ class Sender:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
 
     def deactivatePins(self):
-        print GPIO.input(self.led_power)
-        print GPIO.input(self.led_network)
-        print GPIO.input(self.led_counts)
         GPIO.output(self.led_power,False)
         GPIO.output(self.led_network,False)
         GPIO.output(self.led_power,False)
-        print GPIO.input(self.led_power)
-        print GPIO.input(self.led_network)
-        print GPIO.input(self.led_counts)
-
-    def main(self):
         GPIO.cleanup()
 
+    def main(self):
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             det.activatePin(self.led_power)
@@ -157,4 +150,3 @@ if __name__ == "__main__":
     finally:
         print '~~ Deactivating pins and cleaning up. ~~'
         sen.deactivatePins()
-        GPIO.cleanup()
