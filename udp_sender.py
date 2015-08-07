@@ -96,6 +96,7 @@ class Sender:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # uses UDP protocol
 
     def main(self):
+        GPIO.cleanup()
         if self.args.test:
             print '\t\t ~~~~ Testing complete ~~~~'
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
@@ -108,37 +109,28 @@ class Sender:
             else:
                 sleep_time = 300
             sleep(sleep_time)
-            try:
-                if det.ping():
-                    cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
-                    count = det.getCount()
-                    det.activatePin(self.led_network) # LIGHT UP
-                    print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
-                    if len(det.counts) > 1: # Only run the next segment after the warm-up phase
-                        error_code = 0 # Default 'working' state - error code 0
-                        now = datetime.datetime.now()
-                        c = ','
-                        package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
-                                  str(cpm_error) +c+ str(error_code)
-                        packet = self.pe.encrypt_message(package)[0]
-                        if self.args.test:
-                            print '- '*64, '\nRaw message: ',package
-                            print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
-                        self.socket.sendto(packet, (self.IP, self.port))
-                        print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
-                else:
+            if det.ping():
+                cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
+                count = det.getCount()
+                det.activatePin(self.led_network) # LIGHT UP
+                print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
+                if len(det.counts) > 1: # Only run the next segment after the warm-up phase
+                    error_code = 0 # Default 'working' state - error code 0
+                    now = datetime.datetime.now()
+                    c = ','
+                    package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
+                              str(cpm_error) +c+ str(error_code)
+                    packet = self.pe.encrypt_message(package)[0]
                     if self.args.test:
-                        print '\t~~~ Blink LED ~~~'
-                    else:
-                        det.blink(self.led_network, number_of_flashes = 1) # FLASH
-            except (KeyboardInterrupt, SystemExit):
-                det.deactivatePin(self.led_power)
-                det.deactivatePin(self.led_network)
-                print '.... User interrupt ....\n Byyeeeeeeee'
-            except Exception as e:
-                det.deactivatePin(self.led_power)
-                det.deactivatePin(self.led_network)
-                print str(e)
+                        print '- '*64, '\nRaw message: ',package
+                        print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
+                    self.socket.sendto(packet, (self.IP, self.port))
+                    print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
+            else:
+                if self.args.test:
+                    print '\t~~~ Blink LED ~~~'
+                else:
+                    det.blink(self.led_network, number_of_flashes = 1) # FLASH
 
 if __name__ == "__main__":
     sen = Sender()
@@ -146,5 +138,15 @@ if __name__ == "__main__":
     sen.initialise()
     sen.getDatafromCSV()
     sen.initVariables()
-    sen.main()
-    GPIO.cleanup()
+    try:
+        sen.main()
+    except (KeyboardInterrupt, SystemExit):
+        print '.... User interrupt ....\n Byyeeeeeeee'
+    except Exception as e:
+        print str(e)
+    finally:
+        print '~~ Deactivating pins and cleaning up. ~~'
+        det.deactivatePin(self.led_power)
+        det.deactivatePin(self.led_network)
+        det.deactivatePin(self.led_counts)
+        GPIO.cleanup()
