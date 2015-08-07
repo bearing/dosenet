@@ -99,17 +99,16 @@ class Sender:
         print GPIO.input(self.led_power)
         print GPIO.input(self.led_network)
         print GPIO.input(self.led_counts)
-        det.deactivatePin(self.led_power)
-        det.deactivatePin(self.led_network)
-        det.deactivatePin(self.led_counts)
+        GPIO.output(self.led_power,False)
+        GPIO.output(self.led_network,False)
+        GPIO.output(self.led_power,False)
         print GPIO.input(self.led_power)
         print GPIO.input(self.led_network)
         print GPIO.input(self.led_counts)
 
     def main(self):
         GPIO.cleanup()
-        if self.args.test:
-            print '\t\t ~~~~ Testing complete ~~~~'
+
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             det.activatePin(self.led_power)
