@@ -160,38 +160,27 @@ class Dosimeter:
         GPIO.output(pin,False)
         #print 'Pin OFF #:',pin,' - ',datetime.datetime.now()
 
-    def blink(self, pin=20, frequency = 1, number_of_flashes = 1):
-        try:
-            for i in range(0, number_of_flashes):
-                print '\t\t * #%s' % pin # Flash
-                self.deactivatePin(pin)
-                sleep(0.01)
-                self.activatePin(pin)
-                sleep(frequency)
-                self.deactivatePin(pin)
-                sleep(0.01)
-        except (KeyboardInterrupt, SystemExit):
-            print '.... User interrupt ....\n Byyeeeeeeee'
-        except Exception as e:
-            raise e
+    def invertPin(self,pin):
+        GPIO.output(pin, not GPIO.input(pin))
+
+    def blink(self, pin=21, frequency = 1, number_of_flashes = 1):
+        for i in range(0, number_of_flashes):
+            print '\t\t * #%s' % pin # Flash
+            self.deactivatePin(pin)
+            sleep(0.005)
+            self.activatePin(pin)
+            sleep(frequency)
+            self.deactivatePin(pin)
+            sleep(0.005)
 
     def __del__(self):
         print ('Dosimeter object just died - __del__')
-        self.deactivatePin(20)
-        self.deactivatePin(21)
-        self.deactivatePin(26)
         self.close()
     def __exit__(self):
         print ('Dosimeter object just exited - __exit__')
-        self.deactivatePin(20)
-        self.deactivatePin(21)
-        self.deactivatePin(26)
         self.close()
     def close(self):
         print('Actually closing now')
-        self.deactivatePin(20)
-        self.deactivatePin(21)
-        self.deactivatePin(26)
         GPIO.cleanup()
 
 if __name__ == "__main__":
@@ -217,9 +206,7 @@ if __name__ == "__main__":
             print '\t','CPM: ',cpm,u'±',cpm_err,'\n'
         except (KeyboardInterrupt, SystemExit):
             print '.... User interrupt ....\n Byyeeeeeeee'
-            GPIO.cleanup()
-            sys.exit(0)
         except Exception as e:
-            GPIO.cleanup()
             print str(e)
-            sys.exit(1)
+        finally:
+            GPIO.cleanup()
