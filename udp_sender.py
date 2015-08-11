@@ -15,6 +15,7 @@ import sys
 import argparse
 import RPi.GPIO as GPIO
 from dosimeter import Dosimeter
+import threading
 
 class Sender:
     def parseArguments(self):
@@ -102,20 +103,19 @@ class Sender:
         GPIO.cleanup()
 
     def main(self):
+        # SEE HEREEEEEE
+        # http://pymotw.com/2/threading/
+        # thread_led_network = threading.Thread(name='LED_network'), target=SOMEFUCNTIONILLMAKEWHENSOBER)
+        # thread_led_network.setDaemon(True)
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            det.activatePin(self.led_power)
+            det.activatePin(self.led_power) # thread_led_power.start()
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
-            if self.args.test:
-                sleep_time = 10
-            else:
-                sleep_time = 300
-            sleep(sleep_time)
             if det.ping():
                 cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                 count = det.getCount()
-                det.activatePin(self.led_network) # LIGHT UP
+                det.activatePin(self.led_network) # LIGHT UP # thread_led_network.start()
                 print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
                 if len(det.counts) > 1: # Only run the next segment after the warm-up phase
                     error_code = 0 # Default 'working' state - error code 0
@@ -134,8 +134,13 @@ class Sender:
                     print '\t~~~ Blink LED ~~~'
                 else:
                     det.blink(self.led_network, number_of_flashes = 1) # FLASH
+            if self.args.test:
+                sleep_time = 10
+            else:
+                sleep_time = 300
+            sleep(sleep_time)
 
-if __name__ == "__main__":
+if __name__=="__main__":
     sen = Sender()
     sen.parseArguments()
     sen.initialise()
