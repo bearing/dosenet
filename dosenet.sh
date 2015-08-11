@@ -2,8 +2,8 @@
 # /etc/init.d/dosenet.sh
 ### BEGIN INIT INFO
 # Provides: dosenet
-# Required-Start: networking
-# Required-Stop: networking
+# Required-Start: $all
+# Required-Stop: $all
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
 # X-Interactive: false
@@ -20,14 +20,14 @@ case "$1" in
   start)
     echo "Starting DoseNet script" >> $LOG
     echo "Starting DoseNet script"
-    sudo $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/$CONFIGFILE
+    sudo $CONDA/python $DOSENET/udp_sender.py -f $DOSENET/config-files/$CONFIGFILE &
     date >> $LOG
     ;;
   stop)
     echo "Stopping DoseNet script" >> $LOG
     echo "Stopping DoseNet script"
     date >> $LOG
-    sudo killall python
+    sudo killall python &
     ;;
   test)
     echo "Testing DoseNet Script" >> $LOG
@@ -36,7 +36,7 @@ case "$1" in
     date >> $LOG
     ;;
   *)
-    echo "Usage: /etc/init.d/dosenet {start|stop}"
+    echo "Usage: /etc/init.d/dosenet {start|test|stop}"
     exit 1
     ;;
 esac
