@@ -4,9 +4,8 @@ from Crypto.PublicKey import RSA as rsa
 class public_d_encrypt:
     def __init__(self, key_file_lst = []):
         for key_file in key_file_lst:
-            print key_file
-            print key_file_lst
             key = self.read_key_file(key_file)
+            print key
             if(not key):
                 continue
             if( key.has_private()):
