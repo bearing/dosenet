@@ -125,16 +125,16 @@ class Sender:
                         print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
                     self.socket.sendto(packet, (self.IP, self.port))
                     print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
-                    if self.args.test:
-                        sleep_time = 10
-                    else:
-                        sleep_time = 300
-                    sleep(sleep_time)
             else:
                 if self.args.test:
                     print '\t~~~ Blink LED ~~~'
                 else:
                     det.blink(pin = self.led_network, number_of_flashes = 3) # FLASH
+            if self.args.test:
+                sleep_time = 10
+            else:
+                sleep_time = 300
+            sleep(sleep_time)
 
 if __name__=="__main__":
     sen = Sender()
