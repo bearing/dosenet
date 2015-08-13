@@ -66,8 +66,8 @@ class Injector:
             socket (custSocket) - Refer to the udp_tools.py in the udp folder.
                 Sets up UDP only socket to listen on given IP, port and a decryption object.
         """
-        self.privateKey = ['/home/dosenet/.ssh/id_rsa.pub']
-        de = ccrypt.public_d_encrypt(key_file_lst = self.privateKey) # Uses 1 private key
+        privateKey = ['/home/dosenet/.ssh/id_rsa.pub']
+        de = ccrypt.public_d_encrypt(key_file_lst = privateKey) # Uses 1 private key
         self.port = 5005
         # Gets actual IP address
         self.IP = ([(s.connect(('8.8.8.8', 80)),
