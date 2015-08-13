@@ -69,7 +69,7 @@ class Injector:
         privateKey = ['/home/dosenet/.ssh/id_rsa.pub']
         de = ccrypt.public_d_encrypt(key_file_lst = privateKey) # Uses 1 private key
         print privateKey
-        print de
+        print de.key_file_lst
         self.port = 5005
         # Gets actual IP address
         self.IP = ([(s.connect(('8.8.8.8', 80)),
