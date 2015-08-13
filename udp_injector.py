@@ -18,9 +18,9 @@ import argparse
 import_list = ['crypt','mysql','udp'] # Extensible way for adding future imports
 for el in import_list:
     sys.path.append( os.path.abspath(os.path.join(os.getcwd(),el)) )
-    print sys.path.append(os.path.abspath(os.path.join(os.getcwd(),el)))
 from crypt import cust_crypt as ccrypt
 from udp import udp_tools as udpTool
+from mysql import mysql_tools as mySQLTool
 import socket
 
 # class Parser:
@@ -40,10 +40,12 @@ class Injector:
         """ Deeply integrated parsing - to be decoupled from the main class later.
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('-v', action="store_true", required = False,
+        parser.add_argument('-v', action='store_true', required = False,
             help = '\n\t Will print: Message received on IP:port... ')
+        parser.add_argument('--ip', action='store_true', nargs='?', required = False, type = str,
+            help = '\n\t Force a custom listening IP address for the server. \
+                    \n Default value: \'192.168.1.105\'')
         self.args = parser.parse_args()
-        from mysql import mysql_tools as mySQLTool
         self.db = mySQLTool.SQLObject()
         print self.db
 
@@ -73,6 +75,10 @@ class Injector:
                 s.close()) for s in [socket.socket(socket.AF_INET,
                                                     socket.SOCK_DGRAM)]][0][1])
         print self.IP # '192.168.1.105' - current GRIM 'Database' IP - default behaviour
+        print '~~ GRIM IP should be 192.168.1.105... ~~'
+        if self.args.ip:
+            self.IP = self.args.ip[0]
+            print '~~~~ Using forced IP: ', self.IP, '~~~~'
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
     def main(self):
