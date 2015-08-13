@@ -18,6 +18,7 @@ import argparse
 import_list = ['crypt','mysql','udp'] # Extensible way for adding future imports
 for el in import_list:
     sys.path.append( os.path.abspath(os.path.join(os.getcwd(),el)) )
+    print sys.path.append(os.path.abspath(os.path.join(os.getcwd(),el)))
 from crypt import cust_crypt as ccrypt
 from udp import udp_tools as udpTool
 import socket
@@ -66,7 +67,7 @@ class Injector:
         self.privateKey = ['/home/dosenet/.ssh/id_rsa.pub']
         de = ccrypt.public_d_encrypt(key_file_lst = self.privateKey) # Uses 1 private key
         self.port = 5005
-        # Gets GRIM's actual local IP address
+        # Gets actual IP address
         self.IP = ([(s.connect(('8.8.8.8', 80)),
                 s.getsockname()[0],
                 s.close()) for s in [socket.socket(socket.AF_INET,
