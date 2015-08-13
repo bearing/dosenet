@@ -89,7 +89,7 @@ class Sender:
         self.IP = 'dosenet.dhcp.lbl.gov'
         self.port = 5005
         if self.args.ip:
-            self.IP = self.args.ip #Send to custom IP if testing
+            self.IP = self.args.ip[0] #Send to custom IP if testing
             print '\n\t Using specified IP: "%s"' % self.IP
         if self.args.test:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
