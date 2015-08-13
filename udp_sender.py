@@ -86,11 +86,10 @@ class Sender:
     def initVariables(self):
         public_key = ['/home/pi/dosenet/id_rsa_dosenet.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
-        # Gets GRIM's actual local IP address
-        self.IP = '192.168.1.105' # Gateway to GRIM from 1110B
+        self.IP = 'dosenet.dhcp.lbl.gov'
         self.port = 5005
         if self.args.ip:
-            print '\n\t PS. %s is GRIM' % self.IP
+            print '\n\t Using specified IP: "%s"' % self.IP
             self.IP = self.args.ip #Send to custom IP if testing
         if self.args.test:
             print 'UDP target IP @ port :', self.IP + ':' + str(self.port)
@@ -110,6 +109,7 @@ class Sender:
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             if det.ping():
+                det.activatePin(self.led_network)
                 cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                 count = det.getCount()
                 print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
@@ -134,7 +134,7 @@ class Sender:
                 if self.args.test:
                     print '\t~~~ Blink LED ~~~'
                 else:
-                    det.blink(self.led_network, number_of_flashes = 1) # FLASH
+                    det.blink(pin = self.led_network, number_of_flashes = 3) # FLASH
 
 if __name__=="__main__":
     sen = Sender()
