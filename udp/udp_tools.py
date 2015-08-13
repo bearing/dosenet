@@ -1,5 +1,4 @@
 import socket
-import cust_crypt as ccrypt
 
 class custSocket:
     def __init__(self,ip,port,decrypt):
