@@ -6,8 +6,8 @@ class custSocket:
         self.ip = ip
         self.port = port
         self.decrypt = decrypt
-        #if( not decrypt.private_key ):
-        #    print 'Warning: You will not be able to decrypt messages'
+        if( not decrypt.private_key ):
+            print 'Warning: You will not be able to decrypt messages'
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #UDP ONLY
         try:
             self.sock.bind((ip,port))
