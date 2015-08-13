@@ -42,7 +42,7 @@ class Injector:
         parser = argparse.ArgumentParser()
         parser.add_argument('-v', action='store_true', required = False,
             help = '\n\t Will print: Message received on IP:port... ')
-        parser.add_argument('--ip', action='store_true', nargs='?', required = False, type = str,
+        parser.add_argument('--ip', nargs='?', action='store_true', required = False, type = str,
             help = '\n\t Force a custom listening IP address for the server. \
                     \n Default value: \'192.168.1.105\'')
         self.args = parser.parse_args()
