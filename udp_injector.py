@@ -79,6 +79,7 @@ class Injector:
         if self.args.ip:
             self.IP = self.args.ip[0]
             print '~~~~ Using forced IP: ', self.IP, '~~~~'
+        print self.IP, self.port, de
         self.socket = udpTool.custSocket(ip = self.IP, port = self.port, decrypt = de)
 
     def main(self):
