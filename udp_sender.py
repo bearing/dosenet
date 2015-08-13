@@ -114,7 +114,7 @@ class Sender:
                 cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                 count = det.getCount()
                 print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
-                if len(det.counts) > 1: # Only run the next segment after the warm-up phase
+                if len(det.counts) > 0: # Only run the next segment after the warm-up phase
                     error_code = 0 # Default 'working' state - error code 0
                     now = datetime.datetime.now()
                     c = ','
