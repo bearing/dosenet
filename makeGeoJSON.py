@@ -59,7 +59,7 @@ class Plot(object):
 		self.stationRows = self.cursor.fetchall()
 
 	def setStationInfo(self,i):
-		self.stationRowArrayList.append((i[0], i[1], i[2], i[3], i[4], i[5]))
+		self.stationRowArrayList.append(i[0], i[1], str(i[2]), str(i[3]), str(i[4]), str(i[5]))
 
 	def setStationInfoForAll(self):
 		for i in self.stationRows:
