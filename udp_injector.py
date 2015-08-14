@@ -71,6 +71,7 @@ class Injector:
         if self.args.v:
             print self.args
             print self.db
+            print self.db.cursor
             print privateKey
             print de
         self.port = 5005
