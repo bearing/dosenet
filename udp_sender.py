@@ -104,33 +104,31 @@ class Sender:
     def main(self):
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         det.activatePin(self.led_power)
-        sleep_time = 1
+        if self.args.test:
+            sleep_time = 10
+        else:
+            sleep_time = 300
+        error_code = 0 # Default 'working' state - error code 0
+        c = ','
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            sleep(1)
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             if det.ping():
                 det.activatePin(self.led_network)
+                sleep(sleep_time)
                 cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                 count = det.getCount()
                 print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
                 if len(det.counts) > 0: # Only run the next segment after the warm-up phase
-                    error_code = 0 # Default 'working' state - error code 0
                     now = datetime.datetime.now()
-                    c = ','
                     package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
                               str(cpm_error) +c+ str(error_code)
                     packet = self.pe.encrypt_message(package)[0]
                     if self.args.test:
                         print '- '*64, '\nRaw message: ',package
                         print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
+                        print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
                     self.socket.sendto(packet, (self.IP, self.port))
-                    print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
-                    if self.args.test:
-                        sleep_time = 10
-                    else:
-                        sleep_time = 300
-                    sleep(sleep_time)
             else:
                 if self.args.test:
                     print '\t~~~ Blink LED ~~~'
