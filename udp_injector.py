@@ -42,7 +42,7 @@ class Injector:
         """
         parser = argparse.ArgumentParser()
         parser.add_argument('-v', action='store_true', required = False,
-            help = '\n\t Verbosity level 1'
+            help = '\n\t Verbosity level 1')
         parser.add_argument('--ip', nargs='?', required=False, type=str,
             help = '\n\t Force a custom listening IP address for the server. \
                     \n Default value: \'192.168.1.105\'')
