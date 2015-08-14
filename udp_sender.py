@@ -110,7 +110,6 @@ class Sender:
             sleep_time = 300
         error_code = 0 # Default 'working' state - error code 0
         c = ','
-        GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
