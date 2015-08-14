@@ -111,10 +111,10 @@ class Sender:
         error_code = 0 # Default 'working' state - error code 0
         c = ','
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            GPIO.remove_event_detect(24)
-            GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             if det.ping():
                 det.activatePin(self.led_network)
+                GPIO.remove_event_detect(24)
+                GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
                 sleep(sleep_time)
                 cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
                 count = det.getCount()
