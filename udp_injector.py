@@ -48,7 +48,6 @@ class Injector:
                     \n Default value: \'192.168.1.105\'')
         self.args = parser.parse_args()
         self.db = mySQLTool.SQLObject()
-        print self.db
 
     def initialise(self):
         """ Effectively __init__ - makes all class attributes (encryption and networking objects).
@@ -68,16 +67,21 @@ class Injector:
                 Sets up UDP only socket to listen on given IP, port and a decryption object.
         """
         privateKey = ['/home/dosenet/.ssh/id_rsa_lbl']
-        print privateKey
         de = ccrypt.public_d_encrypt(key_file_lst = privateKey) # Uses 1 private key
+        if self.args.v:
+            print self.args
+            print self.db
+            print privateKey
+            print de
         self.port = 5005
         # Gets actual IP address
         self.IP = ([(s.connect(('8.8.8.8', 80)),
                 s.getsockname()[0],
                 s.close()) for s in [socket.socket(socket.AF_INET,
                                                     socket.SOCK_DGRAM)]][0][1])
-        print self.IP # '192.168.1.105' - current GRIM 'Database' IP - default behaviour
-        print '~~ GRIM IP should be 192.168.1.105... ~~'
+        if self.args.v:
+            print self.IP # '192.168.1.105' - current GRIM 'Database' IP - default behaviour
+            print '~~ GRIM IP should be 192.168.1.105... ~~'
         if self.args.ip:
             self.IP = self.args.ip[0]
             print '~~~~ Using forced IP: ', self.IP, '~~~~'
@@ -105,7 +109,7 @@ class Injector:
                 print ('Exception: failed getting data from lisetening to the socket.')
             print str(datetime.datetime.now()), ': ', data
             if self.args.v:
-                print 'Message received on IP:port @ ', self.IP ,':', self.port
+                print '~~~~ Message received on IP:port @ ', self.IP ,':', self.port
             try:
                 self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
@@ -113,7 +117,7 @@ class Injector:
                 sys.exit(0)
             except (Exception) as e:
                 print str(e)
-                print ('Exception: Cannot decrypt data...')
+                print ('~~~~ Exception: Cannot decrypt data... ~~~~')
 
 if __name__=="__main__":
     inj = Injector()
