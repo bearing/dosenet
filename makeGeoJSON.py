@@ -24,7 +24,7 @@ import datetime
 
 class Plot(object):
 	def __init__(self):
-		self.db = mdb.connect("localhost",
+		self.db = mdb.connect("127.0.0.1",
 						"ne170group",
 						"ne170groupSpring2015",
 						"dosimeter_network")
