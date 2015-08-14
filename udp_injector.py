@@ -22,6 +22,7 @@ from crypt import cust_crypt as ccrypt
 from udp import udp_tools as udpTool
 from mysql import mysql_tools as mySQLTool
 import socket
+import datetime
 
 # class Parser:
     # Do this later
@@ -41,7 +42,7 @@ class Injector:
         """
         parser = argparse.ArgumentParser()
         parser.add_argument('-v', action='store_true', required = False,
-            help = '\n\t Will print: Message received on IP:port... ')
+            help = '\n\t Verbosity level 1'
         parser.add_argument('--ip', nargs='?', required=False, type=str,
             help = '\n\t Force a custom listening IP address for the server. \
                     \n Default value: \'192.168.1.105\'')
