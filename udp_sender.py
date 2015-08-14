@@ -84,7 +84,7 @@ class Sender:
         self.msg_hash =  self.file_contents[0]['message_hash']
 
     def initVariables(self):
-        public_key = ['/home/pi/dosenet/id_rsa_lbldosenet.pub']
+        public_key = ['/home/pi/dosenet/id_rsa_lbl.pub']
         self.pe = ccrypt.public_d_encrypt(key_file_lst = public_key)
         self.IP = 'dosenet.dhcp.lbl.gov'
         self.port = 5005
