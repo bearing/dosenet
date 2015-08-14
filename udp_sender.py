@@ -42,6 +42,8 @@ class Sender:
         self.LEDS = dict(led_network = self.led_network,
                         led_power = self.led_power,
                         led_counts = self.led_counts)
+        if self.args.test:
+            print 'LED pins (BCM): ', self.LEDS
 
     def getContents(self,file_path):
         content = [] #list()

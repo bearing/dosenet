@@ -32,7 +32,6 @@ class Dosimeter:
         self.LEDS = dict(led_network = led_network,
                         led_power = led_power,
                         led_counts = led_counts)
-        print 'LED pins (BCM): ', self.LEDS
         self.counts = [] # Datetime list
         #self.noise  = [] # Datetime list
         start = datetime.datetime.now()
