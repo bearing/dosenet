@@ -69,11 +69,11 @@ class Injector:
         privateKey = ['/home/dosenet/.ssh/id_rsa_lbl']
         de = ccrypt.public_d_encrypt(key_file_lst = privateKey) # Uses 1 private key
         if self.args.v:
-            print self.args
-            print self.db
-            print self.db.cursor
-            print privateKey
-            print de
+            print '\t', self.args
+            print '\t', self.db
+            print '\t', self.db.cursor
+            print '\t', privateKey
+            print '\t', de
         self.port = 5005
         # Gets actual IP address
         self.IP = ([(s.connect(('8.8.8.8', 80)),
@@ -81,7 +81,7 @@ class Injector:
                 s.close()) for s in [socket.socket(socket.AF_INET,
                                                     socket.SOCK_DGRAM)]][0][1])
         if self.args.v:
-            print self.IP # '192.168.1.105' - current GRIM 'Database' IP - default behaviour
+            print '\t', self.IP # '192.168.1.105' - current GRIM 'Database' IP - default behaviour
             print '~~ GRIM IP should be 192.168.1.105... ~~'
         if self.args.ip:
             self.IP = self.args.ip[0]
