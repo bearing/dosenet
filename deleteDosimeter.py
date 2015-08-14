@@ -116,6 +116,7 @@ class DataDestroyer:
         print '\nThis will disable authentication of a dosimeter until readded \
 separately with addDosimeterToDB.py. \n \
 If there was more than one station above, you should QUIT.'
+        print '\n\t DEAUTHENICATE STATION?'
         if self.confirm():
             sql = "DELETE FROM stations WHERE ID = %s LIMIT 1;" % self.ID
             self.runSQL(sql)
@@ -172,6 +173,7 @@ If there was more than one station above, you should QUIT.'
 
     def getDataSample(self,select,limit):
         rows = self.runSQL(select, everything = True)
+        print '\t\t\t\t\tSQL:', select
         print 'Sample of data you\'re about to delete (Max: "%s"): \n "%s"' % (limit, rows)
 
     def deleteAllData(self):
@@ -221,7 +223,7 @@ If there was more than one station above, you should QUIT.'
         if raw_input() == 'yes':
             return True
         else:
-            print '~~ Exiting with no changes: did not read "yes"'
+            print '~~ Exiting last prompt: did not read "yes"'
             return False
 
     def runSQL(self,sql, least=False, less=False, everything=False):
