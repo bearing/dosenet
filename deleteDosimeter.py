@@ -80,22 +80,8 @@ class DataDestroyer:
 
     def getArguments(self,ID,arg,option):
         self.ID = ID
-        self.before = False
-        self.after = False
-        self.daterange = False
-        self.dropdata = False
-        self.dropstations = False
-        if option == 'before':
-            self.before = True
-        elif option == 'after':
-            self.after = True
-        elif option == 'daterange':
-            self.daterange = True
-        elif option == 'dropdata':
-            self.dropdata = True
-        elif option == 'dropstations':
-            self.dropstations = True
-        else:
+        self.option = option
+        if not option:
             print '~ No extra flags given ~'
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
@@ -249,19 +235,19 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
             raise e
 
     def main(self):
-        if self.before:
+        if self.option == 'before':
             print '~ DELETING DATA BEFORE ~'
             self.deleteDataBefore()
-        elif self.after:
+        elif self.option == 'after':
             print '~ DELETING DATA AFTER ~'
             self.deleteDataAfter()
-        elif self.daterange:
+        elif self.option == 'daterange':
             print '~ DELETING DATERANGE ~'
             self.deleteDateRange()
-        elif self.dropdata:
+        elif self.option == 'dropdata':
             print '~ DELETING ALL DATA ~'
             self.deleteAllData()
-        elif self.dropstations:
+        elif self.option == 'dropstations':
             print '~ DELETING ALL STATIONS ~'
             self.deleteAllStations()
         else: # default, delete stations
@@ -269,15 +255,15 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
             self.deleteStation()
         self.db.commit()
         # REVIEW
-        if self.before:
+        if self.option == 'before':
             pass
-        elif self.after:
+        elif self.option == 'after':
             pass
-        elif self.daterange:
+        elif self.option == 'daterange':
             pass
-        elif self.dropdata:
+        elif self.option == 'dropdata':
             pass
-        elif self.dropstations:
+        elif self.option == 'dropstations':
             pass
         else: # default, delete stations
             remaining = self.runSQL("SELECT Name FROM stations;", everything=True)
