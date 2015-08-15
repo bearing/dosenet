@@ -131,7 +131,7 @@ If there was more than one station above, you should QUIT.'
 
     def deleteDataBefore(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
-                    AND `receiveTime` < '%s' LIMIT %s" \
+                    AND `receiveTime` < '%s' ORDER BY `receiveTime` DESC LIMIT %s" \
                     % (self.ID, self.before, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
@@ -145,7 +145,7 @@ If there was more than one station above, you should QUIT.'
 
     def deleteDataAfter(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
-                            AND `receiveTime` > '%s' LIMIT %s" \
+                            AND `receiveTime` > '%s' ORDER BY `receiveTime` ASC LIMIT %s" \
                             % (self.ID, self.after, self.limit)
         self.getDataSample(select=select,limit=self.limit)
         msg = 'DELETING ALL DATA AFTER: ',after, 'for ID: ', self.ID
