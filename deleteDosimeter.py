@@ -80,11 +80,6 @@ class DataDestroyer:
 
     def getArguments(self,ID,arg):
         self.ID = ID
-        self.before = False
-        self.after = False
-        self.dropdata = False
-        self.dropstations = False
-        print 'ARGUMENT: ', arg
         if arg == 'before':
             self.before = True
         elif arg == 'after':
@@ -247,15 +242,24 @@ If there was more than one station above, you should QUIT.'
             raise e
 
     def main(self):
+        '''self.before = False
+        self.after = False
+        self.dropdata = False
+        self.dropstations = False'''
         if self.before:
+            print '~ DELETING DATA BEFORE ~'
             self.deleteDataBefore()
         elif self.after:
+            print '~ DELETING DATA AFTER ~'
             self.deleteDataAfter()
         elif self.dropdata:
+            print '~ DELETING ALL DATA ~'
             self.deleteAllData()
         elif self.dropstations:
+            print '~ DELETING ALL STATIONS ~'
             self.deleteAllStations()
         else: # default, delete stations
+            print '~ DELETING ONE STATION ~'
             self.deleteStation()
         self.db.commit()
         # REVIEW
