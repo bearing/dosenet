@@ -85,6 +85,9 @@ class DataDestroyer:
             self.before = arg
         elif option == 'after':
             self.after = arg
+        elif option == 'daterange':
+            self.before = arg[0]
+            self.after = arg[1]
         if not option:
             print '~ No extra flags given ~'
         try:
@@ -290,6 +293,8 @@ if __name__ == "__main__":
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
+            daterange = before,after
+            deleter.getArguments(ID,daterange,'daterange')
         elif par.args.before:
             print '\t\t ~~~ Before flag ~~~'
             before = par.args.before
