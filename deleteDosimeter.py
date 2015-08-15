@@ -125,7 +125,7 @@ If there was more than one station above, you should QUIT.'
         print '\t ~ Delete all the data for this stations? ~'
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE stationID = %s;" % self.ID
-        self.runSQL(sql)
+            self.runSQL(sql)
         if self.log:
             self.appendLog(sql,msg)
 
