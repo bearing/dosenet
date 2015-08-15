@@ -100,8 +100,8 @@ class DataDestroyer:
         select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT %s;" % (self.ID, self.limit))
         self.getDataSample(select=select,limit=self.limit)
         print '\nThis will disable authentication of a dosimeter until readded \
-separately with addDosimeterToDB.py. \n \
-If there was more than one station above, you should QUIT.'
+                separately with addDosimeterToDB.py. \n \
+                If there was more than one station above, you should QUIT.'
         print '\n\t DEAUTHENICATE STATION?'
         if self.confirm():
             sql = "DELETE FROM stations WHERE ID = %s LIMIT 1;" % self.ID
@@ -143,7 +143,7 @@ If there was more than one station above, you should QUIT.'
             if self.log:
                 self.appendLog(sql,msg)
 
-    def deleteDataRange(self):
+    def deleteDateRange(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
                     AND (`receiveTime` BETWEEN '%s' AND '%s') LIMIT %s" \
                     % (self.ID, self.before, self.after, self.limit)
@@ -232,16 +232,20 @@ If there was more than one station above, you should QUIT.'
             raise e
 
     def main(self):
-        '''self.before = False
+        self.before = False
         self.after = False
+        self.daterange = False
         self.dropdata = False
-        self.dropstations = False'''
+        self.dropstations = False
         if self.before:
             print '~ DELETING DATA BEFORE ~'
             self.deleteDataBefore()
         elif self.after:
             print '~ DELETING DATA AFTER ~'
             self.deleteDataAfter()
+        elif self.daterange:
+            print '~ DELETING DATERANGE ~'
+            self.deleteDateRange()
         elif self.dropdata:
             print '~ DELETING ALL DATA ~'
             self.deleteAllData()
@@ -256,6 +260,8 @@ If there was more than one station above, you should QUIT.'
         if self.before:
             pass
         elif self.after:
+            pass
+        elif self.daterange:
             pass
         elif self.dropdata:
             pass
