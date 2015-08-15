@@ -81,13 +81,13 @@ class DataDestroyer:
     def getArguments(self,ID,arg):
         self.ID = ID
         if self.args.before:
-            self.before = True
+            print '\t\t ~~~ Before flag ~~~'
         elif self.args.after:
-            self.after = True
+            print '\t\t ~~~ After flag ~~~'
         elif self.args.dropdata:
-            self.dropdata = True
+            print '\t\t ~~~ Dropdata flag ~~~'
         elif self.args.dropstations:
-            self.dropstations = True
+            print '\t\t ~~~ Dropstations flag ~~~'
         else:
             print '\t\t ~~~ No extra flags given ~~~'
         try:
@@ -291,19 +291,24 @@ if __name__ == "__main__":
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
+            deleter.daterange = True
         elif par.args.before:
             before = par.args.before
             print 'Before: ', before
+            deleter.before = True
             deleter.getArguments(ID,before)
         elif par.args.after:
             after = par.args.after
             print 'After: ', after
+            deleter.after = True
             deleter.getArguments(ID,after)
         elif par.args.dropalldata:
             dropdata = par.args.dropalldata[0]
+            deleter.dropdata = True
             deleter.getArguments(ID,dropdata)
         elif par.args.dropallstations:
             dropstations = par.args.dropallstations[0]
+            deleter.dropallstations = True
             deleter.getArguments(ID,dropstations)
         else:
             deleter.getArguments(ID,'null')
