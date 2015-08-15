@@ -126,8 +126,8 @@ If there was more than one station above, you should QUIT.'
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE stationID = %s;" % self.ID
             self.runSQL(sql)
-        if self.log:
-            self.appendLog(sql,msg)
+            if self.log:
+                self.appendLog(sql,msg)
 
     def deleteDataBefore(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
