@@ -4,7 +4,7 @@ import datetime
 
 class SQLObject:
     def __init__(self):
-        self.db = mdb.connect('localhost','ne170group','ne170groupSpring2015','dosimeter_network')
+        self.db = mdb.connect('127.0.0.1','ne170group','ne170groupSpring2015','dosimeter_network')
         self.verified_stations = []
         self.cursor = self.db.cursor()
         self.getVerifiedStationList()
