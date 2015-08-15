@@ -80,13 +80,13 @@ class DataDestroyer:
 
     def getArguments(self,ID,arg):
         self.ID = ID
-        if arg == 'before':
+        if self.args.before:
             self.before = True
-        elif arg == 'after':
+        elif self.args.after:
             self.after = True
-        elif arg == 'dropdata':
+        elif self.args.dropdata:
             self.dropdata = True
-        elif arg == 'dropstations':
+        elif self.args.dropstations:
             self.dropstations = True
         else:
             print '\t\t ~~~ No extra flags given ~~~'
