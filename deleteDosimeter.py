@@ -78,13 +78,25 @@ class DataDestroyer:
         else:
             self.log = False
 
-    def getArguments(self,ID,arg):
+    def getArguments(self,ID,arg,option):
         self.ID = ID
         self.before = False
         self.after = False
         self.daterange = False
         self.dropdata = False
         self.dropstations = False
+        if option == 'before':
+            self.before = True
+        elif option == 'after':
+            self.after = True
+        elif option == 'daterange':
+            self.daterange = True
+        elif option == 'dropdata':
+            self.dropdata = True
+        elif option == 'dropstations':
+            self.dropstations = True
+        else:
+            print '~ No extra flags given ~'
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
             print '\t\t ~~~ Operating on ',self.name, ' ~~~'
@@ -288,29 +300,24 @@ if __name__ == "__main__":
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
-            deleter.daterange = True
         elif par.args.before:
             print '\t\t ~~~ Before flag ~~~'
             before = par.args.before
             print 'Before: ', before
-            deleter.before = True
-            deleter.getArguments(ID,before)
+            deleter.getArguments(ID,before,'before')
         elif par.args.after:
             print '\t\t ~~~ After flag ~~~'
             after = par.args.after
             print 'After: ', after
-            deleter.after = True
-            deleter.getArguments(ID,after)
+            deleter.getArguments(ID,after,'after')
         elif par.args.dropalldata:
             print '\t\t ~~~ Dropdata flag ~~~'
             dropdata = par.args.dropalldata[0]
-            deleter.dropdata = True
-            deleter.getArguments(ID,dropdata)
+            deleter.getArguments(ID,dropdata,'dropdata')
         elif par.args.dropallstations:
             print '\t\t ~~~ Dropstations flag ~~~'
             dropstations = par.args.dropallstations[0]
-            deleter.dropallstations = True
-            deleter.getArguments(ID,dropstations)
+            deleter.getArguments(ID,dropstations,'dropstations')
         else:
             print '\t\t ~~~ No extra flags given ~~~'
             deleter.getArguments(ID,'null')
