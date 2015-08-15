@@ -297,12 +297,12 @@ if __name__ == "__main__":
             deleter.getArguments(ID,daterange,'daterange')
         elif par.args.before:
             print '\t\t ~~~ Before flag ~~~'
-            before = par.args.before
+            before = par.args.before[0]
             print 'Before: ', before
             deleter.getArguments(ID,before,'before')
         elif par.args.after:
             print '\t\t ~~~ After flag ~~~'
-            after = par.args.after
+            after = par.args.after[0]
             print 'After: ', after
             deleter.getArguments(ID,after,'after')
         elif par.args.dropalldata:
