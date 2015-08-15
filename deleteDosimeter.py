@@ -81,6 +81,10 @@ class DataDestroyer:
     def getArguments(self,ID,arg,option):
         self.ID = ID
         self.option = option
+        if option == 'before':
+            self.before = arg
+        elif option == 'after':
+            self.after = arg
         if not option:
             print '~ No extra flags given ~'
         try:
