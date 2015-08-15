@@ -80,16 +80,6 @@ class DataDestroyer:
 
     def getArguments(self,ID,arg):
         self.ID = ID
-        if self.args.before:
-            print '\t\t ~~~ Before flag ~~~'
-        elif self.args.after:
-            print '\t\t ~~~ After flag ~~~'
-        elif self.args.dropdata:
-            print '\t\t ~~~ Dropdata flag ~~~'
-        elif self.args.dropstations:
-            print '\t\t ~~~ Dropstations flag ~~~'
-        else:
-            print '\t\t ~~~ No extra flags given ~~~'
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
             print '\t\t ~~~ Operating on ',self.name, ' ~~~'
@@ -288,29 +278,35 @@ if __name__ == "__main__":
         else:
             deleter = DataDestroyer()
         if par.args.daterange:
+            print '\t\t ~~~ Daterange flag ~~~'
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
             deleter.daterange = True
         elif par.args.before:
+            print '\t\t ~~~ Before flag ~~~'
             before = par.args.before
             print 'Before: ', before
             deleter.before = True
             deleter.getArguments(ID,before)
         elif par.args.after:
+            print '\t\t ~~~ After flag ~~~'
             after = par.args.after
             print 'After: ', after
             deleter.after = True
             deleter.getArguments(ID,after)
         elif par.args.dropalldata:
+            print '\t\t ~~~ Dropdata flag ~~~'
             dropdata = par.args.dropalldata[0]
             deleter.dropdata = True
             deleter.getArguments(ID,dropdata)
         elif par.args.dropallstations:
+            print '\t\t ~~~ Dropstations flag ~~~'
             dropstations = par.args.dropallstations[0]
             deleter.dropallstations = True
             deleter.getArguments(ID,dropstations)
         else:
+            print '\t\t ~~~ No extra flags given ~~~'
             deleter.getArguments(ID,'null')
     else:
         print 'You have decided not to delete data, thanks!'
