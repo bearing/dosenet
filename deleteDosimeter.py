@@ -84,6 +84,7 @@ class DataDestroyer:
         self.after = False
         self.dropdata = False
         self.dropstations = False
+        print 'ARGUMENT: ', arg
         if arg == 'before':
             self.before = True
         elif arg == 'after':
