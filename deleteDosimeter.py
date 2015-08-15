@@ -80,6 +80,11 @@ class DataDestroyer:
 
     def getArguments(self,ID,arg):
         self.ID = ID
+        self.before = False
+        self.after = False
+        self.daterange = False
+        self.dropdata = False
+        self.dropstations = False
         try:
             self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
             print '\t\t ~~~ Operating on ',self.name, ' ~~~'
@@ -100,8 +105,8 @@ class DataDestroyer:
         select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT %s;" % (self.ID, self.limit))
         self.getDataSample(select=select,limit=self.limit)
         print '\nThis will disable authentication of a dosimeter until readded \
-                separately with addDosimeterToDB.py. \n \
-                If there was more than one station above, you should QUIT.'
+separately with addDosimeterToDB.py. \n If there was more than one station above,\
+ you should QUIT.'
         print '\n\t DEAUTHENICATE STATION?'
         if self.confirm():
             sql = "DELETE FROM stations WHERE ID = %s LIMIT 1;" % self.ID
@@ -232,11 +237,6 @@ class DataDestroyer:
             raise e
 
     def main(self):
-        self.before = False
-        self.after = False
-        self.daterange = False
-        self.dropdata = False
-        self.dropstations = False
         if self.before:
             print '~ DELETING DATA BEFORE ~'
             self.deleteDataBefore()
