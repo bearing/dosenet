@@ -12,7 +12,7 @@ def send_email(process, error_message):
     print spacer
     geojson = call(["stat", "output.geojson"])
     print spacer
-    processes = call(["ps", "aux", "|", "grep", "python", "|", "grep", "-v", "grep"])
+    processes = subprocess.call('ps aux | grep python | grep -v grep', shell=True)
     print spacer
     crontab = call(["crontab","-l"])
     print spacer
