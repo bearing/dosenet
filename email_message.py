@@ -14,8 +14,9 @@ Subject: DoseNet automated message
 <h1> Some DoseNet process isn't running! :( </h1>
 <p> String format this later to inject the relevant process that isn't running. </p>
 <p> Note: include running/last run process list. </p>
-<p> stat ~/output.geojson? </p>
-<p> ps aux | grep python </p>
+<p> stat ~/output.geojson </p>
+<p> ps aux | grep python | grep -v grep </p>
+<p> crontab -l </p>
 """
 
 try:
