@@ -2,6 +2,7 @@
 
 import smtplib
 from subprocess import call
+import subprocess
 
 def send_email(process, error_message):
     sender = 'dosenet@lbl.gov'
