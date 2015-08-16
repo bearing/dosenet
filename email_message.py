@@ -1,38 +1,73 @@
 #!/usr/bin/env python
 
 import smtplib
+from subprocess import call
 
-sender = 'dosenet@lbl.gov'
-receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
+def send_email(process, error_message):
+    sender = 'dosenet@lbl.gov'
+    receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
 
-message = """From: LBL DoseNet <dosenet@lbl.gov>
-To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
-MIME-Version: 1.0
-Content-type: text/html
-Subject: DoseNet automated message
+    stopped = process
+    geojson = call(["stat", "output.geojson"])
+    processes = call(["ps", "aux", "|", "grep", "python", "|", "grep", "-v", "grep"])
+    crontab = call(["crontab","-l"])
 
-<style>
-    samp {
-        background-color: #f8f8ff;
-        padding: 10px;
-        margin: 10px;
-        border-radius: 10px;
-    }
-</style>
-    <h1> Some DoseNet process isn't running! :( </h1>
-        <p> String format this later to inject the relevant process that isn't running. </p>
-        <p> Note: include running/last run process list. </p>
-        <p> stat ~/output.geojson </p>
-        <samp> ps aux | grep python | grep -v grep </samp>
-        <p> crontab -l </p>
-        <br>
-        <p> Navrit Bal </p>
-        <p> Maker of DoseNet. </p>
-"""
+    message = """From: LBL DoseNet <dosenet@lbl.gov>
+    To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
+    MIME-Version: 1.0
+    Content-type: text/html
+    Subject: DoseNet automated message
 
-try:
-   smtpObj = smtplib.SMTP('localhost')
-   smtpObj.sendmail(sender, receivers, message)
-   print "Successfully sent email"
-except SMTPException:
-   print "Error: unable to send email"
+    <style>
+        samp {
+            background-color: #f8f8ff;
+            border-radius: 10px;
+        }
+        code {
+            background-color: #f8f8ff;
+            margin: 20px auto 20px auto;
+            padding-right: 20px;
+            padding-left: 20px;
+            padding-bottom: 7px;
+            border: 2px solid #8AC007;
+            border-radius: 10px;
+            font-size: 1.5em;
+        }
+    </style>
+        <h1> Some DoseNet process just stopped! :( </h1>
+            <h2> Which process stopped? </h2>
+                <code>{}</code>
+                <br>
+                <br>
+                <samp>{}</samp>
+            <p> Include running/last run process list. </p>
+            <br>
+            <h2> GeoJSON file properties </h2>
+                <code> stat ~/output.geojson </code>
+                <br>
+                <br>
+                <samp>{}</samp>
+            <h2> Which Python processes are running </h2>
+                <code> ps aux | grep python | grep -v grep </code>
+                <br>
+                <br>
+                <samp>{}</samp>
+            <h2> Crontab entries </h2>
+                <code> crontab -l </code>
+                <br>
+                <br>
+                <samp>{}</samp>
+            <br>
+            <p> Navrit Bal </p>
+            <p> Maker of DoseNet. </p>
+    """.format(stopped, error_message, geojson, processes, crontab)
+
+    try:
+       smtpObj = smtplib.SMTP('localhost')
+       smtpObj.sendmail(sender, receivers, message)
+       print "Successfully sent email"
+    except SMTPException:
+       print "Error: unable to send email"
+
+if __name__ == "__main__":
+    send_email(process = "Test send_email function", error_message = "... Testing email script ...")
