@@ -11,12 +11,23 @@ MIME-Version: 1.0
 Content-type: text/html
 Subject: DoseNet automated message
 
-<h1> Some DoseNet process isn't running! :( </h1>
-<p> String format this later to inject the relevant process that isn't running. </p>
-<p> Note: include running/last run process list. </p>
-<p> stat ~/output.geojson </p>
-<p> ps aux | grep python | grep -v grep </p>
-<p> crontab -l </p>
+<style>
+    samp {
+        background-color: #f8f8ff;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 10px;
+    }
+</style>
+    <h1> Some DoseNet process isn't running! :( </h1>
+        <p> String format this later to inject the relevant process that isn't running. </p>
+        <p> Note: include running/last run process list. </p>
+        <p> stat ~/output.geojson </p>
+        <samp> ps aux | grep python | grep -v grep </samp>
+        <p> crontab -l </p>
+        <br>
+        <p> Navrit Bal </p>
+        <p> Maker of DoseNet. </p>
 """
 
 try:
