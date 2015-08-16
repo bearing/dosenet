@@ -24,7 +24,7 @@ def send_email(process, error_message):
     Content-type: text/html
     Subject: DoseNet automated message
 
-    <style>
+    <style type="text/css">
         samp {
             background-color: #f8f8ff;
             border-radius: 10px;
