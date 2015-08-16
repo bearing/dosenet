@@ -7,10 +7,15 @@ def send_email(process, error_message):
     sender = 'dosenet@lbl.gov'
     receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
 
+    spacer = "- " * 64
     stopped = process
+    print spacer
     geojson = call(["stat", "output.geojson"])
+    print spacer
     processes = call(["ps", "aux", "|", "grep", "python", "|", "grep", "-v", "grep"])
+    print spacer
     crontab = call(["crontab","-l"])
+    print spacer
 
     message = """From: LBL DoseNet <dosenet@lbl.gov>
     To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
@@ -22,7 +27,7 @@ def send_email(process, error_message):
         samp {
             background-color: #f8f8ff;
             border-radius: 10px;
-        }
+        },
         code {
             background-color: #f8f8ff;
             margin: 20px auto 20px auto;
