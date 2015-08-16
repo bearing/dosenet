@@ -33,9 +33,6 @@ class Plot(object):
 		self.cpmTitle = 'Counts per minute (CPM)'
 		self.remTitle = 'mREM/hr'
 		self.usvTitle = 'uSv/hr'
-		# Should be retrieved from DB
-		self.calibrationFactor_cpm_to_rem = 0.01886792 # COMPLETELY RANDOM (1/53)
-		self.calibrationFactor_cpm_to_usv = 0.00980392 # COMPLETELY RANDOM (1/102)
 		# Other global variables
 		self.stationRows = ''
 		self.stationRowArrayList = []
@@ -75,8 +72,6 @@ class Plot(object):
 								AND receiveTime BETWEEN '%s' \
 								AND '%s';" % (stationID, startTime, endTime))
 			dosePerStation = self.cursor.fetchall()
-		except (KeyboardInterrupt, SystemExit):
-			pass
 		except Exception as e:
 			print 'Could not get data from DB:' + str(e)
 		# Populate time-restricted row array list of data
@@ -130,8 +125,6 @@ class Plot(object):
 									auto_open = False)
 			print fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's'
 			return plotURL
-		except (KeyboardInterrupt, SystemExit):
-			raise
 		except:
 			print ('This '+unit+' plot failed - '+fname)
 
@@ -169,16 +162,13 @@ class Plot(object):
 		return range(len(self.stationRows))
 
 	def makeAllPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
-		plotLengthString = 'Past_' + plotLengthString
+		plotLengthString = 'Last ' + plotLengthString
 		if latestTime == '':
-			print 'Finished list?'
+			print '~~~~ WARNING: Finished list? - No data for this station.'
 		else:
 			try:
 				# Note the negative --> means that we're looking at the past relative to the latest measurement stored in the DB
-				startPlotTime = latestTime + datetime.timedelta(seconds=-time)
-			except (KeyboardInterrupt, SystemExit) as e:
-				raise e
-				sys.exit(0)
+				startPlotTime = latestTime + datetime.timedelta(seconds = -time)
 			except Exception as e:
 				print 'There probably isn\'t any data from this time.\n' + str(e)
 		df = self.getDataFromDB(latestStationID,startPlotTime,latestTime)
@@ -199,8 +189,6 @@ class Plot(object):
 			urlC = self.makePlot(latestStationID,'USV','usvError',self.usvTitle,df,plotLengthString)
 			tempRow = urlA,urlB,urlC
 			urlList.extend(tempRow)
-		except (KeyboardInterrupt, SystemExit):
-			sys.exit(0)
 		except Exception as e:
 			self.printPlotFail(e)
 		return urlList
@@ -247,8 +235,6 @@ class Plot(object):
 				# Make feature - iterating through each
 				try:
 					self.setFeature(point,LName,plotLength,LDose,LTime,urlList)
-				except (KeyboardInterrupt, SystemExit):
-					sys.exit(0)
 				except Exception as e:
 					self.printFeatureFail(e)
 
@@ -259,8 +245,6 @@ class Plot(object):
 		openfile = open('output.geojson','w')
 		try:
 			print >> openfile, dump
-		except (KeyboardInterrupt, SystemExit):
-			sys.exit(0)
 		except Exception as e:
 			print (str(e))
 		finally:
