@@ -70,7 +70,8 @@ def send_email(process, error_message):
        smtpObj.sendmail(sender, receivers, msg.as_string())
        smtpObj.quit()
        print "Successfully sent email"
-    except Exception:
+   except Exception as e:
+       print str(e)
        print "Error: unable to send email"
 
 if __name__ == "__main__":
