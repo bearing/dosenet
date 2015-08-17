@@ -1,24 +1,19 @@
 #!/usr/bin/env python
 
 import smtplib
-from subprocess import Popen, PIPE
-import subprocess
+from os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from time import sleep
-import shlex
 
 def send_email(process, error_message):
     spacer = "- " * 64
     stopped = process
     print spacer
-    geojson = Popen(["stat", "output.geojson"], stdout = PIPE, shell = True).communicate()
+    geojson = os.system("stat output.geojson")
     print spacer
-    cmd = "ps aux | grep python | grep -v grep"
-    args = shlex.split(cmd)
-    processes = Popen(args, stdout = PIPE, shell = True).communicate()
+    processes = os.system("ps aux | grep python | grep -v grep")
     print spacer
-    crontab = Popen(["crontab","-l"], stdout = PIPE, shell = True).communicate()
+    crontab = os.system("crontab -l")
     print spacer
 
     sender = 'dosenet@dosenet'
