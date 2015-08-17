@@ -5,6 +5,7 @@ from subprocess import call
 import subprocess
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from time import sleep
 
 def send_email(process, error_message):
     spacer = "- " * 64
@@ -16,6 +17,7 @@ def send_email(process, error_message):
     print spacer
     crontab = call(["crontab","-l"])
     print spacer
+    sleep(1)
 
     sender = 'dosenet@dosenet'
     receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
