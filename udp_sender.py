@@ -114,7 +114,7 @@ class Sender:
         error_code = 0 # Default 'working' state - error code 0
         c = ','
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            p = Process(target = det.ping, args=(pin=self.led_network,))
+            p = Process(target = det.ping, args=(self.led_network,))
             p.start()
             p.join()
             GPIO.remove_event_detect(24)
