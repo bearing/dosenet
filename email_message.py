@@ -8,8 +8,8 @@ from email.mime.text import MIMEText
 def run_command(cmd):
     proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
-    out = str(out).encode('string-escape')
-    err = str(err).encode('string-escape')
+    out = str(out).encode('string-escape').replace('\n','<br>')
+    err = str(err).encode('string-escape').replace('\n','<br>')
     print out
     return out, err
 
