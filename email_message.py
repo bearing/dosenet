@@ -3,11 +3,10 @@
 import smtplib
 from subprocess import call
 import subprocess
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 def send_email(process, error_message):
-    sender = 'dosenet@dosenet'
-    receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
-
     spacer = "- " * 64
     stopped = process
     print spacer
@@ -18,41 +17,58 @@ def send_email(process, error_message):
     crontab = call(["crontab","-l"])
     print spacer
 
-    message = """From: LBL DoseNet <dosenet@dosenet.dhcp.lbl.gov>
-To: Navrit Bal <nbal@lbl.gov>, DoseNet GMail <ucbdosenet@gmail.com>
-Subject: DoseNet automated message
+    sender = 'dosenet@dosenet'
+    receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
 
-<h1> Some DoseNet process just stopped! :( </h1>
-<h2> Which process stopped? </h2>
-    <code>{}</code>
-    <br>
-    <br>
-    <samp>{}</samp>
-<p> Include running/last run process list. </p>
-<br>
-<h2> GeoJSON file properties </h2>
-    <code> stat ~/output.geojson </code>
-    <br>
-    <br>
-    <samp>{}</samp>
-<h2> Which Python processes are running </h2>
-    <code> ps aux | grep python | grep -v grep </code>
-    <br>
-    <br>
-    <samp>{}</samp>
-<h2> Crontab entries </h2>
-    <code> crontab -l </code>
-    <br>
-    <br>
-    <samp>{}</samp>
-<br>
-<p> Navrit Bal </p>
-<p> Maker of DoseNet. </p>
-    """.format(stopped, error_message, geojson, processes, crontab)
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = "DoseNet automated message"
+    msg['From'] = sender
+    msg['To'] = receivers
+
+    text = """Process: {}\n Error message: {}\n Navrit Bal.""".format(stopped, error_message)
+    html = """\
+<html>
+    <head></head>
+    <body>
+        <h1> Some DoseNet process just stopped! :( </h1>
+        <h2> Which process stopped? </h2>
+            <code>{}</code>
+            <br>
+            <br>
+            <samp>{}</samp>
+        <p> Include running/last run process list. </p>
+        <br>
+        <h2> GeoJSON file properties </h2>
+            <code> stat ~/output.geojson </code>
+            <br>
+            <br>
+            <samp>{}</samp>
+        <h2> Which Python processes are running </h2>
+            <code> ps aux | grep python | grep -v grep </code>
+            <br>
+            <br>
+            <samp>{}</samp>
+        <h2> Crontab entries </h2>
+            <code> crontab -l </code>
+            <br>
+            <br>
+            <samp>{}</samp>
+        <br>
+        <p> Navrit Bal </p>
+        <p> Maker of DoseNet. </p>
+    </body>
+""".format(stopped, error_message, geojson, processes, crontab)
+
+    part1 = MIMEText(text, 'plain')
+    part2 = MIMEText(html, 'html')
+    msg.attach(part1)
+    msg.attach(part2)
 
     try:
        smtpObj = smtplib.SMTP('localhost')
-       smtpObj.sendmail(sender, receivers, message)
+       smtpObj.sendmail(sender, receivers, msg.as_string())
+       smtpObj.quit()
        print "Successfully sent email"
     except SMTPException:
        print "Error: unable to send email"
