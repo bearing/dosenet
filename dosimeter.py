@@ -140,7 +140,7 @@ class Dosimeter:
             self.resetCounts(seconds = accumulation_time)
         return cpm, cpm_err
 
-    def ping(self, pin = 20, hostname = 'berkeley.edu'):
+    def ping(self, pin = 20, hostname = 'dosenet.dhcp.lbl.gov'):
         response = os.system('ping -c 1 '  + str(hostname) + '> /dev/null')
         # and then check the response...
         if response == 0:
