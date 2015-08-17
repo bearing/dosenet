@@ -7,6 +7,8 @@ from email.mime.text import MIMEText
 
 def run_command(cmd):
     proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
+    type(out)
+    print out
     (out, err) = proc.communicate()
     return str(out), str(err)
 
@@ -16,8 +18,8 @@ def send_email(process, error_message):
 
     print spacer
     geojson, geojson_err = run_command("stat ~/output.geojson")
+    type(geojson)
     print geojson
-    print geojson_err
     print spacer
     processes, processer_err = run_command("ps aux | grep python | grep -v grep")
     print spacer
