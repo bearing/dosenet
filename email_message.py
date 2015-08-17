@@ -31,35 +31,25 @@ def send_email(process, error_message):
     text = """Process: {}\n Error message: {}\n Navrit Bal.""".format(stopped, error_message)
     html = """\
 <html>
-    <head></head>
-    <body>
-        <h1> Some DoseNet process just stopped! :( </h1>
-        <h2> Which process stopped? </h2>
-            <code>{}</code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <p> Include running/last run process list. </p>
-        <br>
-        <h2> GeoJSON file properties </h2>
-            <code> stat ~/output.geojson </code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <h2> Which Python processes are running </h2>
-            <code> ps aux | grep python | grep -v grep </code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <h2> Crontab entries </h2>
-            <code> crontab -l </code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <br>
-        <p> Navrit Bal </p>
-        <p> Maker of DoseNet. </p>
-    </body>
+<head></head>
+<body>
+<h1> Some DoseNet process just stopped! :( </h1>
+            <h2> Which process stopped? </h2>
+                <code style="background-color: #f8f8ff; padding-right: 20px; padding-left: 20px; padding-bottom: 7px; border-radius: 10px; font-size: 1.5em; margin: 20px auto; border: 2px solid #8ac007;">{}</code>
+                <br><br><samp style="background-color: #f8f8ff; border-radius: 10px;">{}</samp>
+            <p> Include running/last run process list. </p>
+            <br><h2> GeoJSON file properties </h2>
+                <code style="background-color: #f8f8ff; padding-right: 20px; padding-left: 20px; padding-bottom: 7px; border-radius: 10px; font-size: 1.5em; margin: 20px auto; border: 2px solid #8ac007;"> stat ~/output.geojson </code>
+                <br><br><samp style="background-color: #f8f8ff; border-radius: 10px;">{}</samp>
+            <h2> Which Python processes are running </h2>
+                <code style="background-color: #f8f8ff; padding-right: 20px; padding-left: 20px; padding-bottom: 7px; border-radius: 10px; font-size: 1.5em; margin: 20px auto; border: 2px solid #8ac007;"> ps aux | grep python | grep -v grep </code>
+                <br><br><samp style="background-color: #f8f8ff; border-radius: 10px;">{}</samp>
+            <h2> Crontab entries </h2>
+                <code style="background-color: #f8f8ff; padding-right: 20px; padding-left: 20px; padding-bottom: 7px; border-radius: 10px; font-size: 1.5em; margin: 20px auto; border: 2px solid #8ac007;"> crontab -l </code>
+                <br><br><samp style="background-color: #f8f8ff; border-radius: 10px;">{}</samp>
+            <br><p> Navrit Bal </p>
+            <p> Maker of DoseNet. </p>
+</body>
 </html>""".format(stopped, error_message, geojson, processes, crontab)
 
     part1 = MIMEText(text, 'plain')
