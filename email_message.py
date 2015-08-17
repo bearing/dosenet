@@ -12,15 +12,14 @@ def send_email(process, error_message):
     spacer = "- " * 64
     stopped = process
     print spacer
-    geojson = Popen(["stat", "output.geojson"], stdout = PIPE).communicate()
+    geojson = Popen(["stat", "output.geojson"], stdout = PIPE, shell = True).communicate()
     print spacer
     cmd = "ps aux | grep python | grep -v grep"
     args = shlex.split(cmd)
-    processes = Popen(args, stdout = PIPE).communicate()
+    processes = Popen(args, stdout = PIPE, shell = True).communicate()
     print spacer
-    crontab = Popen(["crontab","-l"], stdout = PIPE).communicate()
+    crontab = Popen(["crontab","-l"], stdout = PIPE, shell = True).communicate()
     print spacer
-    sleep(1)
 
     sender = 'dosenet@dosenet'
     receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
