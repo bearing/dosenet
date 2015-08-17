@@ -5,7 +5,7 @@ from subprocess import call
 import subprocess
 
 def send_email(process, error_message):
-    sender = 'dosenet@lbl.gov'
+    sender = 'dosenet@dosenet'
     receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
 
     spacer = "- " * 64
@@ -19,7 +19,7 @@ def send_email(process, error_message):
     print spacer
 
     message = """From: LBL DoseNet <dosenet@lbl.gov>
-To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
+To: Navrit Bal <nbal@lbl.gov>, DoseNet GMail <ucbdosenet@gmail.com>
 Subject: DoseNet automated message
 
 <h1> Some DoseNet process just stopped! :( </h1>
