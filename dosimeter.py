@@ -140,14 +140,18 @@ class Dosimeter:
             self.resetCounts(seconds = accumulation_time)
         return cpm, cpm_err
 
-    def ping(self, hostname='berkeley.edu'):
+    def ping(self, hostname = 'berkeley.edu', pin = 20):
         response = os.system('ping -c 1 '  + hostname + '> /dev/null')
         # and then check the response...
         if response == 0:
           print '~ ', hostname, 'is up!'
+          self.activatePin(pin = pin)
+          print 'NET ON'
           return True
         else:
           print '~ ', hostname, 'is DOWN!'
+          self.blink(pin = pin)
+          print 'NET OFF'
           return False
 
     def activatePin(self,pin):
@@ -161,7 +165,7 @@ class Dosimeter:
     def invertPin(self,pin):
         GPIO.output(pin, not GPIO.input(pin))
 
-    def blink(self, pin=21, frequency = 1, number_of_flashes = 1):
+    def blink(self, pin = 21, frequency = 1, number_of_flashes = 1):
         for i in range(0, number_of_flashes):
             print '\t\t * #%s' % pin # Flash
             self.deactivatePin(pin)
