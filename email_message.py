@@ -24,7 +24,7 @@ def send_email(process, error_message):
     crontab, crontab_err = run_command("crontab -l")
     print spacer
 
-    sender = 'dosenet@dosenet'
+    sender = 'dosenet@dosenet.dhcp.lbl.gov'
     receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
 
     # Create message container - the correct MIME type is multipart/alternative.
