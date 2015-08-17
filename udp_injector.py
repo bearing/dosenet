@@ -103,30 +103,29 @@ class Injector:
         while True:
             try:
                 data = self.socket.listen()
-            except (KeyboardInterrupt, SystemExit):
-                print ('\nExit cleaning')
-                sys.exit(0)
             except (Exception) as e:
                 print str(e)
-                print ('Exception: failed getting data from lisetening to the socket.')
+                print ('Exception: failed getting data from listening to the socket.')
             print str(datetime.datetime.now()), ': ', data
             if self.args.v:
                 print '~~~~ Message received on IP:port @ ', self.IP ,':', self.port
             try:
                 self.db.inject(data) # Verifying the packets happens in here
-            except (KeyboardInterrupt, SystemExit):
-                print 'Sending email'
-                email_message.send_email(process = "udp_injector.py", error_message = "Manual shutdown.")
-                print '\nExit cleaning'
-                sys.exit(0)
             except (Exception) as e:
                 print str(e)
-                print 'Sending email'
-                email_message.send_email(process = "udp_injector.py", error_message = str(e))
                 print '~~~~ Exception: Cannot decrypt data... ~~~~'
 
 if __name__=="__main__":
     inj = Injector()
     inj.parseArguments() # Must parse arguments before actually starting everything else
     inj.initialise()
-    inj.main()
+    try:
+        inj.main()
+    except (KeyboardInterrupt, SystemExit):
+        print 'Sending email'
+        email_message.send_email(process = "udp_injector.py", error_message = "Manual shutdown.")
+        print '\nExit cleaning'
+        sys.exit(0)
+    except (Exception) as e:
+        print 'Sending email'
+        email_message.send_email(process = "udp_injector.py", error_message = str(e))
