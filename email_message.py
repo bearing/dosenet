@@ -18,7 +18,7 @@ def send_email(process, error_message):
     crontab = call(["crontab","-l"])
     print spacer
 
-    message = """From: LBL DoseNet <dosenet@lbl.gov>
+    message = """From: LBL DoseNet <dosenet@dosenet.dhcp.lbl.gov>
 To: Navrit Bal <nbal@lbl.gov>, DoseNet GMail <ucbdosenet@gmail.com>
 Subject: DoseNet automated message
 
