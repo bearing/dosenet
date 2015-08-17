@@ -13,16 +13,11 @@ def run_command(cmd):
     return out, err
 
 def send_email(process, error_message):
-    spacer = "- " * 64
     stopped = process
 
-    print spacer
     geojson, geojson_err = run_command("stat ~/output.geojson")
-    print spacer
     processes, processer_err = run_command("ps aux | grep python | grep -v grep")
-    print spacer
     crontab, crontab_err = run_command("crontab -l")
-    print spacer
 
     sender = 'dosenet@dosenet'
     receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
@@ -61,6 +56,7 @@ def send_email(process, error_message):
     part2 = MIMEText(html, 'html')
     msg.attach(part1)
     msg.attach(part2)
+    print msg.as_string()
 
     try:
        smtpObj = smtplib.SMTP('localhost')
