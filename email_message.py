@@ -7,9 +7,9 @@ from email.mime.text import MIMEText
 
 def run_command(cmd):
     proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
     type(out)
     print out
-    (out, err) = proc.communicate()
     return str(out), str(err)
 
 def send_email(process, error_message):
