@@ -58,7 +58,7 @@ def send_email(process, error_message):
         <p> Navrit Bal </p>
         <p> Maker of DoseNet. </p>
     </body>
-""".format(stopped, error_message, geojson, processes, crontab)
+</html>""".format(stopped, error_message, geojson, processes, crontab)
 
     part1 = MIMEText(text, 'plain')
     part2 = MIMEText(html, 'html')
@@ -70,7 +70,7 @@ def send_email(process, error_message):
        smtpObj.sendmail(sender, receivers, msg.as_string())
        smtpObj.quit()
        print "Successfully sent email"
-   except Exception as e:
+    except Exception as e:
        print str(e)
        print "Error: unable to send email"
 
