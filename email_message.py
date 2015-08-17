@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 def run_command(cmd):
     proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
-    return out, err
+    return str(out), str(err)
 
 def send_email(process, error_message):
     spacer = "- " * 64
