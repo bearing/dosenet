@@ -115,13 +115,15 @@ class Injector:
             try:
                 self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
+                print 'Sending email'
                 email_message.send_email(process = "udp_injector.py", error_message = "Manual shutdown.")
-                print ('\nExit cleaning')
+                print '\nExit cleaning'
                 sys.exit(0)
             except (Exception) as e:
                 print str(e)
+                print 'Sending email'
                 email_message.send_email(process = "udp_injector.py", error_message = str(e))
-                print ('~~~~ Exception: Cannot decrypt data... ~~~~')
+                print '~~~~ Exception: Cannot decrypt data... ~~~~'
 
 if __name__=="__main__":
     inj = Injector()
