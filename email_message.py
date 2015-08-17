@@ -20,7 +20,7 @@ def send_email(process, error_message):
     crontab, crontab_err = run_command("crontab -l")
 
     sender = 'dosenet@dosenet'
-    receivers = 'nbal@lbl.gov ucbdosenet@gmail.com'
+    receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
 
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
@@ -60,7 +60,7 @@ def send_email(process, error_message):
 
     try:
        smtpObj = smtplib.SMTP('localhost')
-       smtpObj.sendmail(sender, receivers, msg.as_string())
+       smtpObj.sendmail(sender, receivers.split(","), msg.as_string())
        smtpObj.quit()
        print "Successfully sent email"
     except Exception as e:
