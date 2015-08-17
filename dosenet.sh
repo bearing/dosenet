@@ -9,7 +9,7 @@
 # X-Interactive: false
 # Short-Description: DoseNet - sends UDP packets to the GRIM for the DoseNet project
 ### END INIT INFO
-CONFIGFILE=etchhall.csv
+CONFIGFILE=lbl.csv
 HOME=/home/pi
 DOSENET=$HOME/dosenet
 CONDA=$HOME/miniconda/bin
