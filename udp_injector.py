@@ -102,7 +102,6 @@ class Injector:
         print '\n\t\t\t ~~~~ Listening ~~~~'
         while True:
             try:
-                raise Exception('I know Python!')
                 data = self.socket.listen()
             except (Exception) as e:
                 print str(e)
