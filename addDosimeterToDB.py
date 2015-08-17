@@ -32,7 +32,7 @@ class Parser:
 
 class DBTool:
     def __init__(self,name,lat,lon,cpmtorem,cpmtousv,*ID):
-        self.db = mdb.connect("localhost", # Open database connection
+        self.db = mdb.connect("127.0.0.1", # Open database connection
                         "ne170group",
                         "ne170groupSpring2015",
                         "dosimeter_network")
