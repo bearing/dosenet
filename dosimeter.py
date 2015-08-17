@@ -141,7 +141,7 @@ class Dosimeter:
         return cpm, cpm_err
 
     def ping(self, hostname = 'berkeley.edu', pin = 20):
-        response = os.system('ping -c 1 '  + hostname + '> /dev/null')
+        response = os.system('ping -c 1 '  + str(hostname) + '> /dev/null')
         # and then check the response...
         if response == 0:
           print '~ ', hostname, 'is up!'
