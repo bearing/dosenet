@@ -10,7 +10,6 @@ def run_command(cmd):
     (out, err) = proc.communicate()
     out = str(out).replace('\n','<br>')
     err = str(err).replace('\n','<br>')
-    print out
     return out, err
 
 def send_email(process, error_message):
