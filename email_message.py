@@ -21,7 +21,6 @@ def send_email(process, error_message):
     message = """From: LBL DoseNet <dosenet@lbl.gov>
     To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
     MIME-Version: 1.0
-    Content-type: text/html
     Subject: DoseNet automated message
 
     <h1> Some DoseNet process just stopped! :( </h1>
