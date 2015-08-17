@@ -19,35 +19,35 @@ def send_email(process, error_message):
     print spacer
 
     message = """From: LBL DoseNet <dosenet@lbl.gov>
-    To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
-    Subject: DoseNet automated message
+To: Navrit Bal <nbal@lbl.gov> DoseNet GMail <ucbdosenet@gmail.com>
+Subject: DoseNet automated message
 
-    <h1> Some DoseNet process just stopped! :( </h1>
-        <h2> Which process stopped? </h2>
-            <code>{}</code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <p> Include running/last run process list. </p>
-        <br>
-        <h2> GeoJSON file properties </h2>
-            <code> stat ~/output.geojson </code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <h2> Which Python processes are running </h2>
-            <code> ps aux | grep python | grep -v grep </code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <h2> Crontab entries </h2>
-            <code> crontab -l </code>
-            <br>
-            <br>
-            <samp>{}</samp>
-        <br>
-        <p> Navrit Bal </p>
-        <p> Maker of DoseNet. </p>
+<h1> Some DoseNet process just stopped! :( </h1>
+<h2> Which process stopped? </h2>
+    <code>{}</code>
+    <br>
+    <br>
+    <samp>{}</samp>
+<p> Include running/last run process list. </p>
+<br>
+<h2> GeoJSON file properties </h2>
+    <code> stat ~/output.geojson </code>
+    <br>
+    <br>
+    <samp>{}</samp>
+<h2> Which Python processes are running </h2>
+    <code> ps aux | grep python | grep -v grep </code>
+    <br>
+    <br>
+    <samp>{}</samp>
+<h2> Crontab entries </h2>
+    <code> crontab -l </code>
+    <br>
+    <br>
+    <samp>{}</samp>
+<br>
+<p> Navrit Bal </p>
+<p> Maker of DoseNet. </p>
     """.format(stopped, error_message, geojson, processes, crontab)
 
     try:
