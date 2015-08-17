@@ -1,19 +1,25 @@
 #!/usr/bin/env python
 
 import smtplib
-import os
+import subprocess
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+def run_command(cmd):
+    proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    return out, err
 
 def send_email(process, error_message):
     spacer = "- " * 64
     stopped = process
+
     print spacer
-    geojson = os.system("stat output.geojson")
+    geojson, geojson_err = run_command("stat ~/output.geojson")
     print spacer
-    processes = os.system("ps aux | grep python | grep -v grep")
+    processes, processer_err = run_command("ps aux | grep python | grep -v grep")
     print spacer
-    crontab = os.system("crontab -l")
+    crontab, crontab_err = run_command("crontab -l")
     print spacer
 
     sender = 'dosenet@dosenet'
