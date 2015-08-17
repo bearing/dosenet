@@ -23,6 +23,7 @@ from udp import udp_tools as udpTool
 from mysql import mysql_tools as mySQLTool
 import socket
 import datetime
+import email_message
 
 # class Parser:
     # Do this later
@@ -114,10 +115,12 @@ class Injector:
             try:
                 self.db.inject(data) # Verifying the packets happens in here
             except (KeyboardInterrupt, SystemExit):
+                email_message.send_email(process = "udp_injector.py", error_message = "Manual shutdown.")
                 print ('\nExit cleaning')
                 sys.exit(0)
             except (Exception) as e:
                 print str(e)
+                email_message.send_email(process = "udp_injector.py", error_message = str(e))
                 print ('~~~~ Exception: Cannot decrypt data... ~~~~')
 
 if __name__=="__main__":

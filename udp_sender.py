@@ -16,7 +16,6 @@ import argparse
 import RPi.GPIO as GPIO
 from dosimeter import Dosimeter
 import subprocess
-import email_message
 
 class Sender:
     def parseArguments(self):
@@ -148,10 +147,8 @@ if __name__ == "__main__":
     try:
         sen.main()
     except (KeyboardInterrupt, SystemExit):
-        email_message.send_email(process = "udp_injector.py", error_message = "Manual shutdown.")
         print '.... User interrupt ....\n Byyeeeeeeee'
     except Exception as e:
-        email_message.send_email(process = "udp_injector.py", error_message = str(e))
         print str(e)
     finally:
         print '~~ Deactivating pins and cleaning up. ~~'
