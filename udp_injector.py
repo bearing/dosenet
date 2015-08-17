@@ -105,7 +105,7 @@ class Injector:
                 data = self.socket.listen()
             except (Exception) as e:
                 print str(e)
-                print ('Exception: failed getting data from listening to the socket.')
+                print 'Exception: failed getting data from listening to the socket.'
             print str(datetime.datetime.now()), ': ', data
             if self.args.v:
                 print '~~~~ Message received on IP:port @ ', self.IP ,':', self.port
