@@ -18,7 +18,7 @@ def send_email(process, error_message):
     print spacer
 
     sender = 'dosenet@dosenet'
-    receivers = ['nbal@lbl.gov','ucbdosenet@gmail.com']
+    receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
 
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
