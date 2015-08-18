@@ -107,9 +107,9 @@ class Sender:
 
     def getAndSendData(self, sleep_time = 300):
         cpm, cpm_error = self.det.getCPM(accumulation_time = sleep_time)
-        count = det.getCount()
+        count = self.det.getCount()
         print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
-        if len(det.counts) > 1: # Only run the next segment after the warm-up phase
+        if len(self.det.counts) > 1: # Only run the next segment after the warm-up phase
             self.sendData(cpm = cpm, cpm_error = cpm_error)
 
     def sendData(self, cpm, cpm_error, error_code = 0):
