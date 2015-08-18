@@ -120,11 +120,16 @@ class Sender:
                   str(cpm_error) +c+ str(error_code)
         packet = self.pe.encrypt_message(package)[0]
         if self.args.test:
-            print '- '*64, '\nRaw message: ',package
+            print '- '*64, '\nRaw message: ', u'%s' % package
             print 'Encrypted message: ', str(packet), '\n', '- '*64 # This really screws up Raspberry Pi terminal... without str()
             print 'Encrypted UDP Packet sent @ '+ str(now )+ ' - ' + \
                     str(self.IP)+':'+str(self.port),'\n'
-        self.socket.sendto(packet, (self.IP, self.port))
+        try:
+            self.socket.sendto(packet, (self.IP, self.port))
+        except Excpetion as e:
+            print str(e)
+            print ''
+            pass
 
     def main(self):
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
