@@ -150,12 +150,8 @@ if __name__ == "__main__":
         sen.main()
     except (KeyboardInterrupt, SystemExit):
         print '.... User interrupt ....\n Byyeeeeeeee'
-        print 'Sending email'
-        email_message.send_email(process = os.path.basename(__file__), error_message = "Manual shutdown.")
     except Exception as e:
         print str(e)
-        print 'Sending email'
-        email_message.send_email(process = os.path.basename(__file__), error_message = str(e))
     finally:
         print '~~ Deactivating pins and cleaning up. ~~'
         sen.deactivatePins()
