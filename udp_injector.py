@@ -123,9 +123,10 @@ if __name__=="__main__":
         inj.main()
     except (KeyboardInterrupt, SystemExit):
         print 'Sending email'
-        email_message.send_email(process = "udp_injector.py", error_message = "Manual shutdown.")
+        email_message.send_email(process = os.path.basename(__file__), error_message = "Manual shutdown.")
         print '\nExit cleaning'
         sys.exit(0)
     except (Exception) as e:
+        print str(e)
         print 'Sending email'
-        email_message.send_email(process = "udp_injector.py", error_message = str(e))
+        email_message.send_email(process = os.path.basename(__file__), error_message = str(e))
