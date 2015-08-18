@@ -105,11 +105,11 @@ class Sender:
         GPIO.output(self.led_power,False)
         GPIO.cleanup()
 
-    def getAndSendData(self, sleep_time = 300):
-        cpm, cpm_error = self.det.getCPM(accumulation_time = sleep_time)
-        count = self.det.getCount()
+    def getAndSendData(self, det, sleep_time = 300):
+        cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
+        count = det.getCount()
         print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
-        if len(self.det.counts) > 1: # Only run the next segment after the warm-up phase
+        if len(det.counts) > 1: # Only run the next segment after the warm-up phase
             self.sendData(cpm = cpm, cpm_error = cpm_error)
 
     def sendData(self, cpm, cpm_error, error_code = 0):
@@ -127,18 +127,18 @@ class Sender:
         self.socket.sendto(packet, (self.IP, self.port))
 
     def main(self):
-        self.det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
-        self.det.activatePin(self.led_power)
+        det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
+        det.activatePin(self.led_power)
         if self.args.test:
             sleep_time = 10 # seconds
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            p = Process(target = self.det.ping, args=(self.led_network,))
+            p = Process(target = det.ping, args=(self.led_network,))
             p.start()
             p.join() # Will block main thread execution until ping succeeds, else blinks in parallel
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             sleep(sleep_time)
-            getAndSendData(sleep_time = sleep_time) # time in seconds
+            getAndSendData(det = det, sleep_time = sleep_time) # time in seconds
 
 if __name__ == "__main__":
     sen = Sender()
