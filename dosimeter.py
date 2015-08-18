@@ -149,7 +149,7 @@ class Dosimeter:
           return True
         else:
           print '~ ', hostname, 'is DOWN!'
-          self.blink(pin = pin, frequency = 0.5, number_of_flashes = 20)
+          self.blink(pin = pin, frequency = 2, number_of_flashes = 5)
           self.ping()
 
     def activatePin(self,pin):
