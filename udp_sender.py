@@ -134,6 +134,7 @@ class Sender:
     def main(self):
         det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
         det.activatePin(self.led_power)
+        sleep_time = 300
         if self.args.test:
             sleep_time = 10 # seconds
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
