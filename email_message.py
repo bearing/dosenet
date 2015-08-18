@@ -12,16 +12,17 @@ def run_command(cmd):
     err = str(err).replace('\n','<br>')
     return out, err
 
-def send_email(process, error_message):
+def send_email(process, error_message, sender = 'dosenet@dosenet'):
     stopped = process
 
-    geojson, geojson_err = run_command("stat ~/output.geojson")
+    try:
+        geojson, geojson_err = run_command("stat ~/output.geojson")
+    except Exception as e:
+        geojson, geojson_err = ("Running on a RPi, ignore this")
     processes, processer_err = run_command("ps aux | grep python | grep -v grep")
     crontab, crontab_err = run_command("crontab -l")
 
-    sender = 'dosenet@dosenet'
     receivers = 'nbal@lbl.gov,ucbdosenet@gmail.com'
-
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "DoseNet automated message"
