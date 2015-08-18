@@ -20,6 +20,7 @@ from time import sleep
 import os
 import sys
 import random
+import email_message
 
 # SIG >> float (~3.3V) --> 0.69V --> EXP charge back to float (~3.3V)
 # NS  >> ~0V (GPIO.LOW) --> 3.3V (GPIO.HIGH) RPi rail
@@ -210,5 +211,7 @@ if __name__ == "__main__":
             print '.... User interrupt ....\n Byyeeeeeeee'
         except Exception as e:
             print str(e)
+            print 'Sending email'
+            email_message.send_email(process = os.path.basename(__file__), error_message = str(e))
         finally:
             GPIO.cleanup()
