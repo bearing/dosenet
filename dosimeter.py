@@ -143,16 +143,13 @@ class Dosimeter:
 
     def ping(self, pin = 20, hostname = 'dosenet.dhcp.lbl.gov'):
         response = os.system('ping -c 1 '  + str(hostname) + '> /dev/null')
-        # and then check the response...
-        if response == 0:
+        if response == 0: # and then check the response...
           print '~ ', hostname, 'is up!'
           self.activatePin(pin = pin)
-          print 'NET ON'
           return True
         else:
           print '~ ', hostname, 'is DOWN!'
           self.blink(pin = pin, frequency = 0.2, number_of_flashes = 50)
-          print 'NET OFF'
           return False
 
     def activatePin(self,pin):
@@ -189,7 +186,7 @@ class Dosimeter:
 if __name__ == "__main__":
     det = Dosimeter()
     response = det.ping()
-    print 'Ping test berkeley.edu: ',response
+    print 'Ping DoseNet server test: ',response
     data = det.getCPM()
     print data
     det.updateCount_basic()
