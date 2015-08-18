@@ -138,7 +138,7 @@ class Sender:
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             sleep(sleep_time)
-            getAndSendData(det = det, sleep_time = sleep_time) # time in seconds
+            self.getAndSendData(det = det, sleep_time = sleep_time) # time in seconds
 
 if __name__ == "__main__":
     sen = Sender()
