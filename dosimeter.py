@@ -150,7 +150,7 @@ class Dosimeter:
           return True
         else:
           print '~ ', hostname, 'is DOWN!'
-          self.blink(pin = pin)
+          self.blink(pin = pin, frequency = 0.2, number_of_flashes = 50)
           print 'NET OFF'
           return False
 
