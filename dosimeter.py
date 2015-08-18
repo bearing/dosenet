@@ -169,9 +169,9 @@ class Dosimeter:
             self.deactivatePin(pin)
             sleep(0.005)
             self.activatePin(pin)
-            sleep(frequency)
+            sleep(frequency/2)
             self.deactivatePin(pin)
-            sleep(0.005)
+            sleep(frequency/2)
 
     def __del__(self):
         print ('Dosimeter object just died - __del__')
