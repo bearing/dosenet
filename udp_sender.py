@@ -105,35 +105,40 @@ class Sender:
         GPIO.output(self.led_power,False)
         GPIO.cleanup()
 
-    def main(self):
-        det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
-        det.activatePin(self.led_power)
-        if self.args.test:
-            sleep_time = 10
-        else:
-            sleep_time = 300
-        error_code = 0 # Default 'working' state - error code 0
+    def getAndSendData(self, sleep_time = 300):
+        cpm, cpm_error = self.det.getCPM(accumulation_time = sleep_time)
+        count = det.getCount()
+        print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
+        if len(det.counts) > 1: # Only run the next segment after the warm-up phase
+            self.sendData(cpm = cpm, cpm_error = cpm_error)
+
+    def sendData(self, cpm, cpm_error, error_code = 0):
+        # Default 'working' state - error code 0
         c = ','
+        now = datetime.datetime.now()
+        package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
+                  str(cpm_error) +c+ str(error_code)
+        packet = self.pe.encrypt_message(package)[0]
+        if self.args.test:
+            print '- '*64, '\nRaw message: ',package
+            print 'Encrypted message: ', str(packet), '\n', '- '*64 # This really screws up Raspberry Pi terminal... without str()
+            print 'Encrypted UDP Packet sent @ '+ str(now )+ ' - ' + \
+                    str(self.IP)+':'+str(self.port),'\n'
+        self.socket.sendto(packet, (self.IP, self.port))
+
+    def main(self):
+        self.det = Dosimeter(**self.LEDS)  # Initialise dosimeter object from dosimeter.py
+        self.det.activatePin(self.led_power)
+        if self.args.test:
+            sleep_time = 10 # seconds
         while True: # Run until error or KeyboardInterrupt (Ctrl + C)
-            p = Process(target = det.ping, args=(self.led_network,))
+            p = Process(target = self.det.ping, args=(self.led_network,))
             p.start()
-            p.join()
+            p.join() # Will block main thread execution until ping succeeds, else blinks in parallel
             GPIO.remove_event_detect(24)
             GPIO.add_event_detect(24, GPIO.FALLING, callback = det.updateCount_basic, bouncetime=1)
             sleep(sleep_time)
-            cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
-            count = det.getCount()
-            print 'Count: ', count,' - CPM: ', cpm, u'±', cpm_error
-            if len(det.counts) > 1: # Only run the next segment after the warm-up phase
-                now = datetime.datetime.now()
-                package = str(self.msg_hash) +c+ str(self.stationID) +c+ str(cpm) +c+ \
-                          str(cpm_error) +c+ str(error_code)
-                packet = self.pe.encrypt_message(package)[0]
-                if self.args.test:
-                    print '- '*64, '\nRaw message: ',package
-                    print 'Encrypted message: ',str(packet),'\n','- '*64 # This really screws up Raspberry Pi terminal... without str()
-                    print 'Encrypted UDP Packet sent @ '+ str(now)+' - '+str(self.IP)+':'+str(self.port),'\n'
-                self.socket.sendto(packet, (self.IP, self.port))
+            getAndSendData(sleep_time = sleep_time) # time in seconds
 
 if __name__ == "__main__":
     sen = Sender()
