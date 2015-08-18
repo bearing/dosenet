@@ -17,6 +17,7 @@ import RPi.GPIO as GPIO
 from dosimeter import Dosimeter
 import subprocess
 from multiprocessing import Process
+import email_message
 
 class Sender:
     def parseArguments(self):
@@ -146,6 +147,8 @@ if __name__ == "__main__":
         print '.... User interrupt ....\n Byyeeeeeeee'
     except Exception as e:
         print str(e)
+        print 'Sending email'
+        email_message.send_email(process = os.path.basename(__file__), error_message = str(e))
     finally:
         print '~~ Deactivating pins and cleaning up. ~~'
         sen.deactivatePins()
