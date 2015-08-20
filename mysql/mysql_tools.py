@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import MySQLdb as mdb
 import datetime
+import email_message
 
 class SQLObject:
     def __init__(self):
@@ -22,7 +23,9 @@ class SQLObject:
             self.verified_stations = self.cursor.fetchall()
         except Exception as e:
             raise e
-            print 'Error: Could not get list of stations from the database!'
+            msg = 'Error: Could not get list of stations from the database!'
+            print msg
+            email_message.send_email(process = os.path.basename(__file__), error_message = msg)
 
     def checkHashFromRAM(self,ID):
         # Essentially the same as doing the following in MySQL
@@ -35,7 +38,9 @@ class SQLObject:
         except Exception as e:
             raise e
             return False
-            print 'Error: Could not find a station matching that ID'
+            msg = 'Error: Could not find a station matching that ID'
+            print msg
+            email_message.send_email(process = os.path.basename(__file__), error_message = msg)
 
     def insertIntoDosenet(self,stationID,cpm,cpm_error,error_flag):
         self.cursor.execute("INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
@@ -48,6 +53,8 @@ class SQLObject:
         if not self.authenticatePacket(data):
             print '~~ FAILED AUTHENTICATION ~~'
             print 'Data: ', data
+            msg = str('FAILED AUTHENTICATION\n',data)
+            email_message.send_email(process = os.path.basename(__file__), error_message = msg)
         else:
             data = self.parsePacket(data)
             if(data):
@@ -58,8 +65,10 @@ class SQLObject:
                     error_flag  = data[4])
             else:
                 print '~~ FAILED TO INJECT/PARSE ~~'
-                print '\t stationID: "%s", cpm: "%s", cpm_error: "%s", error_flag: "%s"' % \
+                msg = '\t stationID: "%s", cpm: "%s", cpm_error: "%s", error_flag: "%s"' % \
                     (stationID,cpm,cpm_error,error_flag)
+                print msg
+                email_message.send_email(process = os.path.basename(__file__), error_message = msg)
 
     def getHashList(self):
         return self.verified_stations
