@@ -68,6 +68,8 @@ class SQLObject:
         hash_list = self.getHashList()
         msg_hash = data[:32] # Is it the correct hash length?
         if not any(str(msg_hash) in i for i in hash_list): # Verify the hash is in the list
+            print 'Message Hash: ', msg_hash
+            print 'Hash list: ', hash_list
             print 'Hash is not in list'
             return False
         # Ok, we think this could be a real station
