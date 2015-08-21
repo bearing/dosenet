@@ -64,14 +64,15 @@ class Sender:
             print '- '*64
             print 'Test file:\t',self.file_path
             self.file_contents = self.getContents(self.file_path)
+            csv = self.file_contents
             print '- '*64
-            print '\t',type(self.file_contents),self.file_contents
+            print '\t',type(csv), csv
             print '- '*64
-            print '\n1st line dictonary object:\t\t',self.file_contents[0]
-            print 'stationID element:\t',self.file_contents[0]['stationID']
-            print 'message_hash element:\t',self.file_contents[0]['message_hash']
-            print 'lat element:\t\t',self.file_contents[0]['lat']
-            print 'long element:\t\t',self.file_contents[0]['long']
+            print '\n1st line dictonary object:\t\t', csv[0]
+            print 'stationID element:\t', csv[0]['stationID']
+            print 'message_hash element:\t', csv[0]['message_hash']
+            print 'lat element:\t\t',  csv[0]['lat']
+            print 'long element:\t\t', csv[0]['long']
         else:
             print '~ Normal run, loading CSV configuration file'
             try:
@@ -79,13 +80,14 @@ class Sender:
             except Exception, e:
                 print '\n\tIs this running on a Raspberry Pi?'
                 print '\tIf so, make sure the \'RPi\' package is installed with conda and or pip\n'
-                print '------- Getting the CSV file contents failed -------\n'
+                print '~~~~~ ERROR: Getting the CSV file contents failed ~~~~~\n'
                 raise e
                 sys.exit(0)
 
     def getDatafromCSV(self): # Load from config files
-        self.stationID = self.file_contents[0]['stationID']
-        self.msg_hash =  self.file_contents[0]['message_hash']
+        csv = self.file_contents
+        self.stationID = csv[0]['stationID']
+        self.msg_hash =  csv[0]['message_hash']
 
     def initVariables(self):
         public_key = ['/home/pi/dosenet/ssh_keys/id_rsa_lbl.pub']
@@ -108,7 +110,7 @@ class Sender:
     def getAndSendData(self, det, sleep_time = 300):
         cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
         count = det.getCount()
-        print 'Count: ', count,' - CPM: ', cpm, u'\xb1', cpm_error
+        print 'Count: ', count,' - CPM: ', cpm, u'\xb1', cpm_error # u'\xb1' is plus/minus unicode symbol
         if len(det.counts) > 1: # Only run the next segment after the warm-up phase
             self.sendData(cpm = cpm, cpm_error = cpm_error)
 
