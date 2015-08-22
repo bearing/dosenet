@@ -5,18 +5,20 @@
 ##### Navrit Bal, Tigran Ter-Stepanyan, Mark Trudel, Nathan Richner
 ##### Joseph Curtis, Ryan Pavlovsky, Ali Hanks
 ##### Kai Vetter
+
 ---
 ## What goes where?
-This is all contained in the GitHub folder, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/ or cd ~/git/dosenet` would get you where you want to be.
+This is all contained in the GitHub folder, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` or `cd ~/git/dosenet` would get you where you want to be.
 This repo should always be cloned by SSH:
->		git clone git@github.com:bearing/dosenet.git
+
+	git clone git@github.com:bearing/dosenet.git
 
 ### Raspberry Pi
-	udp_sender.py --test(-t) (Optional) filename(-f) (Optional[str]) --led (Optional[int]) --ip (Optional[str])
+	udp_sender.py filename(-f) (required) --test(-t) (Opt.) (Opt.[str]) --led_counts (Opt.[int]) --led_power (Opt.[int]) --led_network (Opt.[int]) --ip (Optional[str])
 
 >Example:
 
->		sudo ./udp_sender.py -f config-files/etchhall.csv
+>		sudo ./udp_sender.py -f config-files/lbl.csv
 
 > Must be launched as sudo (it accesses GPIO pins and low-level networking APIs)
 > `sudo ./udp_sender.py`
@@ -25,11 +27,11 @@ This repo should always be cloned by SSH:
 > Usage: 
 >> **Test**: python dosimeter.py
 >
-> Supporting class for the UDP_sender class
+> Supporting class for the UDP_sender class. Handles actual radiation detection logic and passes through to the sender.
 
 	config-files/*.csv
 > Each station has it's own CSV file (Headers: stationID, hash, lat, long).
-	There are test CSV files.
+	There are test CSV files available.
 
 	id_rsa_dosenet.pub
 >	A **private key** used for the 'half-encrypted' stage between Raspberry Pis and the database server (GRIM).
@@ -41,9 +43,11 @@ This repo should always be cloned by SSH:
 	makeGeoJSON.py
 > Usage: 
 >> **Automatic**: crontab operation
+
 >> **Manual**: python makeGeoJSON.py
 
 > Input: *None*
+
 > Output: **output.geojson**
 >
 > Updates Plot.ly graphs via cron job operation - currently set to every 5 minutes.
@@ -52,7 +56,9 @@ This repo should always be cloned by SSH:
 	udp_injector.py
 > Usage: 
 >> **Manual**: python udp_injector.py
+
 >> **tmux**: tmux a -t UDP_injector; python udp_injector.py; Ctrl+b, d
+
 >> **screen**: screen python udp_injector.py; Ctrl+a, d
 
 > Input: Encrypted UDP packets from RPi's
@@ -65,6 +71,7 @@ This repo should always be cloned by SSH:
 >> **Manual**: 
 
 > Input: 
+
 > Output: 
 >
 > Stuff
@@ -74,6 +81,7 @@ This repo should always be cloned by SSH:
 >> **Manual**: 
 
 > Input: 
+
 > Output: 
 >
 > Stuff
