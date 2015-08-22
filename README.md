@@ -14,7 +14,7 @@ This repo should always be cloned by SSH:
 	git clone git@github.com:bearing/dosenet.git
 
 ### Raspberry Pi
-	udp_sender.py filename(-f) (required) --test(-t) (Opt.) (Opt.[str]) --led_counts (Opt.[int]) --led_power (Opt.[int]) --led_network (Opt.[int]) --ip (Optional[str])
+	udp_sender.py filename(-f) (required) --test(-t) (Opt.) (Opt.[str]) --led_counts (Opt.[int]) --led_power (Opt.[int]) --led_network (Opt.[int]) --ip (Opt.[str])
 
 >Example:
 
