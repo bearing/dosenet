@@ -1,9 +1,16 @@
 ![](http://i.imgur.com/dVADwI5.png =512x "DoseNet logo")
 # Berkeley RadWatch Dosimeter Network
-# *LBNL / UC Berkeley*
+# *LBL / UC Berkeley*
+### Author: Navrit Bal
+##### Navrit Bal, Tigran Ter-Stepanyan, Mark Trudel, Nathan Richner
+##### Joseph Curtis, Ryan Pavlovsky, Ali Hanks
+##### Kai Vetter
 ---
 ## What goes where?
-This is all contained in the GitHub folder, stored by convention in the 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` would get you where you want to be.
+This is all contained in the GitHub folder, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/ or cd ~/git/dosenet` would get you where you want to be.
+This repo should always be cloned by SSH:
+>		git clone git@github.com:bearing/dosenet.git
+
 ### Raspberry Pi
 	udp_sender.py --test(-t) (Optional) filename(-f) (Optional[str]) --led (Optional[int]) --ip (Optional[str])
 
@@ -15,7 +22,10 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 > `sudo ./udp_sender.py`
 
 	dosimeter.py
-> Stuff
+> Usage: 
+>> **Test**: python dosimeter.py
+>
+> Supporting class for the UDP_sender class
 
 	config-files/*.csv
 > Each station has it's own CSV file (Headers: stationID, hash, lat, long).
@@ -25,24 +35,48 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 >	A **private key** used for the 'half-encrypted' stage between Raspberry Pis and the database server (GRIM).
 
 ---
-### GRIM - Database & Listener
+### DoseNet server - Database & Listener
+#### dosenet.dhcp.lbl.gov
+##### Used to be grim.nuc.berkeley.edu
 	makeGeoJSON.py
->
+> Usage: 
+>> **Automatic**: crontab operation
+>> **Manual**: python makeGeoJSON.py
 
-	makeGeoJSON.sh
+> Input: *None*
+> Output: **output.geojson**
 >
+> Updates Plot.ly graphs via cron job operation - currently set to every 5 minutes.
+> Copies (via scp) the produced GeoJSON file to Kepler - at end of run-time.
 
 	udp_injector.py
->
+> Usage: 
+>> **Manual**: python udp_injector.py
+>> **tmux**: tmux a -t UDP_injector; python udp_injector.py; Ctrl+b, d
+>> **screen**: screen python udp_injector.py; Ctrl+a, d
 
-	udp_injector.sh
->
+> Input: Encrypted UDP packets from RPi's
+> Output: Database entries
+> 
+> Data collection and storage: Listens, decrypts, parses, injects incoming UDP packets from the RPi's.
 
 	addDosimeterToDB.py
+> Usage:
+>> **Manual**: 
+
+> Input: 
+> Output: 
 >
+> Stuff
 
 	deleteDosimeter.py
+> Usage:
+>> **Manual**: 
+
+> Input: 
+> Output: 
 >
+> Stuff
 
 	/mysql/backup_database.sh  all|stations|data
 > BASH script that backups subsets of the database (tables) or the whole thing to .sql files in /home/dosenet/ (~/). 
@@ -60,7 +94,7 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
 ---
 ### DECF Kepler - Website & Drupal
 	/html/*
-> Copied into [Drupal interface](https://radwatch.berkeley.edu/user)
+> Copied into [Drupal interface](https://radwatch.berkeley.edu/user) for each file.
 
 	~/.ssh/id_rsa_dosenet.pub
 > Needs to be renamed or appended (>>) to authorized_keys and id_rsa.pub
@@ -82,10 +116,10 @@ This is all contained in the GitHub folder, stored by convention in the 'dosenet
    + Print encrypted message
    + Print Sent to: Address @ Port
 
-+ **GRIM** - open UDP injector
++ **DoseNet server** - open UDP injector
 
-		No logging:  ./udp_injector.sh
-		Log to file: ./udp_injector.sh > udp_injector.log
+		No logging:  python udp_injector.py
+		Log to file: ----------"----------- > udp_injector.log
 
    + Print encrypted message
    + Print decrypted message
@@ -101,7 +135,7 @@ The script is verbose on encountering errors.
 + SQL injection
 
 + Invalid format
-   + Random data
+   + Random data (DDoS possibility)
 
 + Valid format, wrong data
    + No station database entry
