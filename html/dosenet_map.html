@@ -478,6 +478,10 @@
 	var markerCluster;
 	var marks = []; // contains all infoWindows
 	var infowindow = new google.maps.InfoWindow();
+	// url for geoJSON file
+	var url = 'https://radwatch.berkeley.edu/sites/default/files/output.geojson?'
+		+ Math.random().toString(36).replace(/[^a-z]+/g, '') // To solve browser caching issue
+	var json = $($.parseJSON(JSON.stringify($.getJSON(url))))
 
 	// Gives ability to center map on array of two points
 	// Input: Array, coordinates latitude longitude
@@ -549,14 +553,12 @@
 
 		var sel = document.getElementById('dose_dropdown');
 		sv = sel.options[sel.selectedIndex].value;
-        var url = 'https://radwatch.berkeley.edu/sites/default/files/output.geojson?' + Math.random().toString(36).replace(/[^a-z]+/g, '');
-		var json = $($.parseJSON(JSON.stringify($.getJSON(url))));
 
 		$.getJSON(url, function(data){
 			var i = 0;
 			$.each(data.features, function(key, val){
-				var lon = val.geometry.coordinates[0]
-				var lat = val.geometry.coordinates[1]
+				var lon = val.geometry.coordinates[0];
+				var lat = val.geometry.coordinates[1];
 				var sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
 				switch(sv) {
 					case 'CPM':
@@ -632,11 +634,6 @@
 		sv = sel.options[sel.selectedIndex].value;
 		// Automatically centers map on Berkeley, could be any array of coorinates defined above
 		centerMap(berkeley);
-
-		// url for geoJSON file
-        var url = 'https://radwatch.berkeley.edu/sites/default/files/output.geojson?'
-			+ Math.random().toString(36).replace(/[^a-z]+/g, '') // To solve browser caching issue
-		var json = $($.parseJSON(JSON.stringify($.getJSON(url))))
 
 		// Fetch geoJSON file
 		// Runs function on complete, data is the data extracted from geoJSON
