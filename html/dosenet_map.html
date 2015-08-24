@@ -505,6 +505,7 @@
 
 	// Can be used to get the timeframe for a plot, called in returnContent
 	function getTimeframe(){
+		infowindow.close();
 		var sel_time = document.getElementById('time_dropdown');
 		return sel_time.options[sel_time.selectedIndex].value;
 	}
@@ -547,6 +548,7 @@
 	}
 
 	function getData(){
+		infowindow.close();
 		markerCluster.clearMarkers();
 		clearMarkers();
 		get_unit_type();
