@@ -477,6 +477,7 @@
 	var markers = [];
 	var markerCluster;
 	var marks = []; // contains all infoWindows
+	var infowindow = new google.maps.InfoWindow();
 
 	// Gives ability to center map on array of two points
 	// Input: Array, coordinates latitude longitude
@@ -519,6 +520,7 @@
 
 	function SetMarkerProperties(marker, infowindow, val)
 	{
+		infowindow.close()
         // Sets Marker Icon to Red Icon
         // Can be changed to anything from [red, green, yellow, purple, green]
         marker.setIcon('https://maps.google.com/mapfiles/ms/icons/red-dot.png');
@@ -577,7 +579,6 @@
 					break;
 				}
 				var latest = "&nbsp"+sel_unit+"&nbsp"+getUnit()+"&nbsp";
-		        var infowindow = new google.maps.InfoWindow();
 		        var marker = new MarkerWithLabel({
 		            map: map,
 		            title: name,
@@ -674,9 +675,7 @@
 				}
 				var latest = "&nbsp" + sel_unit + "&nbsp" + getUnit() + "&nbsp"
 
-		        // Creates Google Maps Objects
-		        var infowindow = new google.maps.InfoWindow()
-
+		        // Creates Google Maps Object
 		        var marker = new MarkerWithLabel({
 		            map: map,
 		            title: name,
