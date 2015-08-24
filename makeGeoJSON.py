@@ -116,7 +116,7 @@ class Plot(object):
 							xaxis = XAxis(title = 'Time (PDT)',
 							rangemode = 'nonzero',
 							autorange = True),
-							yaxis = YAxis(type = 'log',title = plotTitle),
+							yaxis = YAxis(title = plotTitle),
 							font = fontPref)
 			# Plot.ly export, doesn't open a firefox window on the server
 			plotURL = py.plot(Figure(data = Data([trace]),
