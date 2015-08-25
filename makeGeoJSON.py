@@ -86,9 +86,10 @@ class Plot(object):
 		i = 0
 		while len(df.index) > 200: # Reduce data for plotting
 			i += 1
-			df = ((df + df.shift(-1)) / 2)[::2]
-		if i!=0:
-			print 'Data was averaged every other row ' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
+			df = df[::2]
+			#df = ((df + df.shift(-1)) / 2)[::2]
+		if i != 0:
+			print 'Data halved ' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
 		return df
 
 	# [unit] over numberOfSeconds for a specific named station [stationID]
