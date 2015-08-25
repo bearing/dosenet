@@ -81,18 +81,18 @@ class Plot(object):
 					inplace=True)
 		return df
 
-	def reduceData(self,df):
+	def reduceData(self, df):
 		t0 = time.time()
 		i = 0
 		while len(df.index) > 200: # Reduce data for plotting
 			i += 1
-			df = df[::4]
+			df = ((df + df.shift(-1)) / 2)[::2]
 		if i!=0:
-			print 'Data was quartered' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
+			print 'Data was averaged every other row ' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
 		return df
 
 	# [unit] over numberOfSeconds for a specific named station [stationID]
-	def makePlot(self,stationID,unit,error,plotTitle,df,plength):
+	def makePlot(self, stationID, unit, error, plotTitle, df, plength):
 		try:
 			t0 = time.time()
 			# make the filename for Plot.ly export
