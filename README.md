@@ -8,7 +8,7 @@
 
 ---
 ## What goes where?
-This is all contained in the GitHub folder, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` or `cd ~/git/dosenet` would get you where you want to be.
+This is all contained in the GitHub repository, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` or `cd ~/git/dosenet` would get you where you want to be.
 This repo should always be cloned by SSH:
 
 	git clone git@github.com:bearing/dosenet.git
@@ -30,10 +30,21 @@ This repo should always be cloned by SSH:
 > Supporting class for the UDP_sender class. Handles actual radiation detection logic and passes through to the sender.
 
 	config-files/*.csv
-> Each station has it's own CSV file (Headers: stationID, hash, lat, long).
-	There are test CSV files available.
+> Each station has it's own CSV file (Headers: stationID, hash, lat, long).There are test CSV files available. This data is obtained from the database - you require database access to start sending authenticated packets from a new dosimeter. This is purposely not automated - human checks should be and are required for adding new dosimeters.
+>
+> Header format (static):
+> stationID,message_hash,lat,long
+>
+> Example data (completely database (stations table) dependant:
+> 1,7c756767412b5346ad79bb9a5cf56f51,37.876886,-122.252211
+>
+> A complete sample valid CSV file:
+>
+> stationID,message_hash,lat,long
+>
+> 1,7c756767412b5346ad79bb9a5cf56f51,37.876886,-122.252211
 
-	id_rsa_dosenet.pub
+	ssh-keys/id_rsa_dosenet.private
 >	A **private key** used for the 'half-encrypted' stage between Raspberry Pis and the database server (GRIM).
 
 ---
@@ -46,7 +57,7 @@ This repo should always be cloned by SSH:
 
 >> **Manual**: python makeGeoJSON.py
 
-> Input: *None*
+> Input: *Indirectly* queries database - no command line arguments accepted.
 
 > Output: **output.geojson**
 >
@@ -62,6 +73,7 @@ This repo should always be cloned by SSH:
 >> **screen**: screen python udp_injector.py; Ctrl+a, d
 
 > Input: Encrypted UDP packets from RPi's
+> 
 > Output: Database entries
 > 
 > Data collection and storage: Listens, decrypts, parses, injects incoming UDP packets from the RPi's.
@@ -99,16 +111,61 @@ This repo should always be cloned by SSH:
 > 		backup_dosnet_dosenet.sql
 > 		backup_stations_dosenet.sql
 
+    inject-test-data.py
+> Usage:
+>> **Manual**:
+
+> Input:
+
+> Output:
+>
+> Stuff
+
+    email_message.py
+> Usage:
+>> **Manual**:
+
+> Input:
+
+> Output:
+>
+> Stuff
+
+    dosenet.sh
+> Usage:
+>> **Automatic (after copy)**
+
+> Input: `start|stop|test`
+
+> Output: Starts UDP_sender.py with options on boot to normal Linux runlevels (2, 3, 4, 5)
+>
+> Usage: `cp dosenet.sh /etc/init.d/`
+>
+    /etc/init.d/dosenet.sh start|stop|test
+>
+> Change configuration (`CONFIGFILE` variable) in `/etc/init.d/dosenet.sh` (could use nano, vi, vim, emacs etc.) to match the new dosimeter CSV file as in `config-files/`
+>
+> Eg. `CONFIGFILE=config.csv --> CONFIGFILE=lbl.csv`
+>
+> Then use the `update-rc.d` command detailed below to update symbolic links etc. so it starts up correctly.
+
+    sudo update-rc.d /etc/init.d/dosenet.sh defaults
+    I think there's meant to be another line here????
+    
+    ????
+    
+    ????
+
 ---
 ### DECF Kepler - Website & Drupal
 	/html/*
 > Copied into [Drupal interface](https://radwatch.berkeley.edu/user) for each file.
 
 	~/.ssh/id_rsa_dosenet.pub
-> Needs to be renamed or appended (>>) to authorized_keys and id_rsa.pub
+> `ssh-keys/id_rsa_dosenet.pub` - needs to be renamed or appended (>>) to `authorized_keys` and `id_rsa.pub`
 
 	~/.ssh/id_rsa
-> Rename the 'id_rsa kepler private key' to id_rsa in ~/.ssh
+> Rename the `ssh-keys/id_rsa kepler\ private\ key` to `~/.ssh/id_rsa`
 
 ---
 # Appendix
