@@ -288,7 +288,7 @@ if __name__ == '__main__':
 	plot.setStationInfoForAll()
 	plot.plotAll()
 	plot.closeDB()
-	#plot.makeGeoJSON()
-	#plot.scpToWebServer()
+	plot.makeGeoJSON()
+	plot.scpToWebServer()
 	plot.printEndMessage()
 	print 'Total run time:', ("%.1f" % (time.time() - t0)), 's'
