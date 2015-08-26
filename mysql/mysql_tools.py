@@ -74,6 +74,9 @@ class SQLObject:
         return self.verified_stations
 
     def authenticatePacket(self,data):
+        '''
+        Checks hash in hash list and compares against ID.
+        '''
         hash_list = self.getHashList()
         msg_hash = data[:32] # Is it the correct hash length?
         if not any(str(msg_hash) in i for i in hash_list): # Verify the hash is in the list
