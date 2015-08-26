@@ -7,10 +7,10 @@
 # Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 # Adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 # Created: 		Sun 7/06/15
-# Last updated: Thu 25/06/15
-#################
-## Run on GRIM ##
-#################
+# Last updated: Tue 25/08/15
+###########################
+## Run on DoseNet server ##
+###########################
 import os
 import MySQLdb as mdb
 import sys
@@ -21,6 +21,8 @@ from plotly.graph_objs import *
 import pandas as pd
 import time
 import datetime
+from datetime import timedelta
+import numpy as np
 
 class Plot(object):
 	def __init__(self):
@@ -79,17 +81,8 @@ class Plot(object):
 		df = pd.DataFrame( [[ij for ij in i] for i in dosePerStation] )
 		df.rename(columns={0:'receiveTime', 1:'CPM', 2:'cpmError'},
 					inplace=True)
-		return df
-
-	def reduceData(self, df):
-		t0 = time.time()
-		i = 0
-		while len(df.index) > 200: # Reduce data for plotting
-			i += 1
-			df = df[::2]
-			#df = ((df + df.shift(-1)) / 2)[::2]
-		if i != 0:
-			print 'Data halved ' ,i,'times - ', ("%.4f" % (time.time() - t0)),'s'
+		df.set_index(df['receiveTime'], inplace=True)
+		del df['receiveTime']
 		return df
 
 	# [unit] over numberOfSeconds for a specific named station [stationID]
@@ -101,7 +94,7 @@ class Plot(object):
 			fname = (str(stationID)+'_'+unit+'_'+plength)
 			# setup the plot.ly plot type as a Scatter with points with panda DataFrames (df)
 			trace = Scatter(
-				x = df['receiveTime'],
+				x = df.index,
 				y = df[unit], # changes depending on which units you are plotting
 				mode = 'lines+markers',
 				error_y = ErrorY(
@@ -126,7 +119,10 @@ class Plot(object):
 									auto_open = False)
 			print fname, 'Plot.ly:',("%.2f" % (time.time() - t0)), 's'
 			return plotURL
-		except:
+		except (KeyboardInterrupt, SystemExit):
+			sys.exit(0)
+		except (Exception) as e:
+			raise e
 			print ('This '+unit+' plot failed - '+fname)
 
 	def printPlotFail(self,error):
@@ -162,8 +158,7 @@ class Plot(object):
 	def getNumberOfStations(self):
 		return range(len(self.stationRows))
 
-	def makeAllPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
-		plotLengthString = 'Last ' + plotLengthString
+	def makeUnitPlots(self,latestTime,latestStationID,calibrationCPMtoREM,calibrationCPMtoUSV,pointLatLong,plotLengthString,time):
 		if latestTime == '':
 			print '~~~~ WARNING: Finished list? - No data for this station.'
 		else:
@@ -173,21 +168,27 @@ class Plot(object):
 			except Exception as e:
 				print 'There probably isn\'t any data from this time.\n' + str(e)
 		df = self.getDataFromDB(latestStationID,startPlotTime,latestTime)
-		df = self.reduceData(df)
+		# Data reduction algorithm
+		resample_method = {'Year':'D',
+							'Month': '6H',
+							'Day': '5min',
+							'Hour': '5min'}
+		df_avg = df.resample(resample_method[plotLengthString], how="mean")
 		# Expands dataframe to include other units and their associated errors
-		df['REM'] = df['CPM'] * calibrationCPMtoREM
-		df['USV'] = df['CPM'] * calibrationCPMtoUSV
-		df['remError'] = df['cpmError'] * calibrationCPMtoREM    # CHECK WITH JOEY ETC
-		df['usvError'] = df['cpmError'] * calibrationCPMtoUSV    # PRETTY SURE THIS IS INCORRECT
+		df_avg['REM'] = df_avg['CPM'] * calibrationCPMtoREM
+		df_avg['USV'] = df_avg['CPM'] * calibrationCPMtoUSV
+		df_avg['remError'] = df_avg['cpmError'] * calibrationCPMtoREM
+		df_avg['usvError'] = df_avg['cpmError'] * calibrationCPMtoUSV
+		plotLengthString = 'Last ' + plotLengthString
 		try:
 			urlList = []
 			# Plot markers & lines - Plot.ly to URLs
 			# CPM over numberOfSeconds for all stations
-			urlA = self.makePlot(latestStationID,'CPM','cpmError',self.cpmTitle,df,plotLengthString)
+			urlA = self.makePlot(latestStationID,'CPM','cpmError',self.cpmTitle,df_avg,plotLengthString)
 			# mREM/hr over numberOfSeconds for all stations
-			urlB = self.makePlot(latestStationID,'REM','remError',self.remTitle,df,plotLengthString)
+			urlB = self.makePlot(latestStationID,'REM','remError',self.remTitle,df_avg,plotLengthString)
 			# uSv/hr over numberOfSeconds for all stations
-			urlC = self.makePlot(latestStationID,'USV','usvError',self.usvTitle,df,plotLengthString)
+			urlC = self.makePlot(latestStationID,'USV','usvError',self.usvTitle,df_avg,plotLengthString)
 			tempRow = urlA,urlB,urlC
 			urlList.extend(tempRow)
 		except Exception as e:
@@ -227,10 +228,10 @@ class Plot(object):
 				(LName, LTime, LDose, Lcpmtorem, Lcpmtousv) = i # L --> Latest ...
 				LDose = LDose, LDose*Lcpmtorem, LDose*Lcpmtousv
 				urlList = []
-				urlA = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
-				urlB = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],secondsInDay)
-				urlC = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
-				urlD = self.makeAllPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[3],secondsInYear)
+				urlA = self.makeUnitPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
+				urlB = self.makeUnitPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[1],secondsInDay)
+				urlC = self.makeUnitPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[2],secondsInMonth)
+				urlD = self.makeUnitPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[3],secondsInYear)
 				urlRow = (urlA, urlB, urlC, urlD)
 				urlList.extend(urlRow)
 				# Make feature - iterating through each
@@ -287,7 +288,7 @@ if __name__ == '__main__':
 	plot.setStationInfoForAll()
 	plot.plotAll()
 	plot.closeDB()
-	plot.makeGeoJSON()
-	plot.scpToWebServer()
+	#plot.makeGeoJSON()
+	#plot.scpToWebServer()
 	plot.printEndMessage()
 	print 'Total run time:', ("%.1f" % (time.time() - t0)), 's'
