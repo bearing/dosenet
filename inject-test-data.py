@@ -25,7 +25,7 @@ parser.add_argument('--weeks',type=float,nargs=1,required=False,
 	help='Number[Int] of weeks to inject, eg. 4 = 1 month')
 args = parser.parse_args()
 
-db = mdb.connect("localhost",
+db = mdb.connect("127.0.0.1",
 				"ne170group",
 				"ne170groupSpring2015",
 				"dosimeter_network")
