@@ -381,17 +381,17 @@
 			"</div>";
 	}
 
-	sv_time = "hour";
+	timeframe = "hour";
 	function get_timeframe(){
 		var sel_time = document.getElementById('time_dropdown');
-		sv_time = sel_time.options[sel_time.selectedIndex].value;
+		timeframe = sel_time.options[sel_time.selectedIndex].value;
 	}
 
-	sv = "CPM";
-	function get_unit_type(){
+	unit = "CPM";
+	function setHTML_units(){
 		var sel = document.getElementById('dose_dropdown');
-		sv = sel.options[sel.selectedIndex].value;
-		switch(sv) {
+		unit = sel.options[sel.selectedIndex].value;
+		switch(unit) {
 			case 'cigarette':
 		        document.getElementById("text_field").innerHTML =
 				"<div class =\"jumbotron\" >" +
@@ -471,131 +471,94 @@
 	}
 </script>
 <script>
-	//Google Map Variable, global scope over script
-	var map;
+	var map; // Google Map Object
 	var berkeley = [37.872269, -122.258901];
 	var markers = [];
 	var markerCluster;
-	var marks = []; // contains all infoWindows
+	var marks = [];
 	var infowindow = new google.maps.InfoWindow();
 	// url for geoJSON file
 	var url = 'https://radwatch.berkeley.edu/sites/default/files/output.geojson?'
-		+ Math.random().toString(36).replace(/[^a-z]+/g, '') // To solve browser caching issue
-	var json = $($.parseJSON(JSON.stringify($.getJSON(url))))
+		+ Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+	var json = $($.parseJSON(JSON.stringify($.getJSON(url))));
+	var parsed_json = '';
+	var time = '';
+	var dose = '';
+	var dosimeter_name = '';
+	var graph_url = '';
+	var selected_marker = '';
+	var selected_val = '';
 
-	// Gives ability to center map on array of two points
-	// Input: Array, coordinates latitude longitude
 	function centerMap(center){
 		var mapCenter = new google.maps.LatLng(center[0], center[1]);
 		map.setCenter(mapCenter);
 	}
 
-	function returnContent(val){
-		var time = getTimeframe();
-		var dose = getUnit();
+	function updateInfowindowContent(val){
+		time = getTimeframe();
+		dose = getDoseUnit();
 		var plotly_url = "URL_" + dose + "_" + time;
-
 		var iframeIntro = "<iframe width=\"500\" height=\"400\" frameborder=\"0\" \
 			seamless=\"seamless\" scrolling=\"no\" src=\"";
-		var markerURL = val.properties[plotly_url.toString()];
 		var iframeEnding = ".embed?width=500&height=400\"></iframe>";
-
-		return iframeIntro + markerURL + iframeEnding;
+		graph_url = val.properties[plotly_url.toString()];
+		return iframeIntro + graph_url + iframeEnding;
 	}
 
-	// Can be used to get the timeframe for a plot, called in returnContent
+	// Time units for a plot, called in updateInfowindowContent
 	function getTimeframe(){
 		infowindow.close();
 		var sel_time = document.getElementById('time_dropdown');
 		return sel_time.options[sel_time.selectedIndex].value;
 	}
 
-	// Can be used to get the units for the plot, called in returnContent
-	function getUnit(){
+	// Dose units for a plot, called in updateInfowindowContent
+	function getDoseUnit(){
 		var sel = document.getElementById('dose_dropdown');
 		return sel.options[sel.selectedIndex].value;
 	}
 
 	function clearMarkers() {
+	  markerCluster.clearMarkers();
 	  for (var i = 0; i < markers.length; i++) {
 	    markers[i].setMap(null);
 	  }
 	  markers = [];
 	}
 
-	function SetMarkerProperties(marker, infowindow, val)
-	{
-		infowindow.close()
-        // Sets Marker Icon to Red Icon
-        // Can be changed to anything from [red, green, yellow, purple, green]
+	function setMarkerIcon(marker){
+        // Sets Marker Icon to [red, green, yellow, purple, green] marker
         marker.setIcon('https://maps.google.com/mapfiles/ms/icons/red-dot.png');
-
-        // Adds listener to open infowindow with content from returnContent()
-		// returnConent() will allow you to enter the graphs from the geoJSON file
-		google.maps.event.addListener(marker, 'click', (function(marker) {
-			return function() {
-				infowindow.setContent(returnContent(val));
-				infowindow.open(map, marker);
-			};
-		})(marker));
-
-		// Self added this because otherwise it's annoying,
-		// This closes any info windows when anyone clicks the map
-		//Makes navigation a lot easier!
-		google.maps.event.addListener(map, 'click', function() {
-			infowindow.close();
-		});
 	}
 
-	function getData(){
-		infowindow.close();
-		markerCluster.clearMarkers();
-		clearMarkers();
-		get_unit_type();
-
-		var sel = document.getElementById('dose_dropdown');
-		sv = sel.options[sel.selectedIndex].value;
-
+	function repopulateMarkers(){
 		$.getJSON(url, function(data){
-			var i = 0;
 			$.each(data.features, function(key, val){
-				var lon = val.geometry.coordinates[0];
-				var lat = val.geometry.coordinates[1];
-				var sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
-				switch(sv) {
-					case 'CPM':
-						sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
-					break;
-					case 'REM':
-						sel_unit = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
-					break;
-					case 'USV':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
-					break;
-					case 'plane':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
-					break;
-					case 'cigarette':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
-					break;
-					case 'medical':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
-					break;
-				}
-				var latest = "&nbsp"+sel_unit+"&nbsp"+getUnit()+"&nbsp";
+				var lon = getCoords(val).lon;
+				var lat = getCoords(val).lat;
 		        var marker = new MarkerWithLabel({
 		            map: map,
 		            title: name,
 		            position: new google.maps.LatLng(lat, lon),
-		            labelContent: latest,
+		            labelContent: getLabelContent(val),
 		            labelAnchor: new google.maps.Point(20, 0),
 		            labelClass: "labels",
 		        });
 		        markers.push(marker);
-		        SetMarkerProperties(marker, infowindow, val);
+		        setMarkerIcon(marker);
+				addMarkerEventListeners(val, marker);
 	      	});
 			markerCluster.addMarkers(markers);
 		});
+	}
+
+	function changeDoseUnits(){
+		infowindow.close();
+		infowindow.open(map, selected_marker);
+		clearMarkers();
+		setHTML_units();
+		selected_unit = getDoseUnit();
+		repopulateMarkers();
 	}
 
 	function getDosimeterCoords(index){
@@ -605,89 +568,116 @@
 		return location
 	}
 
-	function getSelectedDosimeter(){
+	function getSelectedDosimeterIndex(){
 		var sel = document.getElementById('dosimeter_list');
-		var index = sel.selectedIndex
-		var value = sel.options[sel.selectedIndex].value
-		return {
-			index: index,
-			name: value
-		}
+		var index = sel.selectedIndex;
+		dosimeter_name = sel.options[sel.selectedIndex].value;
+		return index
 	}
 
 	function goToDosimeter(){
-		var info = getSelectedDosimeter();
-		var index = info.index;
-		var name = info.name;
+		infowindow.close();
+		var index = getSelectedDosimeterIndex();
 		var center = getDosimeterCoords(index);
 		map.setCenter(center);
 	}
 
- 	var parsed_json = ''
-	$(document).ready(function(){
-		// Run initialize to generate new map
+	function initMap(){
 		map = new google.maps.Map(document.getElementById('map-canvas'), {
 			zoom: 9,
 			disableDefaultUI: true
 		});
+		google.maps.event.addListener(map, 'click', function() {
+			infowindow.close();
+		});
+	}
 
-		var dosimeter_list = $("#dosimeter_list");
-		var sel = document.getElementById('dose_dropdown');
-		sv = sel.options[sel.selectedIndex].value;
-		// Automatically centers map on Berkeley, could be any array of coorinates defined above
-		centerMap(berkeley);
+	function getCoords(val){
+		return {
+			lon : val.geometry.coordinates[0],
+			lat : val.geometry.coordinates[1]
+		}
+	}
 
-		// Fetch geoJSON file
-		// Runs function on complete, data is the data extracted from geoJSON
+	function getLabelContent(val){
+		selected_unit = getDoseUnit();
+		switch(selected_unit) {
+			case 'CPM':
+				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				break;
+			case 'REM':
+				latest_val = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+				break;
+			case 'USV':
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
+				break;
+			case 'plane':
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
+				break;
+			case 'cigarette':
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
+				break;
+			case 'medical':
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
+				break;
+			default:
+				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				break;
+		}
+		return ("&nbsp" + latest_val + "&nbsp" + selected_unit + "&nbsp");
+	}
+
+	function addMarkerEventListeners(val, marker){
+		// Adds listener to open infowindow with content from updateInfowindowContent()
+		// updateInfowindowContent() will allow you to enter the graphs from the geoJSON file
+		google.maps.event.addListener(marker, 'click', (function(marker) {
+			return function() {
+				infowindow.setContent(updateInfowindowContent(val));
+				infowindow.open(map, marker);
+				selected_val = val;
+				selected_marker = marker;
+			};
+		})(marker));
+	}
+
+	function addTimeDropdownListener(){
+		$("#time_dropdown").change(function(){
+			//infowindow.close();
+			goToDosimeter();
+			infowindow.setContent(updateInfowindowContent(selected_val));
+			infowindow.open(map, selected_marker);
+		});
+	}
+
+	$(document).ready(function(){
+		var marker;
+		initMap();
+		centerMap(berkeley); //Because we're self-centered.
+
+		// Fetch geoJSON file - runs function on complete, 'data' is extracted from JSON
 		$.getJSON(url, function(data){
-			parsed_json = data
+			parsed_json = data;
 			// For each item in "features" array inside data runs function
-			// key is the position of the item in the array Features
-			// val is the value in of the item
+			// key: position of item in the array Features
+			// val: value of item
 			$.each(data.features, function(key, val){
-				dosimeter_list.append($("<option />").text(val.properties["Name"]))
-				// Get val info - Geometry position
-				var lon = val.geometry.coordinates[0]
-				var lat = val.geometry.coordinates[1]
-
-				//Latest Dose (CPM) value
-				var sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1)
-				switch(sv) {
-					case 'CPM':
-						sel_unit = (val.properties["Latest dose (CPM)"]).toFixed(1);
-					break;
-					case 'REM':
-						sel_unit = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
-					break;
-					case 'USV':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
-					break;
-					case 'plane':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
-					break;
-					case 'cigarette':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
-					break;
-					case 'medical':
-						sel_unit = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
-					break;
-				}
-				var latest = "&nbsp" + sel_unit + "&nbsp" + getUnit() + "&nbsp"
-
-		        // Creates Google Maps Object
+				$("#dosimeter_list").append($("<option />").text(val.properties["Name"]));
+				var lon = getCoords(val).lon;
+				var lat = getCoords(val).lat;
 		        var marker = new MarkerWithLabel({
 		            map: map,
 		            title: name,
 		            position: new google.maps.LatLng(lat, lon),
-		            labelContent: latest,
+		            labelContent: getLabelContent(val),
 		            labelAnchor: new google.maps.Point(20, 0),
 		            labelClass: "labels",
+					animation: google.maps.Animation.DROP
 		        });
-
-		        markers.push(marker);
-		        SetMarkerProperties(marker, infowindow, val);
+				markers.push(marker);
+		        setMarkerIcon(marker);
+				addMarkerEventListeners(val, marker);
 	      	});
-
+			addTimeDropdownListener();
 			var mcOptions = {gridSize: 40, maxZoom: 15};
 			markerCluster = new MarkerClusterer(map, markers, mcOptions);
 		});
@@ -710,13 +700,13 @@
 					<div class="label label-info">
 						Units to Display on Plots
 					</div>
-					<select id="dose_dropdown" class="dropdown" onChange='getData()'>
-						<option value="CPM">CPM</option>
-						<option value="REM">Millirem per Hour</option>
-						<option value="USV">µSv per Hour</option>
-						<option value="plane">Plane</option>
-						<option value="medical">Medical</option>
-						<option value="cigarette">Cigarette</option>
+					<select id="dose_dropdown" class="dropdown" onChange='changeDoseUnits()'>
+						<option value="CPM"> CPM </option>
+						<option value="REM"> mrem per Hour </option>
+						<option value="USV"> µSv per Hour </option>
+						<option value="plane"> Hours on a plane </option>
+						<option value="medical"> Medical unit </option>
+						<option value="cigarette"> Cigarette packs </option>
 					</select>
 				</td>
 				<td>
@@ -725,21 +715,19 @@
 						Timeframe
 					</div>
 					<select id="time_dropdown" class="dropdown" onChange='getTimeframe()'>
-						<option value="Hour">Last Hour</option>
-						<option value="Day">Last Day</option>
-						<option value="Month">Last Month</option>
-						<option value="Year">Last Year</option>
+						<option value="Hour"> Last Hour </option>
+						<option value="Day"> Last Day </option>
+						<option value="Month"> Last Month </option>
+						<option value="Year"> Last Year </option>
 					</select>
 				</td>
 				<td>
 					<div class="label label-info">
 						Dosimeter list
 					</div>
-					<select id="dosimeter_list" class="dropdown" onChange='goToDosimeter()'>
+					<select id="dosimeter_list" class="dropdown" onClick='goToDosimeter()'
+						onChange='goToDosimeter()'>
 					</select>
-					<!--<div class="label label-info">Dosimeters</div>
-					<img class="reddot" src="https://maps.google.com/mapfiles/ms/icons/red-dot.png" />
-					!-->
 				</td>
 			</tr>
 		</table>
