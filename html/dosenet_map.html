@@ -603,22 +603,27 @@
 		selected_unit = getDoseUnit();
 		switch(selected_unit) {
 			case 'CPM':
-				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(4);
 				break;
 			case 'REM':
-				latest_val = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+				selected_unit = 'mrem/hr'
+				latest_val = (val.properties["Latest dose (mREM/hr)"]).toFixed(4);
 				break;
 			case 'USV':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
+				selected_unit = '&microSv/hr'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(4);
 				break;
 			case 'plane':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
+				selected_unit = 'plane'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(4);
 				break;
 			case 'cigarette':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
+				selected_unit = 'Cigarettes'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(4);
 				break;
 			case 'medical':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
+				selected_unit = 'X-Rays'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(4);
 				break;
 			default:
 				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
