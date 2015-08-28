@@ -46,7 +46,7 @@ class SQLObject:
         self.cursor.execute("INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
                 VALUES ('%s','%s','%s','%s');" %
                 (stationID,cpm,cpm_error,error_flag))
-        # Time is decided by the MySQL database / GRIM hence 'receiveTime' field in DB
+        # Time is decided by the MySQL database / DoseNet hence 'receiveTime' field in DB
         self.db.commit()
 
     def inject(self,data):
@@ -58,11 +58,16 @@ class SQLObject:
         else:
             data = self.parsePacket(data)
             if(data):
-                self.insertIntoDosenet(
-                    stationID   = data[1],
-                    cpm         = data[2],
-                    cpm_error   = data[3],
-                    error_flag  = data[4])
+                if data[2] > 100: # if cpm > 100
+                    msg = 'CPM more than 100 - assumed to be noise event.\n NOT INJECTING.'
+                    print msg
+                    email_message.send_email(process = os.path.basename(__file__), error_message = msg)
+                else:
+                    self.insertIntoDosenet(
+                        stationID   = data[1],
+                        cpm         = data[2],
+                        cpm_error   = data[3],
+                        error_flag  = data[4])
             else:
                 print '~~ FAILED TO INJECT/PARSE ~~'
                 msg = '\t stationID: "%s", cpm: "%s", cpm_error: "%s", error_flag: "%s"' % \
