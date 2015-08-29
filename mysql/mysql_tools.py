@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import MySQLdb as mdb
 import datetime
+import os
 import email_message
 
 class SQLObject:
