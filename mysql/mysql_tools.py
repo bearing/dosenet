@@ -58,8 +58,8 @@ class SQLObject:
         else:
             data = self.parsePacket(data)
             if(data):
-                if data[2] > 100: # if cpm > 100
-                    msg = 'CPM more than 100 - assumed to be noise event.\n NOT INJECTING.'
+                if data[2] > 20: # if cpm > 100
+                    msg = 'CPM more than 20 - assumed to be noise event.\n NOT INJECTING.'
                     print msg
                     email_message.send_email(process = os.path.basename(__file__), error_message = msg)
                 else:
