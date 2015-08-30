@@ -57,7 +57,6 @@ def send_email(process, error_message, sender = 'dosenet@dosenet'):
     part2 = MIMEText(html, 'html')
     msg.attach(part1)
     msg.attach(part2)
-    print msg.as_string()
 
     try:
        smtpObj = smtplib.SMTP('localhost')
