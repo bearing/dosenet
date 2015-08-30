@@ -59,10 +59,14 @@ class SQLObject:
         else:
             data = self.parsePacket(data)
             if(data):
-                if data[2] > 20: # if cpm > 100
-                    msg = 'CPM more than 20 - assumed to be noise event.\n NOT INJECTING.'
+                cpm = data[2]
+                if cpm > 20:
+                    msg = 'CPM more than 20 - assumed to be noise event.\n NOT INJECTING. \n CPM:%s' % cpm
                     print msg
-                    email_message.send_email(process = os.path.basename(__file__), error_message = msg)
+                    #if not self.just_sent #for that stationID
+                    #    email_message.send_email(process = os.path.basename(__file__), error_message = msg)
+                    # Could use a datbase solution for this
+                    # Add a field to the stations table - Bool: just_sent_a_message? 1 or 0
                 else:
                     self.insertIntoDosenet(
                         stationID   = data[1],
