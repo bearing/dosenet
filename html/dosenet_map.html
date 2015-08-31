@@ -12,7 +12,7 @@
 	<meta http-equiv="last-modified" content="2015-04-23 13:10 PDT" />
 	<meta name="copyright" content="© 2015 Navrit Bal, Tigran Ter-Stepanyan and Luke Sheard" />
 	<meta name="author" content="Navrit Bal, Tigran Ter-Stepanyan, Luke Sheard" />
-	<meta http-equiv="refresh" content="300;url=https://radwatch.berkeley.edu/dosenet/">
+	<meta http-equiv="refresh" content="300;url=httpk://radwatch.berkeley.edu/dosenet/">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
 	<script type="text/javascript"
@@ -614,7 +614,6 @@
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(4);
 				break;
 			case 'plane':
-<<<<<<< HEAD
 				selected_unit = 'plane hrs'
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.420168067).toFixed(4);
 				break;
@@ -625,18 +624,6 @@
 			case 'medical':
 				selected_unit = 'X-Rays/hr'
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.2).toFixed(4);
-=======
-				selected_unit = 'plane'
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(4);
-				break;
-			case 'cigarette':
-				selected_unit = 'Cigarettes'
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(4);
-				break;
-			case 'medical':
-				selected_unit = 'X-Rays'
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(4);
->>>>>>> origin/master
 				break;
 			default:
 				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
