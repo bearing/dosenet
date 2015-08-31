@@ -47,7 +47,7 @@ class Plot(object):
 		py.sign_in('ne170','ilo0p1671e')
 		############################
 		#### ~~~ ATTENTION ~~~ #####
-		self.KEPLER_USERNAME = 'jccurtis'
+		self.KEPLER_USERNAME = 'nav' #'jccurtis'
 		#### ~~~~~~~~~~~~~~~~~ #####
 		############################
 
