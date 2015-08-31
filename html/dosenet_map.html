@@ -12,7 +12,7 @@
 	<meta http-equiv="last-modified" content="2015-04-23 13:10 PDT" />
 	<meta name="copyright" content="© 2015 Navrit Bal, Tigran Ter-Stepanyan and Luke Sheard" />
 	<meta name="author" content="Navrit Bal, Tigran Ter-Stepanyan, Luke Sheard" />
-	<meta http-equiv="refresh" content="300;url=httpk://radwatch.berkeley.edu/dosenet/">
+	<meta http-equiv="refresh" content="300;url=https://radwatch.berkeley.edu/dosenet/">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
 	<script type="text/javascript"
@@ -327,7 +327,7 @@
 				"Units Used" +
 			"</div>" +
 			"<div class =\"jp\">" +
-			"Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities." +
+			"Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities. In these cases the dose stated corresponds to the effective dose equivalent for that exposure." +
 			"</div>" +
 			"</div>"
         }
@@ -396,13 +396,13 @@
 		        document.getElementById("text_field").innerHTML =
 				"<div class =\"jumbotron\" >" +
 				"<div class =\"jh5\">" +
-				"Cigarettes (1 carton = 6 µSv)</a>" +
+				"Cigarettes (1 pack (20 cigarettes) = 6 µSv)</a>" +
 				"</div>" +
 				"<div class =\"jp\">" +
 				"'While cigarette smoke is not an obvious source of radiation exposure, it contains small amounts of radioactive materials [polonium-210 and lead-210] which smokers bring into their lungs as they inhale. The radioactive particles lodge in lung tissue and over time contribute a huge radiation dose. Radioactivity may be one of the key factors in lung cancer among smokers.' See <a href=\"http://www.epa.gov/radiation/sources/tobacco.html\">U.S. Environmental Protection Agency</a>" +
 				"<br><br><a href=\"http://www.ncrponline.org/Learn_More/Did_You_Know_95.html\">Equivalent dose estimation</a>" +
 				"...'greatest contributor to the effective population dose equivalent of all consumer products. In fact, tobacco products probably would have been the greatest single contributor to the effective population dose equivalent of all radiation sources, including natural background sources and medical radiation [NCRP Report No. 93 summarizing exposures from all sources (NCRP, 1987a)].'" +
-				"<br><br>This unit compares how many cigarettes would give you the same dose as standing at this location for 10 minutes. <br><a href=\"http://www.rmeswi.com/36.html\">Radiation Measurement and Elimination Services</a>" +
+				"<br><br>This unit compares the effective dose equivalent for how many cigarettes would give you the same dose per hour. <br><a href=\"http://www.rmeswi.com/36.html\">Radiation Measurement and Elimination Services</a>" +
 				"</div>" +
 				"</div>";
 			break;
@@ -414,7 +414,7 @@
 				"</div>" +
 				"<div class =\"jp\">" +
 				"Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude means the air is thinner. With thinner air, there is less protection from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground." +
-				"<br><br>This unit compares how many minutes on an airplane would give you the same dose as standing at this location for 10 minutes. <br><a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public information</a>" +
+				"<br><br>This unit gives the amount of time on an airplane would correspond to the same effective dose. <br><a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public information</a>" +
 				"</div>" +
 				"</div>";
 			break;
@@ -426,7 +426,7 @@
 				"</div>" +
 				"<div class =\"jp\">" +
 				"Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure." +
-				"<br><br>The units here compare how many 5 µSv X-rays would need to be taken to give you the same dose as standing at this location for 10 minutes." +
+				"<br><br>The units here compare how many 5 µSv X-rays would need to be taken to give you the same effective dose as standing at this location for one hour." +
 				"<br><a href=\"http://www.radiologyinfo.org/en/pdf/sfty_xray.pdf\">Radiology information</a>" +
 				"<br><a href=\"http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html\">NRC - Daily lives</a>" +
 				"</div>"
@@ -603,22 +603,40 @@
 		selected_unit = getDoseUnit();
 		switch(selected_unit) {
 			case 'CPM':
-				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(4);
 				break;
 			case 'REM':
-				latest_val = (val.properties["Latest dose (mREM/hr)"]).toFixed(1);
+				selected_unit = 'mrem/hr'
+				latest_val = (val.properties["Latest dose (mREM/hr)"]).toFixed(4);
 				break;
 			case 'USV':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(1);
+				selected_unit = '&microSv/hr'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(4);
 				break;
 			case 'plane':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(1);
+<<<<<<< HEAD
+				selected_unit = 'plane hrs'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.420168067).toFixed(4);
 				break;
 			case 'cigarette':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(1);
+				selected_unit = 'cigarettes/hr'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.00833333335).toFixed(4);
 				break;
 			case 'medical':
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(1);
+				selected_unit = 'X-Rays/hr'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.2).toFixed(4);
+=======
+				selected_unit = 'plane'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.0700280112).toFixed(4);
+				break;
+			case 'cigarette':
+				selected_unit = 'Cigarettes'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.555555556).toFixed(4);
+				break;
+			case 'medical':
+				selected_unit = 'X-Rays'
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.833333333).toFixed(4);
+>>>>>>> origin/master
 				break;
 			default:
 				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
@@ -705,8 +723,8 @@
 						<option value="REM"> mrem per Hour </option>
 						<option value="USV"> µSv per Hour </option>
 						<option value="plane"> Hours on a plane </option>
-						<option value="medical"> Medical unit </option>
-						<option value="cigarette"> Cigarette packs </option>
+						<option value="medical"> X-rays </option>
+						<option value="cigarette"> cigarettes </option>
 					</select>
 				</td>
 				<td>
