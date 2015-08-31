@@ -256,10 +256,7 @@ class Plot(object):
 		self.db.close() # Disconnect from DB server
 
 	def scpToWebServer(self): # copy to webserver - DECF Kepler
-		# Must be run under 'dosenet' linux user so that the SSH keypair setup between GRIM & DECF Kepler works without login
-		# Not ideal: uses Joey's account for the SCP
-		# Will be: $ scp ... jcurtis@kepler/.../
-		#			         =======
+		# Must be run under 'dosenet' linux user so that the SSH keypair setup between DoseNet server & DECF Kepler works without login
 		outputLocation = " output.geojson "
 		webServerLocation = " '%s'@kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/ " % (self.KEPLER_USERNAME)
 		command = "scp" + outputLocation + webServerLocation
