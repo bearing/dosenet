@@ -7,6 +7,12 @@
 ##### Kai Vetter
 
 ---
+## ToDo!
+- [ ] WiFi addition to dosimeter
+- [ ] Daily database dumps to csv (timestamp - datatype?, dose, dose_err) located on CDN.
+- [ ] App development
+
+---
 ## What goes where?
 This is all contained in the GitHub repository, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` or `cd ~/git/dosenet` would get you where you want to be.
 This repo should always be cloned by SSH:
