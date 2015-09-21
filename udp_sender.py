@@ -59,12 +59,10 @@ class Sender:
     def initialise(self):
         if self.args.test:
             print '~ Testing CSV handling\n\n'
-            #print a list of available CSV dialects, eg. Unix, Excel, Excel tab...
             print '- '*64
             print 'Test file:\t',self.file_path
             self.file_contents = self.getContents(self.file_path)
             csv = self.file_contents
-            print 'CSV Dialects:\t',csv.list_dialects()
             print '- '*64
             print '\t',type(csv), csv
             print '- '*64
