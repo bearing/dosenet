@@ -8,6 +8,8 @@
 
 ---
 ## ToDo!
+- [ ] Move device code to public repo.
+- [ ] Move config csv (with hash, lat, long) to root dir. This CSV is made during detector initialization to properly identify the dosimeter.
 - [ ] WiFi addition to dosimeter
 - [ ] Daily database dumps to csv (timestamp - datatype?, dose, dose_err) located on CDN.
 - [ ] App development
