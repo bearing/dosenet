@@ -108,7 +108,7 @@ class Sender:
     def getAndSendData(self, det, sleep_time = 300):
         cpm, cpm_error = det.getCPM(accumulation_time = sleep_time)
         count = det.getCount()
-        print 'Count: ', count,' - CPM: ', cpm, u'\xb1', cpm_error # u'\xb1' is plus/minus unicode symbol
+        print 'Count: ', count,' - CPM: ', cpm, '+/-', cpm_error
         if len(det.counts) > 1: # Only run the next segment after the warm-up phase
             self.sendData(cpm = cpm, cpm_error = cpm_error)
 
