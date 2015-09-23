@@ -14,6 +14,11 @@
 - [ ] Daily database dumps to csv (timestamp - datatype?, dose, dose_err) located on CDN.
 - [ ] App development
 
+## Preweb release todo (Ryan)
+- [ ] Remove pinewood station (temp)
+- [ ] Mount campus dosimeter (indoor, outdoor)
+- [ ] Grounding fix (test new RPi hat board)
+
 ---
 ## What goes where?
 This is all contained in the GitHub repository, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` or `cd ~/git/dosenet` would get you where you want to be.
@@ -32,7 +37,7 @@ This repo should always be cloned by SSH:
 > `sudo ./udp_sender.py`
 
 	dosimeter.py
-> Usage: 
+> Usage:
 >> **Test**: python dosimeter.py
 >
 > Supporting class for the UDP_sender class. Handles actual radiation detection logic and passes through to the sender.
@@ -60,7 +65,7 @@ This repo should always be cloned by SSH:
 #### dosenet.dhcp.lbl.gov
 ##### Used to be grim.nuc.berkeley.edu
 	makeGeoJSON.py
-> Usage: 
+> Usage:
 >> **Automatic**: crontab operation
 
 >> **Manual**: python makeGeoJSON.py
@@ -73,7 +78,7 @@ This repo should always be cloned by SSH:
 > Copies (via scp) the produced GeoJSON file to Kepler - at end of run-time.
 
 	udp_injector.py
-> Usage: 
+> Usage:
 >> **Manual**: python udp_injector.py
 
 >> **tmux**: tmux a -t UDP_injector; python udp_injector.py; Ctrl+b, d
@@ -81,39 +86,39 @@ This repo should always be cloned by SSH:
 >> **screen**: screen python udp_injector.py; Ctrl+a, d
 
 > Input: Encrypted UDP packets from RPi's
-> 
+>
 > Output: Database entries
-> 
+>
 > Data collection and storage: Listens, decrypts, parses, injects incoming UDP packets from the RPi's.
 
 	addDosimeterToDB.py
 > Usage:
->> **Manual**: 
+>> **Manual**:
 
-> Input: 
+> Input:
 
-> Output: 
+> Output:
 >
 > Stuff
 
 	deleteDosimeter.py
 > Usage:
->> **Manual**: 
+>> **Manual**:
 
-> Input: 
+> Input:
 
-> Output: 
+> Output:
 >
 > Stuff
 
 	/mysql/backup_database.sh  all|stations|data
-> BASH script that backups subsets of the database (tables) or the whole thing to .sql files in /home/dosenet/ (~/). 
+> BASH script that backups subsets of the database (tables) or the whole thing to .sql files in /home/dosenet/ (~/).
    Example:
 
 		./database_backup.sh all
 		Password: ne170groupSpring2015  
 
-   Output files: *.sql in /home/dosenet/ (~/). 
+   Output files: *.sql in /home/dosenet/ (~/).
 
 > 		backup_all_dosenet.sql
 > 		backup_dosnet_dosenet.sql
@@ -159,9 +164,9 @@ This repo should always be cloned by SSH:
 
     sudo update-rc.d /etc/init.d/dosenet.sh defaults
     I think there's meant to be another line here????
-    
+
     ????
-    
+
     ????
 
 ---
