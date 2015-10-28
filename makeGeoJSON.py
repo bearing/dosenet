@@ -215,13 +215,13 @@ class Plot(object):
 			Lcpmtousv = self.stationRowArrayList[station][5]
 			ignoreStation = bool(self.stationRowArrayList[station][6])
 			# ignore stations
-			if ignoreStation == 0 :
-				print "Ignoring station {}".format()
+			if ignoreStation == 0:
+				print "Ignoring station id={}, name={}".format(stationID, stationName)
 				continue
 			# builds up a tuple coordinates of the stations, longitude & latitude
 			longlat = [lon, lat]
 			point = Point(longlat)
-			
+
 			# get latest dose (CPM) and time for that measurement in the loop so we can display in exported GeoJSON file
 			self.cursor.execute("SELECT Name, receiveTime, cpm, cpmError \
 								FROM dosnet \
