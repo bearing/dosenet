@@ -199,22 +199,31 @@ class Plot(object):
 		# Constants used for plotting clarity
 		secondsInYear =  31557600 	# 365.23 days
 		secondsInMonth = 2592000 	# 30 days
-		secondsInWeek =  604800 	# 7 days
-		secondsInDay = 	 86400 		# 24 hours
-		secondsInHour =  3600 		# 60 minutes
+		secondsInWeek =  604800 	# 7 days (also duh)
+		secondsInDay = 	 86400 		# 24 hours (also duh)
+		secondsInHour =  3600 		# 60 minutes (also duh)
 		secondsInMinute= 60 		# Duh
 		plotLength = ('Hour','Day','Month','Year')
 		station = 0
 		for station in self.getNumberOfStations():
-			if self.stationRowArrayList[station][6] == 0 :
+			# ID, Name, Lat, Long, cpmtorem, cpmtousv, display
+			stationID = self.stationRowArrayList[station][0]
+			stationName = self.stationRowArrayList[station][1]
+			lat = self.stationRowArrayList[station][2]
+			lon = self.stationRowArrayList[station][3]
+			Lcpmtorem = self.stationRowArrayList[station][4]
+			Lcpmtousv = self.stationRowArrayList[station][5]
+			ignoreStation = bool(self.stationRowArrayList[station][6])
+			# ignore stations
+			if ignoreStation == 0 :
+				print "Ignoring station {}".format()
 				continue
 			# builds up a tuple coordinates of the stations, longitude & latitude
-			longlat = [ self.stationRowArrayList[station][3], self.stationRowArrayList[station][2]]
+			longlat = [lon, lat]
 			point = Point(longlat)
-			# gets the stationID for insertion into the features
-			stationID = self.stationRowArrayList[station][1]
+			
 			# get latest dose (CPM) and time for that measurement in the loop so we can display in exported GeoJSON file
-			self.cursor.execute("SELECT Name, receiveTime, cpm, cpmtorem, cpmtousv \
+			self.cursor.execute("SELECT Name, receiveTime, cpm, cpmError \
 								FROM dosnet \
 								INNER JOIN stations \
 								ON dosnet.stationID = stations.ID \
@@ -224,10 +233,10 @@ class Plot(object):
 									INNER JOIN stations \
 									ON dosnet.stationID = stations.ID  \
 									WHERE Name='%s') AND Name='%s';" \
-									% (stationID, stationID))
+									% (stationName, stationName))
 			dtRows = self.cursor.fetchall() # dtRows --> Data & time rows
 			for i in dtRows:
-				(LName, LTime, LDose, Lcpmtorem, Lcpmtousv) = i # L --> Latest ...
+				(LName, LTime, LDose, Lcpmerror) = i # L --> Latest ...
 				LDose = LDose, LDose*Lcpmtorem, LDose*Lcpmtousv
 				urlList = []
 				urlA = self.makeUnitPlots(LTime,LName,Lcpmtorem,Lcpmtousv,point,plotLength[0],secondsInHour)
