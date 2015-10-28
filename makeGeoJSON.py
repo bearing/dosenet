@@ -52,13 +52,13 @@ class Plot(object):
 		############################
 
 	def getStationInfo(self):
-		# Get number of stations, station name, longitude, latitude, CPM to mRem and uSv conversion calibration factors
-		self.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv \
+		# Get number of stations, station name, longitude, latitude, CPM to mRem and uSv calibration factors, and displayFlag
+		self.cursor.execute("SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv, display \
 							FROM dosimeter_network.stations;") # Name & Long are reserved words apparently, need `...`
 		self.stationRows = self.cursor.fetchall()
 
 	def setStationInfo(self,i):
-		self.stationRowArrayList.append((i[0], i[1], float(i[2]), float(i[3]), float(i[4]), float(i[5])))
+		self.stationRowArrayList.append((i[0], i[1], float(i[2]), float(i[3]), float(i[4]), float(i[5]), int(i[6])))
 
 	def setStationInfoForAll(self):
 		for i in self.stationRows:
@@ -206,6 +206,8 @@ class Plot(object):
 		plotLength = ('Hour','Day','Month','Year')
 		station = 0
 		for station in self.getNumberOfStations():
+			if self.stationRowArrayList[station][6] == 0 :
+				continue
 			# builds up a tuple coordinates of the stations, longitude & latitude
 			longlat = [ self.stationRowArrayList[station][3], self.stationRowArrayList[station][2]]
 			point = Point(longlat)
