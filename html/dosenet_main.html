@@ -26,6 +26,8 @@
 		width: 100%;
 		margin-bottom:1em !important;
 		margin-top: 1em !important;
+		margin-right:1em !important;
+		margin-left: 1em !important;
   	}
 	#image-expand-canvas {
 		width: 150%;
@@ -33,7 +35,7 @@
 		margin-top: 1em !important;
   	}
 	#logo-canvas {
-		width: 25%;
+		width: 15%;
 		margin-bottom:1em !important;
 		margin-top: 1em !important;
   	}
@@ -46,7 +48,12 @@
 		vertical-align: middle;
 	}
 	.logoTable {
-		width: 25%;
+		vertical-align: middle;
+	}
+	.logoCell {
+		border: 10px solid transparent;
+		width: 20%;
+		height: 100%;
 		vertical-align: middle;
 	}
 	.autoResizeImage {
@@ -60,12 +67,19 @@
 
 <body>
 <!-- Headline -->
-
-	<div id=logo-canvas>
-		<img src="/sites/default/files/pictures/DoseNet-logo-transparentbg.png"/>
+	<div style="font-size:30px">
+	<table>
+		<td style="border: 15px solid transparent; vertical-align: middle">
+			Back to the network:
+		</td>
+		<td style="border: 15px solid transparent; vertical-align: middle;">
+			 <a href="https://radwatch.berkeley.edu/dosenet"><img style="height:8%"src="/sites/default/files/pictures/DoseNetGoogleLogo.png"/></a>
+		</td>
+	</table>
 	</div>
+	<br>
 
-	<div id=my_banner>
+	<div id="my_banner">
 	    DoseNet represents a dedicated effort to encourage students to be active and engaged participants, taking on the fascinating challenges of better perceiving the world around us and understanding what “normal” really is.
 	</div>
 
@@ -86,33 +100,37 @@
 
 	<br>
 
-		<table class="center " style="float: middle;">
+		<table class="logoTable">
 		<tr>
-    		<td class="logoTable">
+			<td>
+			</td>
+    		<td class="logoCell">
     			<div id="image-table-canvas">
-    				<img class="autoResizeImage" src="sites/default/files/pictures/ucbseal.png"/>
+    				<img class="autoResizeImage" src="/sites/default/files/pictures/ucbseal.png"/>
     			</div>
     		</td>
-    		<td class="logoTable">
+    		<td class="logoCell">
     			<div id="image-table-canvas">
-    				<img class="autoResizeImage" src="sites/default/files/pictures/lbnl.png"/>
+    				<img class="autoResizeImage" src="/sites/default/files/pictures/lbnl.png"/>
     			</div>
     		</td>
-    		<td class="logoTable">
+    		<td style="border: 10px solid transparent; width: 17.5%; vertical-align: middle;">
     			<div id="image-table-canvas">
-    				<img class="autoResizeImage" src="sites/default/files/pictures/campolindo_logo.jpeg"/>
+    				<img class="autoResizeImage" src="/sites/default/files/pictures/campolindo_logo.jpeg"/>
     			</div>
     		</td>
-    		<td class="logoTable">
+    		<td style="border: 10px solid transparent; width: 18%; vertical-align: middle;">
     			<div id="image-table-canvas">
-    				<img class="autoResizeImage" src="sites/default/files/pictures/pinewood_logo.jpg"/>
+    				<img class="autoResizeImage" src="/sites/default/files/pictures/pinewood_logo.jpg"/>
     			</div>
+    		</td>
+    		<td>
     		</td>
     	</tr>
     </table>
     <br>
 
-<p>DoseNet aims to form a network with schools throughout the Bay Area and beyond that will serve as  to establish a relationship between UC Berkeley and member high schools. We see interacting with young students in this way as vital to improving community understanding of radiation and radiation dangers as well as providing valuable hands-on experimentation in a relevant and cutting edge scientific endeavor. To aid in building this community, we plan to have semi-yearly workshops, bringing together students from across the network to present the results from measurements taken at their location and absorb new concepts from their scientific community.</p>
+<p>DoseNet aims to form a network with schools throughout the Bay Area and beyond that will serve as  to establish a relationship between UC Berkeley and member high schools. We see interacting with young students in this way as vital to improving community understanding of radiation and radiation risks as well as providing valuable hands-on experimentation in a relevant and cutting edge scientific endeavor. To aid in building this community, we plan to have semi-yearly workshops, bringing together students from across the network to present the results from measurements taken at their location and absorb new concepts from their scientific community.</p>
 
 	<br>
 	<br>
@@ -138,19 +156,19 @@
 		<tr>
     		<td style="width:50%; vertical-align:middle">
     			<div id="image-table-canvas">
-    				<img class="autoResizeImage" src="sites/default/files/pictures/StudentSoldering.jpg"/>
+    				<img class="autoResizeImage" src="/sites/default/files/pictures/StudentSoldering.jpg"/>
     			</div>
     		</td>
     		<td style="width:50%; vertical-align:middle">
     			<div id="image-table-canvas">
-    				<img class="autoResizeImage" src="sites/default/files/pictures/NavDeveloping.jpg"/>
+    				<img class="autoResizeImage" src="/sites/default/files/pictures/NavDeveloping.jpg"/>
     			</div>
     		</td>
     	</tr>
     </table>
 	<br>
 
-	<p> Several young undergraduates have already been directly involved in the construction and interfacing. There is the potential for interested advanced high school students to continue with this development, build new models for in-class use, and upgrade them to include additional capabilities as well.</p>
+	<p> Several undergraduate students have already been directly involved in the construction and interfacing. There is the potential for interested advanced high school students to continue with this development, build new models for in-class use, and upgrade them to include additional capabilities as well.</p>
 
 	<br>
 	<br>
@@ -180,20 +198,26 @@
 	<table width="100%" border="0" cellspacing="0" cellpadding="0">
     	<tr valign="middle">
     		<td  style="width:30%; vertical-align:middle">
-   				<img class="autoResizeImage" src="sites/default/files/pictures/DosimeterWScreen.jpg"/>
+    			<div id="image-table-canvas">
+	   				<img class="autoResizeImage" src="/sites/default/files/pictures/DosimeterWScreen.jpg"/>
+	   			</div>
     		</td>
     		<td  style="width:30%; vertical-align:middle">
-   				<img class="autoResizeImage" src="sites/default/files/pictures/equipment_plain.jpeg"/>
+    			<div id="image-table-canvas">
+	   				<img class="autoResizeImage" src="/sites/default/files/pictures/equipment_plain.jpeg"/>
+	   			</div>
     		</td>
-    		<td  style="width:30%; height:250px; vertical-align:middle">
-   				<img class="autoResizeImage" src="sites/default/files/pictures/OpenDeviceWScreen.jpg"/>
+    		<td  style="width:30%; vertical-align:middle">
+    			<div id="image-table-canvas">
+	   				<img class="autoResizeImage" src="/sites/default/files/pictures/DoseNetDeviceOpen.jpg"/>
+	   			</div>
     		</td>
     	</tr>
     </table>
 
     &nbsp
 
-	<p>These dosimeter devices are basic and cheap, containing three to four basic parts: a raspberry pi, a basic dosimeter, and possibly a touch screen for direct interaction, and a 3D printed case designed to accommodate these parts. The design includes the possibility to expand on these basic components with additional sensors. This flexibility relies on the modularity of our python API for operating the device and the flexibility of the raspberry pi.</p>
+	<p>These dosimeter devices are basic and cheap, containing three to four basic parts: a raspberry pi, a basic dosimeter, optionally a touch screen for direct interaction, and a 3D printed case designed to accommodate these parts. The design includes the possibility to expand on these basic components with additional sensors. This flexibility relies on the modularity of our python API for operating the device and the flexibility of the raspberry pi.</p>
 	<br>
 
 </body>
