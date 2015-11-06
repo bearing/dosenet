@@ -41,12 +41,15 @@
 			margin-left: 1em;
 			width: 100%;
 		}
-		.jh5{
+		.div {
+			vertical-align: middle;
+		}
+		.jh5 {
 			padding: 0.5em 0 0 0;
 			font-size: 2em;
 			text-align: center;
 		}
-		.jh2{
+		.jh2 {
 			font-size: 3em;
 		}
 		.jp {
@@ -58,24 +61,24 @@
 			font-size: 2vw;
 			font-family: 'Garamond', Arial, sans-serif;
 		}
-		.names{
+		.names {
 			font-family: 'Garamond', Arial, sans-serif;
 			color: #D19000 !important;
 		}
-		.reddot{
+		.reddot {
 			height:1.5em !important;
 			margin-top: 0.5em !important;
 			margin-left: auto;
 	    	margin-right: auto;
 		}
-		.plot{
+		.plot {
 			width:100%;
 			min-height: 35em;
 		}
-		.center{
+		.center {
 			text-align: center;
 		}
-		.vcenteralign{
+		.vcenteralign {
 			vertical-align: center;
 		}
 		.transbg{
@@ -601,7 +604,7 @@
 		selected_unit = getDoseUnit();
 		switch(selected_unit) {
 			case 'CPM':
-				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(4);
+				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
 				break;
 			case 'REM':
 				selected_unit = 'mrem/hr'
@@ -609,7 +612,7 @@
 				break;
 			case 'USV':
 				selected_unit = '&microSv/hr'
-				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(4);
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(3);
 				break;
 			case 'plane':
 				selected_unit = 'plane hrs'
@@ -624,7 +627,7 @@
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.2).toFixed(4);
 				break;
 			default:
-				latest_val = (val.properties["Latest dose (CPM)"]).toFixed(1);
+				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(3);
 				break;
 		}
 		return ("&nbsp" + latest_val + "&nbsp" + selected_unit + "&nbsp");
@@ -667,19 +670,19 @@
 				$("#dosimeter_list").append($("<option />").text(val.properties["Name"]));
 				var lon = getCoords(val).lon;
 				var lat = getCoords(val).lat;
-		        var marker = new MarkerWithLabel({
-		            map: map,
-		            title: name,
-		            position: new google.maps.LatLng(lat, lon),
-		            labelContent: getLabelContent(val),
-		            labelAnchor: new google.maps.Point(20, 0),
-		            labelClass: "labels",
-					animation: google.maps.Animation.DROP
-		        });
+        var marker = new MarkerWithLabel({
+            map: map,
+            title: name,
+            position: new google.maps.LatLng(lat, lon),
+            labelContent: getLabelContent(val),
+            labelAnchor: new google.maps.Point(20, 0),
+            labelClass: "labels",
+						animation: google.maps.Animation.DROP
+        });
 				markers.push(marker);
-		        setMarkerIcon(marker);
+		    setMarkerIcon(marker);
 				addMarkerEventListeners(val, marker);
-	      	});
+	    });
 			addTimeDropdownListener();
 			var mcOptions = {gridSize: 40, maxZoom: 15};
 			markerCluster = new MarkerClusterer(map, markers, mcOptions);
@@ -700,9 +703,9 @@
 						Units to Display on Plots
 					</div>
 					<select id="dose_dropdown" class="dropdown" onChange='changeDoseUnits()'>
-						<option value="CPM"> CPM </option>
-						<option value="REM"> mrem per Hour </option>
 						<option value="USV"> µSv per Hour </option>
+						<option value="REM"> mrem per Hour </option>
+						<option value="CPM"> CPM </option>
 						<option value="plane"> Hours on a plane </option>
 						<option value="medical"> X-rays </option>
 						<option value="cigarette"> cigarettes </option>
