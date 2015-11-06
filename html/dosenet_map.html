@@ -383,7 +383,7 @@
 		timeframe = sel_time.options[sel_time.selectedIndex].value;
 	}
 
-	unit = "CPM";
+	unit = "USV";
 	function setHTML_units(){
 		var sel = document.getElementById('dose_dropdown');
 		unit = sel.options[sel.selectedIndex].value;
@@ -688,7 +688,7 @@
 	</script>
 </head>
 <body>
-	<div id=my_banner>
+	<div id="my_banner">
 	    This map shows background radiation measured throughout our network of small sensors maintained and operated by students around the Bay Area and the UC Berkeley team.
 	</div>
 
@@ -700,9 +700,9 @@
 						Units to Display on Plots
 					</div>
 					<select id="dose_dropdown" class="dropdown" onChange='changeDoseUnits()'>
+						<option value="USV"> µSv per Hour </option>
 						<option value="CPM"> CPM </option>
 						<option value="REM"> mrem per Hour </option>
-						<option value="USV"> µSv per Hour </option>
 						<option value="plane"> Hours on a plane </option>
 						<option value="medical"> X-rays </option>
 						<option value="cigarette"> cigarettes </option>
