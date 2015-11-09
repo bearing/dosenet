@@ -8,7 +8,7 @@
 # Created:         Mon 15/06/15
 # Last updated: Fri 24/06/15
 #################
-## Run on GRIM ##
+#  Run on GRIM  #
 #################
 
 import sys
@@ -16,26 +16,31 @@ import MySQLdb as mdb
 import argparse
 import itertools
 
+
 class Parser:
     def __init__(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('--ID',type=int,nargs=1,required=False,
-            help='Auto generated if not manually set. Does not compensate for \
-            collisions that you may make.')
-        parser.add_argument('--name',type=str,nargs=1,required=True,
-            help='')
-        parser.add_argument('--latlong',type=float,nargs=2,required=True,
-            help='')
-        parser.add_argument('--conv',type=float,nargs=2,required=True,
-            help='')
+        parser.add_argument(
+            '--ID', type=int, nargs=1, required=False,
+            help=('Auto generated if not manually set. Does not compensate ' +
+                  'for collisions that you may make.'))
+        parser.add_argument(
+            '--name', type=str, nargs=1, required=True, help='')
+        parser.add_argument(
+            '--latlong', type=float, nargs=2, required=True, help='')
+        parser.add_argument(
+            '--conv', type=float, nargs=2, required=True, help='')
         self.args = parser.parse_args()
 
+
 class DBTool:
-    def __init__(self,name,lat,lon,cpmtorem,cpmtousv,*ID):
-        self.db = mdb.connect("127.0.0.1", # Open database connection
-                        "ne170group",
-                        "ne170groupSpring2015",
-                        "dosimeter_network")
+    def __init__(self, name, lat, lon, cpmtorem, cpmtousv, *ID):
+        # Open database connection
+        self.db = mdb.connect(
+            "127.0.0.1",
+            "ne170group",
+            "ne170groupSpring2015",
+            "dosimeter_network")
         try:
             self.ID = ID[0]
         except Exception as e:
@@ -45,7 +50,8 @@ class DBTool:
         self.lon = lon
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtousv
-        self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
+        # prepare a cursor object using cursor() method
+        self.cursor = self.db.cursor()
         self.md5hash = ''
         self.initialState = self.getInitialState()
         if not ID:
@@ -57,21 +63,28 @@ class DBTool:
         sql = "SELECT `Name`, IDLatLongHash FROM stations;"
         return self.runSQL(sql, everything=True)
 
-    def addDosimeter(self): # Adds a row to dosimeter_network.stations
-        sql = "INSERT INTO stations (`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) \
-                VALUES ('%s','%s','%s','%s','%s','This should not be here :(');" \
-                % (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
+    def addDosimeter(self):
+        # Adds a row to dosimeter_network.stations
+        sql = ("INSERT INTO stations " +
+               "(`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) " +
+               "VALUES " +
+               "('%s','%s','%s','%s','%s','This should not be here :(');"
+               % (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv))
         self.runSQL(sql)
         self.main()
 
     def addDosimeterWithID(self):
-        sql = "INSERT INTO stations (`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) \
-                VALUES ('%s','%s','%s','%s','%s','%s','This should not be here :(');" \
-                % (self.ID, self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv)
+        sql = (
+            "INSERT INTO stations " +
+            "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) " +
+            "VALUES " +
+            "('%s','%s','%s','%s','%s','%s','This should not be here :(');"
+            % (self.ID, self.name, self.lat, self.lon, self.cpmtorem,
+               self.cpmtousv))
         self.runSQL(sql)
         self.main()
 
-    def getID(self,name):
+    def getID(self, name):
         # The database uses auto-incremented ID numbers so we need to get
         # the ID from the `dosimeter_network.stations` table for when we
         # add the hash
@@ -96,7 +109,9 @@ class DBTool:
                 WHERE `ID` = '%s' ;" % (self.ID)
         self.md5hash = self.runSQL(sql, least=True)
 
-    def setHash(self): # Sets a MD5 hash of the ID, Latitude & for security reasons...
+    def setHash(self):
+        # Sets a MD5 hash of the ID, Latitude & for security reasons...
+
         # RUN "UPDATE stations
         #        SET IDLatLongHash = 'SOME MD5 HASH'
         #         WHERE ID = $$$ ;"
@@ -108,20 +123,23 @@ class DBTool:
         sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
         return self.runSQL(sql, less=True)
 
-    def checkIfDuplicate(self): # Check for Name or MD5 hash collision (duplicate entry)
+    def checkIfDuplicate(self):
+        # Check for Name or MD5 hash collision (duplicate entry)
         print 'Checking for duplicates...'
         if any(str(self.name) in i for i in self.initialState):
-            print 'ERROR: Duplicate NAME detected, not commiting changes. Byyeeeeeeee'
+            print ('ERROR: Duplicate NAME detected, not commiting changes. ' +
+                   'Byyeeeeeeee')
             return True
         elif any(str(self.md5hash) in i for i in self.initialState):
-            print 'ERROR: Duplicate HASH detected, not commiting changes. Byyeeeeeeee'
+            print ('ERROR: Duplicate HASH detected, not commiting changes. ' +
+                   'Byyeeeeeeee')
             return True
         else:
             print 'Good news: no duplicates'
             return False
 
-    def runSQL(self,sql, least=False, less=False, everything=False):
-        print '\t\t\t SQL: ',sql
+    def runSQL(self, sql, least=False, less=False, everything=False):
+        print '\t\t\t SQL: ', sql
         try:
             self.cursor.execute(sql)
             if least:
@@ -159,7 +177,7 @@ class DBTool:
             print '\t ~~~~ FAILED ~~~~'
             raise e
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parse = Parser()
     name = parse.args.name[0]
     print name
@@ -168,8 +186,8 @@ if __name__=="__main__":
     cpmtorem = parse.args.conv[0]
     cpmtousv = parse.args.conv[1]
     if not parse.args.ID:
-        dbtool = DBTool(name,lat,lon,cpmtorem,cpmtousv)
+        dbtool = DBTool(name, lat, lon, cpmtorem, cpmtousv)
     else:
         ID = parse.args.ID[0]
         print 'Forced ID: ', ID
-        dbtool = DBTool(name,lat,lon,cpmtorem,cpmtousv,ID)
+        dbtool = DBTool(name, lat, lon, cpmtorem, cpmtousv, ID)
