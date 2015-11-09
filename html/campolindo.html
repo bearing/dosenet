@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <style text="text/css">
-    #boxlist ul { list-style-type: none; padding: 0px; margin: 0;}
     #my_banner{
       padding-top:15px;
       padding-bottom:15px;
@@ -17,45 +16,10 @@
       border-width: 3px;
       border-style: solid;
     }
-    #image-canvas {
-      width: 50%;
-      margin-bottom:1em !important;
-      margin-top: 1em !important;
-      }
-    #image-table-canvas {
-      width: 100%;
-      margin-bottom:1em !important;
-      margin-top: 1em !important;
-      }
-    #image-exand-canvas {
-      width: 150%;
-      margin-bottom:1em !important;
-      margin-top: 1em !important;
-      }
-    #logo-canvas {
-      width: 25%;
-      margin-bottom:1em !important;
-      margin-top: 1em !important;
-      }
-      .center{
+     .center {
       text-align: center;
     }
-    .autoResizeImage {
-        max-width: 100%;
-        height: auto;
-        width: 100%;
-    }
-    div.img_wrapper_block{
-      float:left; /* important */
-      position:relative; /* important(so we can absolutely position the description div */
-      padding-top: 5px;
-      padding-bottom: 5px;        
-    }
-
-    div.description_block{
-      /*position:absolute; /* absolute position (so we can position it where we want)
-      bottom:0px; /* position will be on bottom
-      left:0px;*/
+    .description_block{
       width:80%;
       /* styling bellow */
       background-color:black;
@@ -65,7 +29,7 @@
       opacity:0.6; /* transparency */
       filter:alpha(opacity=60); /* IE transparency */
     }
-    p.description_content_block{
+    .description_content_block{
       padding:10px;
       padding-right:20px;
       margin:0px;
@@ -74,68 +38,65 @@
 </head>
 
 <body>
+    <div id="my_banner">
+        Our device is installed! This is the first device outside Berkeley to join our dosimeter network.
+    </div>
+    <br>
+    <div style="font-size:20px">
+      We had a great visit! This was the first installation of a DoseNet device outside Berkeley. It was great getting the opportunity to talk to interested students, recruited by Ms. Eaton, about the project. We look forward to our next visit to meet with all the science teachers!
+    </div>
+    <br>
 
-<!-- Headline -->
- 
-<div id="my_banner">
-    Our device is installed! This is the first device outside Berkeley to join our dosimeter network.
-</div>
-<br>
-<div style="font-size:20px">
-  We had a great visit! This was the first installation of a DoseNet device outside Berkeley. It was great getting the opportunity to talk to interested students, recruited by Ms. Eaton, about the project. We look forward to our next visit to meet with all the science teachers!
-</div>
-<br>
+    <div>
+      <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4358.embed?width=500&amp;height=400"></iframe>
+    </div>
 
-<div>
-  <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4358.embed?width=500&amp;height=400"></iframe>
-</div>
+    &nbsp;
 
-&nbsp
+    <table class="center " style="float: middle;">
+      <tr>
+        <td>
+            <a rel="image" href="/sites/default/files/pictures/Campolindo_visit_merged.jpg">
+              <img style="width:80%;" src="/sites/default/files/pictures/Campolindo_visit_merged.jpg"/>
+            </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="description_block">
+          <center>
+            <p class="description_content_block">Fig 1. Students learn about the DoseNet device from our visiting members, Brian Plimley and Ali Hanks.</p>
+          </center>
+          </div>
+        </td>
+      </tr>
+    </table>
 
-<table class="center " style="float: middle;">
-  <tr>
-    <td>
-        <a rel="image" href="/sites/default/files/pictures/Campolindo_visit_merged.jpg">
-          <img style="width:80%;" src="/sites/default/files/pictures/Campolindo_visit_merged.jpg"/>
-        </a>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <div class="description_block">
-      <center>
-        <p class="description_content_block">Fig 1. Students learn about the DoseNet device from our visiting members, Brian Plimley and Ali Hanks.</p>
-      </center>
-      </div>
-    </td>
-  </tr>
-</table>
+    &nbsp;
 
-&nbsp
+    <table>
+      <tr>
+        <td class="logoTable">
+            <a rel="image" href="/sites/default/files/pictures/Campolindo_device_closed.jpg">
+              <img style="width:80%;" src="/sites/default/files/pictures/Campolindo_device_closed.jpg"/>
+            </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="description_block">
+          <center>
+            <p class="description_content_block">Fig 2. Our installed DoseNet device. Don't touch!</p>
+          </center>
+          </div>
+        </td>
+      </tr>
+    </table>
 
-<table>
-  <tr>
-    <td class="logoTable">
-        <a rel="image" href="/sites/default/files/pictures/Campolindo_device_closed.jpg">
-          <img style="width:80%;" src="/sites/default/files/pictures/Campolindo_device_closed.jpg"/>
-        </a>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <div class="description_block">
-      <center>
-        <p class="description_content_block">Fig 2. Our installed DoseNet device. Don't touch!</p>
-      </center>
-      </div>
-    </td>
-  </tr>
-</table>
+    &nbsp;
 
-&nbsp
-
-<div style="font-size:30px">
-  <a href="https://radwatch.berkeley.edu/dosenet/map"> Check out the whole network!</a>
-</div>
-
+    <div style="font-size:30px">
+      <a href="https://radwatch.berkeley.edu/dosenet/map"> Check out the whole network!</a>
+    </div>
 </body>
+</html>
