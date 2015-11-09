@@ -9,40 +9,42 @@
 # Last updated: Fri 24/06/15
 
 # Delete from row stations table (append log)
-    # --station [int]
+# --station [int]
 # Delete all data for a station ID (append log)
-    # Before --before [datetime]
-    # After  --after [datetime]
-    # Range  --range *before[datetime]* *after[datetime]*
+# Before --before [datetime]
+# After  --after [datetime]
+# Range  --range *before[datetime]* *after[datetime]*
 
 # Nuke all data (append log)
-    # --dropalldata FORREALSUPERSERIOUSOMGOMGOMG
+# --dropalldata FORREALSUPERSERIOUSOMGOMGOMG
 # Nuke all stations (append log, backup first)
-    # --dropallstations FORREALSUPERSERIOUSOMGOMGOMG
+# --dropallstations FORREALSUPERSERIOUSOMGOMGOMG
 
 import datetime
 import sys
 import argparse
 import MySQLdb as mdb
 
+
 class Parser:
     def __init__(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('--ID',type=int,nargs=1,required=True,\
-            help='')
-        parser.add_argument('--before',nargs=1,required=False,\
-            help='')
-        parser.add_argument('--after',nargs=1,required=False,\
-            help='')
-        parser.add_argument('--daterange',nargs=2,required=False,\
-            help='')
-        parser.add_argument('--dropalldata',required=False,\
-            help='')
-        parser.add_argument('--dropallstations',required=False,\
-            help='')
-        parser.add_argument('--log',required=False,default=True,\
-            help='')
+        parser.add_argument(
+            '--ID', type=int, nargs=1, required=True, help='')
+        parser.add_argument(
+            '--before', nargs=1, required=False, help='')
+        parser.add_argument(
+            '--after', nargs=1, required=False, help='')
+        parser.add_argument(
+            '--daterange', nargs=2, required=False, help='')
+        parser.add_argument(
+            '--dropalldata', required=False, help='')
+        parser.add_argument(
+            '--dropallstations', required=False, help='')
+        parser.add_argument(
+            '--log', required=False, default=True, help='')
         self.args = parser.parse_args()
+
 
 class DataDestroyer:
     """ API for cleaning up and managing removal of data from the database safely.
@@ -60,12 +62,15 @@ class DataDestroyer:
         db (SQLObject): Custom MySQL database object for injecting into.
         cursor (db.cursor): Used for accessing database returns.
     """
-    def __init__(self,log=False):
-        self.db = mdb.connect("localhost", # Open database connection
+
+    def __init__(self, log=False):
+        # Open database connection
+        self.db = mdb.connect("localhost",
                               "ne170group",
                               "ne170groupSpring2015",
                               "dosimeter_network")
-        self.cursor = self.db.cursor() # prepare a cursor object using cursor() method
+        # prepare a cursor object using cursor() method
+        self.cursor = self.db.cursor()
         self.LOG_NAME = 'deleteDosimeter.log'
         self.limit = 10
         self.secure_password = 'FORREALSUPERSERIOUSOMGOMGOMG'
@@ -78,7 +83,7 @@ class DataDestroyer:
         else:
             self.log = False
 
-    def getArguments(self,ID,arg,option):
+    def getArguments(self, ID, arg, option):
         self.ID = ID
         self.option = option
         if option == 'before':
@@ -91,10 +96,12 @@ class DataDestroyer:
         if not option:
             print '~ No extra flags given ~'
         try:
-            self.name = self.runSQL(("SELECT `Name` FROM stations WHERE ID = %s;") % self.ID, least=True)
-            print '\t\t ~~~ Operating on ',self.name, ' ~~~'
+            self.name = self.runSQL(
+                ("SELECT `Name` FROM stations WHERE ID = %s;")
+                % self.ID, least=True)
+            print '\t\t ~~~ Operating on ', self.name, ' ~~~'
         except Exception as e:
-            print '\n\tERROR: Could not get name of station. You should stop...'
+            print '\n\tERROR: Could not get name of station. You should stop..'
             print str(e)
             print '\n\t\t\t~~ EXIT? ~~'
             if self.confirm():
@@ -107,70 +114,74 @@ class DataDestroyer:
         # Get station row that we're about to delete - append to log
         msg = '\t\t\t ~~~ DELETING A STATION ~~~'
         print msg
-        select = ("SELECT * FROM dosnet WHERE stationID = %s LIMIT %s;" % (self.ID, self.limit))
-        self.getDataSample(select=select,limit=self.limit)
-        print '\nThis will disable authentication of a dosimeter until readded \
-separately with addDosimeterToDB.py. \n If there was more than one station above,\
- you should QUIT.'
+        select = (
+            "SELECT * FROM dosnet WHERE stationID = %s LIMIT %s;"
+            % (self.ID, self.limit))
+        self.getDataSample(select=select, limit=self.limit)
+        print ('\nThis will disable authentication of a dosimeter until',
+               'readded separately with addDosimeterToDB.py.',
+               '\n If there was more than one station above, you should QUIT.')
         print '\n\t DEAUTHENICATE STATION?'
         if self.confirm():
             sql = "DELETE FROM stations WHERE ID = %s LIMIT 1;" % self.ID
             self.runSQL(sql)
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
         print '\t ~ Delete all the data for this stations? ~'
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE stationID = %s;" % self.ID
             self.runSQL(sql)
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
 
     def deleteDataBefore(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
                     AND `receiveTime` < '%s' ORDER BY `receiveTime` DESC LIMIT %s" \
                     % (self.ID, self.before, self.limit)
-        self.getDataSample(select=select,limit=self.limit)
-        msg = ('DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID)
+        self.getDataSample(select=select, limit=self.limit)
+        msg = ('DELETING ALL DATA BEFORE: ', self.before, 'for ID: ', self.ID)
         print msg
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE stationID = %s \
                     AND `receiveTime` < '%s';" % (self.ID, self.before)
             self.runSQL(sql)
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
 
     def deleteDataAfter(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
                             AND `receiveTime` > '%s' ORDER BY `receiveTime` ASC LIMIT %s" \
                             % (self.ID, self.after, self.limit)
-        self.getDataSample(select=select,limit=self.limit)
-        msg = ('DELETING ALL DATA AFTER: ',after, 'for ID: ', self.ID)
+        self.getDataSample(select=select, limit=self.limit)
+        msg = ('DELETING ALL DATA AFTER: ', after, 'for ID: ', self.ID)
         print msg
         if self.confirm():
             sql = "DELETE FROM dosnet WHERE stationID = %s \
                     AND `receiveTime` > '%s';" % (self.ID, self.after)
             self.runSQL(sql)
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
 
     def deleteDateRange(self):
         select = "SELECT * FROM dosnet WHERE stationID = %s \
                     AND (`receiveTime` BETWEEN '%s' AND '%s') LIMIT %s" \
                     % (self.ID, self.before, self.after, self.limit)
-        self.getDataSample(select=select,limit=self.limit)
-        msg = 'DELETING ALL DATA BEFORE: ',self.before, 'for ID: ', self.ID
+        self.getDataSample(select=select, limit=self.limit)
+        msg = 'DELETING ALL DATA BEFORE: ', self.before, 'for ID: ', self.ID
         print msg
         if self.confirm():
-            sql = "DELETE FROM dosnet WHERE stationID = %s \
-                AND (`receiveTime` BETWEEN '%s' AND '%s');" % (self.ID, self.before, self.after)
+            sql = ("DELETE FROM dosnet WHERE stationID = %s AND " +
+                   "(`receiveTime` BETWEEN '%s' AND '%s');"
+                   % (self.ID, self.before, self.after))
             self.runSQL(sql)
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
 
-    def getDataSample(self,select,limit):
-        rows = self.runSQL(select, everything = True)
+    def getDataSample(self, select, limit):
+        rows = self.runSQL(select, everything=True)
         print '\t\t\t\t\tSQL:', select
-        print 'Sample of data you\'re about to delete (Max: "%s"): \n "%s"' % (limit, rows)
+        print ('Sample of data you\'re about to delete (Max: "%s"): \n "%s"'
+               % (limit, rows))
 
     def deleteAllData(self):
         msg = 'Truncating table dosnet - all data in the table will be gone.'
@@ -183,7 +194,7 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
             else:
                 print self.exit_serious_message
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
 
     def deleteAllStations(self):
         msg = 'Truncating table stations - all data in the table will be gone.'
@@ -196,13 +207,13 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
             else:
                 print self.exit_serious_message
             if self.log:
-                self.appendLog(sql,msg)
+                self.appendLog(sql, msg)
 
-    def appendLog(self,*some_text):
+    def appendLog(self, *some_text):
         for text in some_text:
             try:
                 with open(self.LOG_NAME, 'a') as logfile:
-                    msg = datetime.datetime.now(),'\n\t',text
+                    msg = datetime.datetime.now(), '\n\t', text
                     logfile.write(str(msg))
             except (KeyboardInterrupt, SystemExit):
                 print '.... User interrupt ....\n Byyeeeeeeee'
@@ -222,8 +233,8 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
             print '~~ Exiting last prompt: did not read "yes"'
             return False
 
-    def runSQL(self,sql, least=False, less=False, everything=False):
-        print '\t\t\t\t\t SQL: ',sql
+    def runSQL(self, sql, least=False, less=False, everything=False):
+        print '\t\t\t\t\t SQL: ', sql
         self.cursor.execute(sql)
         try:
             if least:
@@ -257,7 +268,8 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
         elif self.option == 'dropstations':
             print '~ DELETING ALL STATIONS ~'
             self.deleteAllStations()
-        else: # default, delete stations
+        else:
+            # default, delete stations
             print '~ DELETING ONE STATION ~'
             self.deleteStation()
         self.db.commit()
@@ -272,14 +284,17 @@ separately with addDosimeterToDB.py. \n If there was more than one station above
             pass
         elif self.option == 'dropstations':
             pass
-        else: # default, delete stations
-            remaining = self.runSQL("SELECT Name FROM stations;", everything=True)
+        else:
+            # default, delete stations
+            remaining = self.runSQL(
+                "SELECT Name FROM stations;", everything=True)
             print '~~~ Remaining stations! ~~~'
             print remaining
 
 if __name__ == "__main__":
     print '\n\t\t\t ~~ Hai Joey! ~~'
-    print '\tThis script deletes data from the dosimeter network database on GRIM'
+    print ('\tThis script deletes data from the',
+           'dosimeter network database on GRIM')
     print '\tAre you sure you want to proceed??? (Type yes to proceed)'
     if raw_input() == 'yes':
         par = Parser()
@@ -293,29 +308,29 @@ if __name__ == "__main__":
             print '--before and --after arguments ignored'
             before = par.args.daterange[0]
             after = par.args.daterange[1]
-            daterange = before,after
-            deleter.getArguments(ID,daterange,'daterange')
+            daterange = before, after
+            deleter.getArguments(ID, daterange, 'daterange')
         elif par.args.before:
             print '\t\t ~~~ Before flag ~~~'
             before = par.args.before[0]
             print 'Before: ', before
-            deleter.getArguments(ID,before,'before')
+            deleter.getArguments(ID, before, 'before')
         elif par.args.after:
             print '\t\t ~~~ After flag ~~~'
             after = par.args.after[0]
             print 'After: ', after
-            deleter.getArguments(ID,after,'after')
+            deleter.getArguments(ID, after, 'after')
         elif par.args.dropalldata:
             print '\t\t ~~~ Dropdata flag ~~~'
             dropdata = par.args.dropalldata[0]
-            deleter.getArguments(ID,dropdata,'dropdata')
+            deleter.getArguments(ID, dropdata, 'dropdata')
         elif par.args.dropallstations:
             print '\t\t ~~~ Dropstations flag ~~~'
             dropstations = par.args.dropallstations[0]
-            deleter.getArguments(ID,dropstations,'dropstations')
+            deleter.getArguments(ID, dropstations, 'dropstations')
         else:
             print '\t\t ~~~ No extra flags given ~~~'
-            deleter.getArguments(ID,'null')
+            deleter.getArguments(ID, 'null')
     else:
         print 'You have decided not to delete data, thanks!'
         print 'If this was a mistake, type yes next time...'
