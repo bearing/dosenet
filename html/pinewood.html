@@ -17,80 +17,122 @@
       border-width: 3px;
       border-style: solid;
     }
-  #image-canvas {
-    width: 50%;
-    margin-bottom:1em !important;
-    margin-top: 1em !important;
-    }
-  #image-table-canvas {
-    width: 100%;
-    margin-bottom:1em !important;
-    margin-top: 1em !important;
-    }
-  #image-exand-canvas {
-    width: 150%;
-    margin-bottom:1em !important;
-    margin-top: 1em !important;
-    }
-  #logo-canvas {
-    width: 25%;
-    margin-bottom:1em !important;
-    margin-top: 1em !important;
-    }
-    .center{
-    text-align: center;
-  }
-  .autoResizeImage {
-      max-width: 100%;
-      height: auto;
+    #image-canvas {
+      width: 50%;
+      margin-bottom:1em !important;
+      margin-top: 1em !important;
+      }
+    #image-table-canvas {
       width: 100%;
-  }
+      margin-bottom:1em !important;
+      margin-top: 1em !important;
+      }
+    #image-exand-canvas {
+      width: 150%;
+      margin-bottom:1em !important;
+      margin-top: 1em !important;
+      }
+    #logo-canvas {
+      width: 25%;
+      margin-bottom:1em !important;
+      margin-top: 1em !important;
+      }
+      .center{
+      text-align: center;
+    }
+    .autoResizeImage {
+        max-width: 100%;
+        height: auto;
+        width: 100%;
+    }
+    div.img_wrapper_block{
+      float:left; /* important */
+      position:relative; /* important(so we can absolutely position the description div */
+      padding-top: 5px;
+      padding-bottom: 5px;        
+    }
 
+    div.description_block{
+      /*position:absolute; /* absolute position (so we can position it where we want)
+      bottom:0px; /* position will be on bottom
+      left:0px;*/
+      width:80%;
+      /* styling bellow */
+      background-color:black;
+      font-family: 'tahoma';
+      font-size:14px;
+      color:white;
+      opacity:0.6; /* transparency */
+      filter:alpha(opacity=60); /* IE transparency */
+    }
+    p.description_content_block{
+      padding:10px;
+      padding-right:20px;
+      margin:0px;
+    }
   </style>
 </head>
 
 <body>
 
-<!-- Headline -->
- 
 <div id="my_banner">
-    Our device is installed! The dosimeter network now has two schools.
+    Our device is installed! The dosimeter network has added a new location.
+</div>
+<br>
+<div style="font-size:20px">
+  We had a great day visiting the students in Mrs. Abraham's AP Chemistry class and meeting several after to discuss ways they can get involved!
 </div>
 <br>
 
-<iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4237.embed?width=500&amp;height=400"></iframe>
+<div>
+  <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4237.embed?width=500&amp;height=400"></iframe>
+</div>
 
-  <table class="center " style="float: middle;">
-    <tr>
-        <td class="logoTable">
-          <div id="image-table-canvas">
-            <img class="autoResizeImage" src="/sites/default/files/pictures/Pinewood_core_students.jpg"/>
-          </div>
-        </td>
-        <td class="logoTable">
-          <div id="image-table-canvas">
-            <img class="autoResizeImage" src="/sites/default/files/pictures/Pinewood_core_students_2.jpg"/>
-          </div>
-        </td>
-    </tr>
-    <tr>
-        <td class="logoTable">
-          <div id="image-table-canvas">
-            <img class="autoResizeImage" src="/sites/default/files/pictures/Pinewood_device.jpg"/>
-          </div>
-        </td>
-    </tr>
-    </table>
+&nbsp
 
-  <div style="font-size:30px">
-  <table>
-    <td style="border: 15px solid transparent; vertical-align: middle">
-      Check out the whole network:
+<table class="center " style="float: middle;">
+  <tr>
+    <td>
+        <a rel="image" href="/sites/default/files/pictures/Pinewood_core_students_2.jpg"><img style="width:80%;" src="/sites/default/files/pictures/Pinewood_core_students_2.jpg"/></a>
     </td>
-    <td style="border: 15px solid transparent; vertical-align: middle;">
-       <a href="https://radwatch.berkeley.edu/dosenet/map"><img style="height:5%"src="/sites/default/files/pictures/DoseNetGoogleLogo.png"/></a>
+  </tr>
+  <tr>
+    <td>
+      <div class="description_block">
+      <center>
+        <p class="description_content_block">Fig 1. Students learn about the DoseNet device from one of our members, Brian Plimley.</p>
+      </center>
+      </div>
     </td>
-  </table>
-  </div>
+  </tr>
+</table>
+
+&nbsp
+
+<table>
+  <tr>
+    <td class="logoTable">
+        <a rel="image" href="/sites/default/files/pictures/Pinewood_device.jpg">
+          <img style="width:80%;" src="/sites/default/files/pictures/Pinewood_device.jpg"/>
+        </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="description_block">
+      <center>
+        <p class="description_content_block">Fig 2. Our installed and mounted DoseNet device. Don't touch!</p>
+      </center>
+      </div>
+    </td>
+  </tr>
+</table>
+
+&nbsp
+
+<div style="font-size:30px">
+  <a href="https://radwatch.berkeley.edu/dosenet/map"> Check out the whole network!</a>
+</div>
+
 
 </body>

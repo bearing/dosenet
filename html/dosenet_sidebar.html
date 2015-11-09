@@ -1,77 +1,54 @@
 <head>
 	<style text="text/css">
-        .headline h4 { background:#FAFAFA !important; } /* LEAVE THIS HERE ALI - fixes the weird white background on the title that I noticed before*/
-  	#boxlist ul { list-style-type: none; padding: 0px; margin: 0;}
-  	#my_banner{
-  		padding-top:15px;
-  		padding-bottom:15px;
-  		padding-right:20px;
-  		padding-left:20px;
-  		background:#5b6770;
-  		font-size:16px;
-  		line-height:150% !important;
-  		color: white;
-  		border-radius: 15px;
-  		border-color: #d19000;
-  		border-width: 3px;
-  		border-style: solid;
-  	}
-	#image-canvas {
-		width: 50%;
-		margin-bottom:1em !important;
-		margin-top: 1em !important;
-  	}
-	#image-table-canvas {
-		width: 100%;
-		margin-bottom:1em !important;
-		margin-top: 1em !important;
-  	}
-	#image-exand-canvas {
-		width: 150%;
-		margin-bottom:1em !important;
-		margin-top: 1em !important;
-  	}
-	#logo-canvas {
-		width: 50%;
-		margin-bottom:1em !important;
-		margin-top: 1em !important;
-  	}
-  	.center{
-		text-align: center;
-	}
-
-  </style>
+    .headline h4 { background:#FAFAFA !important; } /* LEAVE THIS HERE ALI - fixes the weird white background on the title that I noticed*/
+		input.button.color{
+			margin-bottom: 0.5em;
+			float: right;
+			border-radius: 5px;
+		}
+		img#dosenet_logo {
+			border:2px solid #d19000;
+			border-radius: 5px;
+			width: 180px;
+			float: right;
+			margin: 1.5em 0 1em 0;
+			padding: 5px 5px 0 5px;
+		}
+		h4#partners{
+			margin-top: 10px;
+			float: right;
+		}
+		div.wrapper{
+			width:220px;
+			height: 220px;
+		}
+	</style>
 </head>
 
-<body><img src="/sites/default/files/pictures/DoseNet-logo-transparentbg.png"/>
-
-<a href="https://radwatch.berkeley.edu/dosenet/about"><input type="button" class="button color" value="About DoseNet"></a>
-<br><br><br>
-<div id="my_banner">
-    A dedicated effort to encourage students to be active and engaged participants in taking on the fascinating challenges of better perceiving the world around us.
-</div>
-<br>
-
-<h4>Building a Community</h4>
-	<a href="https://radwatch.berkeley.edu/dosenet/join"><input type="button" class="button color" value="Learn about Joining"></a>
-<br><br><br>
-	<div id="my_banner">
-		We are building an inter-institution collaboration with the potential to develop personal links between participating schools and UC Berkeley.
+<body>
+	<div class="wrapper">
+		<a href="https://radwatch.berkeley.edu/dosenet/map">
+			<img id="dosenet_logo" alt="DoseNet Map page"  src="/sites/default/files/pictures/DoseNet-logo-transparentbg.png"/>
+		</a>
+		<a href="https://radwatch.berkeley.edu/dosenet/about">
+			<input type="button" class="button color" value="About DoseNet">
+		</a>
+		<a href="https://radwatch.berkeley.edu/dosenet/join">
+			<input type="button" class="button color"	value="Learn about Joining">
+		</a>
+		<a href="https://radwatch.berkeley.edu/dosenet/map">
+			<input type="button" class="button color"	value="Download Data">
+		</a>
 	</div>
-<br>
-
-<h4>Accessing Data</h4>
-<a href="https://radwatch.berkeley.edu/dosenet/map"><input type="button" class="button color" value="DoseNet Data" style="margin-right:15px;"></a>
-<br><br><br>
-	<div id="my_banner">
-		Data can be accessed online using plotly, or downloaded for offline analysis.
+	<div class="wrapper">
+		<h4 id="partners">
+			Partners
+		</h4>
+		<a href="https://radwatch.berkeley.edu/dosenet/schools/campolindo-high-school">
+			<input type="button" class="button color"	value="Campolindo High School">
+		</a>
+		<a href="https://radwatch.berkeley.edu/dosenet/schools/pinewood">
+			<input type="button" class="button color"	value="Pinewood School">
+		</a>
 	</div>
-<br>
-
-<h4>Device locations</h4>
-<a href="https://radwatch.berkeley.edu/dosenet/schools/campolindo-high-school"><input type="button" class="button color" value="Campolindo High School" style="margin-right:15px;"></a>
-<br><br><br>
-<a href="https://radwatch.berkeley.edu/dosenet/schools/pinewood"><input type="button" class="button color" value="Pinewood School" style="margin-right:15px;"></a>
-<br><br><br>
-
 </body>
