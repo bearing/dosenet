@@ -58,8 +58,8 @@ class Plot(object):
         #   CPM to mRem and uSv calibration factors, and displayFlag
         # Name & Long are reserved words apparently, need `...`
         self.cursor.execute(
-            "SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv, display " +
-            "FROM dosimeter_network.stations;")
+            "SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv, display \
+            FROM dosimeter_network.stations;")
         self.stationRows = self.cursor.fetchall()
 
     def setStationInfo(self, i):
@@ -247,16 +247,17 @@ class Plot(object):
 
             # get latest dose (CPM) and time for that measurement in the loop
             #   so we can display in exported GeoJSON file
-            self.cursor.execute(' '.join(
-                "SELECT Name, receiveTime, cpm, cpmError",
-                "FROM dosnet",
-                "INNER JOIN stations",
-                "ON dosnet.stationID = stations.ID",
-                "WHERE receiveTime =",
-                "(SELECT MAX(receiveTime) FROM dosnet INNER JOIN stations",
-                "ON dosnet.stationID = stations.ID ",
-                "WHERE Name='%s') AND Name='%s';"
-                % (stationName, stationName)))
+            self.cursor.execute("SELECT Name, receiveTime, cpm, cpmError \
+								FROM dosnet \
+								INNER JOIN stations \
+								ON dosnet.stationID = stations.ID \
+								WHERE receiveTime = \
+									(SELECT MAX(receiveTime) \
+									FROM dosnet \
+									INNER JOIN stations \
+									ON dosnet.stationID = stations.ID  \
+									WHERE Name='%s') AND Name='%s';" \
+									% (stationName, stationName))
             # dtRows --> Data & time rows
             dtRows = self.cursor.fetchall()
             for i in dtRows:
