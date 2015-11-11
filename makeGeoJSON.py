@@ -311,10 +311,7 @@ class Plot(object):
         # Will be: $ scp ... jcurtis@kepler/.../
         #			         =======
         outputLocation = " output.geojson "
-        webServerLocation = (
-            " '%s'@kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/" +
-            "radwatch-7.32/sites/default/files/ "
-            % (self.KEPLER_USERNAME))
+        webServerLocation = " '%s'@kepler.berkeley.edu:/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/ " % (self.KEPLER_USERNAME)
         command = "scp" + outputLocation + webServerLocation
         try:
             os.system(command)
