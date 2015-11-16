@@ -47,11 +47,8 @@ class Plot(object):
         self.filename = ''
         # Plot.ly sign in using ne170 login details
         py.sign_in('ne170', 'ilo0p1671e')
-        ############################
-        #    ~~~ ATTENTION ~~~     #
-        self.KEPLER_USERNAME = 'nav'
-        #    ~~~~~~~~~~~~~~~~~     #
-        ############################
+        # Change to update SCP user
+        self.KEPLER_USERNAME = 'jccurtis'
 
     def getStationInfo(self):
         # Get number of stations, station name, longitude, latitude,
@@ -315,12 +312,13 @@ class Plot(object):
         command = "scp" + outputLocation + webServerLocation
         try:
             os.system(command)
+            print 'Successful SCP transfer to KEPLER (%s)' % self.KEPLER_USERNAME
         except Exception as e:
             print 'Network Error: Cannot SCP to Kepler'
             raise e
 
     def printEndMessage(self):
-        print ' Navrit Bal - time is ' + getDateTime()
+        print ' makeGeoJSON DONE, the time is ' + getDateTime()
 
 
 def getDateTime():
