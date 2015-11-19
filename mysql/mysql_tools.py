@@ -2,6 +2,9 @@
 import MySQLdb as mdb
 import datetime
 import email_message
+import pandas as pd
+import time
+from dateutil.relativedelta import *
 
 class SQLObject:
     def __init__(self):
@@ -127,3 +130,87 @@ class SQLObject:
         except (Exception) as e:
             print str(e)
             print ('Exception: Could not get hash from database. Is GRIM online and running MySQL?')
+
+    def getStations(self):
+        df = pd.read_sql(
+            "SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv, display, nickname \
+            FROM dosimeter_network.stations;",
+            con=self.db)
+        df.set_index(df['ID'], inplace=True)
+        del df['ID']
+        return df
+
+    def getActiveStations(self):
+        df = self.getStations()
+        df = df[df['display'] == 1]
+        del df['display']
+        return df
+
+    def getLatestStationData(self, stationID):
+        self.cursor.execute(
+            "SELECT stationID, Name, receiveTime, cpm, cpmError \
+            FROM dosnet \
+            INNER JOIN stations \
+            ON dosnet.stationID = stations.ID \
+            WHERE receiveTime = \
+            (SELECT MAX(receiveTime) \
+            FROM dosnet \
+            WHERE stationID='{0}') \
+            AND stationID='{0}';".format(stationID)
+        )
+        result = self.cursor.fetchall()
+        assert len(result) == 1, 'More than one recent result returned for {}'.format(stationID)
+        result = result[0]
+        data = {}
+        data['id'] = result[0]
+        data['name'] = result[1]
+        data['time'] = result[2]
+        data['cpm'] = result[3]
+        data['cpm_err'] = result[4]
+        return data
+
+    def getDataForStationByRange(self, stationID, timemin, timemax):
+        q = "SELECT receiveTime, cpm, cpmError \
+        FROM dosnet \
+        WHERE `dosnet`.`stationID`='{}' \
+        AND receiveTime \
+        BETWEEN '{}' \
+        AND '{}';".format(stationID, timemin, timemax)
+        df = pd.read_sql(q, con=self.db)
+        return df
+
+    def getLastDay(self, stationID):
+        lastest_dt = self.getLatestStationData(stationID)['time']
+        df = self.getDataForStationByRange(
+            stationID,
+            lastest_dt + relativedelta(days=-1),
+            lastest_dt
+        )
+        return df
+
+    def getLastWeek(self, stationID):
+        lastest_dt = self.getLatestStationData(stationID)['time']
+        df = self.getDataForStationByRange(
+            stationID,
+            lastest_dt + relativedelta(days=-7),
+            lastest_dt
+        )
+        return df
+
+    def getLastMonth(self, stationID):
+        lastest_dt = self.getLatestStationData(stationID)['time']
+        df = self.getDataForStationByRange(
+            stationID,
+            lastest_dt + relativedelta(months=-1),
+            lastest_dt
+        )
+        return df
+
+    def getLastYear(self, stationID):
+        lastest_dt = self.getLatestStationData(stationID)['time']
+        df = self.getDataForStationByRange(
+            stationID,
+            lastest_dt + relativedelta(months=-12),
+            lastest_dt
+        )
+        return df
