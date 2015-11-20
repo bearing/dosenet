@@ -21,9 +21,6 @@ from plotly.graph_objs import *
 import pandas as pd
 import time
 import datetime
-from datetime import timedelta
-import numpy as np
-
 
 class Plot(object):
     def __init__(self):
@@ -138,6 +135,7 @@ class Plot(object):
 
     def setFeature(self, point, name, plength, latestDose, latestTime,
                    URLlist):
+        print URLlist
         properties = {'Name': name,
                       'Latest dose (CPM)': latestDose[0],
                       'Latest dose (mREM/hr)': latestDose[1],
@@ -276,6 +274,8 @@ class Plot(object):
                     secondsInYear)
                 urlRow = (urlA, urlB, urlC, urlD)
                 urlList.extend(urlRow)
+                # under maintenance sign image on joey's google drive
+                # urlList += [['blob:https%3A//drive.google.com/ac94ce0d-5b39-42d6-a0ac-4420616d29e3'] * 3] * 4
                 # Make feature - iterating through each
                 try:
                     self.setFeature(
