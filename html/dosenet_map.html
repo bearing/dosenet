@@ -682,19 +682,19 @@
 				$("#dosimeter_list").append($("<option />").text(val.properties["Name"]));
 				var lon = getCoords(val).lon;
 				var lat = getCoords(val).lat;
-        var marker = new MarkerWithLabel({
-            map: map,
-            title: name,
-            position: new google.maps.LatLng(lat, lon),
-            labelContent: getLabelContent(val),
-            labelAnchor: new google.maps.Point(20, 0),
-            labelClass: "labels",
-						animation: google.maps.Animation.DROP
-        });
+		        var marker = new MarkerWithLabel({
+		            map: map,
+		            title: name,
+		            position: new google.maps.LatLng(lat, lon),
+		            labelContent: getLabelContent(val),
+		            labelAnchor: new google.maps.Point(20, 0),
+		            labelClass: "labels",
+								animation: google.maps.Animation.DROP
+		        });
 				markers.push(marker);
-		    setMarkerIcon(marker);
+			    setMarkerIcon(marker);
 				addMarkerEventListeners(val, marker);
-	    });
+		    });
 			addTimeDropdownListener();
 			var mcOptions = {gridSize: 40, maxZoom: 15};
 			markerCluster = new MarkerClusterer(map, markers, mcOptions);
