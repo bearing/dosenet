@@ -1,40 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style text="text/css">
-    #my_banner{
-      padding-top:15px;
-      padding-bottom:15px;
-      padding-right:20px;
-      padding-left:20px;
-      background:#5b6770;
-      font-size:20px;
-      line-height:150% !important;
-      color: white;
-      border-radius: 15px;
-      border-color: #d19000;
-      border-width: 3px;
-      border-style: solid;
-    }
-     .center {
-      text-align: center;
-    }
-    .description_block{
-      width:80%;
-      /* styling bellow */
-      background-color:black;
-      font-family: 'tahoma';
-      font-size:14px;
-      color:white;
-      opacity:0.6; /* transparency */
-      filter:alpha(opacity=60); /* IE transparency */
-    }
-    .description_content_block{
-      padding:10px;
-      padding-right:20px;
-      margin:0px;
-    }
-  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://radwatch.berkeley.edu/sites/default/files/dosenet/data_processing.js"></script>
+  <script src="dygraph-combined.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://radwatch.berkeley.edu/sites/default/files/dosenet/dosenet_style.css">
 </head>
 
 <body>
@@ -47,9 +17,14 @@
     </div>
     <br>
 
-    <div>
-      <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4358.embed?width=500&amp;height=400"></iframe>
-    </div>
+    <div id="daycountsdata" style="width:80%"></div>
+    <script type="text/javascript"> 
+      var url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/campolindo.csv?'
+        + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+      get_data(url,'Campolindo','USV','Day','daycountsdata');
+    </script>
+
+    <!--  <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4358.embed?width=500&amp;height=400"></iframe> -->
 
     &nbsp;
 

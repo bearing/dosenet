@@ -1,0 +1,42 @@
+
+
+<script type="text/javascript"
+  src="dygraph-combined.js"></script>
+</head>
+<div id="netcountsdiv" style="width:90%"></div>
+<div id="bqdiv" style="width:90%"></div>
+<script type="text/javascript">
+  g = new Dygraph(
+
+    // containing div
+    document.getElementById("netcountsdiv"),
+
+        <?php 
+        $file = fopen("pinewood.csv","r");
+        echo “[“;
+        while (($line = fgetcsv($file)) !== FALSE)
+        {
+          $x= date(‘Y/m/d H:i:s’,strtotime($line[0]));  //converting into required format of date
+          $x= ‘”‘.$x.'”‘;
+          $y = ((float)$line[1])*0.0037;      //float if necessary.
+          $err=((float)$line[2])*0.0037;
+          echo “[“.”(new Date($x))”.”,”.$y.”,”.$err.”],”;       //displaying a row of the 2-d array
+        }
+        fclose($file);
+        echo “]”;
+        ?>
+    { title: 'Counts/sec on Filter',
+            ylabel: 'Counts/sec' ,errorBars: true }
+
+  );
+ p= new Dygraph(
+
+    // containing div
+    document.getElementById("bqdiv"),
+
+    "/sites/default/files/pictures/rooftop_tmp/weather_bq.csv",
+    { title: 'Decays Per Second on Filter Over Time',
+            ylabel: 'Bq' ,errorBars: true }
+
+  );
+</script>

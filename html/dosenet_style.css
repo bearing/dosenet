@@ -1,0 +1,32 @@
+#my_banner{
+  padding-top:15px;
+  padding-bottom:15px;
+  padding-right:20px;
+  padding-left:20px;
+  background:#5b6770;
+  font-size:20px;
+  line-height:150% !important;
+  color: white;
+  border-radius: 15px;
+  border-color: #d19000;
+  border-width: 3px;
+  border-style: solid;
+}
+.center {
+  text-align: center;
+}
+.description_block {
+  width:80%;
+  /* styling below */
+  background-color:black;
+  font-family: 'tahoma';
+  font-size:14px;
+  color:white;
+  opacity:0.6; /* transparency */
+  filter:alpha(opacity=60); /* IE transparency */
+}
+.description_content_block {
+  padding:10px;
+  padding-right:20px;
+  margin:0px;
+}

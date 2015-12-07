@@ -45,20 +45,20 @@
 			vertical-align: middle;
 		}
 		#my_banner {
-  		padding-top:15px;
-  		padding-bottom:15px;
-  		padding-right:20px;
-  		padding-left:20px;
-  		background:#5b6770;
-  		font-size:16px;
-  		line-height:150% !important;
-  		color: white;
-  		border-radius: 15px;
-  		border-color: #d19000;
-  		border-width: 3px;
-  		border-style: solid;
+	  		padding-top:15px;
+	  		padding-bottom:15px;
+	  		padding-right:20px;
+	  		padding-left:20px;
+	  		background:#5b6770;
+	  		font-size:16px;
+	  		line-height:150% !important;
+	  		color: white;
+	  		border-radius: 15px;
+	  		border-color: #d19000;
+	  		border-width: 3px;
+	  		border-style: solid;
 			margin-bottom: 1em;
-  	}
+  		}
 		.jh5 {
 			padding: 0.5em 0 0 0;
 			font-size: 2em;
@@ -185,12 +185,12 @@
 			white-space: nowrap;
 			vertical-align: middle;
 			-ms-touch-action: manipulation;
-			  touch-action: manipulation;
+			touch-action: manipulation;
 			cursor: pointer;
 			-webkit-user-select: none;
-			 -moz-user-select: none;
-			  -ms-user-select: none;
-			      user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 			background-image: none;
 			border: 1px solid transparent;
 			border-radius: 4px;
@@ -334,7 +334,7 @@
 	function https(){
 		var URL = document.URL;
 		var secureURL = URL.replace("http:","https:");
-	}
+	} 
     function units_used() {
         document.getElementById("text_field").innerHTML =
 			"<div class =\"jumbotron\" >" +
@@ -508,14 +508,21 @@
 	function updateInfowindowContent(val){
 		time = getTimeframe();
 		dose = getDoseUnit();
-		if( dose=='plane'||dose=='cigarette'||dose=='medical')
-			dose = 'USV';
-		var plotly_url = "URL_" + dose + "_" + time;
+		url = getURL();
+		//if( dose=='plane'||dose=='cigarette'||dose=='medical')
+		//	dose = 'USV';
+		//var plotly_url = "URL_" + dose + "_" + time;
 		var iframeIntro = "<iframe width=\"500\" height=\"400\" frameborder=\"0\" \
-			seamless=\"seamless\" scrolling=\"no\" src=\"";
-		var iframeEnding = ".embed?width=500&height=400\"></iframe>";
-		graph_url = val.properties[plotly_url.toString()];
-		return iframeIntro + graph_url + iframeEnding;
+		//	seamless=\"seamless\" scrolling=\"no\" src=\"";
+		//var iframeEnding = ".embed?width=500&height=400\"></iframe>";
+		//graph_url = val.properties[plotly_url.toString()];
+		var frame = "<div id=\"daycountsdata\" style=\"width:80%\"></div>";
+		var script_begin = "<script type=\"text/javascript\">";
+ 		var script_cmd = "get_data(" + url + "," + val.properties['Name'] + "," + dose + "," + time + ", \"daycountsdata\");";
+    	var script_end = "</script>";
+
+    	return frame + script_begin + script_cmd + script_end;
+		//return iframeIntro + graph_url + iframeEnding;
 	}
 
 	// Time units for a plot, called in updateInfowindowContent
@@ -627,7 +634,7 @@
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(3);
 				break;
 			case 'plane':
-				selected_unit = 'plane hrs'
+				selected_unit = 'plane travel/hr'
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.420168067).toFixed(4);
 				break;
 			case 'cigarette':
