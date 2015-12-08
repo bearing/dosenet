@@ -14,9 +14,14 @@
 	<meta name="author" content="Navrit Bal, Tigran Ter-Stepanyan, Luke Sheard" />
 	<meta http-equiv="refresh" content="300;url=https://radwatch.berkeley.edu/dosenet/map">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSaBOz47zWi5eWz12SYzSl6GMSpl8l1c8&callback=initMap"></script>
+	<!--<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
 	<script type="text/javascript"
 		src="https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.0/src/markerwithlabel.js">
+		</script>
+	-->
+	<script type="text/javascript" 
+		src="https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.5/src/markerwithlabel_packed.js">
 		</script>
 	<script type="text/javascript"
 		src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js">
@@ -24,7 +29,7 @@
 	<script src="https://radwatch.berkeley.edu/sites/default/files/dosenet/data_processing.js"></script>
 	<script type="text/javascript"
 		src="dygraph-combined.js">
-	</script>
+		</script>
 
 	<style text="text/css">
 		@font-face {
@@ -490,6 +495,7 @@
 	var map; // Google Map Object
 	var berkeley = [37.872269, -122.258901];
 	var markers = [];
+	var json_vals = [];
 	var markerCluster;
 	var marks = [];
 	var infowindow = new google.maps.InfoWindow();
@@ -512,7 +518,7 @@
 
 	// These two functions should be temporary until this can be done in makeGeoJSON as we phase out plot.ly
 	function getURL(val){
-		var name = val.properties['Name'];
+		var name = val.properties["Name"];
 		var url;
 		switch(name) {
 			case 'LBL':
@@ -539,7 +545,7 @@
 		return url;
 	}
 	function getName(val){
-		var name = val.properties['Name'];
+		var name = val.properties["Name"];
 		var short_name = 'NONAME';
 		switch(name) {
 			case 'LBL':
@@ -628,12 +634,14 @@
 	}
 
 	function changeDoseUnits(){
-		infowindow.close();
-		infowindow.open(map, selected_marker);
-		clearMarkers();
 		setHTML_units();
-		selected_unit = getDoseUnit();
-		repopulateMarkers();
+		for (var i = 0; i < markers.length; i++) {
+			var label_text = getLabelContent(json_vals[i]);
+			markers[i].labelVisible = false;
+			markers[i].setOptions({ labelContent: label_text });
+			//markers[i].labelContent = label_text;
+			markers[i].labelVisible = true;
+		}
 	}
 
 	function getDosimeterCoords(index){
@@ -647,7 +655,7 @@
 		var sel = document.getElementById('dosimeter_list');
 		var index = sel.selectedIndex;
 		dosimeter_name = sel.options[sel.selectedIndex].value;
-		return index
+		return index;
 	}
 
 	function goToDosimeter(){
@@ -729,6 +737,15 @@
 		});
 	}
 
+	function addUnitDropdownListener(){
+		$("#dose_dropdown").change(function(){
+			//infowindow.close();
+			goToDosimeter();
+			infowindow.setContent(updateInfowindowContent(selected_val));
+			infowindow.open(map, selected_marker);
+		});
+	}
+
 	$(document).ready(function(){
 		var marker;
 		initMap();
@@ -754,10 +771,12 @@
 								animation: google.maps.Animation.DROP
 		        });
 				markers.push(marker);
+		        json_vals.push(val);
 			    setMarkerIcon(marker);
 				addMarkerEventListeners(val, marker);
 		    });
 			addTimeDropdownListener();
+			addUnitDropdownListener();
 			var mcOptions = {gridSize: 40, maxZoom: 15};
 			markerCluster = new MarkerClusterer(map, markers, mcOptions);
 		});

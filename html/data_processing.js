@@ -54,13 +54,13 @@ function process_csv(text,dose,time) {
 	  scale = 0.0036;
 	break;
 	case 'cigarette':
-	  scale = 0.036*0.420168067;
+	  scale = 0.036*0.00833333335;
 	break;
 	case 'medical':
 	  scale = 0.036*0.2;
 	break;
 	case 'plane':
-	  scale = 0.036*0.00833333335;
+	  scale = 0.036*0.420168067;
 	break;
   }
 
