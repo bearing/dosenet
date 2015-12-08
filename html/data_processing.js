@@ -2,6 +2,11 @@ var data_input = [];
 
 //var url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/pinewood.csv?'
 //+ Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+function parseDate(input) {
+  var parts = input.replace('-',' ').replace('-',' ').replace(':',' ').replace(':',' ').replace(',',' ').split(' ');
+  // new Date(year, month [, day [, hours[, minutes[, seconds[, ms]]]]])
+  return new Date(parts[0], parts[1]-1, parts[2], parts[3], parts[4], parts[5]); // Note: months are 0-based
+}
 
 function process_csv(text,dose,time) {
   data_input = []; // Clear any old data out before filling!
@@ -9,8 +14,8 @@ function process_csv(text,dose,time) {
   var nentries = lines.length; // compare to full set possible for given time interval and keep smaller value
   var newest_data = lines[lines.length-2].split(",");
   var oldest_data = lines[1].split(",");
-  var end_date = new Date(newest_data[0]);
-  var start_date = new Date(oldest_data[0]);
+  var end_date = new Date(parseDate(newest_data[0]));
+  var start_date = new Date(parseDate(oldest_data[0]));
   switch(time) {
 	case 'Hour':
 	  end_date = new Date(end_date.getTime() + -1*3600*1000);
@@ -43,19 +48,19 @@ function process_csv(text,dose,time) {
 	  scale = 1.0;
 	break;
 	case 'USV':
-	  scale = 0.0036;
-	break;
-	case 'REM':
 	  scale = 0.036;
 	break;
+	case 'REM':
+	  scale = 0.0036;
+	break;
 	case 'cigarette':
-	  scale = 0.0036*0.420168067;
+	  scale = 0.036*0.420168067;
 	break;
 	case 'medical':
-	  scale = 0.0036*0.2;
+	  scale = 0.036*0.2;
 	break;
 	case 'plane':
-	  scale = 0.0036*0.00833333335;
+	  scale = 0.036*0.00833333335;
 	break;
   }
 
@@ -64,7 +69,7 @@ function process_csv(text,dose,time) {
     var line = lines[i];
     if(line.length>3) {
       var data = line.split(",");
-      var x = new Date(data[0]);
+      var x = new Date(parseDate(data[0]));
       if( x.getTime() < end_date.getTime() ) { continue; }
       var y = parseFloat(data[1]);
       var err = parseFloat(data[2]);
@@ -142,14 +147,22 @@ function plot_data(location,dose,time,div) {
     data_input,
     { title: title_text,
 	  rollPeriod: roll,
-	  showRoller: true,
+	  //showRoller: true,
       errorBars: true,
       showRangeSelector: true,
       sigFigs: 3,
-      maxNumberWidth: 2,
       ylabel: y_text,
       xlabel: 'Time (local)',
-      labels: [ "Time (local)", data_label]
+      labels: [ "Time (local)", data_label],
+      axes: {
+      	y: {
+      		//reserveSpaceLeft: 2,
+      		axisLabelFormatter: function(x) {
+	  		                          			var shift = Math.pow(10, 5);
+		      		                          	return Math.round(x * shift) / shift;
+		      		                        }
+      	   }
+      }
     }
   );
 }
