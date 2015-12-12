@@ -7,13 +7,9 @@
 ##### Kai Vetter
 
 ---
-## ToDo!
-- [ ] Move config csv (with hash, lat, long) to root dir. This CSV is made during detector initialization to properly identify the dosimeter.
-- [ ] WiFi addition to dosimeter
-- [ ] Move daily database dumps to CDN?
-
-## Preweb release todo (Ryan)
-- [ ] Grounding fix (test new RPi hat board)
+## Please take note
+This readme may not be fully up to date. (see #23)
+For a to-do, see the issue list in GitHub and Waffle.
 
 ---
 ## What goes where?
