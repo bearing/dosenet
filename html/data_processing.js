@@ -8,6 +8,31 @@ function parseDate(input) {
   return new Date(parts[0], parts[1]-1, parts[2], parts[3], parts[4], parts[5]); // Note: months are 0-based
 }
 
+function singleErrorPlotter(e) {
+  var ctx = e.drawingContext;
+  var points = e.points;
+  var g = e.dygraph;
+  var color = e.color;
+  ctx.save();
+  ctx.strokeStyle = e.color;
+
+  for (var i = 0; i < points.length; i++) {
+    var p = points[i];
+    var center_x = p.canvasx;
+    if (isNaN(p.y_bottom)) continue;
+
+    var low_y = g.toDomYCoord(p.yval_minus),
+        high_y = g.toDomYCoord(p.yval_plus);
+
+    ctx.beginPath();
+    ctx.moveTo(center_x, low_y);
+    ctx.lineTo(center_x, high_y);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 function process_csv(text,dose,time) {
   data_input = []; // Clear any old data out before filling!
   var lines = text.split("\n");
@@ -149,19 +174,29 @@ function plot_data(location,dose,time,div) {
 	  rollPeriod: roll,
 	  //showRoller: true,
       errorBars: true,
+      connectSeparatedPoints: false,
+      drawPoints: true,
       showRangeSelector: true,
       sigFigs: 3,
       ylabel: y_text,
       xlabel: 'Time (local)',
       labels: [ "Time (local)", data_label],
+      data_label: {
+                    strokeWidth: 0.0,
+                    highlightCircleSize: 2,
+                    plotter: [
+                      singleErrorPlotter,
+                      Dygraph.Plotters.linePlotter
+                    ]
+                  },
       axes: {
       	y: {
-      		//reserveSpaceLeft: 2,
-      		axisLabelFormatter: function(x) {
-	  		                          			var shift = Math.pow(10, 5);
-		      		                          	return Math.round(x * shift) / shift;
-		      		                        }
-      	   }
+      		    //reserveSpaceLeft: 2,
+          		axisLabelFormatter: function(x) {
+        	  		                          			var shift = Math.pow(10, 5);
+      		      		                          	return Math.round(x * shift) / shift;
+        		      		                        }
+      	   },
       }
     }
   );
