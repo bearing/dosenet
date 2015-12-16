@@ -182,12 +182,9 @@ function plot_data(location,dose,time,div) {
       xlabel: 'Time (local)',
       labels: [ "Time (local)", data_label],
       data_label: {
-                    strokeWidth: 0.0,
+                    strokeWidth: 2.0,
                     highlightCircleSize: 2,
-                    plotter: [
-                      singleErrorPlotter,
-                      Dygraph.Plotters.linePlotter
-                    ]
+                    plotter: singleErrorPlotter
                   },
       axes: {
       	y: {
