@@ -7,17 +7,9 @@
 ##### Kai Vetter
 
 ---
-## ToDo!
-- [ ] Move device code to public repo.
-- [ ] Move config csv (with hash, lat, long) to root dir. This CSV is made during detector initialization to properly identify the dosimeter.
-- [ ] WiFi addition to dosimeter
-- [ ] Daily database dumps to csv (timestamp - datatype?, dose, dose_err) located on CDN.
-- [ ] App development
-
-## Preweb release todo (Ryan)
-- [ ] Remove pinewood station (temp)
-- [ ] Mount campus dosimeter (indoor, outdoor)
-- [ ] Grounding fix (test new RPi hat board)
+## Please take note
+This readme may not be fully up to date. (see #23)
+For a to-do, see the issue list in GitHub and Waffle.
 
 ---
 ## What goes where?
