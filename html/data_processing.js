@@ -107,10 +107,9 @@ function plot_data(location,dose,time,div) {
   var title_text = location;
   var y_text = '&microSv/hr';
   var data_label = '&microSv/hr';
-  var roll = 1;
   switch(dose) {
 	case 'CPM':
-	  title_text = title_text + ' in Counts per Minute ';
+	  title_text = title_text + ' in CPM ';
 	  y_text = 'CPM';
 	  data_label = "CPM";
 	break;
@@ -140,30 +139,25 @@ function plot_data(location,dose,time,div) {
 	  data_label = "air-travel/hr";
 	break;
   }
+
   switch(time) {
   	case 'Hour':
   	  title_text = title_text + 'for the most recent ' + time;
-  	  roll = 1;
   	break;
   	case 'Day':
   	  title_text = title_text + 'for the most recent ' + time;
-  	  roll = 1;
   	break;
   	case 'Week':
   	  title_text = title_text + 'for the most recent ' + time;
-  	  roll = 7;
   	break;
   	case 'Month':
   	  title_text = title_text + 'for the most recent ' + time;
-  	  roll = 30;
   	break;
   	case 'Year':
   	  title_text = title_text + 'for the most recent ' + time;
-  	  roll = 365;
   	break;
   	case 'All':
   	  title_text = 'All data for ' + title_text;
-  	  roll = 1;
   }
 
   g = new Dygraph(
@@ -171,21 +165,21 @@ function plot_data(location,dose,time,div) {
     document.getElementById(div),
     data_input,
     { title: title_text,
-	  rollPeriod: roll,
-	  //showRoller: true,
       errorBars: true,
       connectSeparatedPoints: false,
       drawPoints: true,
+      pointSize: 3,
       showRangeSelector: true,
       sigFigs: 3,
       ylabel: y_text,
       xlabel: 'Time (local)',
       labels: [ "Time (local)", data_label],
-      data_label: {
-                    strokeWidth: 2.0,
-                    highlightCircleSize: 2,
-                    plotter: singleErrorPlotter
-                  },
+      strokeWidth: 0.0,
+      highlightCircleSize: 5,
+      plotter: [
+        singleErrorPlotter,
+        Dygraph.Plotters.linePlotter
+        ],
       axes: {
       	y: {
       		    //reserveSpaceLeft: 2,
