@@ -113,10 +113,11 @@ class Plot(object):
                             yaxis=YAxis(title=plotTitle),
                             font=fontPref)
             # Plot.ly export, doesn't open a firefox window on the server
-            plotURL = py.plot(Figure(data=Data([trace]),
-                              layout=layout),
-                              filename=fname,
-                              auto_open=False)
+            #plotURL = py.plot(Figure(data=Data([trace]),
+            #                  layout=layout),
+            #                  filename=fname,
+            #                  auto_open=False)
+            plotURL = ""
             print fname, 'Plot.ly:', ("%.2f" % (time.time() - t0)), 's'
             return plotURL
         except (KeyboardInterrupt, SystemExit):
