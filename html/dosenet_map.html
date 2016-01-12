@@ -14,13 +14,18 @@
 	<meta name="author" content="Navrit Bal, Tigran Ter-Stepanyan, Luke Sheard" />
 	<meta http-equiv="refresh" content="300;url=https://radwatch.berkeley.edu/dosenet/map">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSaBOz47zWi5eWz12SYzSl6GMSpl8l1c8&callback=initMap"></script>
 	<script type="text/javascript"
-		src="https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.0/src/markerwithlabel.js">
+		src="https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.9/src/markerwithlabel_packed.js">
 		</script>
 	<script type="text/javascript"
 		src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js">
 		</script>
+	<script src="https://radwatch.berkeley.edu/sites/default/files/dosenet/data_processing.js"></script>
+	<script type="text/javascript"
+		src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js">
+		</script>
+
 	<style text="text/css">
 		@font-face {
 			font-family: 'Garamond';
@@ -45,20 +50,20 @@
 			vertical-align: middle;
 		}
 		#my_banner {
-  		padding-top:15px;
-  		padding-bottom:15px;
-  		padding-right:20px;
-  		padding-left:20px;
-  		background:#5b6770;
-  		font-size:16px;
-  		line-height:150% !important;
-  		color: white;
-  		border-radius: 15px;
-  		border-color: #d19000;
-  		border-width: 3px;
-  		border-style: solid;
+	  		padding-top:15px;
+	  		padding-bottom:15px;
+	  		padding-right:20px;
+	  		padding-left:20px;
+	  		background:#5b6770;
+	  		font-size:16px;
+	  		line-height:150% !important;
+	  		color: white;
+	  		border-radius: 15px;
+	  		border-color: #d19000;
+	  		border-width: 3px;
+	  		border-style: solid;
 			margin-bottom: 1em;
-  	}
+  		}
 		.jh5 {
 			padding: 0.5em 0 0 0;
 			font-size: 2em;
@@ -185,12 +190,12 @@
 			white-space: nowrap;
 			vertical-align: middle;
 			-ms-touch-action: manipulation;
-			  touch-action: manipulation;
+			touch-action: manipulation;
 			cursor: pointer;
 			-webkit-user-select: none;
-			 -moz-user-select: none;
-			  -ms-user-select: none;
-			      user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 			background-image: none;
 			border: 1px solid transparent;
 			border-radius: 4px;
@@ -413,7 +418,8 @@
 				"'While cigarette smoke is not an obvious source of radiation exposure, it contains small amounts of radioactive materials [polonium-210 and lead-210] which smokers bring into their lungs as they inhale. The radioactive particles lodge in lung tissue and over time contribute a huge radiation dose. Radioactivity may be one of the key factors in lung cancer among smokers.' <br><a href=\"http://www.epa.gov/radiation/sources/tobacco.html\">U.S. Environmental Protection Agency</a>" +
 				"<br><br>" +
 				"The National Council on Radiation Protection and Measurements suggests that tobacco products are probably the greatest single contributor to effective dose equivalent in the population at large, even greater than medical procedures and natural background. [NCRP Report No. 93 summarizing exposures from all sources (NCRP, 1987a)]. <br><a href=\"http://www.ncrponline.org/Learn_More/Did_You_Know_95.html\">Equivalent dose estimation</a>" +
-				"<br><br>The values shown compare the effective dose equivalent for how many cigarettes would give you the same dose per hour. Plotting using these units is left as an exercise for the viewer. <br><a href=\"http://www.rmeswi.com/36.html\">Radiation Measurement and Elimination Services</a>" +
+				"<br><br>The values shown compare the effective dose equivalent for how many cigarettes would give you the same dose per hour." +
+				"<br><a href=\"http://www.rmeswi.com/36.html\">Radiation Measurement and Elimination Services</a>" +
 				"</div>" +
 				"</div>";
 			break;
@@ -425,7 +431,8 @@
 				"</div>" +
 				"<div class =\"jp\">" +
 				"Radiation also comes from the sun, solar wind, and other cosmic radiation. The bulk of this radiation is blocked by the Earth’s atmosphere. However, when flying across the country, the increased altitude there is less atmosphere above you to protect you from this cosmic radiation. This means that while flying in an airplane, you receive a higher dose of radiation than you would on the ground." +
-				"<br><br>The values shown indicate the amount of time on an airplane would correspond to the same effective dose. Plotting using these units is left as an exercise for the viewer. <br><a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public Information on commerical airplane flights</a>" +
+				"<br><br>The values shown indicate the amount of time on an airplane would correspond to the same effective dose." +
+				"<br><a href=\"http://www.hps.org/publicinformation/ate/faqs/commercialflights.html\">HPS Public Information on commerical airplane flights</a>" +
 				"</div>" +
 				"</div>";
 			break;
@@ -437,10 +444,10 @@
 				"</div>" +
 				"<div class =\"jp\">" +
 				"Getting x-rayed at the dentist’s office or getting CT scans at a hospital are common occurrences. These forms of imaging help doctors see inside the body and allow them to more easily do their jobs. However, such procedures do expose one’s body to some dose of radiation. This amount varies from procedure to procedure." +
-				"<br><br>The values shown compare how many 5 µSv X-rays would need to be taken to give you the same effective dose as standing at this location for one hour. Plotting using these units is left as an exercise for the viewer." +
+				"<br><br>The values shown compare how many 5 µSv X-rays would need to be taken to give you the same effective dose as standing at this location for one hour." +
 				"<br><a href=\"http://www.radiologyinfo.org/en/pdf/sfty_xray.pdf\">Radiology information</a>" +
 				"<br><a href=\"http://www.nrc.gov/about-nrc/radiation/around-us/doses-daily-lives.html\">NRC - Daily lives</a>" +
-				"</div>"
+				"</div>" +
 				"</div>";
 			break;
 			case 'CPM':
@@ -485,6 +492,7 @@
 	var map; // Google Map Object
 	var berkeley = [37.872269, -122.258901];
 	var markers = [];
+	var json_vals = [];
 	var markerCluster;
 	var marks = [];
 	var infowindow = new google.maps.InfoWindow();
@@ -505,17 +513,74 @@
 		map.setCenter(mapCenter);
 	}
 
+	// These two functions should be temporary until this can be done in makeGeoJSON as we phase out plot.ly
+	function getURL(val){
+		var name = val.properties["Name"];
+		var url;
+		switch(name) {
+			case 'LBL':
+				url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/lbl.csv?'
+				  + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+			break;
+			case 'Campolindo High School':
+				url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/campolindo.csv?'
+				  + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+			break;
+			case 'Pinewood High School':
+				url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/pinewood.csv?'
+				  + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+			break;
+			case 'Etcheverry Hall':
+				url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/etch.csv?'
+				  + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+			break;
+			case 'Etcheverry Hall Roof':
+				url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/etch_roof.csv?'
+				  + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+			break;
+		}
+		return url;
+	}
+	function getName(val){
+		var name = val.properties["Name"];
+		var short_name = 'NONAME';
+		switch(name) {
+			case 'LBL':
+				short_name = 'LBL';
+			break;
+			case 'Campolindo High School':
+				short_name = 'Campolindo';
+			break;
+			case 'Pinewood High School':
+				short_name = 'Pinewood';
+			break;
+			case 'Etcheverry Hall':
+				short_name = 'Etcheverry Hall';
+			break;
+			case 'Etcheverry Hall Roof':
+				short_name = 'Etcheverry Roof';
+			break;
+		}
+		return short_name;
+	}
+
 	function updateInfowindowContent(val){
 		time = getTimeframe();
 		dose = getDoseUnit();
-		if( dose=='plane'||dose=='cigarette'||dose=='medical')
-			dose = 'USV';
+		url = getURL(val);
+		name = getName(val);
+
 		var plotly_url = "URL_" + dose + "_" + time;
 		var iframeIntro = "<iframe width=\"500\" height=\"400\" frameborder=\"0\" \
 			seamless=\"seamless\" scrolling=\"no\" src=\"";
 		var iframeEnding = ".embed?width=500&height=400\"></iframe>";
 		graph_url = val.properties[plotly_url.toString()];
-		return iframeIntro + graph_url + iframeEnding;
+
+		//return iframeIntro + graph_url + iframeEnding;
+		var node_name = dose + '_' + time + '_' + name;
+		var content_string = '<div id="' + node_name + '"" style="width:500px; height=400px"></div>';
+		get_data(url.toString(),name.toString(),dose,time,node_name);
+		return content_string;
 	}
 
 	// Time units for a plot, called in updateInfowindowContent
@@ -566,12 +631,14 @@
 	}
 
 	function changeDoseUnits(){
-		infowindow.close();
-		infowindow.open(map, selected_marker);
-		clearMarkers();
 		setHTML_units();
-		selected_unit = getDoseUnit();
-		repopulateMarkers();
+		for (var i = 0; i < markers.length; i++) {
+			var label_text = getLabelContent(json_vals[i]);
+			markers[i].labelVisible = false;
+			markers[i].setOptions({ labelContent: label_text });
+			//markers[i].labelContent = label_text;
+			markers[i].labelVisible = true;
+		}
 	}
 
 	function getDosimeterCoords(index){
@@ -585,7 +652,7 @@
 		var sel = document.getElementById('dosimeter_list');
 		var index = sel.selectedIndex;
 		dosimeter_name = sel.options[sel.selectedIndex].value;
-		return index
+		return index;
 	}
 
 	function goToDosimeter(){
@@ -627,7 +694,7 @@
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]).toFixed(3);
 				break;
 			case 'plane':
-				selected_unit = 'plane hrs'
+				selected_unit = 'plane travel/hr'
 				latest_val = (val.properties["Latest dose (&microSv/hr)"]*0.420168067).toFixed(4);
 				break;
 			case 'cigarette':
@@ -667,6 +734,15 @@
 		});
 	}
 
+	function addUnitDropdownListener(){
+		$("#dose_dropdown").change(function(){
+			//infowindow.close();
+			goToDosimeter();
+			infowindow.setContent(updateInfowindowContent(selected_val));
+			infowindow.open(map, selected_marker);
+		});
+	}
+
 	$(document).ready(function(){
 		var marker;
 		initMap();
@@ -692,10 +768,12 @@
 								animation: google.maps.Animation.DROP
 		        });
 				markers.push(marker);
+		        json_vals.push(val);
 			    setMarkerIcon(marker);
 				addMarkerEventListeners(val, marker);
 		    });
 			addTimeDropdownListener();
+			addUnitDropdownListener();
 			var mcOptions = {gridSize: 40, maxZoom: 15};
 			markerCluster = new MarkerClusterer(map, markers, mcOptions);
 		});
@@ -715,12 +793,12 @@
 						Units to Display on Plots
 					</div>
 					<select id="dose_dropdown" class="dropdown" onChange='changeDoseUnits()'>
-						<option value="USV"> µSv per Hour </option>
-						<option value="REM"> mrem per Hour </option>
+						<option value="USV"> µSv/hr </option>
+						<option value="REM"> mrem/hr </option>
 						<option value="CPM"> CPM </option>
-						<option value="plane"> Hours on a plane </option>
-						<option value="medical"> X-rays </option>
-						<option value="cigarette"> cigarettes </option>
+						<option value="plane"> air travel/hr </option>
+						<option value="medical"> X-rays/hr </option>
+						<option value="cigarette"> cigarettes/hr </option>
 					</select>
 				</td>
 				<td>
@@ -731,6 +809,7 @@
 					<select id="time_dropdown" class="dropdown" onChange='getTimeframe()'>
 						<option value="Hour"> Last Hour </option>
 						<option value="Day"> Last Day </option>
+						<option value="Week"> Last Week </option>
 						<option value="Month"> Last Month </option>
 						<option value="Year"> Last Year </option>
 					</select>
