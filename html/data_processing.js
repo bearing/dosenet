@@ -148,10 +148,10 @@ function plot_data(location,dose,time,div) {
 	case 'USV':
 	  title_text = title_text + ' in &microSv/hr ';
 	  y_text = '&microSv/hr';
-	  data_label = "&microSv/hr";
+	  data_label = "µSv/hr";
 	break;
 	case 'REM':
-	  title_text = title_text + ' in &mrem/hr ';
+	  title_text = title_text + ' in mrem/hr ';
 	  y_text = 'mrem/hr';
 	  data_label = "mrem/hr";
 	break;

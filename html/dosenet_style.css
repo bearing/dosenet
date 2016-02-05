@@ -34,6 +34,8 @@ p.description_content_block {
   vertical-align: middle;
 }
 
+.tab { text-indent:40px }
+
 .logoCell {
   border: 10px solid transparent;
   width: 20%;
