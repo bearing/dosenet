@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://radwatch.berkeley.edu/sites/default/files/dosenet/data_processing.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://radwatch.berkeley.edu/sites/default/files/dosenet/dosenet_style.css">
+</head>
+
+<body>
+    <div id="my_banner">
+        The dosimeter network has added both indoor and outdoor locations at Berkeley!
+    </div>
+    <br>
+    <div style="font-size:20px;">
+      Our highly sensitive air monitor data tells us that there are significant variations in radiation levels due to changes in weather. To see these with our dosimeter devices, we of course need to have devices installed outdoors. However, the relatively low sensitivity of our dosimeters may make them insensitive to such variations. To find out if these devices are sensitive enough to see significant weather related variations, we have installed two devices at Etcheverry Hall at UC Berkeley, one inside the building, and one on the roof next to our air monitor.
+    </div>
+    <br>
+
+    <div id="daycountshall" style="width:100%"></div>
+    <script type="text/javascript"> 
+      var url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/etch.csv?'
+        + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+      get_data(url,'Etcheverry Hall','USV','Day','daycountshall');
+    </script>
+    <br>
+    <div id="daycountsroof" style="width:100%"></div>
+    <script type="text/javascript"> 
+      var url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/etch_roof.csv?'
+        + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+      get_data(url,'Etcheverry Hall Roof','USV','Day','daycountsroof');
+    </script>
+
+    &nbsp;
+
+    <table class="center " style="float: middle;">
+      <tr>
+        <td>
+            <a rel="image" href="/sites/default/files/pictures/Ali_installing_roof.jpg"><img style="width:100%;" src="/sites/default/files/pictures/Ali_installing_roof.jpg"/></a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="description_block">
+          <center>
+            <p class="description_content_block">Fig 1. Ali Hanks mounts the roof device next to the air vents in our roof enclosure.</p>
+          </center>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    &nbsp;
+
+    <table class="center " style="float: middle;">
+      <tr>
+        <td>
+            <a rel="image" href="/sites/default/files/pictures/Ross_installing_roof.jpg"><img style="width:100%;" src="/sites/default/files/pictures/Ross_installing_roof.jpg"/></a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="description_block">
+          <center>
+            <p class="description_content_block">Fig 2. Ross Meyer helping to install our roof device.</p>
+          </center>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    &nbsp;
+
+    <div style="font-size:30px;">
+      <a href="https://radwatch.berkeley.edu/dosenet/map"> Check out the whole network!</a>
+    </div>
+</body>
+</html>

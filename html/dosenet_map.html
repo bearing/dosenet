@@ -15,7 +15,7 @@
 	<meta http-equiv="refresh" content="300;url=https://radwatch.berkeley.edu/dosenet/map">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSaBOz47zWi5eWz12SYzSl6GMSpl8l1c8&callback=initMap"></script>
-	<script type="text/javascript"
+	<script type="text/javascript" 
 		src="https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.9/src/markerwithlabel_packed.js">
 		</script>
 	<script type="text/javascript"
@@ -26,7 +26,7 @@
 		src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js">
 		</script>
 
-	<style text="text/css">
+	<style type="text/css">
 		@font-face {
 			font-family: 'Garamond';
 			src: local('Garamond'), url('Garamond.ttf') format('truetype');
@@ -339,6 +339,15 @@
 	function https(){
 		var URL = document.URL;
 		var secureURL = URL.replace("http:","https:");
+	} 
+	function calibration() {
+		document.getElementById("text_field").innerHTML = 
+			"<div class = \"jumbotron\" >" +
+			"<div class = \"jh5\">" +
+			"</div>" + 
+			"<div class = \"jp\">" +
+			"The DoseNet devices measure radiation counts to get counts per minute (CPM). However, CPM is not a useful measurement of radiation in our environment, because one count in a DoseNet device is different from one count in a Geiger counter, which is different from one count in a germanium detector, and so on. The counts in any detector have to be *calibrated* to represent a physical unit of dose rate, such as µSv/hr. The procedure used to calibrate our devices is described on the " +
+			"<a href=\"https://radwatch.berkeley.edu/dosenet/calibrations\">" + "Calibration Page" + "</a>";
 	}
     function units_used() {
         document.getElementById("text_field").innerHTML =
@@ -349,7 +358,7 @@
 			"<div class =\"jp\">" +
 			"Background radiation is present everywhere. However, there are also many common, everyday human activities that expose you to radiation. The units used here are a sample of different sources of radiation in everyday activity and allow you to compare the background dose to these different activities. To see a description of how the unit conversion was determined, select that unit type form the drop down menu. In these cases the dose stated corresponds to the effective dose equivalent for that exposure." +
 			"</div>" +
-			"</div>"
+			"</div>";
         }
 	function map_explained() {
 		document.getElementById("text_field").innerHTML =
@@ -360,7 +369,7 @@
 			"<div class =\"jp\">" +
 			"The map uses Google Maps with pinpoints at each dosimeter location. These dosimeters then update to show the current radiation level. Clicking on any of the points will bring up a new window, displaying more information about the individual detector and allow you to view the radiation level as a function of time. The units can be changed using the dropdown just above the map. These units show the background radiation level in more familiar terms." +
 			"</div>" +
-			"</div>"
+			"</div>";
 	}
 
 	function about_radiation(){
@@ -559,7 +568,7 @@
 			break;
 			case 'Etcheverry Hall Roof':
 				short_name = 'Etcheverry Roof';
-			break;
+			break;			
 		}
 		return short_name;
 	}
@@ -785,6 +794,12 @@
 	    This map shows background radiation measured throughout our network of small sensors maintained and operated by students around the Bay Area and the UC Berkeley team.
 	</div>
 
+	<div>
+		<a href="https://radwatch.berkeley.edu/dosenet/levels">
+			<img id="dosenet_rad_banner" alt="Relative Radiation Levels"  src="/sites/default/files/pictures/RadiationRatesGraphic.jpg"/>
+		</a>
+	</div>
+
 	<div class="roundedwrapper">
 		<table class="center "style="float: left;">
 			<tr>
@@ -835,6 +850,8 @@
 		<button type="button" class="btn btn-info btn-sm"
 			onclick="about_dosenet()">About the Devices</button>
 		<button type="button" class="btn btn-info btn-sm"
+			onclick="calibration()">Calibrating</button>
+		<button type="button" class="btn btn-info btn-sm"
 			onclick="about_radiation()">About Radiation</button>
 		<button type="button" class="btn btn-info btn-sm"
 			onclick="map_explained()">How the Map Works</button>
@@ -842,7 +859,7 @@
 			onclick="units_used()">Units Used</button>
 	</div>
 	<div id="text_field">
-		<script> about_dosenet() </script>
+		<script> about_dosenet(); </script>
 	</div>
 </body>
 </html>

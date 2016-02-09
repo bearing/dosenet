@@ -1,40 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style text="text/css">
-    #my_banner{
-      padding-top:15px;
-      padding-bottom:15px;
-      padding-right:20px;
-      padding-left:20px;
-      background:#5b6770;
-      font-size:20px;
-      line-height:150% !important;
-      color: white;
-      border-radius: 15px;
-      border-color: #d19000;
-      border-width: 3px;
-      border-style: solid;
-    }
-    .center {
-      text-align: center;
-    }
-    .description_block {
-      width:80%;
-      /* styling below */
-      background-color:black;
-      font-family: 'tahoma';
-      font-size:14px;
-      color:white;
-      opacity:0.6; /* transparency */
-      filter:alpha(opacity=60); /* IE transparency */
-    }
-    .description_content_block {
-      padding:10px;
-      padding-right:20px;
-      margin:0px;
-    }
-  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://radwatch.berkeley.edu/sites/default/files/dosenet/data_processing.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://radwatch.berkeley.edu/sites/default/files/dosenet/dosenet_style.css">
 </head>
 
 <body>
@@ -43,20 +13,28 @@
     </div>
     <br>
     <div style="font-size:20px;">
-      We had a great day visiting the students in Mrs. Abraham's AP Chemistry class and meeting several after to discuss ways they can get involved!
+      We had a great day visiting the students in Mrs. Abraham's AP Chemistry class and meeting several after to discuss ways they can get involved! Check out updates from our more recent visits! <br>
+      <ul style="list-style-type: circle; list-style-position: inside;">
+        <li> <p><a href="https://radwatch.berkeley.edu/dosenet/schools/update1"> With help from serveral students, we got our device upgraded and running smoothly again!</a></p></li>
+      </ul>
     </div>
     <br>
 
-    <div>
-      <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4241.embed?width=500&amp;height=400"></iframe>
-    </div>
+    <div id="daycountsdata" style="width:100%"></div>
+    <script type="text/javascript"> 
+      var url = 'https://radwatch.berkeley.edu/sites/default/files/dosenet/pinewood.csv?'
+        + Math.random().toString(36).replace(/[^a-z]+/g, ''); // To solve browser caching issue
+      get_data(url,'Pinewood','USV','Day','daycountsdata');
+    </script>
+
+    <!--  <iframe width="500" height="400" frameborder="0" seamless="seamless" scrolling="no" src="https://plot.ly/~ne170/4241.embed?width=500&amp;height=400"></iframe> -->
 
     &nbsp;
 
     <table class="center " style="float: middle;">
       <tr>
         <td>
-            <a rel="image" href="/sites/default/files/pictures/Pinewood_core_students_2.jpg"><img style="width:80%;" src="/sites/default/files/pictures/Pinewood_core_students_2.jpg"/></a>
+            <a rel="image" href="/sites/default/files/pictures/Pinewood_core_students_2.jpg"><img style="width:100%;" src="/sites/default/files/pictures/Pinewood_core_students_2.jpg"/></a>
         </td>
       </tr>
       <tr>
@@ -75,7 +53,7 @@
     <table class="center " style="float: middle;">
       <tr>
         <td>
-            <a rel="image" href="/sites/default/files/pictures/Pinewood_demo_lecture.jpg"><img style="width:80%;" src="/sites/default/files/pictures/Pinewood_demo_lecture.jpg"/></a>
+            <a rel="image" href="/sites/default/files/pictures/Pinewood_demo_lecture.jpg"><img style="width:100%;" src="/sites/default/files/pictures/Pinewood_demo_lecture.jpg"/></a>
         </td>
       </tr>
       <tr>
@@ -95,7 +73,7 @@
       <tr>
         <td class="logoTable">
             <a rel="image" href="/sites/default/files/pictures/Pinewood_device.jpg">
-              <img style="width:80%;" src="/sites/default/files/pictures/Pinewood_device.jpg"/>
+              <img style="width:100%;" src="/sites/default/files/pictures/Pinewood_device.jpg"/>
             </a>
         </td>
       </tr>

@@ -1,0 +1,83 @@
+#my_banner{
+  padding-top:15px;
+  padding-bottom:15px;
+  padding-right:20px;
+  padding-left:20px;
+  background:#5b6770;
+  font-size:20px;
+  line-height:150% !important;
+  color: white;
+  border-radius: 15px;
+  border-color: #d19000;
+  border-width: 3px;
+  border-style: solid;
+}
+
+div.description_block {
+  width:100%;
+  /* styling below */
+  background-color:black;
+  font-family: 'tahoma';
+  font-size:14px;
+  color:white;
+  opacity:0.6; /* transparency */
+  filter:alpha(opacity=60); /* IE transparency */
+}
+
+p.description_content_block {
+  padding:10px;
+  padding-right:20px;
+  margin:0;
+}
+
+.logoTable {
+  vertical-align: middle;
+}
+
+.tab { text-indent:40px }
+
+.logoCell {
+  border: 10px solid transparent;
+  width: 20%;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.autoResizeImage {
+    max-width: 100%;
+    height: auto;
+    width: 100%;
+}
+
+.center{
+  text-align: center;
+}
+
+#boxlist ul { list-style-type: none; padding: 0; margin: 0;}
+
+#image-canvas {
+  width: 50%;
+  margin-bottom:1em !important;
+  margin-top: 1em !important;
+}
+
+#image-table-canvas {
+  width: 100%;
+  margin-bottom:1em !important;
+  margin-top: 1em !important;
+  margin-right:1em !important;
+  margin-left: 1em !important;
+}
+
+#image-exand-canvas {
+  width: 150%;
+  margin-bottom:1em !important;
+  margin-top: 1em !important;
+}
+
+#logo-canvas {
+  width: 25%;
+  margin-bottom:1em !important;
+  margin-top: 1em !important;
+}
+

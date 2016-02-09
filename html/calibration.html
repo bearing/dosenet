@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" type="text/css" href="https://radwatch.berkeley.edu/sites/default/files/dosenet/dosenet_style.css">
+</head>
+
+<body>
+
+<h3>
+	Calibrating our devices
+</h3>
+
+We calibrated our devices by operating them alongside a Geiger counter which has been professionally calibrated. By operating a DoseNet device next to the Geiger probe, with a gamma radiation source some distance away, we can conclude that the CPM in the DoseNet device is equivalent to the µSv/hr in the calibrated Geiger probe, within some uncertainty we can also estimate.
+
+<br>
+<br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr valign="middle">
+		<td style="border: 10px solid transparent; width: 40%; vertical-align: top;">
+			<div>
+   				<a rel="image" href="/sites/default/files/pictures/DosimeterCalibration.jpg"><img class="autoResizeImage" src="/sites/default/files/pictures/DosimeterCalibration.jpg"/></a>
+   			</div>
+			<div class="description_block">
+			<center>
+			  <p class="description_content_block">Fig 1. The DoseNet device on a Raspberry Pi, with the Geiger probe positioned above it. Around both of them are pieces of radiation shielding.</p>
+			</center>
+			</div>
+		</td>
+		<td style="border: 10px solid transparent; width: 40%; vertical-align: top;">
+			<div>
+   				<a rel="image" href="/sites/default/files/pictures/DosimeterCalibrationStation.jpg"><img class="autoResizeImage" src="/sites/default/files/pictures/DosimeterCalibrationStation.jpg"/></a>
+   			</div>
+			<div class="description_block">
+			<center>
+			  <p class="description_content_block">Fig 2. The Geiger counter dose reading (in rem) is in the lower left, and the DoseNet device counts are on the computer monitor on the right. The small red and white disk in the center is a sealed gamma source.</p>
+			</center>
+			</div>
+		</td>
+	</tr>
+</table>
+
+<h3>
+	Estimating measurement uncertainty
+</h3>
+
+Any scientific measurement must include an estimate of the *uncertainty* in the measurement value. We cannot just take one number from the device and one number from the probe, because the numbers are fluctuating continously as radiation randomly interacts in each detector. In order to get a precise measurement with known uncertainty, we measure both CPM and µSv/hr many times over a long period of time, and use statistics to calculate the expected uncertainty in the calculated calibration constant. Figure 3 shows a sample of the device CPM and corresponding Geiger counter micro-rem/hr measurments taken, where the variation from reading to reading can clearly be seen.
+
+<br>
+<br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr valign="middle">
+		<td style="border: 10px solid transparent; width: 40%; vertical-align: top;">
+			<div>
+   				<a rel="image" href="/sites/default/files/pictures/DoseNet_calibration_calculation.png"><img class="autoResizeImage" src="/sites/default/files/pictures/DoseNet_calibration_calculation.png"/></a>
+   			</div>
+			<div class="description_block">
+			<center>
+			  <p class="description_content_block">Fig 3. A spreadsheet showing the calibration with our natural uranium sample.</p>
+			</center>
+			</div>
+		</td>
+	</tr>
+</table>
+<br>
+
+<h3>
+	Energy dependence - systematic uncertainty
+</h3>
+
+The statistical uncertainty inherent in this procedure is not the only limitation when determining the correct calibration constant. The radioactive sample used can also introduce some uncertainty. For example, when using a Cobalt-60 sample we found that 3.9 CPM is equivalent to 0.187 µSv/hr. This gives us a *calibration constant* of (0.187 / 3.9) = 0.048 µSv/hr/CPM. However many counts per minute we measure, we can multiple by 0.048 to get a measurement in µSv/hr. However, when we perform the same procedure with a Ba-133 sample, we get a calibration constant of 0.026, meaning different radiation sources give us different calibration constants!
+
+<br><br>
+
+This complication comes from the different energies of gamma radiation. Lower-energy gamma rays are more likely to interact in the device and produce a count, but they contribute a smaller dose than higher-energy gamma rays do. Unlike some more advanced types of detectors, the DoseNet device cannot distinguish gamma-ray energies. However, we know that radioactivity in our environment consists almost entirely of naturally-occuring uranium, thorium, and potassium. To address this limitation, we used a source consisting of natural uranium, which produces gamma rays of a wide range of energies, which is a good representation of background gamma radiation as a whole. 
+
+<br><br>
+
+<h5 style="center">
+	The calibration constant for our natural uranium sample is 0.0357 µSv/hr/CPM +/- 10%. <br>
+	This is the factor we use in our database to convert the CPM that the devices report to µSv/hr.
+</h5>
+</body>
+
+</html>
