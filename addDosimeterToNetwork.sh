@@ -48,11 +48,6 @@ echo "Stopping udp_injector"
 sudo killall python &
 
 echo "Restarting udp_injector"
-tmux
-injector
-tmux detach
-
-echo "checking that udp_injector restarted"
-grepp
+screen -dm python udp_injector.py
 
 echo "New station added!"
