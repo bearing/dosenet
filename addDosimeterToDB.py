@@ -166,7 +166,7 @@ class DBTool:
             raise e
 
     def makeCSV(self):
-        fname = "%s.csv" % (self.nickname)
+        fname = "~/config-files/%s.csv" % (self.nickname)
         with open(fname, 'wb') as csvfile:
             stationwriter = csv.writer(csvfile, delimiter=',')
             stationwriter.writerow(['stationID', 'message_hash, lag, long'])
