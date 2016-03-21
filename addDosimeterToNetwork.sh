@@ -3,13 +3,38 @@
 #    - run addDosimeterToDB.py
 #    - restart udp_injector.py to pick up new location
 
+while [[ $# > 1 ]]
+do
+key="$1"
 
-NAME = $1
-NICKNAME = $2
-LAT = $3
-LONG = $4
-CONV = $5
-DISPLAY = $6
+case $key in
+    --name)
+    NAME="$2"
+    shift # past argument
+    ;;
+    --nickname)
+    NICKNAME="$2"
+    shift # past argument
+    ;;
+    --lat)
+    LAT="$2"
+    shift # past argument
+    ;;
+    --long)
+    LONG="$2"
+    shift # past argument
+    ;;
+    --conv)
+    CONV="$2"
+    shift # past argument
+    ;;
+    --display)
+    DISPLAY="$2"
+    ;;
+    *)
+       # unknown option
+    ;;
+esac
 
 if [ ! -f $DISPLAY ]
 then
