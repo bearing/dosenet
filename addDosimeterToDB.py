@@ -19,22 +19,22 @@ import csv
 
 class Parser:
     def __init__(self):
-        parser = argparse.ArgumentParser('')
+        parser = argparse.ArgumentParser('python script to inject new station into the database')
         parser.add_argument(
             '--ID', type=int, nargs=1, required=False,
             help='Auto generated if not manually set.')
         parser.add_argument(
-            'name', type=str, nargs=1, help='')
+            'name', type=str, nargs=1, help='full name for plotting', metavar='NAME')
         parser.add_argument(
-            'nickname', type=str, nargs=1, help='')
+            'nickname', type=str, nargs=1, help='short name for csv files', metavar='NICKNAME')
         parser.add_argument(
-            'lat', type=float, nargs=1, help='')
+            'lat', type=float, nargs=1, help='', metavar='LATITUDE')
         parser.add_argument(
-            'long', type=float, nargs=1, help='')
+            'long', type=float, nargs=1, help='', metavar='LONGITUDE')
         parser.add_argument(
-            'conv', type=float, nargs=1, help='')
+            'conv', type=float, nargs=1, help='CPM to mrem', metavar='CONV')
         parser.add_argument(
-            'display', type=int, nargs=1, help='')
+            'display', type=int, nargs=1, help='display on(1)/off(0)', metavar='DISPLAY')
         self.args = parser.parse_args()
 
 
