@@ -19,7 +19,7 @@ import csv
 
 class Parser:
     def __init__(self):
-        parser = argparse.ArgumentParser('python script to inject new station into the database')
+        parser = argparse.ArgumentParser('needs more arguments... use -h for help menu')
         parser.add_argument(
             '--ID', type=int, nargs=1, required=False,
             help='Auto generated if not manually set.')
