@@ -8,6 +8,7 @@
 numargs=$#
 
 if [[ numargs < 6 ]]
+then
   echo "Not enough arguments!"
   python ~/git/dosenet_dev/addDosimeterToDB.py -h
 fi
@@ -34,7 +35,7 @@ sudo killall python &
 
 echo "Restarting udp_injector"
 #screen -dm python udp_injector.py
-tmux new-session -d -s UDP_INJECTOR '~/anaconda/bin/python udp_injector.py'
+#tmux new-session -d -s UDP_INJECTOR '~/anaconda/bin/python udp_injector.py'
 
 #echo "killing all old tmux sessions..."
 #tmux kill-session -a
