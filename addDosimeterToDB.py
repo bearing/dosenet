@@ -24,17 +24,17 @@ class Parser:
             '--ID', type=int, nargs=1, required=False,
             help='Auto generated if not manually set.')
         parser.add_argument(
-            'name', type=str, nargs=1, required=True, help='')
+            'name', type=str, nargs=1, help='')
         parser.add_argument(
-            'nickname', type=str, nargs=1, required=True, help='')
+            'nickname', type=str, nargs=1, help='')
         parser.add_argument(
-            'lat', type=float, nargs=1, required=True, help='')
+            'lat', type=float, nargs=1, help='')
         parser.add_argument(
-            'long', type=float, nargs=1, required=True, help='')
+            'long', type=float, nargs=1, help='')
         parser.add_argument(
-            'conv', type=float, nargs=1, required=True, help='')
+            'conv', type=float, nargs=1, help='')
         parser.add_argument(
-            'display', type=int, nargs=1, required=True, help='')
+            'display', type=int, nargs=1, help='')
         self.args = parser.parse_args()
 
 
