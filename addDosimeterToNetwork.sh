@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 # script to do everything needed to add a new station to the system:
 #    - run addDosimeterToDB.py
 #    - restart udp_injector.py to pick up new location
