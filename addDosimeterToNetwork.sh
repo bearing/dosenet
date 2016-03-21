@@ -3,14 +3,6 @@
 #    - run addDosimeterToDB.py
 #    - restart udp_injector.py to pick up new location
 
-if [[ $# < 4 ]]
-then
-  # not all arguments provided
-  echo "Error with input arguments... getting usage from python script"
-  python ~/git/dosenet/addDosimeterToDB.py -h
-  exit -1
-fi
-
 while [[ $# > 1 ]]
 do
 key="$1"
@@ -46,6 +38,14 @@ echo "LAT = ${LAT}"
 echo "LONG = ${LONG}"
 echo "CONV = ${CONV}"
 echo "DISPLAY = ${DISPLAY}"
+
+if [[ $# < 4 ]]
+then
+  # not all arguments provided
+  echo "Error with input arguments... getting usage from python script"
+  python ~/git/dosenet/addDosimeterToDB.py -h
+  exit -1
+fi
 
 echo "Adding new station to database"
 python ~/git/dosenet/addDosimeterToDB.py --name '$NAME' '$NICKNAME' --latlong $LAT $LONG --conv $CONV --display $DISPLAY
