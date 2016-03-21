@@ -6,6 +6,7 @@
 if [[ $# < 4 ]]
 then
   # not all arguments provided
+  echo "Error with input arguments... getting usage from python script"
   python ~/git/dosenet/addDosimeterToDB.py -h
   exit -1
 fi
@@ -38,6 +39,13 @@ case $key in
 esac
 shift # past argument or value
 done
+
+echo "NAME = ${NAME}"
+echo "NICKNAME = ${NICKNAME}"
+echo "LAT = ${LAT}"
+echo "LONG = ${LONG}"
+echo "CONV = ${CONV}"
+echo "DISPLAY = ${DISPLAY}"
 
 echo "Adding new station to database"
 python ~/git/dosenet/addDosimeterToDB.py --name '$NAME' '$NICKNAME' --latlong $LAT $LONG --conv $CONV --display $DISPLAY
