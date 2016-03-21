@@ -15,15 +15,14 @@ import sys
 import MySQLdb as mdb
 import argparse
 import itertools
-
+import csv
 
 class Parser:
     def __init__(self):
         parser = argparse.ArgumentParser()
         parser.add_argument(
             '--ID', type=int, nargs=1, required=False,
-            help=('Auto generated if not manually set. Does not compensate ' +
-                  'for collisions that you may make.'))
+            help='Auto generated if not manually set.')
         parser.add_argument(
             '--name', type=str, nargs=2, required=True, help='')
         parser.add_argument(
@@ -45,7 +44,7 @@ class DBTool:
             "dosimeter_network")
         try:
             self.ID = ID[0]
-        except Exception as e:
+        except Exception as ex:
             print 'Auto generating ID, good choice.'
         self.name = name
         self.nickname = nickname
@@ -57,6 +56,7 @@ class DBTool:
         # prepare a cursor object using cursor() method
         self.cursor = self.db.cursor()
         self.md5hash = ''
+        self.new_station = ''
         self.initialState = self.getInitialState()
         if not ID:
             self.addDosimeter()
@@ -128,10 +128,14 @@ class DBTool:
         return self.runSQL(sql, less=True)
 
     def checkIfDuplicate(self):
-        # Check for Name or MD5 hash collision (duplicate entry)
+        # Check for Name, ID, or MD5 hash collision (duplicate entry)
         print 'Checking for duplicates...'
         if any(str(self.name) in i for i in self.initialState):
             print ('ERROR: Duplicate NAME detected, not commiting changes. ' +
+                   'Byyeeeeeeee')
+            return True
+        elif any(str(self.ID) in i for i in self.initialState):
+            print ('ERROR: Duplicate ID detected, not commiting changes. ' +
                    'Byyeeeeeeee')
             return True
         elif any(str(self.md5hash) in i for i in self.initialState):
@@ -161,6 +165,13 @@ class DBTool:
             print sql
             raise e
 
+    def makeCSV(self):
+        fname = "%s.csv" % (self.nickname)
+        with open(fname, 'wb') as csvfile:
+            stationwriter = csv.writer(csvfile, delimiter=',')
+            stationwriter.writerow(['stationID', 'message_hash, lag, long'])
+            stationwriter.writerow([self.ID, self.md5hash, self.lat, self.lon])
+
     def main(self):
         self.duplicate = True
         try:
@@ -174,12 +185,14 @@ class DBTool:
             self.new_station = self.getNewStation()
             print self.new_station
             if not self.checkIfDuplicate():
-                print 'Good news: Committing changes. That\'s it.'
+                print 'Good news: Committing changes!'
                 self.db.commit()
+                print 'Generating csv file for this location'
+                self.makeCSV()
                 print 'SUCESSSSSS'
-        except Exception as e:
+        except Exception as ex:
             print '\t ~~~~ FAILED ~~~~'
-            raise e
+            raise ex
 
 if __name__ == "__main__":
     parse = Parser()
