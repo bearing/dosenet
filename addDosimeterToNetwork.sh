@@ -3,6 +3,8 @@
 #    - run addDosimeterToDB.py
 #    - restart udp_injector.py to pick up new location
 
+. ~/.keychain/$HOSTNAME-sh
+
 while [[ $# > 1 ]]
 do
 key="$1"
@@ -40,7 +42,7 @@ echo "CONV = ${CONV}"
 echo "DISPLAY = ${DISPLAY}"
 
 echo "Adding new station to database"
-python ~/git/dosenet/addDosimeterToDB.py --name '$NAME' '$NICKNAME' --latlong $LAT $LONG --conv $CONV --display $DISPLAY
+python ~/git/dosenet_dev/addDosimeterToDB.py --name '$NAME' '$NICKNAME' --latlong $LAT $LONG --conv $CONV --display $DISPLAY
 
 echo "Stopping udp_injector"
 sudo killall python &
