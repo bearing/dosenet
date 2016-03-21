@@ -24,7 +24,7 @@ class Parser:
             '--ID', type=int, nargs=1, required=False,
             help='Auto generated if not manually set.')
         parser.add_argument(
-            '--name', type=str, nargs=2, required=True, help='')
+            '--name', type=str, nargs=2, required=True, help='', metavar="name nickname")
         parser.add_argument(
             '--latlong', type=float, nargs=2, required=True, help='')
         parser.add_argument(
