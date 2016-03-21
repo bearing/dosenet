@@ -97,7 +97,7 @@ class DBTool:
         self.ID = self.runSQL(sql, least=True)
         if 1 <= self.ID <= 3:
             print 'Check the DB (stations) - there\'s probably an ID collision'
-        elif self.ID <= 0:
+        elif self.ID < 0:
             print 'ID less than 0?? There\'s a problem afoot'
         elif self.ID is None:
             print 'ID is None... Byyeeeeeeee'
@@ -166,7 +166,7 @@ class DBTool:
             raise e
 
     def makeCSV(self):
-        fname = "~/config-files/%s.csv" % (self.nickname)
+        fname = "%s.csv" % (self.nickname)
         with open(fname, 'wb') as csvfile:
             stationwriter = csv.writer(csvfile, delimiter=',')
             stationwriter.writerow(['stationID', 'message_hash, lag, long'])
@@ -185,10 +185,10 @@ class DBTool:
             self.new_station = self.getNewStation()
             print self.new_station
             if not self.checkIfDuplicate():
-                print 'Good news: Committing changes!'
-                self.db.commit()
                 print 'Generating csv file for this location'
                 self.makeCSV()
+                print 'Good news: Committing changes! All done!'
+                self.db.commit()
                 print 'SUCESSSSSS'
         except Exception as ex:
             print '\t ~~~~ FAILED ~~~~'
