@@ -191,8 +191,8 @@ if __name__ == "__main__":
     cpmtorem = parse.args.conv[0]
     display = parse.args.display[0]
     if not parse.args.ID:
-        dbtool = DBTool(name, lat, lon, cpmtorem)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display)
     else:
         ID = parse.args.ID[0]
         print 'Forced ID: ', ID
-        dbtool = DBTool(name, lat, lon, cpmtorem, ID)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, ID)
