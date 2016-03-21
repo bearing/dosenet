@@ -7,7 +7,10 @@
 
 numargs=$#
 
-
+if [[ numargs < 6 ]]
+  echo "Not enough arguments!"
+  python ~/git/dosenet_dev/addDosimeterToDB.py -h
+fi
 
 NAME=$1
 NICKNAME=$2
