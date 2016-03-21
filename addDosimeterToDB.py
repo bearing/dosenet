@@ -19,18 +19,22 @@ import csv
 
 class Parser:
     def __init__(self):
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser('')
         parser.add_argument(
             '--ID', type=int, nargs=1, required=False,
             help='Auto generated if not manually set.')
         parser.add_argument(
-            '--name', type=str, nargs=2, required=True, help='', metavar="name nickname")
+            'name', type=str, nargs=1, required=True, help='')
         parser.add_argument(
-            '--latlong', type=float, nargs=2, required=True, help='')
+            'nickname', type=str, nargs=1, required=True, help='')
         parser.add_argument(
-            '--conv', type=float, nargs=1, required=True, help='')
+            'lat', type=float, nargs=1, required=True, help='')
         parser.add_argument(
-            '--display', type=int, nargs=1, required=True, help='')
+            'long', type=float, nargs=1, required=True, help='')
+        parser.add_argument(
+            'conv', type=float, nargs=1, required=True, help='')
+        parser.add_argument(
+            'display', type=int, nargs=1, required=True, help='')
         self.args = parser.parse_args()
 
 
@@ -197,10 +201,10 @@ class DBTool:
 if __name__ == "__main__":
     parse = Parser()
     name = parse.args.name[0]
-    nickname = parse.args.name[1]
+    nickname = parse.args.nickname[0]
     print name
-    lat = parse.args.latlong[0]
-    lon = parse.args.latlong[1]
+    lat = parse.args.lat[0]
+    lon = parse.args.long[0]
     cpmtorem = parse.args.conv[0]
     display = parse.args.display[0]
     if not parse.args.ID:
