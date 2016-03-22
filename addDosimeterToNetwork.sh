@@ -35,9 +35,10 @@ sudo killall python &
 
 echo "Restarting udp_injector"
 #screen -dm python udp_injector.py
-#tmux new-session -d -s UDP_INJECTOR '~/anaconda/bin/python udp_injector.py'
+tmux new-session -d -s UDP_INJECTOR 
+tmux send-keys -t UDP_INJECTOR "~/anaconda/bin/python udp_injector.py" C-m
 
-#echo "killing all old tmux sessions..."
-#tmux kill-session -a
+echo "killing all old tmux sessions..."
+tmux kill-session -a
 
 echo "New station added!"
