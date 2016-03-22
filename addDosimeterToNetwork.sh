@@ -5,13 +5,6 @@
 
 numargs=$#
 
-if [[ $numargs < 6 ]]
-then
-  echo "Not enough arguments!"
-  python ~/git/dosenet_dev/addDosimeterToDB.py -h
-  exit -1
-fi
-
 NAME=$1
 NICKNAME=$2
 LAT=$3
@@ -26,6 +19,13 @@ echo "LONG = ${LONG}"
 echo "CONV = ${CONV}"
 echo "DISPLAY = ${DISPLAY}"
 
+if [[ $numargs < 6 ]]
+then
+  echo "Not enough arguments!"
+  python ~/git/dosenet_dev/addDosimeterToDB.py -h
+  exit -1
+fi
+
 echo "Adding new station to database"
 python ~/git/dosenet_dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
 
@@ -35,5 +35,7 @@ killall python
 echo "Restarting udp_injector ... start new session if session doesn't exist"
 tmux new-session -d -s UDP_INJECTOR 
 tmux send-keys -t UDP_INJECTOR "injector" C-m
+
+ps aux | grep python | grep -v grep
 
 echo "New station added!"
