@@ -3,8 +3,6 @@
 #    - run addDosimeterToDB.py
 #    - restart udp_injector.py to pick up new location
 
-. ~/.keychain/$HOSTNAME-sh
-
 numargs=$#
 
 if [[ numargs < 6 ]]
@@ -31,14 +29,10 @@ echo "Adding new station to database"
 python ~/git/dosenet_dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
 
 echo "Stopping udp_injector"
-sudo killall python &
+killall python
 
-echo "Restarting udp_injector"
-#screen -dm python udp_injector.py
+echo "Restarting udp_injector ... start new session if session doesn't exist"
 tmux new-session -d -s UDP_INJECTOR 
-tmux send-keys -t UDP_INJECTOR "~/anaconda/bin/python udp_injector.py" C-m
-
-echo "killing all old tmux sessions..."
-tmux kill-session -a
+tmux send-keys -t UDP_INJECTOR "injector" C-m
 
 echo "New station added!"
