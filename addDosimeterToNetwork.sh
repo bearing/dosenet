@@ -5,10 +5,11 @@
 
 numargs=$#
 
-if [[ numargs < 6 ]]
+if [[ $numargs < 6 ]]
 then
   echo "Not enough arguments!"
   python ~/git/dosenet_dev/addDosimeterToDB.py -h
+  exit -1
 fi
 
 NAME=$1
