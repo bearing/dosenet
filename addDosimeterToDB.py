@@ -16,6 +16,7 @@ import MySQLdb as mdb
 import argparse
 import itertools
 import csv
+from timezonefinder.timezonefinder import TimezoneFinder
 
 class Parser:
     def __init__(self):
@@ -54,6 +55,9 @@ class DBTool:
         self.nickname = nickname
         self.lat = lat
         self.lon = lon
+        tf = TimezoneFinder()
+        self.timezone = tf.timezone_at(lon, lat)
+        print 'New location at (lat,long) = (', lat, ',', lon, ') in timezone: ', self.timezone
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
         self.display = display
