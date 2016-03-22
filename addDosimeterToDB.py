@@ -78,21 +78,21 @@ class DBTool:
     def addDosimeter(self):
         # Adds a row to dosimeter_network.stations
         sql = ("INSERT INTO stations " +
-               "(`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`) " +
+               "(`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
                "VALUES " +
-               "('%s','%s','%s','%s','%s','%s','This should not be here :(','%s');"
-               % (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv, self.display, self.nickname))
+               "('%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
+               % (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv, self.display, self.nickname, self.timezone))
         self.runSQL(sql)
         self.main()
 
     def addDosimeterWithID(self):
         sql = (
             "INSERT INTO stations " +
-            "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`) " +
+            "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
             "VALUES " +
-            "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s');"
+            "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
             % (self.ID, self.name, self.lat, self.lon, self.cpmtorem,
-               self.cpmtousv, self.display, self.nickname))
+               self.cpmtousv, self.display, self.nickname, self.timezone))
         self.runSQL(sql)
         self.main()
 
