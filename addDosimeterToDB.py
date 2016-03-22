@@ -20,7 +20,7 @@ from timezonefinder.timezonefinder import TimezoneFinder
 
 class Parser:
     def __init__(self):
-        parser = argparse.ArgumentParser('needs more arguments... use -h for help menu')
+        parser = argparse.ArgumentParser('use -h for list of arguments')
         parser.add_argument(
             '--ID', type=int, nargs=1, required=False,
             help='Auto generated if not manually set.')
@@ -57,7 +57,7 @@ class DBTool:
         self.lon = lon
         tf = TimezoneFinder()
         self.timezone = tf.timezone_at(lon, lat)
-        print 'New location at (lat,long) = (', lat, ',', lon, ') in timezone: ', self.timezone
+        print 'New location at (', lat, ',', lon, ') in', self.timezone, ' timezone'
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
         self.display = display
@@ -170,7 +170,6 @@ class DBTool:
         except (KeyboardInterrupt, SystemExit):
             pass
         except Exception, e:
-            print sql
             raise e
 
     def makeCSV(self):
