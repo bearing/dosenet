@@ -11,6 +11,7 @@ LAT=$3
 LONG=$4
 CONV=$5
 DISPLAY=$6
+ID=$7
 
 echo "NAME = ${NAME}"
 echo "NICKNAME = ${NICKNAME}"
@@ -18,16 +19,23 @@ echo "LAT = ${LAT}"
 echo "LONG = ${LONG}"
 echo "CONV = ${CONV}"
 echo "DISPLAY = ${DISPLAY}"
+echo "ID = ${ID}"
 
 if [[ $numargs < 6 ]]
 then
   echo "Not enough arguments!"
   python ~/git/dosenet_dev/addDosimeterToDB.py -h
+  echo "Add option ID argument last"
   exit -1
 fi
 
 echo "Adding new station to database"
-python ~/git/dosenet_dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
+if [[ $ID != 0 ]]
+then
+  python ~/git/dosenet_dev/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
+else
+  python ~/git/dosenet_dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY  
+fi
 
 echo "Stopping udp_injector"
 killall python
