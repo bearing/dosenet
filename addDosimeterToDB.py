@@ -88,7 +88,7 @@ class DBTool:
         #determine ID based on list of IDs already in use in database
         sql = ("SELECT ID FROM stations;")
         id_range = self.runSQL(sql, everything=True)
-        print 'first ID in list of IDs in database is', type(id_range[0])
+        print 'first ID in list of IDs in database is', id_range[0][0]
         self.setID(id_range)
 
         # Adds a row to dosimeter_network.stations
