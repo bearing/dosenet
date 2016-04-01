@@ -15,26 +15,33 @@ import sys
 import MySQLdb as mdb
 import argparse
 import itertools
-
+import csv
+import re
+from timezonefinder.timezonefinder import TimezoneFinder
 
 class Parser:
     def __init__(self):
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser('use -h for list of arguments')
         parser.add_argument(
             '--ID', type=int, nargs=1, required=False,
-            help=('Auto generated if not manually set. Does not compensate ' +
-                  'for collisions that you may make.'))
+            help='Auto generated if not manually set.')
         parser.add_argument(
-            '--name', type=str, nargs=1, required=True, help='')
+            'name', type=str, nargs=1, help='full name for plotting', metavar='NAME')
         parser.add_argument(
-            '--latlong', type=float, nargs=2, required=True, help='')
+            'nickname', type=str, nargs=1, help='short name for csv files', metavar='NICKNAME')
         parser.add_argument(
-            '--conv', type=float, nargs=2, required=True, help='')
+            'lat', type=float, nargs=1, help='', metavar='LATITUDE')
+        parser.add_argument(
+            'long', type=float, nargs=1, help='', metavar='LONGITUDE')
+        parser.add_argument(
+            'conv', type=float, nargs=1, help='CPM to mrem', metavar='CONV')
+        parser.add_argument(
+            'display', type=int, nargs=1, help='display on(1)/off(0)', metavar='DISPLAY')
         self.args = parser.parse_args()
 
 
 class DBTool:
-    def __init__(self, name, lat, lon, cpmtorem, cpmtousv, *ID):
+    def __init__(self, name, nickname, lat, lon, cpmtorem, display, *ID):
         # Open database connection
         self.db = mdb.connect(
             "127.0.0.1",
@@ -43,16 +50,22 @@ class DBTool:
             "dosimeter_network")
         try:
             self.ID = ID[0]
-        except Exception as e:
+        except Exception as ex:
             print 'Auto generating ID, good choice.'
         self.name = name
+        self.nickname = nickname
         self.lat = lat
         self.lon = lon
+        tf = TimezoneFinder()
+        self.timezone = tf.timezone_at(lon, lat)
+        print 'New location at (', lat, ',', lon, ') in', self.timezone, ' timezone'
         self.cpmtorem = cpmtorem
-        self.cpmtousv = cpmtousv
+        self.cpmtousv = cpmtorem*10
+        self.display = display
         # prepare a cursor object using cursor() method
         self.cursor = self.db.cursor()
         self.md5hash = ''
+        self.new_station = ''
         self.initialState = self.getInitialState()
         if not ID:
             self.addDosimeter()
@@ -63,24 +76,39 @@ class DBTool:
         sql = "SELECT `Name`, IDLatLongHash FROM stations;"
         return self.runSQL(sql, everything=True)
 
+    def setID(self, id_range):
+        next_id = 0
+        for i in range(0, len(id_range)):
+            this_id = id_range[i][0]
+            if this_id < 10000:
+                print 'checking next ID: ', this_id
+                next_id = max(this_id, next_id)
+        print 'found final ID: ', next_id+1
+        self.ID = next_id+1
+
     def addDosimeter(self):
+        #determine ID based on list of IDs already in use in database
+        sql = ("SELECT ID FROM stations;")
+        id_range = self.runSQL(sql, everything=True) #returns a python tuple with one element
+        self.setID(id_range)
+
         # Adds a row to dosimeter_network.stations
         sql = ("INSERT INTO stations " +
-               "(`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) " +
+               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
                "VALUES " +
-               "('%s','%s','%s','%s','%s','This should not be here :(');"
-               % (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv))
+               "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
+               % (self.ID,self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv, self.display, self.nickname, self.timezone))
         self.runSQL(sql)
         self.main()
 
     def addDosimeterWithID(self):
         sql = (
             "INSERT INTO stations " +
-            "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,IDLatLongHash) " +
+            "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
             "VALUES " +
-            "('%s','%s','%s','%s','%s','%s','This should not be here :(');"
+            "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
             % (self.ID, self.name, self.lat, self.lon, self.cpmtorem,
-               self.cpmtousv))
+               self.cpmtousv, self.display, self.nickname, self.timezone))
         self.runSQL(sql)
         self.main()
 
@@ -93,7 +121,7 @@ class DBTool:
         self.ID = self.runSQL(sql, least=True)
         if 1 <= self.ID <= 3:
             print 'Check the DB (stations) - there\'s probably an ID collision'
-        elif self.ID <= 0:
+        elif self.ID < 0:
             print 'ID less than 0?? There\'s a problem afoot'
         elif self.ID is None:
             print 'ID is None... Byyeeeeeeee'
@@ -124,10 +152,14 @@ class DBTool:
         return self.runSQL(sql, less=True)
 
     def checkIfDuplicate(self):
-        # Check for Name or MD5 hash collision (duplicate entry)
+        # Check for Name, ID, or MD5 hash collision (duplicate entry)
         print 'Checking for duplicates...'
         if any(str(self.name) in i for i in self.initialState):
             print ('ERROR: Duplicate NAME detected, not commiting changes. ' +
+                   'Byyeeeeeeee')
+            return True
+        elif any(str(self.ID) in i for i in self.initialState):
+            print ('ERROR: Duplicate ID detected, not commiting changes. ' +
                    'Byyeeeeeeee')
             return True
         elif any(str(self.md5hash) in i for i in self.initialState):
@@ -154,8 +186,14 @@ class DBTool:
         except (KeyboardInterrupt, SystemExit):
             pass
         except Exception, e:
-            print sql
             raise e
+
+    def makeCSV(self):
+        fname = "/home/dosenet/config-files/%s.csv" % (self.nickname)
+        with open(fname, 'wb') as csvfile:
+            stationwriter = csv.writer(csvfile, delimiter=',')
+            stationwriter.writerow(['stationID', 'message_hash', 'lag', 'long'])
+            stationwriter.writerow([self.ID, self.md5hash, self.lat, self.lon])
 
     def main(self):
         self.duplicate = True
@@ -170,24 +208,27 @@ class DBTool:
             self.new_station = self.getNewStation()
             print self.new_station
             if not self.checkIfDuplicate():
-                print 'Good news: Committing changes. That\'s it.'
+                print 'Generating csv file for this location'
+                self.makeCSV()
+                print 'Good news: Committing changes! All done!'
                 self.db.commit()
                 print 'SUCESSSSSS'
-        except Exception as e:
+        except Exception as ex:
             print '\t ~~~~ FAILED ~~~~'
-            raise e
+            raise ex
 
 if __name__ == "__main__":
     parse = Parser()
     name = parse.args.name[0]
+    nickname = parse.args.nickname[0]
     print name
-    lat = parse.args.latlong[0]
-    lon = parse.args.latlong[1]
+    lat = parse.args.lat[0]
+    lon = parse.args.long[0]
     cpmtorem = parse.args.conv[0]
-    cpmtousv = parse.args.conv[1]
+    display = parse.args.display[0]
     if not parse.args.ID:
-        dbtool = DBTool(name, lat, lon, cpmtorem, cpmtousv)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display)
     else:
         ID = parse.args.ID[0]
         print 'Forced ID: ', ID
-        dbtool = DBTool(name, lat, lon, cpmtorem, cpmtousv, ID)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, ID)
