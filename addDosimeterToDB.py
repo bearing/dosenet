@@ -75,13 +75,24 @@ class DBTool:
         sql = "SELECT `Name`, IDLatLongHash FROM stations;"
         return self.runSQL(sql, everything=True)
 
+    def setID(self, IDlist):
+        this_id = 0
+        for i in range(0, len(IDlist)):
+            if IDlist[i] < 10000:
+                this_id = max(this_id, IDlist[i])
+        self.ID = this_id
+
     def addDosimeter(self):
+        #determine ID based on list of IDs already in use in database
+        sql = ("SELECT ID FROM stations;")
+        self.setID(self.runSQL(sql))
+
         # Adds a row to dosimeter_network.stations
         sql = ("INSERT INTO stations " +
-               "(`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
+               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
                "VALUES " +
-               "('%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
-               % (self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv, self.display, self.nickname, self.timezone))
+               "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
+               % (self.ID,self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv, self.display, self.nickname, self.timezone))
         self.runSQL(sql)
         self.main()
 
