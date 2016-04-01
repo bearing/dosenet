@@ -24,7 +24,7 @@ echo "ID = ${ID}"
 if [[ $numargs < 6 ]]
 then
   echo "Not enough arguments!"
-  python ~/git/dosenet_dev/addDosimeterToDB.py -h
+  python ~/git/dosenet/addDosimeterToDB.py -h
   echo "Add option ID argument last"
   exit -1
 fi
@@ -32,9 +32,9 @@ fi
 echo "Adding new station to database"
 if [[ $ID != 0 ]]
 then
-  python ~/git/dosenet_dev/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
+  python ~/git/dosenet/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
 else
-  python ~/git/dosenet_dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY  
+  python ~/git/dosenet/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY  
 fi
 
 echo "Stopping udp_injector"
