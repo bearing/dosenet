@@ -75,17 +75,19 @@ class DBTool:
         sql = "SELECT `Name`, IDLatLongHash FROM stations;"
         return self.runSQL(sql, everything=True)
 
-    def setID(self, IDlist):
+    def setID(self, id_range):
         this_id = 0
-        for i in range(0, len(IDlist)):
-            if IDlist[i] < 10000:
-                this_id = max(this_id, IDlist[i])
+        for i in range(0, len(id_range)):
+            if id_range[i] < 10000:
+                this_id = max(this_id, id_range[i])
         self.ID = this_id
 
     def addDosimeter(self):
         #determine ID based on list of IDs already in use in database
         sql = ("SELECT ID FROM stations;")
-        self.setID(self.runSQL(sql))
+        id_range = self.runSQL(sql)
+        print id_range
+        self.setID(id_range)
 
         # Adds a row to dosimeter_network.stations
         sql = ("INSERT INTO stations " +
