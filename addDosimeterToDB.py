@@ -16,6 +16,7 @@ import MySQLdb as mdb
 import argparse
 import itertools
 import csv
+import re
 from timezonefinder.timezonefinder import TimezoneFinder
 
 class Parser:
@@ -66,7 +67,6 @@ class DBTool:
         self.md5hash = ''
         self.new_station = ''
         self.initialState = self.getInitialState()
-        print 'Initial database state is', self.initialState
         if not ID:
             self.addDosimeter()
         else:
@@ -77,11 +77,12 @@ class DBTool:
         return self.runSQL(sql, everything=True)
 
     def setID(self, id_range):
-        this_id = 0
+        next_id = 0
         for i in range(0, len(id_range)):
+            this_id = int(re.search(r'\d+', id_range[i]).group())
             if id_range[i] < 10000:
-                this_id = max(this_id, id_range[i])
-        self.ID = this_id
+                next_id = max(this_id, next_id)
+        self.ID = next_id
 
     def addDosimeter(self):
         #determine ID based on list of IDs already in use in database
