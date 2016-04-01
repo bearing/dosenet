@@ -86,8 +86,8 @@ class DBTool:
     def addDosimeter(self):
         #determine ID based on list of IDs already in use in database
         sql = ("SELECT ID FROM stations;")
-        id_range = self.runSQL(sql)
-        print 'list of IDs in database is', self.runSQL(sql)
+        id_range = self.runSQL(sql, everything=True)
+        print 'list of IDs in database is', id_range
         self.setID(id_range)
 
         # Adds a row to dosimeter_network.stations
