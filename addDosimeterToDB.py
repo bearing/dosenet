@@ -80,8 +80,8 @@ class DBTool:
         next_id = 0
         for i in range(0, len(id_range)):
             this_id = id_range[i][0]
-            print 'checking next ID: ', this_id
-            if id_range[i] < 10000:
+            if this_id < 10000:
+                print 'checking next ID: ', this_id
                 next_id = max(this_id, next_id)
         print 'found final ID: ', next_id
         self.ID = next_id
