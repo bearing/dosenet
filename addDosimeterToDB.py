@@ -83,8 +83,8 @@ class DBTool:
             if this_id < 10000:
                 print 'checking next ID: ', this_id
                 next_id = max(this_id, next_id)
-        print 'found final ID: ', next_id
-        self.ID = next_id
+        print 'found final ID: ', next_id+1
+        self.ID = next_id+1
 
     def addDosimeter(self):
         #determine ID based on list of IDs already in use in database
