@@ -66,6 +66,7 @@ class DBTool:
         self.md5hash = ''
         self.new_station = ''
         self.initialState = self.getInitialState()
+        print 'Initial database state is', self.initialState
         if not ID:
             self.addDosimeter()
         else:
