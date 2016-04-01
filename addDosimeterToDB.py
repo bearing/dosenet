@@ -79,7 +79,7 @@ class DBTool:
     def setID(self, id_range):
         next_id = 0
         for i in range(0, len(id_range)):
-            this_id = int(re.search(r'\d+', id_range[i]).group())
+            this_id = id_range[i][0]
             if id_range[i] < 10000:
                 next_id = max(this_id, next_id)
         self.ID = next_id
@@ -87,8 +87,7 @@ class DBTool:
     def addDosimeter(self):
         #determine ID based on list of IDs already in use in database
         sql = ("SELECT ID FROM stations;")
-        id_range = self.runSQL(sql, everything=True)
-        print 'first ID in list of IDs in database is', id_range[0][0]
+        id_range = self.runSQL(sql, everything=True) #returns a python tuple with one element
         self.setID(id_range)
 
         # Adds a row to dosimeter_network.stations
