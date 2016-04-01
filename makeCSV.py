@@ -43,4 +43,5 @@ for sid, name, nick in zip(stations.index, stations['Name'], stations['nickname'
     except Exception as e:
         print('Network Error: Cannot SCP to Kepler')
         raise e
+    time.sleep(10)
 print('Total run time: {:.2f} sec'.format(time.time() - start_time))

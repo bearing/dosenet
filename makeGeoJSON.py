@@ -118,6 +118,7 @@ class Plot(object):
             #                  layout=layout),
             #                  filename=fname,
             #                  auto_open=False)
+
             print fname, 'Plot.ly:', ("%.2f" % (time.time() - t0)), 's'
             return plotURL
         except (KeyboardInterrupt, SystemExit):
