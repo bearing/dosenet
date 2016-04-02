@@ -194,7 +194,7 @@ class SQLObject:
         return df
 
     def getLastDay(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['time']
+        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
         df = self.getDataForStationByRange(
             stationID,
             lastest_dt + relativedelta(days=-1),
@@ -203,7 +203,7 @@ class SQLObject:
         return df
 
     def getLastWeek(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['time']
+        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
         df = self.getDataForStationByRange(
             stationID,
             lastest_dt + relativedelta(days=-7),
@@ -212,7 +212,7 @@ class SQLObject:
         return df
 
     def getLastMonth(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['time']
+        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
         df = self.getDataForStationByRange(
             stationID,
             lastest_dt + relativedelta(months=-1),
@@ -221,7 +221,7 @@ class SQLObject:
         return df
 
     def getLastYear(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['time']
+        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
         df = self.getDataForStationByRange(
             stationID,
             lastest_dt + relativedelta(months=-12),
