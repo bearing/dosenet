@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import MySQLdb as mdb
-import email_message
+# import email_message
 import pandas as pd
-import os
+# import os
 import sys
 from dateutil.relativedelta import relativedelta
 
@@ -20,10 +20,16 @@ class SQLObject:
         self.getVerifiedStationList()
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except:
+            pass
 
     def __exit__(self):
-        self.close()
+        try:
+            self.close()
+        except:
+            pass
 
     def close(self):
         self.db.close()
@@ -36,8 +42,8 @@ class SQLObject:
             raise e
             msg = 'Error: Could not get list of stations from the database!'
             print(msg)
-            email_message.send_email(
-                process=os.path.basename(__file__), error_message=msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
 
     def checkHashFromRAM(self, ID):
         # Essentially the same as doing the following in MySQL
@@ -52,8 +58,8 @@ class SQLObject:
             return False
             msg = 'Error: Could not find a station matching that ID'
             print(msg)
-            email_message.send_email(
-                process=os.path.basename(__file__), error_message=msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
 
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag):
         self.cursor.execute(
@@ -68,16 +74,16 @@ class SQLObject:
             print('~~ FAILED AUTHENTICATION ~~')
             print('Data: ', data)
             msg = str('FAILED AUTHENTICATION\n', data)
-            email_message.send_email(
-                process=os.path.basename(__file__), error_message=msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
         else:
             data = self.parsePacket(data)
             if(data):
                 if data[2] > 100:  # if cpm > 100
                     msg = 'CPM more than 100 - assumed to be noise event.\n NOT INJECTING.'
                     print(msg)
-                    email_message.send_email(
-                        process=os.path.basename(__file__), error_message=msg)
+                    # email_message.send_email(
+                    #     process=os.path.basename(__file__), error_message=msg)
                 else:
                     self.insertIntoDosenet(stationID=data[1],
                                            cpm=data[2],
@@ -86,8 +92,8 @@ class SQLObject:
             else:
                 msg = '~~ FAILED TO INJECT/PARSE ~~'
                 print(msg)
-                email_message.send_email(
-                    process=os.path.basename(__file__), error_message=msg)
+                # email_message.send_email(
+                #     process=os.path.basename(__file__), error_message=msg)
 
     def getHashList(self):
         return self.verified_stations
