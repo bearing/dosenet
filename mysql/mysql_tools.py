@@ -167,26 +167,20 @@ class SQLObject:
         return df
 
     def getLatestStationData(self, stationID):
-        self.cursor.execute(
-            "SELECT stationID, Name, receiveTime, cpm, cpmError \
-            FROM dosnet \
-            INNER JOIN stations \
-            ON dosnet.stationID = stations.ID \
-            WHERE receiveTime = \
-            (SELECT MAX(receiveTime) \
-            FROM dosnet \
-            WHERE stationID='{0}') \
-            AND stationID='{0}';".format(stationID)
-        )
-        result = self.cursor.fetchall()
-        assert len(result) == 1, 'More than one recent result returned for {}'.format(stationID)
-        result = result[0]
-        data = {}
-        data['id'] = result[0]
-        data['name'] = result[1]
-        data['time'] = result[2]
-        data['cpm'] = result[3]
-        data['cpm_err'] = result[4]
+        df = pd.read_sql(
+            "SELECT * \
+             FROM dosnet \
+             INNER JOIN stations \
+             ON dosnet.stationID = stations.ID \
+             WHERE receiveTime = \
+                (SELECT MAX(receiveTime) \
+                FROM dosnet \
+                WHERE stationID='{0}') \
+                AND stationID='{0}';".format(stationID),
+            con=self.db)
+        df.set_index(df['Name'], inplace=True)
+        assert len(df) == 1, 'More than one recent result returned for {}'.format(stationID)
+        data = df.iloc[0]
         return data
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
