@@ -153,7 +153,7 @@ class SQLObject:
 
     def getStations(self):
         df = pd.read_sql(
-            "SELECT ID, `Name`, Lat, `Long`, cpmtorem, cpmtousv, display, nickname \
+            "SELECT * \
             FROM dosimeter_network.stations;",
             con=self.db)
         df.set_index(df['ID'], inplace=True)
