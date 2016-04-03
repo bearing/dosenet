@@ -7,6 +7,7 @@ from geojson import Point, Feature, FeatureCollection
 import time
 import datetime
 from mysql.mysql_tools import SQLObject
+from makeCSV import get_webserver_csv_path
 
 docstring = """
 Main makeGeoJSON and transfer to KEPLER webserver 
@@ -66,7 +67,7 @@ def main(testing=False, verbose=False, fname_geojson='output.geojson',
                       'Latest dose (mREM/hr)': str(dose_mrem),
                       'Latest dose (&microSv/hr)': str(dose_usv),
                       'Latest measurement': str(latest_data['receiveTime']),
-                      'CSV_LOCATION': ''}
+                      'CSV_LOCATION': get_webserver_csv_path(latest_data['nickname'])}
         feature_list.append(Feature(geometry=point, properties=properties))
     # -------------------------------------------------------------------------
     # Close database connection
