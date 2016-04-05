@@ -6,7 +6,7 @@ REMOTE_USERNAME = 'jccurtis'
 # Default geojson paths
 LOCAL_GEOJSON_PATH = os.path.join(os.getcwd(), 'tmp/geojson/')
 REMOTE_GEOJSON_PATH = \
-    '/var/www/html/htdocs-nuc-groups/radwatch-7.32/sites/default/files/'
+    '/var/www/html/htdocs-nuc-groups/radwatch/sites/default/files/'
 # Default geojson filename
 GEOJSON_FNAME = 'output.geojson'
 # Default CSV paths
