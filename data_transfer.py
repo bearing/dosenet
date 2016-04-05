@@ -82,6 +82,10 @@ class FileForWebserver(object):
         """Base filename"""
         self.fname = fname
 
+    def get_fname(self):
+        """Get base filename"""
+        return self.fname
+
     def set_local_path(self, path):
         """Path of local directory, make it if it does not exist"""
         self.local_path = path
@@ -112,7 +116,7 @@ class FileForWebserver(object):
         self.open_file()
         try:
             self.get_file().write(data_string)
-
+            self.print_local_file_saved()
         except Exception as e:
             print('Cannot write here:', self.get_local_fname())
             print(e)
@@ -149,11 +153,11 @@ class CsvForWebserver(FileForWebserver):
         obj.set_fname(nickname + '.csv')
         return obj
 
-
-def get_remote_csv_fname_from_nickname(nickname, **kwargs):
-    """Shortcut to get remote fname from nickname"""
-    csvfile = CsvForWebserver.from_nickname(nickname, **kwargs)
-    return csvfile.get_remote_fname()
+    @staticmethod
+    def get_remote_csv_fname_from_nickname(nickname, **kwargs):
+        """Shortcut to get remote fname from nickname"""
+        csvfile = CsvForWebserver.from_nickname(nickname, **kwargs)
+        return csvfile.get_remote_fname()
 
 
 class GeoJsonForWebserver(FileForWebserver):
