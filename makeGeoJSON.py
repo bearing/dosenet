@@ -60,9 +60,9 @@ def main(testing=False, verbose=False, **kwargs):
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
         properties = {
             'Name': latest_data['Name'],
-            'Latest dose (CPM)': str(latest_data['cpm']),
-            'Latest dose (mREM/hr)': str(dose_mrem),
-            'Latest dose (&microSv/hr)': str(dose_usv),
+            'Latest dose (CPM)': latest_data['cpm'],
+            'Latest dose (mREM/hr)': dose_mrem,
+            'Latest dose (&microSv/hr)': dose_usv,
             'Latest measurement': str(latest_data['receiveTime']),
             'CSV_LOCATION': get_remote_csv_fname_from_nickname(
                 latest_data['nickname'])}
