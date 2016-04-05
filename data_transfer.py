@@ -120,8 +120,8 @@ class FileForWebserver(object):
         except Exception as e:
             print('Cannot write here:', self.get_local_fname())
             print(e)
-        self.close_file()
-        self.print_local_file_saved()
+        finally:
+            self.close_file()
 
     def df_to_file(self, df):
         self.open_file()
@@ -131,8 +131,8 @@ class FileForWebserver(object):
         except Exception as e:
             print('Cannot write here:', self.get_local_fname())
             print(e)
-        self.close_file()
-        self.print_local_file_saved()
+        finally:
+            self.close_file()
 
     def print_local_file_saved(self):
         print('Saved ({}):\n    {}'.format(
