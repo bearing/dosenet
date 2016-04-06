@@ -192,7 +192,7 @@ class DBTool:
         fname = "/home/dosenet/config-files/%s.csv" % (self.nickname)
         with open(fname, 'wb') as csvfile:
             stationwriter = csv.writer(csvfile, delimiter=',')
-            stationwriter.writerow(['stationID', 'message_hash', 'lag', 'long'])
+            stationwriter.writerow(['stationID', 'message_hash', 'lat', 'long'])
             stationwriter.writerow([self.ID, self.md5hash, self.lat, self.lon])
 
     def main(self):
