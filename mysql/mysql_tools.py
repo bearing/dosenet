@@ -61,81 +61,45 @@ class SQLObject:
             # email_message.send_email(
             #     process=os.path.basename(__file__), error_message=msg)
 
-    def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag):
+    def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag, **kwargs):
         self.cursor.execute(
             "INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
-             VALUES ('%s','%s','%s','%s');".format(
+             VALUES ('{}','{}','{}','{}');".format(
                 stationID, cpm, cpm_error, error_flag))
         # Time is decided by the MySQL database / DoseNet hence 'receiveTime' field in DB
         self.db.commit()
 
     def inject(self, data):
-        if not self.authenticatePacket(data):
-            print('~~ FAILED AUTHENTICATION ~~')
-            print('Data: ', data)
-            msg = str('FAILED AUTHENTICATION\n', data)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
-        else:
-            data = self.parsePacket(data)
-            if(data):
-                if data[2] > 100:  # if cpm > 100
-                    msg = 'CPM more than 100 - assumed to be noise event.\n NOT INJECTING.'
-                    print(msg)
-                    # email_message.send_email(
-                    #     process=os.path.basename(__file__), error_message=msg)
-                else:
-                    self.insertIntoDosenet(stationID=data[1],
-                                           cpm=data[2],
-                                           cpm_error=data[3],
-                                           error_flag=data[4])
-            else:
-                msg = '~~ FAILED TO INJECT/PARSE ~~'
-                print(msg)
-                # email_message.send_email(
-                #     process=os.path.basename(__file__), error_message=msg)
+        auth = self.authenticatePacket(data)
+        assert auth is None, auth
+        self.insertIntoDosenet(**data)
 
     def getHashList(self):
         return self.verified_stations
 
     def authenticatePacket(self, data):
         '''
-        Checks hash in hash list and compares against ID.
+        Checks hash in hash list and compares against ID. Returns string if
+        not authenticated. Otherwise returns None (success)
         '''
-        hash_list = self.getHashList()
-        # Is it the correct hash length?
-        msg_hash = data[:32]
-        # Verify the hash is in the list
-        if not any(str(msg_hash) in i for i in hash_list):
-            print('Message Hash:', msg_hash)
-            print('Hash list:', hash_list)
-            print('Hash is not in list')
-            return False
-        # Ok, we think this could be a real station
-        ID       = int(data.split(',')[1])
-        db_hash  = self.checkHashFromRAM(ID)
-        # Is it an authenticated station with a matching database entry?
-        if db_hash == msg_hash:
-            return True
-        else:
-            print('ID:', ID, 'Hash from database:', db_hash, 'Hash from message', msg_hash)
-            return False  # Valid data, not authenticated station.
-
-    def parsePacket(self, data):
-        data = data.split(',')  # Commas are our delimiters for the decrypted message
-        msg_hash = data[0]
-        if len(msg_hash) == 32:  # All is good. Cast as known data types
-            stationID   = int(data[1])
-            cpm         = float(data[2])
-            cpm_error   = float(data[3])
-            error_flag  = int(data[4])
-            return (msg_hash, stationID, cpm, cpm_error, error_flag)
-        else:
-            return False
-            print('Data:', data)
-            print('Message hash', msg_hash)
-            print('Station ID: "{}", CPM: "{}", CPM error: "{}", Error flag: "{}"'.format(
-                stationID, cpm, cpm_error, error_flag))
+        if not isinstance(data, dict):
+            return 'Inject data is not a dict: {}'.format(data)
+        # Check data for keys
+        data_types = {'hash': str, 'stationID': int, 'cpm': float,
+                      'cpm_error': float, 'error_flag': int}
+        for k in data_types:
+            if k not in data:
+                return 'No {} in data: {}'.format(k, data)
+            if not isinstance(data[k], data_types[k]):
+                return 'Incorrect type for {}: {} (should be {})'.format(
+                    k, type(data[k]), data_types[k])
+        hashes = self.getStations()['IDLatLongHash']
+        # Check for this specific hash
+        if data['hash'] != hashes[data['stationID']]:
+            return 'Data hash ({}) does not match stationID () hash ()'.format(
+                data['hash'], data['stationID'], hashes[data['stationID']])
+        # Everything checks out
+        return None
 
     def getHashFromDB(self, ID):
         # RUN "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
@@ -182,6 +146,9 @@ class SQLObject:
         assert len(df) == 1, 'More than one recent result returned for {}'.format(stationID)
         data = df.iloc[0]
         return data
+
+    def getInjectorStation(self):
+        return self.getStations().loc[0, :]
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
         q = "SELECT receiveTime, cpm, cpmError \
