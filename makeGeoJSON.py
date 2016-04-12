@@ -59,6 +59,7 @@ def main(testing=False, verbose=False, **kwargs):
         latest_data = DB.getLatestStationData(ix)
         dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
+        timezone = latest_data['timezone']
         csvfile = CsvForWebserver.from_nickname(latest_data['nickname'])
         properties = OrderedDict([
             ('Name', latest_data['Name']),
@@ -66,7 +67,8 @@ def main(testing=False, verbose=False, **kwargs):
             ('mREM/hr', dose_mrem),
             ('&microSv/hr', dose_usv),
             ('Latest measurement', str(latest_data['receiveTime'])),
-            ('CSV_LOCATION', csvfile.get_fname())])
+            ('csv_location', csvfile.get_fname()),
+            ('timezone', timezone)])
         feature_list.append(Feature(geometry=point, properties=properties))
     # -------------------------------------------------------------------------
     # Close database connection
