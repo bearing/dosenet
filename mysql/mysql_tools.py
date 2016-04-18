@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import MySQLdb as mdb
-# import email_message
 import pandas as pd
-# import os
 import sys
+import datetime
+import time
+import pytz
 from dateutil.relativedelta import relativedelta
 
+
+def datetime_tz(year, month, day, hour=0, minute=0, second=0, tz='UTC'):
+    dt_naive = datetime.datetime(year, month, day, hour, minute, second)
+    tzinfo = pytz.timezone(tz)
+    return tzinfo.localize(dt_naive)
+
+
+def epoch_to_datetime(epoch, tz='UTC'):
+    """Return datetime with associated timezone."""
+    dt_utc = datetime_tz(1970, 1, 1, tz='UTC') + datetime.timedelta(seconds=epoch)
+    tzinfo = pytz.timezone(tz)
+    return dt_utc.astimezone(tzinfo)
+
+
 class SQLObject:
-    def __init__(self):
+    def __init__(self, tz='+00:00'):
         # NOTE should eventually update names (jccurtis)
         self.db = mdb.connect(
             '127.0.0.1',
@@ -17,7 +32,10 @@ class SQLObject:
             'dosimeter_network')
         self.verified_stations = []
         self.cursor = self.db.cursor()
+        self.set_session_tz(tz)
         self.getVerifiedStationList()
+        self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
+        self.test_station_ids_ix = 0
 
     def __del__(self):
         try:
@@ -30,6 +48,10 @@ class SQLObject:
             self.close()
         except:
             pass
+
+    def set_session_tz(self, tz):
+        print('[CONFIG] Setting session timezone to: {}'.format(tz))
+        self.cursor.execute("SET time_zone='{}';".format(tz))
 
     def close(self):
         self.db.close()
@@ -61,11 +83,18 @@ class SQLObject:
             # email_message.send_email(
             #     process=os.path.basename(__file__), error_message=msg)
 
-    def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag, **kwargs):
+    def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
+                          receiveTime=None, **kwargs):
+        if receiveTime is None:
+            dt = epoch_to_datetime(time.time(), tz='UTC')
+            # NOTE:
+            #   %f is for microseconds
+            #   %z is for timezone offset hours (not used)
+            receiveTime = '{:%Y-%m-%dT%H:%M:%S.%f}'.format(dt)
         self.cursor.execute(
-            "INSERT INTO dosnet(stationID, cpm, cpmError, errorFlag) \
-             VALUES ('{}','{}','{}','{}');".format(
-                stationID, cpm, cpm_error, error_flag))
+            "INSERT INTO dosnet(receiveTime, stationID, cpm, cpmError, errorFlag) \
+             VALUES ('{}', '{}','{}','{}','{}');".format(
+                receiveTime, stationID, cpm, cpm_error, error_flag))
         # Time is decided by the MySQL database / DoseNet hence 'receiveTime' field in DB
         self.db.commit()
 
@@ -149,6 +178,15 @@ class SQLObject:
 
     def getInjectorStation(self):
         return self.getStations().loc[0, :]
+
+    def getNextTestStation(self):
+        test_station = self.getStations().loc[self.test_station_ids[self.test_station_ids_ix], :]
+        # Cycle!
+        if self.test_station_ids_ix == len(self.test_station_ids) - 1:
+            self.test_station_ids_ix = 0
+        else:
+            self.test_station_ids_ix += 1
+        return test_station
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
         q = "SELECT receiveTime, cpm, cpmError \
