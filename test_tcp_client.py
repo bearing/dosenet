@@ -4,7 +4,7 @@
 from __future__ import print_function
 import socket
 import time
-
+from contextlib import closing      # for the 'with' statement
 
 server_address = 'dosenet.dhcp.lbl.gov'
 server_port = 6898
@@ -16,7 +16,7 @@ server_port = 6898
 
 def main():
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         print('Connecting...')
         s.connect((server_address, server_port))
         print('Connected')
@@ -27,13 +27,13 @@ def main():
 
     time.sleep(3)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         print('Connecting...')
         s.connect((server_address, server_port))
         print('Connected')
         message2 = 'I have something else to say'
         print('  Sending message: {}'.format(message2))
-        s.sendall(message1)
+        s.sendall(message2)
         print('...done')
 
     time.sleep(3)
