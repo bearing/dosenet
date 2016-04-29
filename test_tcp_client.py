@@ -31,14 +31,14 @@ def main():
     s.sendall(message1)
     print('...done')
 
-    time.sleep(5)
+    time.sleep(3)
 
     message2 = "I want to send another message"
     print('Sending message: {}'.format(message2))
     s.sendall(message2)
     print('...done')
 
-    time.sleep(10)
+    time.sleep(3)
 
 if __name__ == '__main__':
     main()

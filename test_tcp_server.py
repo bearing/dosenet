@@ -28,6 +28,8 @@ while True:
     # accept() blocks until a connection is made.
     conn, addr = s.accept()
     print('Got a connection from {}'.format(addr))
+
+    # This only handles a single connection! ~~~> see SocketServer
     try:
         while True:
             print('Waiting for data...')
