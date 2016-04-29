@@ -17,12 +17,8 @@ class MyHandler(SocketServer.BaseRequestHandler):
     """Define the handle() method to handle requests"""
 
     def handle(self):
-        while True:
-            data = self.request.recv(1024)
-            if data:
-                print(self.client_address, data)
-            else:
-                break
+        data = self.request.recv(1024)
+        print(self.client_address, data)
 
 
 if __name__ == '__main__':

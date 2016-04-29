@@ -6,37 +6,35 @@ import socket
 import time
 
 
-def get_connection(
-        server_address='dosenet.dhcp.lbl.gov',
-        server_port=6898):
+server_address = 'dosenet.dhcp.lbl.gov'
+server_port = 6898
 
-    # commons.lbl.gov/pages/viewpage.action?spaceKey=cpp&title=Perimeter+Protection
-    #   for open TCP ports on an LBL wired DHCP computer.
-    #   doesn't have to be 6900
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    s.connect((server_address, server_port))
-
-    return s
+# commons.lbl.gov/pages/viewpage.action?spaceKey=cpp&title=Perimeter+Protection
+#   for open TCP ports on an LBL wired DHCP computer.
+#   doesn't have to be 6900
 
 
 def main():
-    print('Connecting...')
-    s = get_connection()
-    print('Connected')
 
-    message1 = 'this is a message to send'
-    print('Sending message: {}'.format(message1))
-    s.sendall(message1)
-    print('...done')
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        print('Connecting...')
+        s.connect((server_address, server_port))
+        print('Connected')
+        message1 = 'this is a message to send'
+        print('  Sending message: {}'.format(message1))
+        s.sendall(message1)
+        print('...done')
 
     time.sleep(3)
 
-    message2 = "I want to send another message"
-    print('Sending message: {}'.format(message2))
-    s.sendall(message2)
-    print('...done')
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        print('Connecting...')
+        s.connect((server_address, server_port))
+        print('Connected')
+        message2 = 'I have something else to say'
+        print('  Sending message: {}'.format(message2))
+        s.sendall(message1)
+        print('...done')
 
     time.sleep(3)
 
