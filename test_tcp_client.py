@@ -8,7 +8,7 @@ import time
 
 def get_connection(
         server_address='dosenet.dhcp.lbl.gov',
-        server_port=6900):
+        server_port=6898):
 
     # commons.lbl.gov/pages/viewpage.action?spaceKey=cpp&title=Perimeter+Protection
     #   for open TCP ports on an LBL wired DHCP computer.
