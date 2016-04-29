@@ -29,9 +29,9 @@ print('Got a connection from {}'.format(addr))
 try:
     while True:
         print('Waiting for data...')
-        data = conn.recvfrom(buffer_size)
+        data, addr2 = conn.recvfrom(buffer_size)
         if data:
-            print('  Received data: {}'.format(data))
+            print('  Received data from {}: {}'.format(addr2, data))
         else:
             time.sleep(1)
             # does this work?
