@@ -91,7 +91,7 @@ class Injector(object):
         print('\tPrivate Key:', self.private_key)
         de = ccrypt.public_d_encrypt(key_file_lst=[self.private_key])
         print('\tDecryptor:', de)
-        self.de = de
+        self.decryptor = de
 
         # Get ip information
         if ip is None:
@@ -174,16 +174,18 @@ class Injector(object):
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
         return self.test_packet
 
-    def handle(self, data, client_address=None, request=None, mode=None):
+    def handle(self, packet, client_address=None, request=None, mode=None):
         """
         Handle one request from either UDP or TCP.
 
         Gets called in UdpHandler.handle() or TcpHandler.handle().
         """
 
-        self.print_status(data)
+        self.decrypt_packet(packet)
 
-        self.parse_packet(data)
+        self.print_status(packet)
+
+        self.parse_packet(packet)
 
         # Parse data
         try:
@@ -204,6 +206,38 @@ class Injector(object):
             print('Injection error:', e)
             continue
         self.print_status('Successfully injected!')
+
+    def decrypt_packet(self, encrypted):
+        """
+        Decrypt packet using private key.
+
+        Also check for the case of an unencrypted packet
+        """
+
+        # In standard text, all character values should be <128.
+        # Encrypted text, or text decrypted with the wrong key, will have
+        #   character values up to 255.
+        # Also, the length of encrypted stuff should be 256 characters.
+        length_encrypted = len(encrypted)
+        ascii_values_encrypted = [ord(c) for c in encrypted]
+
+        decrypted = self.decrypter.decrypt_message((encrypted,))
+
+        length_decrypted = len(decrypted)
+        ascii_values_decrypted = [ord(c) for c in decrypted]
+
+        if length_encrypted != 256 and length_decrypted == 256:
+            raise UnencryptedPacket(
+                'Packet lengths suggest that the packet was not encrypted')
+        elif (all(v < 128 for v in ascii_values_encrypted) and
+                any(v > 127 for v in ascii_values_decrypted)):
+            raise UnencryptedPacket(
+                'Character codes suggest that the packet was not encrypted')
+        elif any(v > 127 for v in ascii_values_decrypted):
+            raise BadPacket('Bad character values in decrypted packet (>127)')
+
+        return decrypted
+
 
     def print_status(self, s):
         print('[{}] {}'.format(str(datetime.datetime.now()), s))
@@ -310,6 +344,26 @@ class TcpHandler(SocketServer.StreamRequestHandler):
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
             mode='tcp')
+
+
+class InjectorError(Exception):
+    pass
+
+
+class PacketLengthError(InjectorError):
+    pass
+
+
+class HashLengthError(InjectorError):
+    pass
+
+
+class UnencryptedPacket(InjectorError):
+    pass
+
+
+class BadPacket(InjectorError):
+    pass
 
 
 def main(verbose=False, **kwargs):
