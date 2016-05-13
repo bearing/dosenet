@@ -174,25 +174,31 @@ class Injector(object):
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
         return self.test_packet
 
-    def handle(self, packet, client_address=None, request=None, mode=None):
+    def handle(self, encrypted_packet,
+               client_address=None, request=None, mode=None):
         """
         Handle one request from either UDP or TCP.
 
         Gets called in UdpHandler.handle() or TcpHandler.handle().
         """
 
-        self.decrypt_packet(packet)
+        try:
+            packet = self.decrypt_packet(encrypted_packet)
+        except UnencryptedPacket:
+            # print to screen. this could be a test message
+            print('Detected unencrypted packet:')
+            print(encrypted_packet)
+            return None
+        # except BadPacket:
+        # don't handle this. SocketServer will print traceback and
+        #   continue handling other requests
 
         self.print_status(packet)
 
-        self.parse_packet(packet)
+        # parse_packet could raise PacketLengthError or HashLengthError
+        #   let SocketServer print traceback and continue handling requests
+        data = self.parse_packet(packet)
 
-        # Parse data
-        try:
-            data = self.parse_packet(packet, verbose=self.verbose)
-        except Exception as e:
-            print('Parsing error:', e)
-            continue
         # Check CPM
         if data['cpm'] > 100:
             print('CPM > 100 (assuming noise) NOT INJECTING')
@@ -226,7 +232,8 @@ class Injector(object):
         length_decrypted = len(decrypted)
         ascii_values_decrypted = [ord(c) for c in decrypted]
 
-        if length_encrypted != 256 and length_decrypted == 256:
+        if (length_encrypted != 256 and length_decrypted == 256 and
+                all(v < 128 for v in ascii_values_encrypted)):
             raise UnencryptedPacket(
                 'Packet lengths suggest that the packet was not encrypted')
         elif (all(v < 128 for v in ascii_values_encrypted) and
@@ -238,29 +245,33 @@ class Injector(object):
 
         return decrypted
 
-
     def print_status(self, s):
         print('[{}] {}'.format(str(datetime.datetime.now()), s))
 
     def parse_packet(self, packet):
         """
-        First stage of data verification:
-          Check number of fields
-          Check length of hash
-
-        Further verification is performed in SQLObject.inject()
+        Split packet into fields
+        First stage of data verification: # fields, hash length
+        Assign fields into a dict object
         """
 
-        # Commas are our delimiters for the decrypted message
-        packet = packet.split(',')
-        if len(packet) != 5:
-            raise
-        # assert len(packet) == 5, 'Packet does not have exactly 5 fields: {}'.format(packet)
+        sep = ','
+        data_length = 5
+        hash_length = 32
+
+        fields = packet.split(sep)
+
+        if len(fields) != data_length:
+            raise PacketLengthError('Found {} fields instead of {}'.format(
+                len(fields), data_length))
+
         data = OrderedDict()
         data['hash'] = packet[0]
-        assert len(data['hash']) == 32, 'Hash not len 32: {}'.format(data['hash'])
+        if len(data['hash']) != hash_length:
+            raise HashLengthError('Hash length is not {}: {}'.format(
+                hash_length, data['hash']))
+        # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
-        # All is good. Cast as known data types
         data['stationID'] = int(packet[1])
         data['cpm'] = float(packet[2])
         data['cpm_error'] = float(packet[3])
@@ -268,6 +279,7 @@ class Injector(object):
         if self.verbose:
             for k, v in data.items():
                 print('    {:20}: {}'.format(k, v))
+
         return data
 
 
