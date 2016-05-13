@@ -174,6 +174,68 @@ class Injector(object):
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
         return self.test_packet
 
+    def handle(self, data, client_address=None, request=None, mode=None):
+        """
+        Handle one request from either UDP or TCP.
+
+        Gets called in UdpHandler.handle() or TcpHandler.handle().
+        """
+
+        self.print_status(data)
+
+        self.parse_packet(data)
+
+        # Parse data
+        try:
+            data = self.parse_packet(packet, verbose=self.verbose)
+        except Exception as e:
+            print('Parsing error:', e)
+            continue
+        # Check CPM
+        if data['cpm'] > 100:
+            print('CPM > 100 (assuming noise) NOT INJECTING')
+            continue
+        # Inject into database
+        if self.verbose:
+            self.print_status('Trying to inject')
+        try:
+            self.db.inject(data)
+        except Exception as e:
+            print('Injection error:', e)
+            continue
+        self.print_status('Successfully injected!')
+
+    def print_status(self, s):
+        print('[{}] {}'.format(str(datetime.datetime.now()), s))
+
+    def parse_packet(self, packet):
+        """
+        First stage of data verification:
+          Check number of fields
+          Check length of hash
+
+        Further verification is performed in SQLObject.inject()
+        """
+
+        # Commas are our delimiters for the decrypted message
+        packet = packet.split(',')
+        if len(packet) != 5:
+            raise
+        # assert len(packet) == 5, 'Packet does not have exactly 5 fields: {}'.format(packet)
+        data = OrderedDict()
+        data['hash'] = packet[0]
+        assert len(data['hash']) == 32, 'Hash not len 32: {}'.format(data['hash'])
+
+        # All is good. Cast as known data types
+        data['stationID'] = int(packet[1])
+        data['cpm'] = float(packet[2])
+        data['cpm_error'] = float(packet[3])
+        data['error_flag'] = int(packet[4])
+        if self.verbose:
+            for k, v in data.items():
+                print('    {:20}: {}'.format(k, v))
+        return data
+
 
 class DosenetUdpServer(SocketServer.UDPServer):
     """
@@ -248,55 +310,6 @@ class TcpHandler(SocketServer.StreamRequestHandler):
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
             mode='tcp')
-
-
-##################
-    def handle(self):
-        """
-        """
-
-        # Print message
-        self.print_status(packet)
-        # Parse data
-        try:
-            data = self.parse_packet(packet, verbose=self.verbose)
-        except Exception as e:
-            print('Parsing error:', e)
-            continue
-        # Check CPM
-        if data['cpm'] > 100:
-            print('CPM > 100 (assuming noise) NOT INJECTING')
-            continue
-        # Inject into database
-        if self.verbose:
-            self.print_status('Trying to inject')
-        try:
-            self.db.inject(data)
-        except Exception as e:
-            print('Injection error:', e)
-            continue
-        self.print_status('Successfully injected!')
-
-    def print_status(self, s):
-        print('[{}] {}'.format(str(datetime.datetime.now()), s))
-
-
-def parse_packet(packet, verbose=False):
-    # Commas are our delimiters for the decrypted message
-    packet = packet.split(',')
-    assert len(packet) == 5, 'Packet does not have exactly 5 fields: {}'.format(packet)
-    data = OrderedDict()
-    data['hash'] = packet[0]
-    assert len(data['hash']) == 32, 'Hash not len 32: {}'.format(data['hash'])
-    # All is good. Cast as known data types
-    data['stationID']   = int(packet[1])
-    data['cpm']         = float(packet[2])
-    data['cpm_error']   = float(packet[3])
-    data['error_flag']  = int(packet[4])
-    if verbose:
-        for k, v in data.items():
-            print('    {:20}: {}'.format(k, v))
-    return data
 
 
 def main(verbose=False, **kwargs):
