@@ -56,30 +56,31 @@ class Injector(object):
         cursor (db.cursor): Used for accessing database returns.
     """
 
-    def __init__(self, verbose=False, private_key=PRIVATE_KEY, port=5005,
-                 ip=None, testing=False, **kwargs):
+    def __init__(self, verbose=False, testing=False,
+                 private_key=PRIVATE_KEY,
+                 udp_port=UDP_PORT, tcp_port=TCP_PORT,
+                 ip=None, **kwargs):
         """
         Initialise decryption & database objects.
 
         Attributes:
-            privateKey (List[str]) - Fully qualified static path of private key
-                (between GRIM and the Raspberry Pis)
-                Default: ['/home/dosenet/.ssh/id_rsa_dosenet']
-            port (int) - Which port to listen for any traffic on.
-                Depends on what Ryan chooses to open for us on the 1110C
-                subnet. Default: 5005
-            IP (String) - Which address is the database (GRIM) at -
-                dynamically determined.
-                Default: '192.168.1.105'
-                Note: this address is not necessarily static
-            socket (custSocket) - Refer to the udp_tools.py in the udp folder.
-                Sets up UDP only socket to listen on given IP, port and a
-                decryption object.
+            verbose (bool) - add verbosity. Default: False
+            testing (bool) - run in test mode with artificial packets.
+                Default: False
+            private_key (str) - Fully qualified static path of private key
+                Default: '~/.ssh/id_rsa_lbl'
+            udp_port (int) - Which port to listen for UDP data on.
+                Default: 5005
+            tcp_port (int) - which port to listen for TCP data on.
+                Default: 5100
+            ip (String) - Which address to listen on.
+                Default: dynamically determined
         """
         self.verbose = verbose
         self.testing = testing
         self.private_key = private_key
-        self.port = port
+        self.udp_port = udp_port
+        self.tcp_port = tcp_port
         self.test_packet = None
 
         # Connect to database
@@ -107,15 +108,19 @@ class Injector(object):
             # Uses 1 private key
             # self.socket = custSocket(ip=self.ip, port=self.port, decrypt=de)
             self.udp_server = DosenetUdpServer(
-                (self.ip, UDP_PORT), UdpHandler, injector=self)
+                (self.ip, self.udp_port), UdpHandler, injector=self)
             self.tcp_server = DosenetTcpServer(
-                (self.ip, TCP_PORT), TcpHandler, injector=self)
+                (self.ip, self.tcp_port), TcpHandler, injector=self)
         else:
             self.socket = None
             print('\tTesting Mode! Not setting up UDP socket')
 
     @staticmethod
     def get_external_ip():
+        """
+        'Hey Google, what's my IP address?'
+        """
+
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
         ip_addr = s.getsockname()[0]
