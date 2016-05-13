@@ -199,10 +199,8 @@ class Injector(object):
         #   let SocketServer print traceback and continue handling requests
         data = self.parse_packet(packet)
 
-        # Check CPM
-        if data['cpm'] > 100:
-            print('CPM > 100 (assuming noise) NOT INJECTING')
-            continue
+        self.check_countrate(data)
+
         # Inject into database
         if self.verbose:
             self.print_status('Trying to inject')
@@ -281,6 +279,18 @@ class Injector(object):
                 print('    {:20}: {}'.format(k, v))
 
         return data
+
+    def check_countrate(data):
+        """
+        Check for countrate that is too high.
+        """
+
+        cpm_error_threshold = 100
+
+        if data['cpm'] > cpm_error_threshold:
+            raise ExcessiveCountrate(
+                'Countrate {} CPM is greater than threshold of {} CPM'.format(
+                    data['cpm'], cpm_error_threshold))
 
 
 class DosenetUdpServer(SocketServer.UDPServer):
@@ -375,6 +385,10 @@ class UnencryptedPacket(InjectorError):
 
 
 class BadPacket(InjectorError):
+    pass
+
+
+class ExcessiveCountrate(InjectorError):
     pass
 
 
