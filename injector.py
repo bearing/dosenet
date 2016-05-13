@@ -34,7 +34,6 @@ import_list = ['crypt', 'mysql', 'udp']
 for el in import_list:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), el)))
 from crypt import cust_crypt as ccrypt
-# from udp.udp_tools import custSocket
 from mysql.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
@@ -183,19 +182,17 @@ class DosenetUdpServer(SocketServer.UDPServer):
     The Dosenet*Server classes add allow_reuse_address = True
     (which should force binding to a port, even if the past server hasn't
     released it yet).
-
-    Also override the verify_request() method, in order to validate the data.
     """
 
     allow_reuse_address = True
     # http://stackoverflow.com/questions/3911009/python-socketserver-baserequesthandler-knowing-the-port-and-use-the-port-already
 
+    # don't use the verify_request method, because this happens before the
+    # packet is unpacked in UdpHandler.handle()
+
     def __init__(self, injector=None, *args):
         super(DosenetUdpServer, self).__init__(*args)
         self.injector = injector
-
-    def verify_request():
-        pass
 
 
 class DosenetTcpServer(SocketServer.TCPServer):
@@ -205,18 +202,15 @@ class DosenetTcpServer(SocketServer.TCPServer):
     The Dosenet*Server classes add allow_reuse_address = True
     (which should force binding to a port, even if the past server hasn't
     released it yet).
-
-    Also override the verify_request() method, in order to validate the data.
     """
 
     allow_reuse_address = True
+    # don't use the verify_request method, because this happens before the
+    # packet is unpacked in TcpHandler.handle()
 
     def __init__(self, injector=None, *args):
-        super(DosenetUdpServer, self).__init__(*args)
+        super(DosenetTcpServer, self).__init__(*args)
         self.injector = injector
-
-    def verify_request():
-        pass
 
 
 class UdpHandler(SocketServer.DatagramRequestHandler):
