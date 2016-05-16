@@ -176,9 +176,9 @@ class SQLObject:
             assert len(df) == 1, 'More than one recent result returned for {}'.format(stationID)
             data = df.iloc[0]
             return data
-        except (Exception) as e:
+        except (AssertionError) as e:
             print(e)
-            print('Exception: No data for station '+stationID)
+            return 0
 
     def getInjectorStation(self):
         return self.getStations().loc[0, :]
