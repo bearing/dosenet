@@ -143,7 +143,7 @@ class SQLObject:
                 AND stationID='{0}';".format(stationID),
             con=self.db)
         df.set_index(df['Name'], inplace=True)
-        assert len(df) == 1, 'More than one recent result returned for {}'.format(stationID)
+        assert len(df) <= 1, 'More than one recent result returned for {}'.format(stationID)
         data = df.iloc[0]
         return data
 
