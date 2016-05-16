@@ -203,37 +203,53 @@ class SQLObject:
         return df
 
     def getLastDay(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-        df = self.getDataForStationByRange(
-            stationID,
-            lastest_dt + relativedelta(days=-1),
-            lastest_dt
-        )
-        return df
+        try:
+            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
+            df = self.getDataForStationByRange(
+                stationID,
+                lastest_dt + relativedelta(days=-1),
+                lastest_dt
+            )
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
 
     def getLastWeek(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-        df = self.getDataForStationByRange(
-            stationID,
-            lastest_dt + relativedelta(days=-7),
-            lastest_dt
-        )
-        return df
+        try:
+            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
+            df = self.getDataForStationByRange(
+                stationID,
+                lastest_dt + relativedelta(days=-7),
+                lastest_dt
+            )
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
 
     def getLastMonth(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-        df = self.getDataForStationByRange(
-            stationID,
-            lastest_dt + relativedelta(months=-1),
-            lastest_dt
-        )
-        return df
+        try:
+            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
+            df = self.getDataForStationByRange(
+                stationID,
+                lastest_dt + relativedelta(months=-1),
+                lastest_dt
+            )
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
 
     def getLastYear(self, stationID):
-        lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-        df = self.getDataForStationByRange(
-            stationID,
-            lastest_dt + relativedelta(months=-12),
-            lastest_dt
-        )
-        return df
+        try:
+            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
+            df = self.getDataForStationByRange(
+                stationID,
+                lastest_dt + relativedelta(months=-12),
+                lastest_dt
+            )
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
