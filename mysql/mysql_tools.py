@@ -178,7 +178,7 @@ class SQLObject:
             return data
         except (AssertionError) as e:
             print(e)
-            return []
+            return pd.DataFrame({})
 
     def getInjectorStation(self):
         return self.getStations().loc[0, :]
