@@ -149,7 +149,7 @@ class SQLObject:
             return data
         except (AssertionError) as e:
             print(e)
-            return 0
+            return []
 
     def getInjectorStation(self):
         return self.getStations().loc[0, :]
