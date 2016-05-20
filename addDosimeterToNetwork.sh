@@ -42,6 +42,7 @@ if [[ $status ]]
 then
   echo "ERROR adding station to database! Exiting now."
   exit 1
+fi
 
 echo "Stopping udp_injector"
 killall python
@@ -53,3 +54,4 @@ tmux send-keys -t UDP_INJECTOR "injector" C-m
 ps aux | grep python | grep -v grep
 
 echo "New station added!"
+exit 0
