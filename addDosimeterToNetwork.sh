@@ -30,12 +30,18 @@ then
 fi
 
 echo "Adding new station to database"
-if [[ $ID != 0 ]]
+if [[ $ID ]]
 then
   python ~/git/dosenet/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
 else
   python ~/git/dosenet/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY  
 fi
+
+status=$?
+if [[ $status ]]
+then
+  echo "ERROR adding station to database! Exiting now."
+  exit 1
 
 echo "Stopping udp_injector"
 killall python
