@@ -40,7 +40,7 @@ fi
 status=$?
 echo "python script returned ${status}"
 
-if [[ $status ]]
+if [[ $status -ne 0 ]]
 then
   echo "ERROR adding station to database! Exiting now."
   exit 1
