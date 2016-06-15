@@ -198,42 +198,49 @@ class Injector(object):
             packet = self.decrypt_packet(encrypted_packet)
         except UnencryptedPacket:
             # print to screen. this could be a test message
-            print_status('Unencrypted packet:  {}'.format(encrypted_packet),
-                         ansi=ANSI_CYAN)
+            print_status(
+                'Unencrypted {} packet: {}'.format(
+                    mode.upper(), encrypted_packet),
+                ansi=ANSI_CYAN)
             return None
         except BadPacket:
-            print_status('Bad packet (cannot resolve into standard ASCII)',
-                         ansi=ANSI_RED)
+            print_status(
+                'Bad {} packet (cannot resolve into standard ASCII)'.format(
+                    mode.upper()),
+                ansi=ANSI_RED)
             return None
 
         try:
             data = self.parse_packet(packet)
         except PacketLengthError:
             # encrypted test message
-            print_status('PacketLengthError: {}'.format(packet),
-                         ansi=ANSI_GR)
+            print_status(
+                '{} PacketLengthError: {}'.format(mode.upper(), packet),
+                ansi=ANSI_GR)
             return None
         except HashLengthError:
-            print_status('HashLengthError: {}'.format(packet),
-                         ansi=ANSI_MG)
+            print_status(
+                '{} HashLengthError: {}'.format(mode.upper(), packet),
+                ansi=ANSI_MG)
             return None
 
         try:
             self.check_countrate(data)
         except ExcessiveCountrate:
-            print_status('Excessive Countrate! {}'.format(packet),
-                         ansi=ANSI_YEL)
+            print_status(
+                '{} Excessive Countrate! {}'.format(mode.upper(), packet),
+                ansi=ANSI_YEL)
             return None
 
         # Still here? now inject into database
-        print_status('Injecting: {}'.format(packet))
+        print_status('Injecting {}: {}'.format(mode.upper(), packet))
         try:
             self.db.inject(data)
         except Exception as e:
             print('Injection error:', e)
             return None
 
-        self.print_status('Successfully injected!')
+        # self.print_status('Successfully injected!')
         return None
 
     def decrypt_packet(self, encrypted):
