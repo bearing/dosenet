@@ -242,7 +242,9 @@ class Injector(object):
             raise UnencryptedPacket(
                 'Character codes suggest that the packet was not encrypted')
         elif any(v > 127 for v in ascii_values_decrypted):
-            raise BadPacket('Bad character values in decrypted packet (>127)')
+            raise BadPacket(
+                'Bad character values in decrypted packet (>127): {}'.format(
+                    ascii_values_decrypted))
 
         return decrypted
 
