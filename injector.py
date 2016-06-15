@@ -316,7 +316,7 @@ class Injector(object):
 
         return data
 
-    def check_countrate(data):
+    def check_countrate(self, data):
         """
         Check for countrate that is too high.
         """
