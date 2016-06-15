@@ -151,13 +151,19 @@ class Injector(object):
             SystemExit: System interrupt to exit the infinite loop.
         """
 
-        print('\n\t\t\t ~~~~ Listening ~~~~')
-        self.udp_process = multiprocessing.Process(
-            target=self.udp_server.serve_forever)
-        self.tcp_process = multiprocessing.Process(
-            target=self.tcp_server.serve_forever)
-        self.udp_process.start()
-        self.tcp_process.start()
+        print('\n')
+        if self.test_inject:
+            # no socket servers. instead, run the test mode
+            self.test()
+            # self.test blocks, but for clarity:
+            return None
+        else:
+            self.udp_process = multiprocessing.Process(
+                target=self.udp_server.serve_forever)
+            self.tcp_process = multiprocessing.Process(
+                target=self.tcp_server.serve_forever)
+            self.udp_process.start()
+            self.tcp_process.start()
 
     def make_test_packet(self):
         """
