@@ -64,10 +64,13 @@ class Injector(object):
         cursor (db.cursor): Used for accessing database returns.
     """
 
-    def __init__(self, verbose=False, testing=False,
+    def __init__(self,
+                 verbose=False,
+                 testing=False,
                  private_key=PRIVATE_KEY,
-                 udp_port=UDP_PORT, tcp_port=TCP_PORT,
-                 ip=None, **kwargs):
+                 udp_port=UDP_PORT,
+                 tcp_port=TCP_PORT,
+                 **kwargs):
         """
         Initialise decryption & database objects.
 
@@ -93,22 +96,14 @@ class Injector(object):
 
         # Connect to database
         self.db = SQLObject()
-        print('\tDataBase:', self.db)
-        print('\tDataBase Cursor:', self.db.cursor)
 
         # Decrypter
         print('\tPrivate Key:', self.private_key)
         de = ccrypt.public_d_encrypt(key_file_lst=[self.private_key])
-        print('\tDecrypter:', de)
         self.decrypter = de
 
         # Get ip information
-        if ip is None:
-            # Gets actual IP address on the internet
-            self.ip = self.get_external_ip()
-        else:
-            assert isinstance(ip, str), 'IP is not a string: {}'.format(ip)
-            self.ip = ip
+        self.ip = self.get_external_ip()
         print('\tIP:', self.ip)
         print('\tUDP Port:', self.udp_port)
         print('\tTCP Port:', self.tcp_port)
@@ -135,18 +130,6 @@ class Injector(object):
         ip_addr = s.getsockname()[0]
         s.close()
         return ip_addr
-
-    def test(self):
-        """
-        Test packet handling with make_test_packet() and handle().
-
-        Blocks execution.
-        """
-
-        while True:
-            time.sleep(0.5)
-            packet = self.make_test_packet()
-            # handle(packet)....
 
     def listen(self):
         """
@@ -176,15 +159,33 @@ class Injector(object):
         """
 
         if self.test_packet is None:
+            # packet contents
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_cpm = 1.
             test_cpm_error = 0.5
             test_error_flag = 0
-            self.test_packet = '{},{},{},{},{}'.format(
+            raw_packet = '{},{},{},{},{}'.format(
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
+            # encrypter
+            publickey = '/home/dosenet/id_rsa.pub'
+            en = ccrypt.PublicDEncrypt(key_file_lst=[publickey])
+            # encrypted packet
+            self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
+
+    def test(self):
+        """
+        Test packet handling with make_test_packet() and handle().
+
+        Blocks execution.
+        """
+
+        while True:
+            test_packet = self.make_test_packet()
+            self.handle(test_packet, mode='test')
+            time.sleep(0.5)
 
     def handle(self, encrypted_packet,
                client_address=None, request=None, mode=None):
@@ -242,7 +243,6 @@ class Injector(object):
             print('Injection error:', e)
             return None
 
-        # self.print_status('Successfully injected!')
         return None
 
     def decrypt_packet(self, encrypted):
@@ -278,9 +278,6 @@ class Injector(object):
                     ascii_values_decrypted))
 
         return decrypted
-
-    def print_status(self, s):
-        print('[{}] {}'.format(str(datetime.datetime.now()), s))
 
     def parse_packet(self, packet):
         """
@@ -477,7 +474,7 @@ class ExcessiveCountrate(InjectorError):
 def main(verbose=False, **kwargs):
     inj = Injector(**kwargs)
     try:
-        inj.main()
+        inj.listen()
     except KeyboardInterrupt:
         print('KeyboardInterrupt shutdown!')
     except SystemExit:
@@ -489,8 +486,12 @@ def main(verbose=False, **kwargs):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-t', '--testing', action='store_true',
-        help='Run in test mode (do not connect to UDP socket)')
+        '-t', '--test-inject', action='store_true',
+        help='Injection test mode: no sockets, inject test data to database')
+    parser.add_argument(
+        '-s', '--test-serve', action='store_true',
+        help='Server test mode: connect to TCP & UDP sockets and ' +
+        'do everything EXCEPT inject to database')
     parser.add_argument(
         '-v', '--verbose', action='store_true',
         help='\n\t Verbosity level 1')
