@@ -87,11 +87,11 @@ class Injector(object):
         print('\tDataBase:', self.db)
         print('\tDataBase Cursor:', self.db.cursor)
 
-        # Decryptor
+        # Decrypter
         print('\tPrivate Key:', self.private_key)
         de = ccrypt.public_d_encrypt(key_file_lst=[self.private_key])
-        print('\tDecryptor:', de)
-        self.decryptor = de
+        print('\tDecrypter:', de)
+        self.decrypter = de
 
         # Get ip information
         if ip is None:
