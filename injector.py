@@ -311,8 +311,10 @@ class DosenetUdpServer(SocketServer.UDPServer):
     # don't use the verify_request method, because this happens before the
     # packet is unpacked in UdpHandler.handle()
 
-    def __init__(self, injector=None, *args):
-        SocketServer.UDPServer.__init__(self, *args)
+    def __init__(self, server_address, req_handler_class, injector=None,
+                 **kwargs):
+        SocketServer.UDPServer.__init__(
+            self, server_address, req_handler_class, **kwargs)
         self.injector = injector
 
 
@@ -329,8 +331,10 @@ class DosenetTcpServer(SocketServer.TCPServer):
     # don't use the verify_request method, because this happens before the
     # packet is unpacked in TcpHandler.handle()
 
-    def __init__(self, injector=None, *args):
-        SocketServer.TCPServer.__init__(self, *args)
+    def __init__(self, server_address, req_handler_class, injector=None,
+                 **kwargs):
+        SocketServer.TCPServer.__init__(
+            self, server_address, req_handler_class, **kwargs)
         self.injector = injector
 
 
