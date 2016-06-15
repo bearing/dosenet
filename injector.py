@@ -182,7 +182,7 @@ class Injector(object):
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
             # encrypter
             publickey = '/home/dosenet/id_rsa.pub'
-            en = ccrypt.PublicDEncrypt(key_file_lst=[publickey])
+            en = ccrypt.public_d_encrypt(key_file_lst=[publickey])
             # encrypted packet
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
@@ -348,10 +348,10 @@ def print_status(status_text, ansi=None):
     using ANSI color code, if provided.
     """
 
-    print_text = (
-        str(ansi) +
-        '[{}] '.format(datetime.datetime.now()) +
-        status_text + ANSI_RESET)
+    if ansi is None:
+        ansi = ''
+    print_text = (ansi + '[{}] '.format(datetime.datetime.now()) +
+                  status_text + ANSI_RESET)
     print(print_text)
 
 
