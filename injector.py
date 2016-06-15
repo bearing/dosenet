@@ -212,15 +212,17 @@ class Injector(object):
 
         try:
             data = self.parse_packet(packet)
-        except PacketLengthError:
+        except PacketLengthError as e:
             # encrypted test message
             print_status(
-                '{} PacketLengthError: {}'.format(mode.upper(), packet),
+                '{} PacketLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
                 ansi=ANSI_GR)
             return None
-        except HashLengthError:
+        except HashLengthError as e:
             print_status(
-                '{} HashLengthError: {}'.format(mode.upper(), packet),
+                '{} HashLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
                 ansi=ANSI_MG)
             return None
 
