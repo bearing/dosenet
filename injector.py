@@ -154,9 +154,9 @@ class Injector(object):
         """
 
         print('\n\t\t\t ~~~~ Listening ~~~~')
-        self.udp_process = multiprocessing.Pool(
+        self.udp_process = multiprocessing.Process(
             target=self.udp_server.serve_forever)
-        self.tcp_process = multiprocessing.Pool(
+        self.tcp_process = multiprocessing.Process(
             target=self.tcp_server.serve_forever)
 
     def make_test_packet(self):
@@ -351,8 +351,7 @@ class UdpHandler(SocketServer.DatagramRequestHandler):
     """
 
     def handle(self):
-        data = self.rfile.readline()
-        # or try self.request.recv(1024)
+        data = self.request.recv(1024)
 
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
@@ -370,7 +369,7 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     """
 
     def handle(self):
-        data = self.rfile.readline()
+        data = self.request.recv(1024)
 
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
