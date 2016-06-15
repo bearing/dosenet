@@ -300,16 +300,16 @@ class Injector(object):
                 len(fields), data_length))
 
         data = OrderedDict()
-        data['hash'] = packet[0]
+        data['hash'] = fields[0]
         if len(data['hash']) != hash_length:
             raise HashLengthError('Hash length is not {}: {}'.format(
                 hash_length, data['hash']))
         # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
-        data['stationID'] = int(packet[1])
-        data['cpm'] = float(packet[2])
-        data['cpm_error'] = float(packet[3])
-        data['error_flag'] = int(packet[4])
+        data['stationID'] = int(fields[1])
+        data['cpm'] = float(fields[2])
+        data['cpm_error'] = float(fields[3])
+        data['error_flag'] = int(fields[4])
         if self.verbose:
             for k, v in data.items():
                 print('    {:20}: {}'.format(k, v))
