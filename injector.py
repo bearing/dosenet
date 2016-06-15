@@ -312,7 +312,7 @@ class DosenetUdpServer(SocketServer.UDPServer):
     # packet is unpacked in UdpHandler.handle()
 
     def __init__(self, injector=None, *args):
-        super(DosenetUdpServer, self).__init__(*args)
+        DosenetUdpServer.__init__(self, *args)
         self.injector = injector
 
 
@@ -330,7 +330,7 @@ class DosenetTcpServer(SocketServer.TCPServer):
     # packet is unpacked in TcpHandler.handle()
 
     def __init__(self, injector=None, *args):
-        super(DosenetTcpServer, self).__init__(*args)
+        DosenetTcpServer.__init__(self, *args)
         self.injector = injector
 
 
