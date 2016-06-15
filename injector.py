@@ -28,6 +28,7 @@ import SocketServer
 import datetime
 from collections import OrderedDict
 import multiprocessing
+import Crypto.Random
 
 # Extensible way for adding future imports
 import_list = ['crypt', 'mysql', 'udp']
@@ -317,9 +318,23 @@ class DosenetUdpServer(SocketServer.UDPServer):
 
     def __init__(self, server_address, req_handler_class, injector=None,
                  **kwargs):
+        """
+        Save the injector instance, in addition to the
+        SocketServer.UDPServer __init__ method
+        """
+
         SocketServer.UDPServer.__init__(
             self, server_address, req_handler_class, **kwargs)
         self.injector = injector
+
+    def serve_forever(self, *args, **kwargs):
+        """
+        Add a Crypto.Random.atfork() call, to allow decryption from
+        this process.
+        """
+
+        Crypto.Random.atfork()
+        SocketServer.UDPServer.serve_forever(self, *args, **kwargs)
 
 
 class DosenetTcpServer(SocketServer.TCPServer):
@@ -337,9 +352,23 @@ class DosenetTcpServer(SocketServer.TCPServer):
 
     def __init__(self, server_address, req_handler_class, injector=None,
                  **kwargs):
+        """
+        Save the injector instance, in addition to the
+        SocketServer.TCPServer __init__ method
+        """
+
         SocketServer.TCPServer.__init__(
             self, server_address, req_handler_class, **kwargs)
         self.injector = injector
+
+    def serve_forever(self, *args, **kwargs):
+        """
+        Add a Crypto.Random.atfork() call, to allow decryption from
+        this process.
+        """
+
+        Crypto.Random.atfork()
+        SocketServer.TCPServer.serve_forever(self, *args, **kwargs)
 
 
 class UdpHandler(SocketServer.DatagramRequestHandler):
