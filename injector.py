@@ -101,7 +101,8 @@ class Injector(object):
             assert isinstance(ip, str), 'IP is not a string: {}'.format(ip)
             self.ip = ip
         print('\tIP:', self.ip)
-        print('\tPort:', self.port)
+        print('\tUDP Port:', self.udp_port)
+        print('\tTCP Port:', self.tcp_port)
 
         if not self.testing:
             # Uses 1 private key
@@ -208,8 +209,10 @@ class Injector(object):
             self.db.inject(data)
         except Exception as e:
             print('Injection error:', e)
-            continue
+            return None
+
         self.print_status('Successfully injected!')
+        return None
 
     def decrypt_packet(self, encrypted):
         """
