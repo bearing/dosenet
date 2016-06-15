@@ -158,6 +158,8 @@ class Injector(object):
             target=self.udp_server.serve_forever)
         self.tcp_process = multiprocessing.Process(
             target=self.tcp_server.serve_forever)
+        self.udp_process.start()
+        self.tcp_process.start()
 
     def make_test_packet(self):
         """
