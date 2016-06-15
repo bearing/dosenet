@@ -382,7 +382,8 @@ class UdpHandler(SocketServer.DatagramRequestHandler):
     """
 
     def handle(self):
-        data = self.request.recv(1024)
+        # UDP request is a tuple of (data, socket) instead of just socket
+        data = self.request[0]
 
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
