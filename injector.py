@@ -66,7 +66,8 @@ class Injector(object):
 
     def __init__(self,
                  verbose=False,
-                 testing=False,
+                 test_inject=False,
+                 test_serve=False,
                  private_key=PRIVATE_KEY,
                  udp_port=UDP_PORT,
                  tcp_port=TCP_PORT,
@@ -88,7 +89,8 @@ class Injector(object):
                 Default: dynamically determined
         """
         self.verbose = verbose
-        self.testing = testing
+        self.test_inject = test_inject
+        self.test_serve = test_serve
         self.private_key = private_key
         self.udp_port = udp_port
         self.tcp_port = tcp_port
@@ -108,16 +110,20 @@ class Injector(object):
         print('\tUDP Port:', self.udp_port)
         print('\tTCP Port:', self.tcp_port)
 
-        if not self.testing:
-            # Uses 1 private key
-            # self.socket = custSocket(ip=self.ip, port=self.port, decrypt=de)
+        if self.test_serve:
+            print('Server test mode! I can listen for packets, but nothing ' +
+                  'will be injected to the database.')
+        if not self.test_inject:
+            # set up socket servers
             self.udp_server = DosenetUdpServer(
                 (self.ip, self.udp_port), UdpHandler, injector=self)
             self.tcp_server = DosenetTcpServer(
                 (self.ip, self.tcp_port), TcpHandler, injector=self)
         else:
-            self.socket = None
-            print('\tTesting Mode! Not setting up UDP socket')
+            self.udp_server = None
+            self.tcp_server = None
+            print('Injection test mode! I can only inject test packets. ' +
+                  'No socket servers.')
 
     @staticmethod
     def get_external_ip():
@@ -235,13 +241,16 @@ class Injector(object):
                 ansi=ANSI_YEL)
             return None
 
-        # Still here? now inject into database
-        print_status('Injecting {}: {}'.format(mode.upper(), packet))
-        try:
-            self.db.inject(data)
-        except Exception as e:
-            print('Injection error:', e)
-            return None
+        # Still here? now inject into database if appropriate.
+        if self.test_serve:
+            print_status('Not injecting {}: {}'.format(mode.upper(), packet))
+        else:
+            print_status('Injecting {}: {}'.format(mode.upper(), packet))
+            try:
+                self.db.inject(data)
+            except Exception as e:
+                print('Injection error:', e)
+                return None
 
         return None
 
