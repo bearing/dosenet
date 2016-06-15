@@ -42,6 +42,14 @@ PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 UDP_PORT = 5006     # testing!
 TCP_PORT = 5100
 
+ANSI_RESET = '\033[37m' + '\033[22m'    # white and not bold
+ANSI_BOLD = '\033[1m'
+ANSI_RED = '\033[31m' + ANSI_BOLD
+ANSI_GR = '\033[32m' + ANSI_BOLD
+ANSI_YEL = '\033[33m' + ANSI_BOLD
+ANSI_CYAN = '\033[36m' + ANSI_BOLD
+ANSI_MG = '\033[35m' + ANSI_BOLD
+
 
 class Injector(object):
     """
@@ -190,24 +198,35 @@ class Injector(object):
             packet = self.decrypt_packet(encrypted_packet)
         except UnencryptedPacket:
             # print to screen. this could be a test message
-            print('Detected unencrypted packet:')
-            print(encrypted_packet)
+            print_status('Unencrypted packet:  {}'.format(encrypted_packet),
+                         ansi=ANSI_CYAN)
             return None
-        # except BadPacket:
-        # don't handle this. SocketServer will print traceback and
-        #   continue handling other requests
+        except BadPacket:
+            print_status('Bad packet (cannot resolve into standard ASCII)',
+                         ansi=ANSI_RED)
+            return None
 
-        self.print_status(packet)
+        try:
+            data = self.parse_packet(packet)
+        except PacketLengthError:
+            # encrypted test message
+            print_status('PacketLengthError: {}'.format(packet),
+                         ansi=ANSI_GR)
+            return None
+        except HashLengthError:
+            print_status('HashLengthError: {}'.format(packet),
+                         ansi=ANSI_MG)
+            return None
 
-        # parse_packet could raise PacketLengthError or HashLengthError
-        #   let SocketServer print traceback and continue handling requests
-        data = self.parse_packet(packet)
+        try:
+            self.check_countrate(data)
+        except ExcessiveCountrate:
+            print_status('Excessive Countrate! {}'.format(packet),
+                         ansi=ANSI_YEL)
+            return None
 
-        self.check_countrate(data)
-
-        # Inject into database
-        if self.verbose:
-            self.print_status('Trying to inject')
+        # Still here? now inject into database
+        print_status('Injecting: {}'.format(packet))
         try:
             self.db.inject(data)
         except Exception as e:
@@ -299,6 +318,20 @@ class Injector(object):
             raise ExcessiveCountrate(
                 'Countrate {} CPM is greater than threshold of {} CPM'.format(
                     data['cpm'], cpm_error_threshold))
+
+
+def print_status(status_text, ansi=None):
+    """
+    Print a status message:
+    [datetime] string
+    using ANSI color code, if provided.
+    """
+
+    print_text = (
+        str(ansi) +
+        '[{}] '.format(datetime.datetime.now()) +
+        status_text + ANSI_RESET)
+    print(print_text)
 
 
 class DosenetUdpServer(SocketServer.UDPServer):
