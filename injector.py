@@ -197,7 +197,7 @@ class Injector(object):
         while True:
             test_packet = self.make_test_packet()
             self.handle(test_packet, mode='test')
-            time.sleep(0.5)
+            time.sleep(1.1)
 
     def handle(self, encrypted_packet,
                client_address=None, request=None, mode=None):
