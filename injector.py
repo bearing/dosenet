@@ -302,14 +302,16 @@ class Injector(object):
         """
 
         sep = ','
-        data_length = 5
+        data_length_old = 5
+        data_length_new = 6
         hash_length = 32
 
         fields = packet.split(sep)
 
-        if len(fields) != data_length:
-            raise PacketLengthError('Found {} fields instead of {}'.format(
-                len(fields), data_length))
+        if len(fields) != data_length_old and len(fields) != data_length_new:
+            raise PacketLengthError(
+                'Found {} fields instead of {} or {}'.format(
+                    len(fields), data_length_old, data_length_new))
 
         data = OrderedDict()
         data['hash'] = fields[0]
@@ -322,6 +324,8 @@ class Injector(object):
         data['cpm'] = float(fields[2])
         data['cpm_error'] = float(fields[3])
         data['error_flag'] = int(fields[4])
+        if len(fields) == data_length_new:
+            data['timestamp'] = float(fields[5])
         if self.verbose:
             for k, v in data.items():
                 print('    {:20}: {}'.format(k, v))
