@@ -102,7 +102,6 @@ class SQLObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        print(deviceTime)
         self.cursor.execute(
             "INSERT INTO dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) \
              VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
