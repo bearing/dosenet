@@ -97,7 +97,10 @@ class SQLObject:
         NOTE that the receiveTime is not included since that is assigned my
         the MySQL default value of CURRENT_TIMESTAMP
         """
-        if deviceTime is None:
+        if (not isinstance(deviceTime, int) and
+                not isinstance(deviceTime, float)):
+            if deviceTime is not None:
+                print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
         print(deviceTime)
         self.cursor.execute(
