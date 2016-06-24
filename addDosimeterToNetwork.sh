@@ -30,11 +30,20 @@ then
 fi
 
 echo "Adding new station to database"
-if [[ $ID != 0 ]]
+if [[ $ID ]]
 then
   python ~/git/dosenet/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
 else
   python ~/git/dosenet/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY  
+fi
+
+status=$?
+echo "python script returned ${status}"
+
+if [[ $status -ne 0 ]]
+then
+  echo "ERROR adding station to database! Exiting now."
+  exit 1
 fi
 
 echo "Stopping udp_injector"
@@ -47,3 +56,4 @@ tmux send-keys -t UDP_INJECTOR "injector" C-m
 ps aux | grep python | grep -v grep
 
 echo "New station added!"
+exit 0

@@ -142,7 +142,7 @@ class Injector(object):
             print('\n\t\t\t ~~~~ Listening ~~~~')
         while True:
             if self.testing:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 packet = self.make_test_packet()
             else:
                 try:
@@ -180,15 +180,14 @@ class Injector(object):
         """
         Put together a test message
         """
-        if self.test_packet is None:
-            inj_stat = self.db.getInjectorStation()
-            test_hash = inj_stat['IDLatLongHash']
-            test_id = inj_stat.name
-            test_cpm = 1.
-            test_cpm_error = 0.5
-            test_error_flag = 0
-            self.test_packet = '{},{},{},{},{}'.format(
-                test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
+        inj_stat = self.db.getNextTestStation()
+        test_hash = inj_stat['IDLatLongHash']
+        test_id = inj_stat.name
+        test_cpm = 1.
+        test_cpm_error = 0.5
+        test_error_flag = 0
+        self.test_packet = '{},{},{},{},{}'.format(
+            test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
         return self.test_packet
 
     def print_status(self, s):

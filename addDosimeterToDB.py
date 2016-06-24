@@ -187,6 +187,7 @@ class DBTool:
             pass
         except Exception, e:
             raise e
+            sys.exit(1)
 
     def makeCSV(self):
         fname = "/home/dosenet/config-files/%s.csv" % (self.nickname)
@@ -216,6 +217,7 @@ class DBTool:
         except Exception as ex:
             print '\t ~~~~ FAILED ~~~~'
             raise ex
+            sys.exit(1)
 
 if __name__ == "__main__":
     parse = Parser()
@@ -232,3 +234,4 @@ if __name__ == "__main__":
         ID = parse.args.ID[0]
         print 'Forced ID: ', ID
         dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, ID)
+    sys.exit(0)
