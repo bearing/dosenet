@@ -321,11 +321,15 @@ class Injector(object):
         # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
         data['stationID'] = int(fields[1])
-        data['cpm'] = float(fields[2])
-        data['cpm_error'] = float(fields[3])
-        data['error_flag'] = int(fields[4])
+        if len(fields) == data_length_old:
+            data['cpm'] = float(fields[2])
+            data['cpm_error'] = float(fields[3])
+            data['error_flag'] = int(fields[4])
         if len(fields) == data_length_new:
-            data['timestamp'] = float(fields[5])
+            data['deviceTime'] = float(fields[2])
+            data['cpm'] = float(fields[3])
+            data['cpm_error'] = float(fields[4])
+            data['error_flag'] = int(fields[5])
         if self.verbose:
             for k, v in data.items():
                 print('    {:20}: {}'.format(k, v))
