@@ -39,7 +39,7 @@ from mysql.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 
-UDP_PORT = 5006     # testing!
+UDP_PORT = 5005     # testing!
 TCP_PORT = 5100
 
 ANSI_RESET = '\033[37m' + '\033[22m'    # white and not bold
