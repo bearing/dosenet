@@ -50,6 +50,12 @@ class SQLObject:
             pass
 
     def set_session_tz(self, tz):
+        """Sets timezone for this MySQL session.
+        This affects the timestamp strings shown by deviceTime and receiveTime.
+        Does NOT affect UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime)
+
+        Might not be needed. Depends what you're doing with the data.
+        """
         print('[CONFIG] Setting session timezone to: {}'.format(tz))
         self.cursor.execute("SET time_zone='{}';".format(tz))
 
@@ -84,18 +90,22 @@ class SQLObject:
             #     process=os.path.basename(__file__), error_message=msg)
 
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
-                          receiveTime=None, **kwargs):
-        if receiveTime is None:
-            dt = epoch_to_datetime(time.time(), tz='UTC')
-            # NOTE:
-            #   %f is for microseconds
-            #   %z is for timezone offset hours (not used)
-            receiveTime = '{:%Y-%m-%dT%H:%M:%S.%f}'.format(dt)
+                          deviceTime=None, **kwargs):
+        """
+        Insert a row of dosimeter data into the dosnet table
+
+        NOTE that the receiveTime is not included since that is assigned my
+        the MySQL default value of CURRENT_TIMESTAMP
+        """
+        if (not isinstance(deviceTime, int) and
+                not isinstance(deviceTime, float)):
+            if deviceTime is not None:
+                print('Warning: received non-numeric deviceTime! Ignoring')
+            deviceTime = time.time()
         self.cursor.execute(
-            "INSERT INTO dosnet(receiveTime, stationID, cpm, cpmError, errorFlag) \
-             VALUES ('{}', '{}','{}','{}','{}');".format(
-                receiveTime, stationID, cpm, cpm_error, error_flag))
-        # Time is decided by the MySQL database / DoseNet hence 'receiveTime' field in DB
+            "INSERT INTO dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) \
+             VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
+                deviceTime, stationID, cpm, cpm_error, error_flag))
         self.db.commit()
 
     def inject(self, data):
