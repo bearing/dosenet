@@ -175,20 +175,22 @@ class SQLObject:
              FROM dosnet \
              INNER JOIN stations \
              ON dosnet.stationID = stations.ID \
-             WHERE receiveTime = \
-                (SELECT MAX(receiveTime) \
+             WHERE deviceTime = \
+                (SELECT MAX(deviceTime) \
                 FROM dosnet \
                 WHERE stationID='{0}') \
                 AND stationID='{0}';".format(stationID),
             con=self.db)
-        try:
-            df.set_index(df['Name'], inplace=True)
-            assert len(df) == 1, 'More than one recent result returned for {}'.format(stationID)
-            data = df.iloc[0]
-            return data
-        except (AssertionError) as e:
-            print(e)
+        df.set_index(df['Name'], inplace=True)
+        if len(df) == 0:
+            print('[SQL] no data returned for stationID={}'.format(stationID))
             return pd.DataFrame({})
+        elif len(df) > 1:
+            print('[SQL] more than one recent result for stationID={}'.format(stationID))
+            print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
 
     def getInjectorStation(self):
         return self.getStations().loc[0, :]
