@@ -24,19 +24,22 @@ def main(testing=False, verbose=False, **kwargs):
     # -------------------------------------------------------------------------
     stations = DB.getActiveStations()
     print(stations)
+    print()
     # -------------------------------------------------------------------------
     # Pull last year of data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
-        print('\n(id={}) {}'.format(sid, name))
+        print('(id={}) {}'.format(sid, name))
         df = DB.getLastYear(sid)
         print('    Loaded last year of data')
         csvfile = CsvForWebserver.from_nickname(nick)
         csvfile.df_to_file(df)
         csvfile.send_to_webserver(testing=testing)
+        print()
 
     print('Total run time: {:.2f} sec'.format(time.time() - start_time))
+
 
 if __name__ == "__main__":
     import argparse
