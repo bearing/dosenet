@@ -59,12 +59,13 @@ then
   exit 1
 fi
 
-echo "Stopping udp_injector"
-killall python
-
-echo "Restarting udp_injector ... start new session if session doesn't exist"
-tmux kill-session -t INJECTOR
 tmux new-session -d -s INJECTOR 
+
+echo "Stopping injector"
+tmux send-keys -t C-c
+tmux send-keys -t C-c
+
+echo "Restarting injector"
 tmux send-keys -t INJECTOR "injector" C-m
 
 ps aux | grep python | grep -v grep
