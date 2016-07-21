@@ -371,7 +371,7 @@ def format_packet(data, client_address):
     For "good" packets.
     """
 
-    output = '#{}, CPM {:.1f} +- {:.1f}, errorflag {}'.format(
+    output = '#{}, CPM {:.1f}+-{:.1f}, err {}'.format(
         data['stationID'], data['cpm'], data['cpm_error'], data['error_flag'])
     if 'deviceTime' in data:
         output += ' at {:.3f}'.format(data['deviceTime'])
