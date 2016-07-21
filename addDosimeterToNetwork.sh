@@ -62,8 +62,8 @@ fi
 tmux new-session -d -s INJECTOR 
 
 echo "Stopping injector"
-tmux send-keys -t C-c
-tmux send-keys -t C-c
+tmux send-keys -t INJECTOR C-c
+tmux send-keys -t INJECTOR C-c
 
 echo "Restarting injector"
 tmux send-keys -t INJECTOR "injector" C-m
