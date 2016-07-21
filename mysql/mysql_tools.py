@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import MySQLdb as mdb
@@ -6,7 +7,6 @@ import sys
 import datetime
 import time
 import pytz
-from dateutil.relativedelta import relativedelta
 
 
 def datetime_tz(year, month, day, hour=0, minute=0, second=0, tz='UTC'):
@@ -169,26 +169,42 @@ class SQLObject:
         del df['display']
         return df
 
-    def getLatestStationData(self, stationID):
+    def getSingleStation(self, stationID):
         df = pd.read_sql(
             "SELECT * \
+            FROM dosimeter_network.stations \
+            WHERE `ID` = {};".format(stationID),
+            con=self.db)
+        df.set_index(df['ID'], inplace=True)
+        del df['ID']
+        return df
+
+    def getLatestStationData(self, stationID):
+        df = pd.read_sql(
+            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
+             cpmtorem, cpmtousv, display, nickname, timezone \
              FROM dosnet \
              INNER JOIN stations \
              ON dosnet.stationID = stations.ID \
-             WHERE receiveTime = \
-                (SELECT MAX(receiveTime) \
-                FROM dosnet \
-                WHERE stationID='{0}') \
-                AND stationID='{0}';".format(stationID),
+             WHERE deviceTime = \
+                (SELECT MAX(deviceTime) \
+                 FROM dosnet \
+                 WHERE stationID='{0}') \
+             AND stationID='{0}';".format(stationID),
             con=self.db)
-        try:
-            df.set_index(df['Name'], inplace=True)
-            assert len(df) == 1, 'More than one recent result returned for {}'.format(stationID)
-            data = df.iloc[0]
-            return data
-        except (AssertionError) as e:
-            print(e)
+        df.set_index(df['Name'], inplace=True)
+        # Add timezone columns
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            print('[SQL WARNING] no data returned for stationID={}'.format(stationID))
             return pd.DataFrame({})
+        elif len(df) > 1:
+            print('[SQL WARNING] more than one recent result for stationID={}'.format(stationID))
+            print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
 
     def getInjectorStation(self):
         return self.getStations().loc[0, :]
@@ -202,64 +218,108 @@ class SQLObject:
             self.test_station_ids_ix += 1
         return test_station
 
+    def getTimezoneFromID(self, stationID):
+        self.cursor.execute(
+            "SELECT timezone FROM stations \
+            WHERE `ID` = {};".format(stationID))
+        tz = self.cursor.fetchall()
+        return tz[0][0]
+
     def getDataForStationByRange(self, stationID, timemin, timemax):
-        q = "SELECT receiveTime, cpm, cpmError \
+        q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), cpm, cpmError \
         FROM dosnet \
         WHERE `dosnet`.`stationID`='{}' \
         AND receiveTime \
         BETWEEN '{}' \
         AND '{}';".format(stationID, timemin, timemax)
         df = pd.read_sql(q, con=self.db)
+        return self.addTimeColumnsToDataframe(df)
+
+    def getDataForStationByInterval(self, stationID, intervalStr):
+        # Make the query for this station on this interval
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+            cpm, cpmError\
+            FROM dosnet \
+            WHERE stationID={} \
+            AND deviceTime >= (NOW() - {}) \
+            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
+        """
+        Input dataframe from query with UNIX_TIMESTAMP for deviceTime and
+        receiveTime. The output has 6 time columns:
+            deviceTime_unix (renamed from UNIX_TIMESTAMP(deviceTime))
+            deviceTime_utc
+            deviceTime_local
+            receiveTime_unix (renamed from UNIX_TIMESTAMP(receiveTime))
+            receiveTime_utc
+            receiveTime_local
+
+        http://stackoverflow.com/questions/17159207/change-timezone-of-date-time-column-in-pandas-and-add-as-hierarchical-index
+        """
+        # Select timezone to use
+        if isinstance(tz, str):
+            # If timezone given as string use it
+            this_tz = tz
+        elif isinstance(stationID, (int, str)):
+            # If tz not provided and stationID given as int/str
+            this_tz = self.getTimezoneFromID(stationID)
+        else:
+            # Default
+            print('[TZ WARNING] Defaulting to `US/Pacific`')
+            this_tz = 'US/Pacific'
+        # Sanity check
+        assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
+        # Rename exist unix epoch seconds columns
+        df.rename(inplace=True, columns={
+            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix',
+            'UNIX_TIMESTAMP(receiveTime)': 'receiveTime_unix'})
+        # Timezones are evil but pandas are fuzzy ...
+        deviceTime = pd.Index(pd.to_datetime(df['deviceTime_unix'], unit='s')).tz_localize('UTC')
+        receiveTime = pd.Index(pd.to_datetime(df['receiveTime_unix'], unit='s')).tz_localize('UTC')
+        df['deviceTime_utc'] = deviceTime
+        df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
+        df['receiveTime_utc'] = receiveTime
+        df['receiveTime_local'] = receiveTime.tz_convert(this_tz)
+        # Rearrange the columns (iterate in opposite order of placement)
+        new_cols = df.columns.tolist()
+        for colname in ['receiveTime_unix', 'receiveTime_local',
+                        'receiveTime_utc', 'deviceTime_unix',
+                        'deviceTime_local', 'deviceTime_utc']:
+            new_cols.insert(0, new_cols.pop(new_cols.index(colname)))
+        df = df[new_cols]
         return df
 
     def getLastDay(self, stationID):
-        try:
-            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-            df = self.getDataForStationByRange(
-                stationID,
-                lastest_dt + relativedelta(days=-1),
-                lastest_dt
-            )
-            return df
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 DAY')
 
     def getLastWeek(self, stationID):
-        try:
-            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-            df = self.getDataForStationByRange(
-                stationID,
-                lastest_dt + relativedelta(days=-7),
-                lastest_dt
-            )
-            return df
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 WEEK')
 
     def getLastMonth(self, stationID):
-        try:
-            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-            df = self.getDataForStationByRange(
-                stationID,
-                lastest_dt + relativedelta(months=-1),
-                lastest_dt
-            )
-            return df
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 MONTH')
 
     def getLastYear(self, stationID):
-        try:
-            lastest_dt = self.getLatestStationData(stationID)['receiveTime']
-            df = self.getDataForStationByRange(
-                stationID,
-                lastest_dt + relativedelta(months=-12),
-                lastest_dt
-            )
-            return df
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
+
+    def testLastMethods(self, stationID=1):
+        print('Testing last data methods with stationID={}\n'.format(stationID))
+        for method in [self.getLastDay, self.getLastWeek, self.getLastMonth,
+                       self.getLastYear]:
+            print('Testing: {}'.format(method))
+            df = method(stationID)
+            print('Num Entries:', len(df))
+            print('HEAD:\n{}'.format(df.head()))
+            print()
+
+
+if __name__ == "__main__":
+    sql = SQLObject()
+    pd.set_option('display.expand_frame_repr', False)
+    sql.testLastMethods(6)

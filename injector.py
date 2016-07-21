@@ -249,9 +249,11 @@ class Injector(object):
 
         # Still here? now inject into database if appropriate.
         if self.test_serve:
-            print_status('Not injecting {}: {}'.format(mode.upper(), packet))
+            print_status('Not injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
         else:
-            print_status('Injecting {}: {}'.format(mode.upper(), packet))
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
             try:
                 self.db.inject(data)
             except Exception as e:
@@ -361,6 +363,21 @@ def print_status(status_text, ansi=None):
     print_text = (ansi + '[{}] '.format(datetime.datetime.now()) +
                   status_text + ANSI_RESET)
     print(print_text)
+
+
+def format_packet(data, client_address):
+    """
+    Format the packet data into a pretty string.
+    For "good" packets.
+    """
+
+    output = '#{}, CPM {:.1f}+-{:.1f}, err {}'.format(
+        data['stationID'], data['cpm'], data['cpm_error'], data['error_flag'])
+    if 'deviceTime' in data:
+        output += ' at {:.3f}'.format(data['deviceTime'])
+    output += ' [from {}]'.format(client_address[0])
+
+    return output
 
 
 class DosenetUdpServer(SocketServer.UDPServer):
