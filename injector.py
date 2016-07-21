@@ -250,10 +250,10 @@ class Injector(object):
         # Still here? now inject into database if appropriate.
         if self.test_serve:
             print_status('Not injecting {}: {}'.format(
-                mode.upper(), format_packet(data, self.client_address)))
+                mode.upper(), format_packet(data, client_address)))
         else:
             print_status('Injecting {}: {}'.format(
-                mode.upper(), format_packet(data, self.client_address)))
+                mode.upper(), format_packet(data, client_address)))
             try:
                 self.db.inject(data)
             except Exception as e:
