@@ -63,6 +63,10 @@ class SQLObject:
         self.db.close()
 
     def getVerifiedStationList(self):
+        """
+        this gets run, but the result doesn't seem to be used except in
+        unused functions
+        """
         try:
             self.cursor.execute("SELECT `ID`, `IDLatLongHash` FROM dosimeter_network.stations;")
             self.verified_stations = self.cursor.fetchall()
@@ -74,6 +78,7 @@ class SQLObject:
             #     process=os.path.basename(__file__), error_message=msg)
 
     def checkHashFromRAM(self, ID):
+        "unused"
         # Essentially the same as doing the following in MySQL
         # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
         try:
@@ -108,12 +113,21 @@ class SQLObject:
                 deviceTime, stationID, cpm, cpm_error, error_flag))
         self.db.commit()
 
+    def insertIntoLog(self, stationID, msgCode, message):
+        """
+        Insert a log message into the stationlog table.
+        """
+        self.cursor.execute(
+            "INSERT INTO stationlog(stationID, msgCode, message) " +
+            "VALUES ({}, {}, {})".format(stationID, msgCode, message))
+
     def inject(self, data):
         auth = self.authenticatePacket(data)
         assert auth is None, auth
         self.insertIntoDosenet(**data)
 
     def getHashList(self):
+        "unused"
         return self.verified_stations
 
     def authenticatePacket(self, data):
