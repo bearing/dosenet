@@ -122,11 +122,13 @@ class SQLObject:
             "VALUES ({}, {}, {})".format(stationID, msgCode, message))
 
     def inject(self, data):
+        """Authenticate the data packet and then insert into database"""
         auth = self.authenticatePacket(data)
         assert auth is None, auth
         self.insertIntoDosenet(**data)
 
     def injectLog(self, data):
+        """Authenticate the log packet and then insert into database"""
         auth = self.authenticatePacket(data)
         assert auth is None, auth
         self.insertIntoLog(**data)
@@ -155,6 +157,7 @@ class SQLObject:
         return None
 
     def getHashFromDB(self, ID):
+        "unused"
         # RUN "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
         try:
             self.cursor.execute("SELECT IDLatLongHash FROM stations \
@@ -169,6 +172,7 @@ class SQLObject:
             print('Exception: Could not get hash from database. Is GRIM online and running MySQL?')
 
     def getStations(self):
+        """Read the stations table from MySQL into a pandas dataframe."""
         df = pd.read_sql(
             "SELECT * \
             FROM dosimeter_network.stations;",
@@ -178,12 +182,14 @@ class SQLObject:
         return df
 
     def getActiveStations(self):
+        """Read the stations table, but only entries with display==1."""
         df = self.getStations()
         df = df[df['display'] == 1]
         del df['display']
         return df
 
     def getSingleStation(self, stationID):
+        """Read one entry of the stations table into a pandas dataframe."""
         df = pd.read_sql(
             "SELECT * \
             FROM dosimeter_network.stations \
@@ -221,6 +227,7 @@ class SQLObject:
             return df.iloc[0]
 
     def getInjectorStation(self):
+        "The injector est station is station 0."
         return self.getStations().loc[0, :]
 
     def getNextTestStation(self):
