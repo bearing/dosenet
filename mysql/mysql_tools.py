@@ -123,14 +123,12 @@ class SQLObject:
 
     def inject(self, data):
         """Authenticate the data packet and then insert into database"""
-        auth = self.authenticatePacket(data)
-        assert auth is None, auth
+        self.authenticatePacket(data)
         self.insertIntoDosenet(**data)
 
     def injectLog(self, data):
         """Authenticate the log packet and then insert into database"""
-        auth = self.authenticatePacket(data)
-        assert auth is None, auth
+        self.authenticatePacket(data)
         self.insertIntoLog(**data)
 
     def getHashList(self):
@@ -139,11 +137,15 @@ class SQLObject:
 
     def authenticatePacket(self, data, packettype='data'):
         '''
-        Checks hash in hash list and compares against ID. Returns string if
-        not authenticated. Otherwise returns None (success)
+        Checks keys in data.
+        Checks hash in hash list and compares against ID.
+        Raises error if anything doesn't match.
+
+        packettype can be either "data" (a normal data packet)
+        or "log" (a log entry from the device).
         '''
         if not isinstance(data, dict):
-            return 'Inject data is not a dict: {}'.format(data)
+            raise TypeError('Inject data is not a dict: {}'.format(data))
 
         # Check data for keys
         if packettype == 'data':
@@ -153,20 +155,24 @@ class SQLObject:
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'message': str}
         else:
-            return 'Unknown packet type {}: should be "data" or "log"'.format(
-                packettype)
+            raise ValueError(
+                'Unknown packet type {}: should be "data" or "log"'.format(
+                    packettype))
         for k in data_types:
             if k not in data:
-                return 'No {} in data: {}'.format(k, data)
+                raise ValueError('No {} in data: {}'.format(k, data))
             if not isinstance(data[k], data_types[k]):
-                return 'Incorrect type for {}: {} (should be {})'.format(
-                    k, type(data[k]), data_types[k])
+                raise TypeError(
+                    'Incorrect type for {}: {} (should be {})'.format(
+                        k, type(data[k]), data_types[k]))
 
-        hashes = self.getStations()['IDLatLongHash']
+        this_hash = self.getStations()['IDLatLongHash'][data['stationID']]
         # Check for this specific hash
-        if data['hash'] != hashes[data['stationID']]:
-            return 'Data hash ({}) does not match stationID ({}) hash ({})'.format(
-                data['hash'], data['stationID'], hashes[data['stationID']])
+        if data['hash'] != this_hash:
+            raise AuthenticationError(
+                "Hash mismatch on ID {}: data packet {}; database {}".format(
+                    data['stationID'], data['hash'], this_hash))
+
         # Everything checks out
         return None
 
@@ -352,6 +358,10 @@ class SQLObject:
             print('Num Entries:', len(df))
             print('HEAD:\n{}'.format(df.head()))
             print()
+
+
+class AuthenticationError(Exception):
+    pass
 
 
 if __name__ == "__main__":
