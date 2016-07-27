@@ -137,17 +137,31 @@ class SQLObject:
         "unused"
         return self.verified_stations
 
-    def authenticatePacket(self, data):
+    def authenticatePacket(self, data, packettype='data'):
         '''
         Checks hash in hash list and compares against ID. Returns string if
         not authenticated. Otherwise returns None (success)
         '''
         if not isinstance(data, dict):
             return 'Inject data is not a dict: {}'.format(data)
-        if 'stationID' not in data:
-            return 'No stationID in data'
-        if 'hash' not in data:
-            return 'No hash in data'
+
+        # Check data for keys
+        if packettype == 'data':
+            data_types = {'hash': str, 'stationID': int, 'cpm': float,
+                          'cpm_error': float, 'error_flag': int}
+        elif packettype == 'log':
+            data_types = {'hash': str, 'stationID': int, 'msgCode': int,
+                          'message': str}
+        else:
+            return 'Unknown packet type {}: should be "data" or "log"'.format(
+                packettype)
+        for k in data_types:
+            if k not in data:
+                return 'No {} in data: {}'.format(k, data)
+            if not isinstance(data[k], data_types[k]):
+                return 'Incorrect type for {}: {} (should be {})'.format(
+                    k, type(data[k]), data_types[k])
+
         hashes = self.getStations()['IDLatLongHash']
         # Check for this specific hash
         if data['hash'] != hashes[data['stationID']]:
