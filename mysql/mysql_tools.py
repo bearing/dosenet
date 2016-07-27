@@ -123,12 +123,12 @@ class SQLObject:
 
     def inject(self, data):
         """Authenticate the data packet and then insert into database"""
-        self.authenticatePacket(data)
+        self.authenticatePacket(data, packettype='data')
         self.insertIntoDosenet(**data)
 
     def injectLog(self, data):
         """Authenticate the log packet and then insert into database"""
-        self.authenticatePacket(data)
+        self.authenticatePacket(data, packettype='log')
         self.insertIntoLog(**data)
 
     def getHashList(self):
