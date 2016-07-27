@@ -126,6 +126,11 @@ class SQLObject:
         assert auth is None, auth
         self.insertIntoDosenet(**data)
 
+    def injectLog(self, data):
+        auth = self.authenticatePacket(data)
+        assert auth is None, auth
+        self.insertIntoLog(**data)
+
     def getHashList(self):
         "unused"
         return self.verified_stations
@@ -137,19 +142,14 @@ class SQLObject:
         '''
         if not isinstance(data, dict):
             return 'Inject data is not a dict: {}'.format(data)
-        # Check data for keys
-        data_types = {'hash': str, 'stationID': int, 'cpm': float,
-                      'cpm_error': float, 'error_flag': int}
-        for k in data_types:
-            if k not in data:
-                return 'No {} in data: {}'.format(k, data)
-            if not isinstance(data[k], data_types[k]):
-                return 'Incorrect type for {}: {} (should be {})'.format(
-                    k, type(data[k]), data_types[k])
+        if 'stationID' not in data:
+            return 'No stationID in data'
+        if 'hash' not in data:
+            return 'No hash in data'
         hashes = self.getStations()['IDLatLongHash']
         # Check for this specific hash
         if data['hash'] != hashes[data['stationID']]:
-            return 'Data hash ({}) does not match stationID () hash ()'.format(
+            return 'Data hash ({}) does not match stationID ({}) hash ({})'.format(
                 data['hash'], data['stationID'], hashes[data['stationID']])
         # Everything checks out
         return None
