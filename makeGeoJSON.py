@@ -57,20 +57,22 @@ def main(testing=False, verbose=False, **kwargs):
                        active_stations.loc[ix, 'Lat']])
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         latest_data = DB.getLatestStationData(ix)
-        if len(latest_data)==0:
+        if len(latest_data) == 0:
             continue
         dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
-        timezone = latest_data['timezone']
         csvfile = CsvForWebserver.from_nickname(latest_data['nickname'])
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
             ('mREM/hr', dose_mrem),
             ('&microSv/hr', dose_usv),
-            ('Latest measurement', str(latest_data['receiveTime'])),
             ('csv_location', csvfile.get_fname()),
-            ('timezone', timezone)])
+            ('Latest measurement', str(latest_data['deviceTime_local']))])
+        for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
+                  'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
+                  'timezone']:
+            properties[k] = str(latest_data[k])
         feature_list.append(Feature(geometry=point, properties=properties))
     # -------------------------------------------------------------------------
     # Close database connection

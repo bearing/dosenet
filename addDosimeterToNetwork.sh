@@ -3,29 +3,42 @@
 #    - run addDosimeterToDB.py
 #    - restart udp_injector.py to pick up new location
 
-numargs=$#
+numargs=0
 
-NAME=$1
-NICKNAME=$2
-LAT=$3
-LONG=$4
-CONV=$5
-DISPLAY=$6
-ID=$7
+read -p "Full location name: " NAME
+if [[ $NAME ]]
+	then let "numargs++"
+fi
 
-echo "NAME = ${NAME}"
-echo "NICKNAME = ${NICKNAME}"
-echo "LAT = ${LAT}"
-echo "LONG = ${LONG}"
-echo "CONV = ${CONV}"
-echo "DISPLAY = ${DISPLAY}"
-echo "ID = ${ID}"
+read -p "location nickname (lowercase, no spaces): " NICKNAME
+if [[ $NICKNAME ]] 
+	then let "numargs++"
+fi
 
-if [[ $numargs < 6 ]]
+read -p "Lattitude: " LAT
+if [[ $LAT ]]
+	then let "numargs++"
+fi
+
+read -p "Longitude: " LONG
+if [[ $LONG ]]
+	then let "numargs++"
+fi
+
+read -p "Display on (1) or off (0)? " DISPLAY
+if [[ $DISPLAY ]]
+	then let "numargs++"
+fi
+
+read -p "ID (optional): " ID
+
+CONV=0.0036
+
+if [[ $numargs < 5 ]]
 then
-  echo "Not enough arguments!"
+  echo "Only the ID is optional. All other requested inputs are required"!
+  ehco "As a reminder, this runs addDosimeter.py: "
   python ~/git/dosenet/addDosimeterToDB.py -h
-  echo "Add option ID argument last"
   exit -1
 fi
 
@@ -46,12 +59,14 @@ then
   exit 1
 fi
 
-echo "Stopping udp_injector"
-killall python
+tmux new-session -d -s INJECTOR 
 
-echo "Restarting udp_injector ... start new session if session doesn't exist"
-tmux new-session -d -s UDP_INJECTOR 
-tmux send-keys -t UDP_INJECTOR "injector" C-m
+echo "Stopping injector"
+tmux send-keys -t INJECTOR C-c
+tmux send-keys -t INJECTOR C-c
+
+echo "Restarting injector"
+tmux send-keys -t INJECTOR "injector" C-m
 
 ps aux | grep python | grep -v grep
 

@@ -1,47 +1,50 @@
 #!/usr/bin/env bash
 #title:       :database_backup.sh
 #description: :This shall backup subsets of the dosimeter_network database.
-#author:      :Navrit Bal
-#date:        :20150728
+#author:      :Navrit Bal and Joseph Curtis
+#date:        :20160623
 #version:     :1.0
 #usage:       :./database_backup.sh
 #notes:       :Have fun Joey!
 #bash_version :4.2.25(1)-release
+#
+# This should be run in crontab:
+#
+# crontab -e
+# @daily . /home/dosenet/git/dosenet_backup/mysql/database_backup.sh all
+#
 #===============================================================================
-/usr/bin/clear
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
-printf "%b\n" "\e~ Using shell: ${GREEN}`which bash`${NC}"
+echo -e "Using shell: ${GREEN}`which bash`${NC}"
 args=("$@")
-printf "\n%s\n" "Number of arguments passed: " $#
 CHOICE=${args[0]}
-printf "%b\n" ">> You will need the database password for these operations - look in the \
-Google Drive /DoseNet/DatabaseAndNetworking/${GREEN}Networking Details.gdoc${NC}"
+FILEDATE=$(date +%Y-%m-%dT%H-%M-%S)
 
 if [[ "$CHOICE" == "all" ]]; then
-   printf "%s\n" "~ Backing up the whole dosimeter_network database"
-   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql${NC}"
-   mysqldump -u ne170group -p dosimeter_network > ~/backup_all_dosenet.sql
-   stat ~/backup_all_dosenet.sql | grep File
-   ls -lah ~/backup_all_dosenet.sql | awk -F " " {'print $5'}
-   stat ~/backup_all_dosenet.sql | grep Modify
+    echo "Backing up the complete dosimeter_network database"
+    FNAME=~/DBdumps/backup_$FILEDATE.sql
+    CMD="mysqldump -u ne170group dosimeter_network > ${FNAME}"
 elif [[ "$CHOICE" == "stations" ]]; then
-   printf "%s\n" "~ Just backing up the stations table of the dosimeter_network database"
-   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql${NC}"
-   mysqldump -u ne170group -p dosimeter_network stations > ~/backup_stations_dosenet.sql
-   stat ~/backup_stations_dosenet.sql | grep File
-   ls -lah ~/backup_stations_dosenet.sql | awk -F " " {'print $5'}
-   stat ~/backup_stations_dosenet.sql | grep Modify
+    echo "Just backing up the stations table of the dosimeter_network database"
+    FNAME=~/DBdumps/backup_stations_$FILEDATE.sql
+    CMD="mysqldump -u ne170group dosimeter_network stations > ${FNAME}"
 elif [[ "$CHOICE" == "data" ]]; then
-   printf "%s\n" "~ Just backing up the dosnet (data) table of the dosimeter_network database"
-   printf "%b\n" "\e~~ Using: ${BLUE}mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql${NC}"
-   mysqldump -u ne170group -p dosimeter_network dosnet > ~/backup_dosnet_dosenet.sql
-   stat ~/backup_dosnet_dosenet.sql | grep File
-   ls -lah ~/backup_dosnet_dosenet.sql | awk -F " " {'print $5'}
-   stat ~/backup_dosnet_dosenet.sql | grep Modify
+    echo "Just backing up the dosnet (data) table of the dosimeter_network database"
+    FNAME=~/DBdumps/backup_dosnet_$FILEDATE.sql
+    CMD="mysqldump -u ne170group dosimeter_network dosnet > ${FNAME}"
 else
-   printf "\t%b\n" "${RED}INVALID INPUT.${NC}"
-   printf "%b\n" "Valid options: ${GREEN}all, stations or data${NC} \n ${BLUE}Try again!?${NC}"
+    printf "\t%b\n" "${RED}INVALID INPUT.${NC}"
+    printf "%b\n" "Valid options: ${GREEN}[all, stations, data]${NC} \n ${BLUE}Try again!?${NC}"
+    exit 1
 fi
+
+# Run command and tell User
+echo -e ${BLUE}${CMD}${NC}
+eval $CMD
+
+# Print back file info
+stat $FNAME
+ls -lah $FNAME | awk -F " " {'print $5'}
