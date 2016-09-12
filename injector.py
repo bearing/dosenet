@@ -431,7 +431,7 @@ class Injector(object):
         # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
         field_dict['stationID'] = int(field_list[ind_ID])
-        if request_type.startswith('field_dict'):
+        if request_type.startswith('data'):
             if ind_deviceTime:
                 field_dict['deviceTime'] = float(field_list[ind_deviceTime])
             field_dict['cpm'] = float(field_list[ind_cpm])
