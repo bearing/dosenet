@@ -42,6 +42,8 @@ PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 UDP_PORT = 5005
 TCP_PORT = 5100
 
+HASH_LENGTH = 32
+
 ANSI_RESET = '\033[37m' + '\033[22m'    # white and not bold
 ANSI_BOLD = '\033[1m'
 ANSI_RED = '\033[31m' + ANSI_BOLD
@@ -205,15 +207,68 @@ class Injector(object):
         Handle one request from either UDP or TCP.
 
         Gets called in UdpHandler.handle() or TcpHandler.handle().
+
+        Error handling can get messy. Here is the structure of function calls:
+
+        handle()
+            handle_decryption()
+                decrypt_packet()
+            get_fields()
+            handle_request_type()
+                classify_request()
+            handle_data_packet() OR handle_log_packet()
+                ...
+        """
+
+        packet = self.handle_decryption(encrypted_packet, mode=mode)
+        if packet is None:
+            return
+
+        field_list = self.get_fields(packet)
+
+        request_type = self.handle_request_type(
+            field_list, mode=mode, packet=packet)
+        if request_type is None:
+            return
+        elif request_type == 'data':
+            handling_method = self.handle_data_packet
+            kwargs = {'old_format': False}
+        elif request_type == 'data_old':
+            handling_method = self.handle_data_packet
+            kwargs = {'old_format': False}
+        elif request_type == 'log':
+            handling_method = self.handle_log_packet
+            kwargs = {}
+
+        try:
+            status = handling_method(
+                field_list, mode=mode, client_address=client_address,
+                **kwargs)
+        except HashLengthError as e:
+            print_status(
+                '{} HashLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
+                ansi=ANSI_MG)
+        except Exception:
+            pass
+            # ...
+        else:
+            print_status(status)
+
+        return None
+
+    def handle_decryption(self, encrypted, mode=None):
+        """
+        Decrypt packet and handle errors.
         """
 
         try:
-            packet = self.decrypt_packet(encrypted_packet)
+            packet = self.decrypt_packet(encrypted)
         except UnencryptedPacket:
             # print to screen. this could be a test message
             print_status(
                 'Unencrypted {} packet: {}'.format(
-                    mode.upper(), encrypted_packet),
+                    mode.upper(), encrypted),
                 ansi=ANSI_CYAN)
             return None
         except BadPacket:
@@ -223,50 +278,13 @@ class Injector(object):
                 ansi=ANSI_RED)
             return None
 
-        try:
-            data = self.parse_packet(packet)
-        except PacketLengthError as e:
-            # encrypted test message
-            print_status(
-                '{} PacketLengthError: {}. Packet={}'.format(
-                    mode.upper(), e, packet),
-                ansi=ANSI_GR)
-            return None
-        except HashLengthError as e:
-            print_status(
-                '{} HashLengthError: {}. Packet={}'.format(
-                    mode.upper(), e, packet),
-                ansi=ANSI_MG)
-            return None
-
-        try:
-            self.check_countrate(data)
-        except ExcessiveCountrate:
-            print_status(
-                '{} Excessive Countrate! {}'.format(mode.upper(), packet),
-                ansi=ANSI_YEL)
-            return None
-
-        # Still here? now inject into database if appropriate.
-        if self.test_serve:
-            print_status('Not injecting {}: {}'.format(
-                mode.upper(), format_packet(data, client_address)))
-        else:
-            print_status('Injecting {}: {}'.format(
-                mode.upper(), format_packet(data, client_address)))
-            try:
-                self.db.inject(data)
-            except Exception as e:
-                print('Injection error:', e)
-                return None
-
-        return None
+        return packet
 
     def decrypt_packet(self, encrypted):
         """
         Decrypt packet using private key.
 
-        Also check for the case of an unencrypted packet
+        May raise UnencryptedPacket or BadPacket.
         """
 
         # In standard text, all character values should be <128.
@@ -296,47 +314,176 @@ class Injector(object):
 
         return decrypted
 
-    def parse_packet(self, packet):
+    def get_fields(self, packet):
         """
-        Split packet into fields
-        First stage of data verification: # fields, hash length
-        Assign fields into a dict object
+        Split packet into fields. No verification or error checking.
         """
-
         sep = ','
-        data_length_old = 5
-        data_length_new = 6
-        hash_length = 32
+        return packet.split(sep)
 
-        fields = packet.split(sep)
+    def handle_request_type(self, field_list, mode=None, packet=None):
+        """
+        Classify request type and verify data length and hash length.
+        """
 
-        if len(fields) != data_length_old and len(fields) != data_length_new:
+        try:
+            request_type = self.classify_request(field_list)
+        except PacketLengthError as e:
+            # encrypted test message
+            print_status(
+                '{} PacketLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
+                ansi=ANSI_GR)
+            return None
+        except UnknownRequestType:
+            print_status('{} UnknownRequestType. Packet={}'.format(
+                mode.upper(), packet))
+            return None
+        except HashLengthError as e:
+            print_status(
+                '{} HashLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
+                ansi=ANSI_MG)
+            return None
+        else:
+            return request_type
+
+    def classify_request(self, field_list):
+        """
+        Classify request as data or log.
+
+        May raise PacketLengthError or UnknownRequestType.
+        """
+
+        num_log_fields = 5
+        num_data_fields_old = 5
+        num_data_fields_new = 6
+
+        if (len(field_list) != num_log_fields and
+                len(field_list) != num_data_fields_old and
+                len(field_list) != num_data_fields_new):
             raise PacketLengthError(
-                'Found {} fields instead of {} or {}'.format(
-                    len(fields), data_length_old, data_length_new))
+                'Found {} fields instead of {}, {}, or {}'.format(
+                    len(field_list),
+                    num_log_fields, num_data_fields_old, num_data_fields_new))
+        elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
+            request_type = 'log'
+        elif len(field_list) == num_data_fields_old:
+            request_type = 'data_old'
+        elif len(field_list) == num_data_fields_new:
+            request_type = 'data'
+        else:
+            # currently, this is impossible
+            #   unless num_log_fields is different than num_data_fields_*,
+            #   and the log is submitted without 'LOG' identifier in position 2
+            raise UnknownRequestType()
+
+        return request_type
+
+    def handle_data_packet(self, field_list, old_format=False, mode=None,
+                           client_address=None):
+        """
+        Parse data packet and give to SqlObject for injection. Handle errors.
+        """
+
+        try:
+            data = self.parse_data_packet(field_list, old_format=old_format)
+        except HashLengthError:
+            pass
+
+        try:
+            self.check_countrate(data)
+        except ExcessiveCountrate:
+            print_status(
+                '{} Excessive Countrate! {}'.format(mode.upper(), packet),
+                ansi=ANSI_YEL)
+            return None
+
+        if self.test_serve:
+            print_status('Not injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+        else:
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            try:
+                self.db.inject(data)
+            except Exception as e:
+                print('Injection error:', e)
+                return None
+
+    def parse_data_packet(self, fields, old_format=False):
+        """
+        Extract data from fields into an OrderedDict.
+
+        May raise HashLengthError.
+        """
+
+        ind_hash = 0
+        ind_ID = 1
+        if old_format:
+            ind_deviceTime = None
+            ind_cpm = 2
+            ind_cpm_error = 3
+            ind_error_flag = 4
+        else:
+            ind_deviceTime = 2
+            ind_cpm = 3
+            ind_cpm_error = 4
+            ind_error_flag = 5
 
         data = OrderedDict()
-        data['hash'] = fields[0]
-        if len(data['hash']) != hash_length:
+
+        data['hash'] = fields[ind_hash]
+        if len(data['hash']) != HASH_LENGTH:
             raise HashLengthError('Hash length is not {}: {}'.format(
-                hash_length, data['hash']))
+                HASH_LENGTH, data['hash']))
         # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
-        data['stationID'] = int(fields[1])
-        if len(fields) == data_length_old:
-            data['cpm'] = float(fields[2])
-            data['cpm_error'] = float(fields[3])
-            data['error_flag'] = int(fields[4])
-        if len(fields) == data_length_new:
-            data['deviceTime'] = float(fields[2])
-            data['cpm'] = float(fields[3])
-            data['cpm_error'] = float(fields[4])
-            data['error_flag'] = int(fields[5])
-        if self.verbose:
-            for k, v in data.items():
-                print('    {:20}: {}'.format(k, v))
+        data['stationID'] = int(fields[ind_ID])
+        if ind_deviceTime:
+            data['deviceTime'] = float(fields[ind_deviceTime])
+        data['cpm'] = float(fields[ind_cpm])
+        data['cpm_error'] = float(fields[ind_cpm_error])
+        data['error_flag'] = int(fields[ind_error_flag])
 
         return data
+
+    def handle_log_packet(self, field_list, mode=None, client_address=None):
+        """
+        Parse log packet and give to SqlObject for injection. Handle errors.
+        """
+
+        try:
+            data = self.parse_data_packet(field_list)
+        except HashLengthError:
+            pass
+
+    def parse_log_packet(self, fields):
+        """
+        Extract log info from fields into an OrderedDict.
+
+        May raise HashLengthError.
+        """
+
+        ind_hash = 0
+        ind_ID = 1
+        # position 2 is "LOG" - already checked in classify_request()
+        ind_msgCode = 3
+        ind_msgText = 4
+
+        logdata = OrderedDict()
+
+        logdata['hash'] = fields[ind_hash]
+        if len(logdata['hash']) != HASH_LENGTH:
+            raise HashLengthError('Hash length is not {}: {}'.format(
+                HASH_LENGTH, logdata['hash']))
+        # The value of the hash gets checked in mysql_tools.SQLObject.inject()
+
+        logdata['stationID'] = int(fields[ind_ID])
+        logdata['msgCode'] = int(fields[ind_msgCode])
+        logdata['msgText'] = fields[ind_msgText]
+
+        return logdata
 
     def check_countrate(self, data):
         """
@@ -496,6 +643,10 @@ class PacketLengthError(InjectorError):
 
 
 class HashLengthError(InjectorError):
+    pass
+
+
+class UnknownRequestType(InjectorError):
     pass
 
 
