@@ -98,14 +98,14 @@ class Injector(object):
         self.test_serve = test_serve
         self.private_key = private_key
 
-        if self.udp_port is None:
+        if udp_port is None:
             if self.test_serve:
                 self.udp_port = TEST_UDP_PORT
             else:
                 self.udp_port = UDP_PORT
         else:
             self.udp_port = udp_port
-        if self.tcp_port is None:
+        if tcp_port is None:
             if self.test_serve:
                 self.tcp_port = TEST_TCP_PORT
             else:
