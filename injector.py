@@ -40,7 +40,10 @@ from mysql.mysql_tools import SQLObject
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 
 UDP_PORT = 5005
+TEST_UDP_PORT = 5006    # for -s mode
+
 TCP_PORT = 5100
+TEST_TCP_PORT = 5101    # for -s mode
 
 HASH_LENGTH = 32
 
@@ -71,8 +74,8 @@ class Injector(object):
                  test_inject=False,
                  test_serve=False,
                  private_key=PRIVATE_KEY,
-                 udp_port=UDP_PORT,
-                 tcp_port=TCP_PORT,
+                 udp_port=None,
+                 tcp_port=None,
                  **kwargs):
         """
         Initialise decryption & database objects.
@@ -94,8 +97,22 @@ class Injector(object):
         self.test_inject = test_inject
         self.test_serve = test_serve
         self.private_key = private_key
-        self.udp_port = udp_port
-        self.tcp_port = tcp_port
+
+        if self.udp_port is None:
+            if self.test_serve:
+                self.udp_port = TEST_UDP_PORT
+            else:
+                self.udp_port = UDP_PORT
+        else:
+            self.udp_port = udp_port
+        if self.tcp_port is None:
+            if self.test_serve:
+                self.tcp_port = TEST_TCP_PORT
+            else:
+                self.tcp_port = TCP_PORT
+        else:
+            self.tcp_port = tcp_port
+
         self.test_packet = None
 
         # Connect to database
