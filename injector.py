@@ -93,6 +93,7 @@ class Injector(object):
             ip (String) - Which address to listen on.
                 Default: dynamically determined
         """
+
         self.verbose = verbose
         self.test_inject = test_inject
         self.test_serve = test_serve
@@ -139,6 +140,7 @@ class Injector(object):
             self.tcp_server = DosenetTcpServer(
                 (self.ip, self.tcp_port), TcpHandler, injector=self)
         else:
+            # test injection
             self.udp_server = None
             self.tcp_server = None
             print('Injection test mode! I can only inject test packets. ' +
@@ -661,14 +663,16 @@ class ExcessiveCountrate(InjectorError):
 
 def main(verbose=False, **kwargs):
     inj = Injector(**kwargs)
-    try:
-        inj.listen()
-    except KeyboardInterrupt:
-        print('KeyboardInterrupt shutdown!')
-    except SystemExit:
-        print('SystemExit shutdown!')
-    except Exception as e:
-        print(e)
+    if not inj.test_inject:
+        try:
+            inj.listen()
+        except KeyboardInterrupt:
+            print('KeyboardInterrupt shutdown!')
+        except SystemExit:
+            print('SystemExit shutdown!')
+    else:
+        # test_inject
+        inj.test()
 
 
 if __name__ == "__main__":
