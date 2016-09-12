@@ -196,8 +196,8 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
-            test_cpm = 1.
-            test_cpm_error = 0.5
+            test_cpm = 1.1
+            test_cpm_error = 0.1
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
