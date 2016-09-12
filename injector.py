@@ -519,7 +519,8 @@ def format_packet(data, client_address):
     else:
         # ???
         output = ' [packet type unknown to format_packet()]'
-    output += ' [from {}]'.format(client_address[0])
+    if client_address is not None:
+        output += ' [from {}]'.format(client_address[0])
 
     return output
 
