@@ -15,7 +15,7 @@ Affiliation:
 Adapted from:
     udp_injector.py (Ryan Pavlovsky)
 Last updated:
-    2016-04-10
+    2016-09-12
 """
 from __future__ import print_function
 
@@ -241,8 +241,6 @@ class Injector(object):
         self.handle_injection(field_dict, request_type,
                               mode=mode, client_address=client_address)
 
-        return None
-
     def handle_decryption(self, encrypted, mode=None):
         """
         Decrypt packet and handle errors.
@@ -324,12 +322,6 @@ class Injector(object):
         except UnknownRequestType:
             print_status('{} UnknownRequestType. Packet={}'.format(
                 mode.upper(), packet))
-            return None
-        except HashLengthError as e:
-            print_status(
-                '{} HashLengthError: {}. Packet={}'.format(
-                    mode.upper(), e, packet),
-                ansi=ANSI_MG)
             return None
         else:
             return request_type
@@ -522,7 +514,9 @@ class DosenetUdpServer(SocketServer.UDPServer):
     """
 
     allow_reuse_address = True
-    # http://stackoverflow.com/questions/3911009/python-socketserver-baserequesthandler-knowing-the-port-and-use-the-port-already
+    # stackoverflow.com/questions/3911009/
+    #   python-socketserver-baserequesthandler-
+    #   knowing-the-port-and-use-the-port-already
 
     # don't use the verify_request method, because this happens before the
     # packet is unpacked in UdpHandler.handle()
