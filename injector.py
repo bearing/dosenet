@@ -467,6 +467,7 @@ class Injector(object):
         if self.test_serve:
             print_status('Not injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
+            return
         elif request_type.startswith('data'):
             print_status('Injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
