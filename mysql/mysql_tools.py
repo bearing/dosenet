@@ -113,13 +113,13 @@ class SQLObject:
                 deviceTime, stationID, cpm, cpm_error, error_flag))
         self.db.commit()
 
-    def insertIntoLog(self, stationID, msgCode, message):
+    def insertIntoLog(self, stationID, msgCode, msgText):
         """
         Insert a log message into the stationlog table.
         """
         self.cursor.execute(
             "INSERT INTO stationlog(stationID, msgCode, message) " +
-            "VALUES ({}, {}, {})".format(stationID, msgCode, message))
+            "VALUES ({}, {}, {})".format(stationID, msgCode, msgText))
 
     def inject(self, data):
         """Authenticate the data packet and then insert into database"""
@@ -153,7 +153,7 @@ class SQLObject:
                           'cpm_error': float, 'error_flag': int}
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
-                          'message': str}
+                          'msgText': str}
         else:
             raise ValueError(
                 'Unknown packet type {}: should be "data" or "log"'.format(

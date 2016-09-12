@@ -216,8 +216,11 @@ class Injector(object):
             get_fields()
             handle_request_type()
                 classify_request()
-            handle_data_packet() OR handle_log_packet()
-                ...
+            handle_parsing()
+                parse_packet()
+                check_countrate() [if applicable]
+            handle_injection()
+                db.inject() OR db.injectLog()
         """
 
         packet = self.handle_decryption(encrypted_packet, mode=mode)
@@ -230,30 +233,13 @@ class Injector(object):
             field_list, mode=mode, packet=packet)
         if request_type is None:
             return
-        elif request_type == 'data':
-            handling_method = self.handle_data_packet
-            kwargs = {'old_format': False}
-        elif request_type == 'data_old':
-            handling_method = self.handle_data_packet
-            kwargs = {'old_format': False}
-        elif request_type == 'log':
-            handling_method = self.handle_log_packet
-            kwargs = {}
 
-        try:
-            status = handling_method(
-                field_list, mode=mode, client_address=client_address,
-                **kwargs)
-        except HashLengthError as e:
-            print_status(
-                '{} HashLengthError: {}. Packet={}'.format(
-                    mode.upper(), e, packet),
-                ansi=ANSI_MG)
-        except Exception:
-            pass
-            # ...
-        else:
-            print_status(status)
+        field_dict = self.handle_parsing(field_list, request_type, mode=mode)
+        if field_dict is None:
+            return
+
+        self.handle_injection(field_dict, request_type,
+                              mode=mode, client_address=client_address)
 
         return None
 
@@ -380,110 +366,76 @@ class Injector(object):
 
         return request_type
 
-    def handle_data_packet(self, field_list, old_format=False, mode=None,
-                           client_address=None):
+    def handle_parsing(self, field_list, request_type, mode=None):
         """
-        Parse data packet and give to SqlObject for injection. Handle errors.
+        Parse data or log packet. Handle errors.
         """
 
         try:
-            data = self.parse_data_packet(field_list, old_format=old_format)
-        except HashLengthError:
-            pass
-
-        try:
-            self.check_countrate(data)
+            field_dict = self.parse_packet(field_list, request_type)
+        except HashLengthError as e:
+            packet = ','.join(field_list)
+            print_status(
+                '{} HashLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
+                ansi=ANSI_MG)
+            return None
         except ExcessiveCountrate:
+            packet = ','.join(field_list)
             print_status(
                 '{} Excessive Countrate! {}'.format(mode.upper(), packet),
                 ansi=ANSI_YEL)
             return None
-
-        if self.test_serve:
-            print_status('Not injecting {}: {}'.format(
-                mode.upper(), format_packet(data, client_address)))
         else:
-            print_status('Injecting {}: {}'.format(
-                mode.upper(), format_packet(data, client_address)))
-            try:
-                self.db.inject(data)
-            except Exception as e:
-                print('Injection error:', e)
-                return None
+            return field_dict
 
-    def parse_data_packet(self, fields, old_format=False):
+    def parse_packet(self, field_list, request_type):
         """
         Extract data from fields into an OrderedDict.
 
-        May raise HashLengthError.
+        May raise HashLengthError or ExcessiveCountrate.
         """
 
         ind_hash = 0
         ind_ID = 1
-        if old_format:
+        if request_type == 'data_old':
             ind_deviceTime = None
             ind_cpm = 2
             ind_cpm_error = 3
             ind_error_flag = 4
-        else:
+        elif request_type == 'data':
             ind_deviceTime = 2
             ind_cpm = 3
             ind_cpm_error = 4
             ind_error_flag = 5
+        elif request_type == 'log':
+            # position 2 is "LOG" - already checked in classify_request()
+            ind_msgCode = 3
+            ind_msgText = 4
 
-        data = OrderedDict()
+        field_dict = OrderedDict()
 
-        data['hash'] = fields[ind_hash]
-        if len(data['hash']) != HASH_LENGTH:
+        field_dict['hash'] = field_list[ind_hash]
+        if len(field_dict['hash']) != HASH_LENGTH:
             raise HashLengthError('Hash length is not {}: {}'.format(
-                HASH_LENGTH, data['hash']))
+                HASH_LENGTH, field_dict['hash']))
         # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
-        data['stationID'] = int(fields[ind_ID])
-        if ind_deviceTime:
-            data['deviceTime'] = float(fields[ind_deviceTime])
-        data['cpm'] = float(fields[ind_cpm])
-        data['cpm_error'] = float(fields[ind_cpm_error])
-        data['error_flag'] = int(fields[ind_error_flag])
+        field_dict['stationID'] = int(field_list[ind_ID])
+        if request_type.startswith('field_dict'):
+            if ind_deviceTime:
+                field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            field_dict['cpm'] = float(field_list[ind_cpm])
+            field_dict['cpm_error'] = float(field_list[ind_cpm_error])
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
 
-        return data
+            self.check_countrate(field_dict)
 
-    def handle_log_packet(self, field_list, mode=None, client_address=None):
-        """
-        Parse log packet and give to SqlObject for injection. Handle errors.
-        """
+        elif request_type == 'log':
+            field_dict['msgCode'] = int(field_list[ind_msgCode])
+            field_dict['msgText'] = field_list[ind_msgText]
 
-        try:
-            data = self.parse_data_packet(field_list)
-        except HashLengthError:
-            pass
-
-    def parse_log_packet(self, fields):
-        """
-        Extract log info from fields into an OrderedDict.
-
-        May raise HashLengthError.
-        """
-
-        ind_hash = 0
-        ind_ID = 1
-        # position 2 is "LOG" - already checked in classify_request()
-        ind_msgCode = 3
-        ind_msgText = 4
-
-        logdata = OrderedDict()
-
-        logdata['hash'] = fields[ind_hash]
-        if len(logdata['hash']) != HASH_LENGTH:
-            raise HashLengthError('Hash length is not {}: {}'.format(
-                HASH_LENGTH, logdata['hash']))
-        # The value of the hash gets checked in mysql_tools.SQLObject.inject()
-
-        logdata['stationID'] = int(fields[ind_ID])
-        logdata['msgCode'] = int(fields[ind_msgCode])
-        logdata['msgText'] = fields[ind_msgText]
-
-        return logdata
+        return field_dict
 
     def check_countrate(self, data):
         """
@@ -496,6 +448,31 @@ class Injector(object):
             raise ExcessiveCountrate(
                 'Countrate {} CPM is greater than threshold of {} CPM'.format(
                     data['cpm'], cpm_error_threshold))
+
+    def handle_injection(self, data, request_type,
+                         mode=None, client_address=None):
+        """
+        Inject data into SqlObject. Handle errors.
+        """
+
+        if self.test_serve:
+            print_status('Not injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+        elif request_type.startswith('data'):
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.inject
+
+        elif request_type == 'log':
+            print_status('Injecting {} to log: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectLog
+
+        try:
+            inject_method(data)
+        except Exception as e:
+            print('Injection error:', e)
+            return None
 
 
 def print_status(status_text, ansi=None):
@@ -518,10 +495,18 @@ def format_packet(data, client_address):
     For "good" packets.
     """
 
-    output = '#{}, CPM {:.1f}+-{:.1f}, err {}'.format(
-        data['stationID'], data['cpm'], data['cpm_error'], data['error_flag'])
-    if 'deviceTime' in data:
-        output += ' at {:.3f}'.format(data['deviceTime'])
+    if 'cpm' in data.keys():
+        output = '#{}, CPM {:.1f}+-{:.1f}, err {}'.format(
+            data['stationID'], data['cpm'], data['cpm_error'],
+            data['error_flag'])
+        if 'deviceTime' in data:
+            output += ' at {:.3f}'.format(data['deviceTime'])
+    elif 'msgCode' in data.keys():
+        output = '#{}, code {}: {}'.format(
+            data['stationID'], data['msgCode'], data['msgText'])
+    else:
+        # ???
+        output = ' [packet type unknown to format_packet()]'
     output += ' [from {}]'.format(client_address[0])
 
     return output
