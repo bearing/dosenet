@@ -119,8 +119,8 @@ class SQLObject:
         """
         sql_cmd = ("INSERT INTO stationlog(stationID, msgCode, message) " +
             "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
-        print(sql_cmd)  # debug
         self.cursor.execute(sql_cmd)
+        self.db.commit()
 
     def inject(self, data):
         """Authenticate the data packet and then insert into database"""
