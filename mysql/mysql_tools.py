@@ -119,7 +119,7 @@ class SQLObject:
         """
         self.cursor.execute(
             "INSERT INTO stationlog(stationID, msgCode, message) " +
-            "VALUES ({}, {}, {})".format(stationID, msgCode, msgText))
+            "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
 
     def inject(self, data):
         """Authenticate the data packet and then insert into database"""
