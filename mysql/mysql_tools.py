@@ -113,7 +113,7 @@ class SQLObject:
                 deviceTime, stationID, cpm, cpm_error, error_flag))
         self.db.commit()
 
-    def insertIntoLog(self, stationID, msgCode, msgText):
+    def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
         """
         Insert a log message into the stationlog table.
         """
