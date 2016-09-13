@@ -17,7 +17,8 @@ def datetime_tz(year, month, day, hour=0, minute=0, second=0, tz='UTC'):
 
 def epoch_to_datetime(epoch, tz='UTC'):
     """Return datetime with associated timezone."""
-    dt_utc = datetime_tz(1970, 1, 1, tz='UTC') + datetime.timedelta(seconds=epoch)
+    dt_utc = (datetime_tz(1970, 1, 1, tz='UTC') +
+              datetime.timedelta(seconds=epoch))
     tzinfo = pytz.timezone(tz)
     return dt_utc.astimezone(tzinfo)
 
@@ -68,7 +69,9 @@ class SQLObject:
         unused functions
         """
         try:
-            self.cursor.execute("SELECT `ID`, `IDLatLongHash` FROM dosimeter_network.stations;")
+            sql_cmd = ("SELECT `ID`, `IDLatLongHash` FROM " +
+                       "dosimeter_network.stations;")
+            self.cursor.execute(sql_cmd)
             self.verified_stations = self.cursor.fetchall()
         except Exception as e:
             raise e
@@ -107,10 +110,12 @@ class SQLObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        self.cursor.execute(
-            "INSERT INTO dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) \
-             VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
+        sql_cmd = (
+            "INSERT INTO " +
+            "dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) " +
+            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, cpm, cpm_error, error_flag))
+        self.cursor.execute(sql_cmd)
         self.db.commit()
 
     def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
@@ -118,7 +123,7 @@ class SQLObject:
         Insert a log message into the stationlog table.
         """
         sql_cmd = ("INSERT INTO stationlog(stationID, msgCode, message) " +
-            "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
+                   "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
@@ -190,7 +195,8 @@ class SQLObject:
             sys.exit(0)
         except (Exception) as e:
             print(e)
-            print('Exception: Could not get hash from database. Is GRIM online and running MySQL?')
+            print('Exception: Could not get hash from database. ' +
+                  'Is the DoseNet server online and running MySQL?')
 
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
@@ -238,10 +244,12 @@ class SQLObject:
         # Add timezone columns
         df = self.addTimeColumnsToDataframe(df, stationID=stationID)
         if len(df) == 0:
-            print('[SQL WARNING] no data returned for stationID={}'.format(stationID))
+            print('[SQL WARNING] no data returned for stationID=' +
+                  '{}'.format(stationID))
             return pd.DataFrame({})
         elif len(df) > 1:
-            print('[SQL WARNING] more than one recent result for stationID={}'.format(stationID))
+            print('[SQL WARNING] more than one recent result for stationID=' +
+                  '{}'.format(stationID))
             print(df)
             return df.iloc[0]
         else:
@@ -252,7 +260,8 @@ class SQLObject:
         return self.getStations().loc[0, :]
 
     def getNextTestStation(self):
-        test_station = self.getStations().loc[self.test_station_ids[self.test_station_ids_ix], :]
+        test_station = self.getStations().loc[
+            self.test_station_ids[self.test_station_ids_ix], :]
         # Cycle!
         if self.test_station_ids_ix == len(self.test_station_ids) - 1:
             self.test_station_ids_ix = 0
