@@ -73,6 +73,7 @@ class Injector(object):
                  verbose=False,
                  test_inject=False,
                  test_serve=False,
+                 test_ports=False,
                  private_key=PRIVATE_KEY,
                  udp_port=None,
                  tcp_port=None,
@@ -82,14 +83,20 @@ class Injector(object):
 
         Attributes:
             verbose (bool) - add verbosity. Default: False
-            testing (bool) - run in test mode with artificial packets.
+            test_inject (bool) - do not listen on sockets, but test
+                injection behavior with artificial packets. Default: False
+            test_serve (bool) - listen on sockets and process packets,
+                but do not inject anything to database. implies test_ports
                 Default: False
+            test_ports (bool) - use the testing UDP and TCP ports, rather than
+                the real ones. Data WILL be injected to database unless
+                test_serve is also True. Default: False
             private_key (str) - Fully qualified static path of private key
                 Default: '~/.ssh/id_rsa_lbl'
             udp_port (int) - Which port to listen for UDP data on.
-                Default: 5005
+                Default: 5005 (or 5006 for testing)
             tcp_port (int) - which port to listen for TCP data on.
-                Default: 5100
+                Default: 5100 (or 5101 for testing)
             ip (String) - Which address to listen on.
                 Default: dynamically determined
         """
@@ -97,17 +104,21 @@ class Injector(object):
         self.verbose = verbose
         self.test_inject = test_inject
         self.test_serve = test_serve
+        if self.test_serve:
+            self.test_ports = True
+        else:
+            self.test_ports = test_ports
         self.private_key = private_key
 
         if udp_port is None:
-            if self.test_serve:
+            if self.test_ports:
                 self.udp_port = TEST_UDP_PORT
             else:
                 self.udp_port = UDP_PORT
         else:
             self.udp_port = udp_port
         if tcp_port is None:
-            if self.test_serve:
+            if self.test_ports:
                 self.tcp_port = TEST_TCP_PORT
             else:
                 self.tcp_port = TCP_PORT
@@ -685,6 +696,9 @@ if __name__ == "__main__":
         '-s', '--test-serve', action='store_true',
         help='Server test mode: connect to TCP & UDP sockets and ' +
         'do everything EXCEPT inject to database')
+    parser.add_argument(
+        '-p', '--test-ports', action='store_true',
+        help='Listen on the default testing ports. Fully functional server')
     parser.add_argument(
         '-v', '--verbose', action='store_true',
         help='\n\t Verbosity level 1')
