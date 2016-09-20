@@ -251,6 +251,8 @@ class Injector(object):
                 check_countrate() [if applicable]
             handle_injection()
                 db.inject() OR db.injectLog()
+            handle_return_packet()
+                ...
         """
 
         packet = self.handle_decryption(encrypted_packet, mode=mode)
@@ -270,6 +272,8 @@ class Injector(object):
 
         self.handle_injection(field_dict, request_type,
                               mode=mode, client_address=client_address)
+
+        self.handle_return_packet(field_dict, request)
 
     def handle_decryption(self, encrypted, mode=None):
         """
@@ -496,6 +500,19 @@ class Injector(object):
         except Exception as e:
             print('Injection error:', e)
             return None
+
+    def handle_return_packet(self, field_dict, request):
+        """
+        Send data packet back to device, with needsUpdate and gitBranch info.
+
+        Handles errors.
+        """
+
+        # identify device ID from field_dict ...
+        # get info from SQL ...
+        # construct return packet ...
+        request.sendall('')
+        # handle exceptions ...
 
 
 def print_status(status_text, ansi=None):
