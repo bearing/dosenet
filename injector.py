@@ -508,11 +508,21 @@ class Injector(object):
         Handles errors.
         """
 
-        # identify device ID from field_dict ...
-        # get info from SQL ...
-        # construct return packet ...
-        request.sendall('')
-        # handle exceptions ...
+        stationID = field_dict['stationID']
+        try:
+            git_branch, needs_update = self.db.getStationReturnInfo(stationID)
+        except IndexError:
+            # stationID not in stations table, yet. shouldn't happen.
+            print_status(
+                "Station ID {} missing from `stations` table!", ansi=ANSI_CYAN)
+            return
+
+        return_packet = "{},{}".format(git_branch, needs_update)
+
+        try:
+            request.sendall(return_packet)
+        except socket.error as e:
+            print_status("Socket error on TCP return packet: {}".format(e))
 
 
 def print_status(status_text, ansi=None):
