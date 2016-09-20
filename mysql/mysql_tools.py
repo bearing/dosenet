@@ -226,6 +226,16 @@ class SQLObject:
         del df['ID']
         return df
 
+    def getStationReturnInfo(self, stationID):
+        """Read gitBranch and needsUpdate from stations table."""
+        df = pd.read_sql(
+            "SELECT gitBranch, needsUpdate FROM dosimeter_network.stations " +
+            "WHERE `ID` = {};".format(stationID), con=self.db)
+        needs_update = df['needsUpdate'][0]
+        git_branch = df['gitBranch'][0]
+
+        return git_branch, needs_update
+
     def getLatestStationData(self, stationID):
         df = pd.read_sql(
             "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
