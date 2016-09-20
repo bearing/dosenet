@@ -236,6 +236,45 @@ class SQLObject:
 
         return git_branch, needs_update
 
+    def setSingleStationUpdate(self, stationID, needs_update=0):
+        """
+        Set needsUpdate = {} for a single station in stations table. Default: 0
+
+        Do this after you tell the device to update and reboot, because after
+        that it doesn't need the update.
+
+        (You could also use this to set needsUpdate = 1 for a single station.)
+        """
+
+        if (not isinstance(needs_update, int) and
+                not isinstance(needs_update, bool)):
+            raise AssertionError('needs_update should be a bool or int (0, 1)')
+
+        needs_update = int(needs_update)    # db expects 0 or 1
+        sql_cmd = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
+            needs_update, stationID)
+        self.cursor.execute(sql_cmd)
+        self.db.commit()
+
+    def setAllStationsUpdate(self, needs_update=1):
+        """
+        Set needsUpdate = {} for all stations in stations table. Default: 1
+
+        Do this if there is a bug in the code such that all stations need to
+        update. Of course you have to fix the bug first ;-)
+
+        (You could also use this to set needsUpdate = 0 for all stations.)
+        """
+
+        if (not isinstance(needs_update, int) and
+                not isinstance(needs_update, bool)):
+            raise AssertionError('needs_update should be a bool or int (0, 1)')
+
+        needs_update = int(needs_update)    # db expects 0 or 1
+        sql_cmd = "UPDATE stations SET needsUpdate={}".format(needs_update)
+        self.cursor.execute(sql_cmd)
+        self.db.commit()
+
     def getLatestStationData(self, stationID):
         df = pd.read_sql(
             "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
