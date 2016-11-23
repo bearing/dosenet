@@ -63,6 +63,10 @@ class SQLObject:
     def close(self):
         self.db.close()
 
+    def refresh(self):
+        """Clear the cache of any query results."""
+        self.db.commit()
+
     def getVerifiedStationList(self):
         """
         this gets run, but the result doesn't seem to be used except in
@@ -228,7 +232,7 @@ class SQLObject:
 
     def getStationReturnInfo(self, stationID):
         """Read gitBranch and needsUpdate from stations table."""
-        self.db.commit()    # refreshes db
+        self.refresh()
         df = pd.read_sql(
             "SELECT gitBranch, needsUpdate FROM dosimeter_network.stations " +
             "WHERE `ID` = {};".format(stationID), con=self.db)
