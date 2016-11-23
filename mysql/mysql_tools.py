@@ -228,6 +228,7 @@ class SQLObject:
 
     def getStationReturnInfo(self, stationID):
         """Read gitBranch and needsUpdate from stations table."""
+        self.db.commit()    # refreshes db
         df = pd.read_sql(
             "SELECT gitBranch, needsUpdate FROM dosimeter_network.stations " +
             "WHERE `ID` = {};".format(stationID), con=self.db)
