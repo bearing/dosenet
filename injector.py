@@ -252,7 +252,7 @@ class Injector(object):
             handle_injection()
                 db.inject() OR db.injectLog()
             handle_return_packet()
-                ...
+                db.getStationReturnInfo()
         """
 
         packet = self.handle_decryption(encrypted_packet, mode=mode)
@@ -523,6 +523,12 @@ class Injector(object):
             request.sendall(return_packet)
         except socket.error as e:
             print_status("Socket error on TCP return packet: {}".format(e))
+        except AttributeError:
+            if request is None:
+                # test injection mode -t
+                pass
+            else:
+                raise
 
 
 def print_status(status_text, ansi=None):
