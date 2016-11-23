@@ -37,7 +37,7 @@ CONV=0.0036
 if [[ $numargs < 5 ]]
 then
   echo "Only the ID is optional. All other requested inputs are required"!
-  ehco "As a reminder, this runs addDosimeter.py: "
+  echo "As a reminder, this runs addDosimeterToDB.py: "
   python ~/git/dosenet/addDosimeterToDB.py -h
   exit -1
 fi
@@ -59,16 +59,25 @@ then
   exit 1
 fi
 
-tmux new-session -d -s INJECTOR 
+echo "Restarting injector in tmux"
+bash -c ~/git/dosenet/injector-in-tmux.sh &> /dev/null
 
-echo "Stopping injector"
-tmux send-keys -t INJECTOR C-c
-tmux send-keys -t INJECTOR C-c
+# tmux new-session -d -s INJECTOR 
 
-echo "Restarting injector"
-tmux send-keys -t INJECTOR "injector" C-m
+# echo "Stopping injector"
+# tmux send-keys -t INJECTOR C-c
+# tmux send-keys -t INJECTOR C-c
+
+# echo "Restarting injector"
+# tmux send-keys -t INJECTOR "injector" C-m
 
 ps aux | grep python | grep -v grep
 
+echo
 echo "New station added!"
+echo
+echo "  Please confirm working injector via:"
+echo "  $ tmux attach-session -t INJECTOR"
+echo "  and then detach by:"
+echo "    [Ctrl-b] d"
 exit 0
