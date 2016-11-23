@@ -4,7 +4,7 @@
 Run on DoseNet Server!
 
 Authors:
-    Brian Plimley (around 2016-05-10)
+    Brian Plimley (after 2016-05-01)
     Joseph Curtis (after 2016-04-10)
     Navrit Bal (after 2015-06-15)
     Ryan Pavlovsky (until 2015-06-15)
@@ -15,7 +15,7 @@ Affiliation:
 Adapted from:
     udp_injector.py (Ryan Pavlovsky)
 Last updated:
-    2016-04-10
+    2016-11-23
 """
 from __future__ import print_function
 
@@ -40,9 +40,14 @@ from mysql.mysql_tools import SQLObject
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 
 UDP_PORT = 5005
-TCP_PORT = 5100
+TEST_UDP_PORT = 5006    # for -s mode
 
-ANSI_RESET = '\033[37m' + '\033[22m'    # white and not bold
+TCP_PORT = 5100
+TEST_TCP_PORT = 5101    # for -s mode
+
+HASH_LENGTH = 32
+
+ANSI_RESET = '\033[0m'    # reset / default
 ANSI_BOLD = '\033[1m'
 ANSI_RED = '\033[31m' + ANSI_BOLD
 ANSI_GR = '\033[32m' + ANSI_BOLD
@@ -68,32 +73,58 @@ class Injector(object):
                  verbose=False,
                  test_inject=False,
                  test_serve=False,
+                 test_ports=False,
                  private_key=PRIVATE_KEY,
-                 udp_port=UDP_PORT,
-                 tcp_port=TCP_PORT,
+                 udp_port=None,
+                 tcp_port=None,
                  **kwargs):
         """
         Initialise decryption & database objects.
 
         Attributes:
             verbose (bool) - add verbosity. Default: False
-            testing (bool) - run in test mode with artificial packets.
+            test_inject (bool) - do not listen on sockets, but test
+                injection behavior with artificial packets. Default: False
+            test_serve (bool) - listen on sockets and process packets,
+                but do not inject anything to database. implies test_ports
                 Default: False
+            test_ports (bool) - use the testing UDP and TCP ports, rather than
+                the real ones. Data WILL be injected to database unless
+                test_serve is also True. Default: False
             private_key (str) - Fully qualified static path of private key
                 Default: '~/.ssh/id_rsa_lbl'
             udp_port (int) - Which port to listen for UDP data on.
-                Default: 5005
+                Default: 5005 (or 5006 for testing)
             tcp_port (int) - which port to listen for TCP data on.
-                Default: 5100
+                Default: 5100 (or 5101 for testing)
             ip (String) - Which address to listen on.
                 Default: dynamically determined
         """
+
         self.verbose = verbose
         self.test_inject = test_inject
         self.test_serve = test_serve
+        if self.test_serve:
+            self.test_ports = True
+        else:
+            self.test_ports = test_ports
         self.private_key = private_key
-        self.udp_port = udp_port
-        self.tcp_port = tcp_port
+
+        if udp_port is None:
+            if self.test_ports:
+                self.udp_port = TEST_UDP_PORT
+            else:
+                self.udp_port = UDP_PORT
+        else:
+            self.udp_port = udp_port
+        if tcp_port is None:
+            if self.test_ports:
+                self.tcp_port = TEST_TCP_PORT
+            else:
+                self.tcp_port = TCP_PORT
+        else:
+            self.tcp_port = tcp_port
+
         self.test_packet = None
 
         # Connect to database
@@ -120,6 +151,7 @@ class Injector(object):
             self.tcp_server = DosenetTcpServer(
                 (self.ip, self.tcp_port), TcpHandler, injector=self)
         else:
+            # test injection
             self.udp_server = None
             self.tcp_server = None
             print('Injection test mode! I can only inject test packets. ' +
@@ -175,8 +207,8 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
-            test_cpm = 1.
-            test_cpm_error = 0.5
+            test_cpm = 1.1
+            test_cpm_error = 0.1
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
@@ -205,15 +237,56 @@ class Injector(object):
         Handle one request from either UDP or TCP.
 
         Gets called in UdpHandler.handle() or TcpHandler.handle().
+
+        Error handling can get messy. Here is the structure of function calls:
+
+        handle()
+            handle_decryption()
+                decrypt_packet()
+            get_fields()
+            handle_request_type()
+                classify_request()
+            handle_parsing()
+                parse_packet()
+                check_countrate() [if applicable]
+            handle_injection()
+                db.inject() OR db.injectLog()
+            handle_return_packet()
+                db.getStationReturnInfo()
+        """
+
+        packet = self.handle_decryption(encrypted_packet, mode=mode)
+        if packet is None:
+            return
+
+        field_list = self.get_fields(packet)
+
+        request_type = self.handle_request_type(
+            field_list, mode=mode, packet=packet)
+        if request_type is None:
+            return
+
+        field_dict = self.handle_parsing(field_list, request_type, mode=mode)
+        if field_dict is None:
+            return
+
+        self.handle_injection(field_dict, request_type,
+                              mode=mode, client_address=client_address)
+
+        self.handle_return_packet(field_dict, request)
+
+    def handle_decryption(self, encrypted, mode=None):
+        """
+        Decrypt packet and handle errors.
         """
 
         try:
-            packet = self.decrypt_packet(encrypted_packet)
+            packet = self.decrypt_packet(encrypted)
         except UnencryptedPacket:
             # print to screen. this could be a test message
             print_status(
                 'Unencrypted {} packet: {}'.format(
-                    mode.upper(), encrypted_packet),
+                    mode.upper(), encrypted),
                 ansi=ANSI_CYAN)
             return None
         except BadPacket:
@@ -223,50 +296,13 @@ class Injector(object):
                 ansi=ANSI_RED)
             return None
 
-        try:
-            data = self.parse_packet(packet)
-        except PacketLengthError as e:
-            # encrypted test message
-            print_status(
-                '{} PacketLengthError: {}. Packet={}'.format(
-                    mode.upper(), e, packet),
-                ansi=ANSI_GR)
-            return None
-        except HashLengthError as e:
-            print_status(
-                '{} HashLengthError: {}. Packet={}'.format(
-                    mode.upper(), e, packet),
-                ansi=ANSI_MG)
-            return None
-
-        try:
-            self.check_countrate(data)
-        except ExcessiveCountrate:
-            print_status(
-                '{} Excessive Countrate! {}'.format(mode.upper(), packet),
-                ansi=ANSI_YEL)
-            return None
-
-        # Still here? now inject into database if appropriate.
-        if self.test_serve:
-            print_status('Not injecting {}: {}'.format(
-                mode.upper(), format_packet(data, client_address)))
-        else:
-            print_status('Injecting {}: {}'.format(
-                mode.upper(), format_packet(data, client_address)))
-            try:
-                self.db.inject(data)
-            except Exception as e:
-                print('Injection error:', e)
-                return None
-
-        return None
+        return packet
 
     def decrypt_packet(self, encrypted):
         """
         Decrypt packet using private key.
 
-        Also check for the case of an unencrypted packet
+        May raise UnencryptedPacket or BadPacket.
         """
 
         # In standard text, all character values should be <128.
@@ -296,47 +332,136 @@ class Injector(object):
 
         return decrypted
 
-    def parse_packet(self, packet):
+    def get_fields(self, packet):
         """
-        Split packet into fields
-        First stage of data verification: # fields, hash length
-        Assign fields into a dict object
+        Split packet into fields. No verification or error checking.
         """
-
         sep = ','
-        data_length_old = 5
-        data_length_new = 6
-        hash_length = 32
+        return packet.split(sep)
 
-        fields = packet.split(sep)
+    def handle_request_type(self, field_list, mode=None, packet=None):
+        """
+        Classify request type and verify data length and hash length.
+        """
 
-        if len(fields) != data_length_old and len(fields) != data_length_new:
+        try:
+            request_type = self.classify_request(field_list)
+        except PacketLengthError as e:
+            # encrypted test message
+            print_status(
+                '{} PacketLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
+                ansi=ANSI_GR)
+            return None
+        except UnknownRequestType:
+            print_status('{} UnknownRequestType. Packet={}'.format(
+                mode.upper(), packet))
+            return None
+        else:
+            return request_type
+
+    def classify_request(self, field_list):
+        """
+        Classify request as data or log.
+
+        May raise PacketLengthError or UnknownRequestType.
+        """
+
+        num_log_fields = 5
+        num_data_fields_old = 5
+        num_data_fields_new = 6
+
+        if (len(field_list) != num_log_fields and
+                len(field_list) != num_data_fields_old and
+                len(field_list) != num_data_fields_new):
             raise PacketLengthError(
-                'Found {} fields instead of {} or {}'.format(
-                    len(fields), data_length_old, data_length_new))
+                'Found {} fields instead of {}, {}, or {}'.format(
+                    len(field_list),
+                    num_log_fields, num_data_fields_old, num_data_fields_new))
+        elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
+            request_type = 'log'
+        elif len(field_list) == num_data_fields_old:
+            request_type = 'data_old'
+        elif len(field_list) == num_data_fields_new:
+            request_type = 'data'
+        else:
+            # currently, this is impossible
+            #   unless num_log_fields is different than num_data_fields_*,
+            #   and the log is submitted without 'LOG' identifier in position 2
+            raise UnknownRequestType()
 
-        data = OrderedDict()
-        data['hash'] = fields[0]
-        if len(data['hash']) != hash_length:
+        return request_type
+
+    def handle_parsing(self, field_list, request_type, mode=None):
+        """
+        Parse data or log packet. Handle errors.
+        """
+
+        try:
+            field_dict = self.parse_packet(field_list, request_type)
+        except HashLengthError as e:
+            packet = ','.join(field_list)
+            print_status(
+                '{} HashLengthError: {}. Packet={}'.format(
+                    mode.upper(), e, packet),
+                ansi=ANSI_MG)
+            return None
+        except ExcessiveCountrate:
+            packet = ','.join(field_list)
+            print_status(
+                '{} Excessive Countrate! {}'.format(mode.upper(), packet),
+                ansi=ANSI_YEL)
+            return None
+        else:
+            return field_dict
+
+    def parse_packet(self, field_list, request_type):
+        """
+        Extract data from fields into an OrderedDict.
+
+        May raise HashLengthError or ExcessiveCountrate.
+        """
+
+        ind_hash = 0
+        ind_ID = 1
+        if request_type == 'data_old':
+            ind_deviceTime = None
+            ind_cpm = 2
+            ind_cpm_error = 3
+            ind_error_flag = 4
+        elif request_type == 'data':
+            ind_deviceTime = 2
+            ind_cpm = 3
+            ind_cpm_error = 4
+            ind_error_flag = 5
+        elif request_type == 'log':
+            # position 2 is "LOG" - already checked in classify_request()
+            ind_msgCode = 3
+            ind_msgText = 4
+
+        field_dict = OrderedDict()
+
+        field_dict['hash'] = field_list[ind_hash]
+        if len(field_dict['hash']) != HASH_LENGTH:
             raise HashLengthError('Hash length is not {}: {}'.format(
-                hash_length, data['hash']))
+                HASH_LENGTH, field_dict['hash']))
         # The value of the hash gets checked in mysql_tools.SQLObject.inject()
 
-        data['stationID'] = int(fields[1])
-        if len(fields) == data_length_old:
-            data['cpm'] = float(fields[2])
-            data['cpm_error'] = float(fields[3])
-            data['error_flag'] = int(fields[4])
-        if len(fields) == data_length_new:
-            data['deviceTime'] = float(fields[2])
-            data['cpm'] = float(fields[3])
-            data['cpm_error'] = float(fields[4])
-            data['error_flag'] = int(fields[5])
-        if self.verbose:
-            for k, v in data.items():
-                print('    {:20}: {}'.format(k, v))
+        field_dict['stationID'] = int(field_list[ind_ID])
+        if request_type.startswith('data'):
+            if ind_deviceTime:
+                field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            field_dict['cpm'] = float(field_list[ind_cpm])
+            field_dict['cpm_error'] = float(field_list[ind_cpm_error])
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
 
-        return data
+            self.check_countrate(field_dict)
+
+        elif request_type == 'log':
+            field_dict['msgCode'] = int(field_list[ind_msgCode])
+            field_dict['msgText'] = field_list[ind_msgText]
+
+        return field_dict
 
     def check_countrate(self, data):
         """
@@ -349,6 +474,61 @@ class Injector(object):
             raise ExcessiveCountrate(
                 'Countrate {} CPM is greater than threshold of {} CPM'.format(
                     data['cpm'], cpm_error_threshold))
+
+    def handle_injection(self, data, request_type,
+                         mode=None, client_address=None):
+        """
+        Inject data into SqlObject. Handle errors.
+        """
+
+        if self.test_serve:
+            print_status('Not injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            return
+        elif request_type.startswith('data'):
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.inject
+
+        elif request_type == 'log':
+            print_status('Injecting {} to log: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectLog
+
+        try:
+            inject_method(data)
+        except Exception as e:
+            print('Injection error:', e)
+            return None
+
+    def handle_return_packet(self, field_dict, request):
+        """
+        Send data packet back to device, with needsUpdate and gitBranch info.
+
+        Handles errors.
+        """
+
+        stationID = field_dict['stationID']
+        try:
+            git_branch, needs_update = self.db.getStationReturnInfo(stationID)
+        except IndexError:
+            # stationID not in stations table, yet. shouldn't happen.
+            print_status(
+                "Station ID {} missing from `stations` table!", ansi=ANSI_CYAN)
+            return
+
+        return_packet = "{},{}".format(git_branch, needs_update)
+
+        try:
+            request.sendall(return_packet)
+        except socket.error as e:
+            print_status("Socket error on TCP return packet: {}".format(e))
+        except AttributeError:
+            if request is None:
+                # test injection mode -t
+                pass
+            else:
+                raise
 
 
 def print_status(status_text, ansi=None):
@@ -371,11 +551,20 @@ def format_packet(data, client_address):
     For "good" packets.
     """
 
-    output = '#{}, CPM {:.1f}+-{:.1f}, err {}'.format(
-        data['stationID'], data['cpm'], data['cpm_error'], data['error_flag'])
-    if 'deviceTime' in data:
-        output += ' at {:.3f}'.format(data['deviceTime'])
-    output += ' [from {}]'.format(client_address[0])
+    if 'cpm' in data.keys():
+        output = '#{}, CPM {:.1f}+-{:.1f}, err {}'.format(
+            data['stationID'], data['cpm'], data['cpm_error'],
+            data['error_flag'])
+        if 'deviceTime' in data:
+            output += ' at {:.3f}'.format(data['deviceTime'])
+    elif 'msgCode' in data.keys():
+        output = '#{}, code {}: {}'.format(
+            data['stationID'], data['msgCode'], data['msgText'])
+    else:
+        # ???
+        output = ' [packet type unknown to format_packet()]'
+    if client_address is not None:
+        output += ' [from {}]'.format(client_address[0])
 
     return output
 
@@ -390,7 +579,9 @@ class DosenetUdpServer(SocketServer.UDPServer):
     """
 
     allow_reuse_address = True
-    # http://stackoverflow.com/questions/3911009/python-socketserver-baserequesthandler-knowing-the-port-and-use-the-port-already
+    # stackoverflow.com/questions/3911009/
+    #   python-socketserver-baserequesthandler-
+    #   knowing-the-port-and-use-the-port-already
 
     # don't use the verify_request method, because this happens before the
     # packet is unpacked in UdpHandler.handle()
@@ -499,6 +690,10 @@ class HashLengthError(InjectorError):
     pass
 
 
+class UnknownRequestType(InjectorError):
+    pass
+
+
 class UnencryptedPacket(InjectorError):
     pass
 
@@ -513,14 +708,16 @@ class ExcessiveCountrate(InjectorError):
 
 def main(verbose=False, **kwargs):
     inj = Injector(**kwargs)
-    try:
-        inj.listen()
-    except KeyboardInterrupt:
-        print('KeyboardInterrupt shutdown!')
-    except SystemExit:
-        print('SystemExit shutdown!')
-    except Exception as e:
-        print(e)
+    if not inj.test_inject:
+        try:
+            inj.listen()
+        except KeyboardInterrupt:
+            print('KeyboardInterrupt shutdown!')
+        except SystemExit:
+            print('SystemExit shutdown!')
+    else:
+        # test_inject
+        inj.test()
 
 
 if __name__ == "__main__":
@@ -532,6 +729,9 @@ if __name__ == "__main__":
         '-s', '--test-serve', action='store_true',
         help='Server test mode: connect to TCP & UDP sockets and ' +
         'do everything EXCEPT inject to database')
+    parser.add_argument(
+        '-p', '--test-ports', action='store_true',
+        help='Listen on the default testing ports. Fully functional server')
     parser.add_argument(
         '-v', '--verbose', action='store_true',
         help='\n\t Verbosity level 1')
