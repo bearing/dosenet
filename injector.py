@@ -4,7 +4,7 @@
 Run on DoseNet Server!
 
 Authors:
-    Brian Plimley (around 2016-05-10)
+    Brian Plimley (after 2016-05-01)
     Joseph Curtis (after 2016-04-10)
     Navrit Bal (after 2015-06-15)
     Ryan Pavlovsky (until 2015-06-15)
@@ -15,7 +15,7 @@ Affiliation:
 Adapted from:
     udp_injector.py (Ryan Pavlovsky)
 Last updated:
-    2016-09-12
+    2016-11-23
 """
 from __future__ import print_function
 
