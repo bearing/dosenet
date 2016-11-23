@@ -47,7 +47,7 @@ TEST_TCP_PORT = 5101    # for -s mode
 
 HASH_LENGTH = 32
 
-ANSI_RESET = '\033[0m'    # white and not bold
+ANSI_RESET = '\033[0m'    # reset / default
 ANSI_BOLD = '\033[1m'
 ANSI_RED = '\033[31m' + ANSI_BOLD
 ANSI_GR = '\033[32m' + ANSI_BOLD
