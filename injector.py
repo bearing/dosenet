@@ -507,7 +507,10 @@ class Injector(object):
             print_status('Injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.inject
-
+        elif request_type == 'd3s':
+            print_status('Injecting D3S {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.inject_d3s
         elif request_type == 'log':
             print_status('Injecting {} to log: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
@@ -578,6 +581,9 @@ def format_packet(data, client_address):
     elif 'msgCode' in data.keys():
         output = '#{}, code {}: {}'.format(
             data['stationID'], data['msgCode'], data['msgText'])
+    elif 'spectrum' in data.keys():
+        output = '#{}, {} total counts, err {}'.format(
+            data['stationID'], sum(data['spectrum']), data['error_flag'])
     else:
         # ???
         output = ' [packet type unknown to format_packet()]'
