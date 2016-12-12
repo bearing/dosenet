@@ -136,6 +136,11 @@ class SQLObject:
         self.authenticatePacket(data, packettype='data')
         self.insertIntoDosenet(**data)
 
+    def injectD3S(self, data):
+        """Authenticate the D3S data packet and then insert into database"""
+        self.authenticatePacket(data, packettype='d3s')
+        self.insertIntoD3S(**data)
+
     def injectLog(self, data):
         """Authenticate the log packet and then insert into database"""
         self.authenticatePacket(data, packettype='log')
@@ -152,7 +157,8 @@ class SQLObject:
         Raises error if anything doesn't match.
 
         packettype can be either "data" (a normal data packet)
-        or "log" (a log entry from the device).
+        or "log" (a log entry from the device)
+        or "d3s" (D3S data).
         '''
         if not isinstance(data, dict):
             raise TypeError('Inject data is not a dict: {}'.format(data))
@@ -161,6 +167,13 @@ class SQLObject:
         if packettype == 'data':
             data_types = {'hash': str, 'stationID': int, 'cpm': float,
                           'cpm_error': float, 'error_flag': int}
+        elif packettype == 'd3s':
+            data_types = {'hash': str, 'stationID': int, 'spectrum': list,
+                          'error_flag': int}
+            if len(data['spectrum']) != 4096:
+                raise AuthenticationError(
+                    'Spectrum length is {}, should be 4096'.format(
+                        len(data['spectrum'])))
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'msgText': str}
