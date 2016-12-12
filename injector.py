@@ -27,6 +27,7 @@ import socket
 import SocketServer
 import datetime
 from collections import OrderedDict
+import ast
 import multiprocessing
 import Crypto.Random
 
@@ -370,16 +371,23 @@ class Injector(object):
         num_log_fields = 5
         num_data_fields_old = 5
         num_data_fields_new = 6
+        num_d3s_fields = 5
 
         if (len(field_list) != num_log_fields and
                 len(field_list) != num_data_fields_old and
-                len(field_list) != num_data_fields_new):
+                len(field_list) != num_data_fields_new and
+                len(field_list) != num_d3s_fields):
             raise PacketLengthError(
-                'Found {} fields instead of {}, {}, or {}'.format(
+                'Found {} fields instead of {}, {}, {}, or {}'.format(
                     len(field_list),
-                    num_log_fields, num_data_fields_old, num_data_fields_new))
+                    num_log_fields, num_data_fields_old, num_data_fields_new,
+                    num_d3s_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
+        elif (len(field_list) == num_d3s_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) > 4096):
+            request_type = 'd3s'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
         elif len(field_list) == num_data_fields_new:
@@ -438,6 +446,10 @@ class Injector(object):
             # position 2 is "LOG" - already checked in classify_request()
             ind_msgCode = 3
             ind_msgText = 4
+        elif request_type == 'd3s':
+            ind_deviceTime = 2
+            ind_spectrum = 3
+            ind_error_flag = 4
 
         field_dict = OrderedDict()
 
@@ -456,6 +468,12 @@ class Injector(object):
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
             self.check_countrate(field_dict)
+
+        elif request_type == 'd3s':
+            field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            spectrum_str = str(field_list[ind_spectrum]).replace(',', ';')
+            field_dict['spectrum'] = ast.literal_eval(spectrum_str)
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         elif request_type == 'log':
             field_dict['msgCode'] = int(field_list[ind_msgCode])
