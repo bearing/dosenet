@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import MySQLdb as mdb
+import numpy as np
 import pandas as pd
 import sys
 import datetime
@@ -119,6 +120,20 @@ class SQLObject:
             "dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, cpm, cpm_error, error_flag))
+        self.cursor.execute(sql_cmd)
+        self.db.commit()
+
+    def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime):
+        """
+        Insert a row of D3S data into the d3s table.
+        """
+        spectrum = np.array(spectrum, dtype=np.uint16)
+        spectrum_blob = spectrum.tobytes()
+        sql_cmd = (
+            "INSERT INTO " +
+            "d3s(deviceTime, stationID, channelCounts, errorFlag) " +
+            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {});".format(
+                deviceTime, stationID, spectrum_blob, error_flag))
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
