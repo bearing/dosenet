@@ -695,7 +695,11 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     """
 
     def handle(self):
-        data = self.request.recv(1024)
+        data_buffer = self.request.recv(1024)
+        data = data_buffer
+        while data_buffer:
+            data_buffer = self.request.recv(1024)
+            data += data_buffer
 
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
