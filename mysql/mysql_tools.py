@@ -134,8 +134,9 @@ class SQLObject:
             "INSERT INTO " +
             "d3s(deviceTime, stationID, channelCounts, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {});".format(
-                deviceTime, stationID, spectrum_blob, error_flag))
-        self.cursor.execute(sql_cmd)
+                deviceTime, stationID, '%s', error_flag))
+        # let MySQLdb library handle the special characters in the blob
+        self.cursor.execute(sql_cmd, (spectrum_blob,))
         self.db.commit()
 
     def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
