@@ -504,7 +504,7 @@ class Injector(object):
 
         elif request_type == 'd3s':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
-            spectrum_str = str(field_list[ind_spectrum]).replace(',', ';')
+            spectrum_str = str(field_list[ind_spectrum]).replace(';', ',')
             field_dict['spectrum'] = ast.literal_eval(spectrum_str)
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
