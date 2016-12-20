@@ -543,7 +543,7 @@ class Injector(object):
         elif request_type == 'd3s':
             print_status('Injecting D3S {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
-            inject_method = self.db.inject_d3s
+            inject_method = self.db.injectD3S
         elif request_type == 'log':
             print_status('Injecting {} to log: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
