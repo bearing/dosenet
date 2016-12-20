@@ -123,7 +123,8 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
-    def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime):
+    def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime,
+                      **kwargs):
         """
         Insert a row of D3S data into the d3s table.
         """
