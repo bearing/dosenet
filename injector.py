@@ -304,17 +304,20 @@ class Injector(object):
                 ansi=ANSI_CYAN)
             return None
         except BadPacket:
-            print_status(
-                'Bad {} packet (cannot resolve into standard ASCII)'.format(
-                    mode.upper()),
-                ansi=ANSI_RED)
-            return None
+            try:
+                packet = self.decrypt_packet_AES(encrypted)
+            except BadPacket:
+                print_status(
+                    'Bad {} packet (cannot resolve into standard ASCII)'.format(
+                        mode.upper()),
+                    ansi=ANSI_RED)
+                return None
 
         return packet
 
     def decrypt_packet(self, encrypted):
         """
-        Decrypt packet using private key.
+        Decrypt packet using RSA private key.
 
         May raise UnencryptedPacket or BadPacket.
         """
@@ -342,6 +345,23 @@ class Injector(object):
         elif any(v > 127 for v in ascii_values_decrypted):
             raise BadPacket(
                 'Bad character values in decrypted packet (>127): {}'.format(
+                    ascii_values_decrypted))
+
+        return decrypted
+
+    def decrypt_packet_AES(self, encrypted):
+        """
+        Decrypt packet using AES symmetric key. For D3S packets.
+
+        May raise BadPacket.
+        """
+
+        decrypted = self.aes.decrypt(encrypted)
+        ascii_values_decrypted = [ord(c) for c in decrypted]
+
+        if any(v > 127 for v in ascii_values_decrypted):
+            raise BadPacket(
+                'Bad character values in decrypted AES packet: {}'.format(
                     ascii_values_decrypted))
 
         return decrypted
