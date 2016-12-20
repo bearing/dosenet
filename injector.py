@@ -30,6 +30,7 @@ from collections import OrderedDict
 import ast
 import multiprocessing
 import Crypto.Random
+from Crypto.Cipher import AES
 
 # Extensible way for adding future imports
 import_list = ['crypt', 'mysql', 'udp']
@@ -39,6 +40,7 @@ from crypt import cust_crypt as ccrypt
 from mysql.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
+SYMMETRIC_KEY = os.path.expanduser('~/secret.aes')
 
 UDP_PORT = 5005
 TEST_UDP_PORT = 5006    # for -s mode
@@ -76,6 +78,7 @@ class Injector(object):
                  test_serve=False,
                  test_ports=False,
                  private_key=PRIVATE_KEY,
+                 symmetric_key=SYMMETRIC_KEY,
                  udp_port=None,
                  tcp_port=None,
                  **kwargs):
@@ -94,6 +97,8 @@ class Injector(object):
                 test_serve is also True. Default: False
             private_key (str) - Fully qualified static path of private key
                 Default: '~/.ssh/id_rsa_lbl'
+            symmetric_key (str) - Fully qualified static path of AES key
+                Default: '~/secret.aes'
             udp_port (int) - Which port to listen for UDP data on.
                 Default: 5005 (or 5006 for testing)
             tcp_port (int) - which port to listen for TCP data on.
@@ -110,6 +115,7 @@ class Injector(object):
         else:
             self.test_ports = test_ports
         self.private_key = private_key
+        self.symmetric_key = symmetric_key
 
         if udp_port is None:
             if self.test_ports:
@@ -135,6 +141,13 @@ class Injector(object):
         print('\tPrivate Key:', self.private_key)
         de = ccrypt.public_d_encrypt(key_file_lst=[self.private_key])
         self.decrypter = de
+
+        # AES decryption
+        print('\tSymmetric Key:', self.symmetric_key)
+        with open(self.symmetric_key, 'r') as keyfile:
+            key = keyfile.read()
+            assert len(key) == 32
+            self.aes = AES.new(key, mode=AES.MODE_ECB)
 
         # Get ip information
         self.ip = self.get_external_ip()
