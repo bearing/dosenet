@@ -34,7 +34,7 @@ Last updated:
 Originally adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 """
 
-def main(testing=False, verbose=False):
+def main(verbose=False):
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Open database tool
@@ -87,10 +87,6 @@ def main(testing=False, verbose=False):
     geojsonfile = DataFile.default_geojson()
     geojsonfile.write_to_file(dump)
     # -------------------------------------------------------------------------
-    # Transfer to webserver
-    # -------------------------------------------------------------------------
-    geojsonfile.send_to_webserver(testing=testing)
-    # -------------------------------------------------------------------------
     # Finished!
     # -------------------------------------------------------------------------
     print('makeGeoJSON DONE, the time is {}'.format(datetime.datetime.now()))
@@ -100,8 +96,6 @@ def main(testing=False, verbose=False):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=docstring)
-    parser.add_argument('-t', '--testing', action='store_true', default=False,
-                        help='Testing mode to not send data to KEPLER')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
     args = parser.parse_args()
