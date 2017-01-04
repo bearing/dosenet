@@ -13,8 +13,6 @@ docstring = """
 Main makeGeoJSON and transfer to KEPLER webserver 
 
 Returns:
-    Plot.ly graphs -
-      Updates dose over time graphs on plot.ly for ALL stations
     output.geojson -
       GeoJSON file for the web page >> copied to Kepler (web server)
         via SCP (SSH CP) command
