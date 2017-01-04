@@ -62,7 +62,7 @@ def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
     cmd += ' '.join(local_fnames_to_send) + ' '
     cmd += '{}@{}:'.format(username, server_address)
     cmd += '{}'.format(remote_path.rstrip('/') + '/')
-    print('\n    {}\n'.format(cmd))
+    print(cmd)
     if testing:
         print('Testing mode, not sending ...')
     else:
