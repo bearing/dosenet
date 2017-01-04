@@ -270,7 +270,8 @@ class Injector(object):
                 db.getStationReturnInfo()
         """
 
-        packet = self.handle_decryption(encrypted_packet, mode=mode)
+        packet = self.handle_decryption(
+            encrypted_packet, is_aes=is_aes, mode=mode)
         if packet is None:
             return
 
@@ -290,13 +291,18 @@ class Injector(object):
 
         self.handle_return_packet(field_dict, request)
 
-    def handle_decryption(self, encrypted, mode=None):
+    def handle_decryption(self, encrypted, is_aes=False, mode=None):
         """
         Decrypt packet and handle errors.
         """
 
+        if is_aes:
+            decrypt = self.decrypt_packet_aes
+        else:
+            decrypt = self.decrypt_packet_rsa
+
         try:
-            packet = self.decrypt_packet(encrypted)
+            packet = decrypt(encrypted)
         except UnencryptedPacket:
             # print to screen. this could be a test message
             print_status(
@@ -316,7 +322,7 @@ class Injector(object):
 
         return packet
 
-    def decrypt_packet(self, encrypted):
+    def decrypt_packet_rsa(self, encrypted):
         """
         Decrypt packet using RSA private key.
 
@@ -350,7 +356,7 @@ class Injector(object):
 
         return decrypted
 
-    def decrypt_packet_AES(self, encrypted):
+    def decrypt_packet_aes(self, encrypted):
         """
         Decrypt packet using AES symmetric key. For D3S packets.
 
