@@ -364,7 +364,6 @@ class Injector(object):
         May raise BadPacket.
         """
 
-        print('AES decrypting packet of length {}'.format(len(encrypted)))
         decrypted = self.aes.decrypt(encrypted)
         ascii_values_decrypted = [ord(c) for c in decrypted]
 
@@ -747,7 +746,6 @@ class TcpHandler(SocketServer.StreamRequestHandler):
             data = firstdata + remainder
         else:
             is_aes = True
-            print('Expecting AES message of length {}'.format(msg_len))
             bytes_recvd = 0
             buffer_size = 1024
             datalist = []
@@ -755,7 +753,6 @@ class TcpHandler(SocketServer.StreamRequestHandler):
                 request_size = min(msg_len - bytes_recvd, buffer_size)
                 datalist.append(self.request.recv(request_size))
                 bytes_recvd += len(datalist[-1])
-                print('Received {} bytes'.format(bytes_recvd))
             data = ''.join(datalist)
 
         self.server.injector.handle(
