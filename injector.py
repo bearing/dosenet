@@ -311,14 +311,11 @@ class Injector(object):
                 ansi=ANSI_CYAN)
             return None
         except BadPacket:
-            try:
-                packet = self.decrypt_packet_AES(encrypted)
-            except BadPacket:
-                print_status(
-                    'Bad {} packet (cannot resolve into standard ASCII)'.format(
-                        mode.upper()),
-                    ansi=ANSI_RED)
-                return None
+            print_status(
+                'Bad {} packet (cannot resolve into standard ASCII)'.format(
+                    mode.upper()),
+                ansi=ANSI_RED)
+            return None
 
         return packet
 
