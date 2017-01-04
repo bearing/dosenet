@@ -360,6 +360,7 @@ class Injector(object):
         May raise BadPacket.
         """
 
+        print('AES decrypting packet of length {}'.format(len(encrypted)))
         decrypted = self.aes.decrypt(encrypted)
         ascii_values_decrypted = [ord(c) for c in decrypted]
 
