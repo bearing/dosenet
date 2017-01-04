@@ -124,15 +124,12 @@ class FileForWebserver(object):
             self.close_file()
 
     def df_to_file(self, df):
-        self.open_file()
         try:
             df.to_csv(self.get_local_fname(), index=None)
             self.print_local_file_saved()
         except Exception as e:
             print('Cannot write here:', self.get_local_fname())
             print(e)
-        finally:
-            self.close_file()
 
     def print_local_file_saved(self):
         print('Saved ({}):\n    {}'.format(
