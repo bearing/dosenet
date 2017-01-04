@@ -747,14 +747,11 @@ class TcpHandler(SocketServer.StreamRequestHandler):
             bytes_recvd = 0
             buffer_size = 1024
             datalist = [firstdata]
-            while bytes_recvd < msg_len - buffer_size:
-                datalist.append(self.request.recv(buffer_size))
-                bytes_recvd += buffer_size
+            while bytes_recvd < msg_len:
+                request_size = min(msg_len - bytes_recvd, buffer_size)
+                datalist.append(self.request.recv(request_size))
+                bytes_recvd += len(datalist[-1])
                 print('Received {} bytes'.format(bytes_recvd))
-            remainder_len = msg_len - bytes_recvd
-            datalist.append(self.request.recv(remainder_len))
-            bytes_recvd += remainder_len
-            print('Received {} bytes'.format(bytes_recvd))
             data = ''.join(datalist)
 
         self.server.injector.handle(
