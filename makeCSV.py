@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from mysql.mysql_tools import SQLObject
-from data_transfer import CsvForWebserver
+from data_transfer import DataFile
 import time
 
 docstring = """
@@ -33,7 +33,7 @@ def main(testing=False, verbose=False, **kwargs):
         print('(id={}) {}'.format(sid, name))
         df = DB.getLastYear(sid)
         print('    Loaded last year of data')
-        csvfile = CsvForWebserver.from_nickname(nick)
+        csvfile = DataFile.csv_from_nickname(nick)
         csvfile.df_to_file(df)
         csvfile.send_to_webserver(testing=testing)
         print()

@@ -8,8 +8,8 @@ WEBSERVER_ADDRESS = 'kepler.berkeley.edu'
 LOCAL_GEOJSON_PATH = os.path.join(os.getcwd(), 'tmp/geojson/')
 REMOTE_GEOJSON_PATH = \
     '/var/www/html/htdocs-nuc-groups/radwatch/sites/default/files/'
-# Default geojson filename
-GEOJSON_FNAME = 'output.geojson'
+# Default geojson base filename
+GEOJSON_FNAME_BASE = 'output.geojson'
 # Default CSV paths
 LOCAL_CSV_PATH = os.path.join(os.getcwd(), 'tmp/csv/')
 REMOTE_CSV_PATH = os.path.join(REMOTE_GEOJSON_PATH, 'dosenet/')
@@ -72,7 +72,13 @@ def scp_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
         print(e)
 
 
-class FileForWebserver(object):
+def nickname_to_remote_csv_fname(nickname, **kwargs):
+    """Shortcut to get remote fname from nickname"""
+    csvfile = DataFile.csv_from_nickname(nickname, **kwargs)
+    return csvfile.remote_fname
+
+
+class DataFile(object):
 
     def __init__(self, base_fname, local_path, remote_path, **kwargs):
         """
@@ -86,6 +92,24 @@ class FileForWebserver(object):
         self.local_path = local_path
         self.remote_path = remote_path
         mkdir(self.local_path)
+
+    @classmethod
+    def csv_from_nickname(cls, nickname, local_path=LOCAL_CSV_PATH,
+                          remote_path=REMOTE_CSV_PATH, **kwargs):
+        obj = cls(
+            base_fname=nickname + '.csv',
+            local_path=local_path,
+            remote_path=remote_path,
+            **kwargs)
+        return obj
+
+    @classmethod
+    def default_geojson(cls):
+        obj = cls(
+            base_fname=GEOJSON_FNAME_BASE,
+            local_path=LOCAL_GEOJSON_PATH,
+            remote_path=REMOTE_GEOJSON_PATH)
+        return obj
 
     def send_to_webserver(self, testing=False):
         scp_to_webserver(
@@ -134,37 +158,3 @@ class FileForWebserver(object):
     def print_local_file_saved(self):
         print('Saved ({}):\n    {}'.format(
             get_byte_size(self.local_fname), self.local_fname))
-
-
-class CsvForWebserver(FileForWebserver):
-
-    def __init__(self, local_path=LOCAL_CSV_PATH, remote_path=REMOTE_CSV_PATH,
-                 **kwargs):
-        """Defaults for local and remote are contained in this init"""
-        super(CsvForWebserver, self).__init__(
-            local_path=local_path, remote_path=remote_path, **kwargs)
-
-    @classmethod
-    def from_nickname(cls, nickname, **kwargs):
-        obj = cls(base_fname=nickname + '.csv', **kwargs)
-        return obj
-
-    @staticmethod
-    def get_remote_csv_fname_from_nickname(nickname, **kwargs):
-        """Shortcut to get remote fname from nickname"""
-        csvfile = CsvForWebserver.from_nickname(nickname, **kwargs)
-        return csvfile.remote_fname
-
-
-class GeoJsonForWebserver(FileForWebserver):
-
-    def __init__(self, local_path=LOCAL_GEOJSON_PATH,
-                 remote_path=REMOTE_GEOJSON_PATH, **kwargs):
-        """Defaults for local and remote are contained in this init"""
-        super(GeoJsonForWebserver, self).__init__(
-            local_path=local_path, remote_path=remote_path, **kwargs)
-
-    @classmethod
-    def from_fname(cls, fname=GEOJSON_FNAME, **kwargs):
-        obj = cls(base_fname=fname, **kwargs)
-        return obj

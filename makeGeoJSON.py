@@ -6,7 +6,7 @@ from geojson import Point, Feature, FeatureCollection
 import time
 import datetime
 from mysql.mysql_tools import SQLObject
-from data_transfer import GeoJsonForWebserver, CsvForWebserver
+from data_transfer import DataFile, nickname_to_remote_csv_fname
 from collections import OrderedDict
 
 docstring = """
@@ -36,7 +36,7 @@ Last updated:
 Originally adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 """
 
-def main(testing=False, verbose=False, **kwargs):
+def main(testing=False, verbose=False):
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Open database tool
@@ -61,13 +61,13 @@ def main(testing=False, verbose=False, **kwargs):
             continue
         dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
-        csvfile = CsvForWebserver.from_nickname(latest_data['nickname'])
+        csv_fname = nickname_to_remote_csv_fname(latest_data['nickname'])
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
             ('mREM/hr', dose_mrem),
             ('&microSv/hr', dose_usv),
-            ('csv_location', csvfile.base_fname),
+            ('csv_location', csv_fname),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
                   'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
@@ -86,7 +86,7 @@ def main(testing=False, verbose=False, **kwargs):
     # -------------------------------------------------------------------------
     # Make geojson file
     # -------------------------------------------------------------------------
-    geojsonfile = GeoJsonForWebserver.from_fname(**kwargs)
+    geojsonfile = DataFile.default_geojson()
     geojsonfile.write_to_file(dump)
     # -------------------------------------------------------------------------
     # Transfer to webserver
