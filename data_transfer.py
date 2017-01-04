@@ -64,18 +64,17 @@ def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
     cmd += '{}'.format(remote_path.rstrip('/') + '/')
     print('\n    {}\n'.format(cmd))
     if testing:
-        print('Testing mode, exiting ...')
-        return None
-    try:
-        # Run the transfer cmd and wait until it returns
-        os.system(cmd)
-        print('Success!')
-    except Exception as e:
-        print('Network Error')
-        print(e)
-    finally:
-        print('DONE ({:.2f} s)'.format(time.time() - tic))
-        print_divider()
+        print('Testing mode, not sending ...')
+    else:
+        try:
+            # Run the transfer cmd and wait until it returns
+            os.system(cmd)
+            print('Success!')
+        except Exception as e:
+            print('Network Error')
+            print(e)
+    print('DONE ({:.2f} s)'.format(time.time() - tic))
+    print_divider()
 
 
 def nickname_to_remote_csv_fname(nickname, **kwargs):
