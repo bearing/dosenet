@@ -32,8 +32,8 @@ def get_byte_size(fname):
     raise TypeError('File larger than 1000 TB?: {}'.format(fname))
 
 
-def scp_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
-                     server_address=WEBSERVER_ADDRESS, testing=False):
+def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
+                      server_address=WEBSERVER_ADDRESS, testing=False):
     """
     Transfer files to webserver (DECF KEPLER). Should be run under 'dosenet'
     linux user so that the SSH keypair setup between DOSENET & DECF Kepler
@@ -54,7 +54,7 @@ def scp_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
     if len(local_fnames_to_send) == 0:
         print('    No files to send, exiting ...')
         return None
-    cmd = 'scp '
+    cmd = 'rsync -azvh '
     cmd += ' '.join(local_fnames_to_send) + ' '
     cmd += '{}@{}:'.format(username, server_address)
     cmd += '{}'.format(remote_path.rstrip('/') + '/')
@@ -64,7 +64,7 @@ def scp_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
         return None
     try:
         tic = time.time()
-        # Run the scp cmd and wait until it returns
+        # Run the transfer cmd and wait until it returns
         os.system(cmd)
         print('    Success! ({:.2f} s)'.format(time.time() - tic))
     except Exception as e:
@@ -112,7 +112,7 @@ class DataFile(object):
         return obj
 
     def send_to_webserver(self, testing=False):
-        scp_to_webserver(
+        send_to_webserver(
             local_fnames=[self.local_fname],
             remote_path=self.remote_path,
             testing=testing)
