@@ -42,24 +42,31 @@ def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
     works without login
 
     Inputs:
-        local_fnames(iterable) : local file paths
-        remote_path(str) : remote directory
+        local_fnames(iterable or str) : local file paths
+        remote_dir(str) : remote directory
         username(str) : remote username
     """
     tic = time.time()
     print_divider()
     print('Webserver transfer:')
-    local_fnames_to_send = []
-    for fname in local_fnames:
-        if not os.path.isfile(fname):
-            print('Cannot locate:', fname)
-        else:
-            local_fnames_to_send.append(fname)
-    if len(local_fnames_to_send) == 0:
-        print('No files to send, exiting ...')
-        return None
+    if isinstance(local_fnames, (list, tuple)):
+        local_fnames_to_send = []
+        for fname in local_fnames:
+            if not os.path.isfile(fname):
+                print('Cannot locate:', fname)
+            else:
+                local_fnames_to_send.append(fname)
+        if len(local_fnames_to_send) == 0:
+            print('No files to send, exiting ...')
+            return None
+        fname_str = ' '.join(local_fnames_to_send)
+    elif isinstance(local_fnames, str):
+        fname_str = local_fnames
+    else:
+        raise TypeError('`local_fnames` should be iterable or string:',
+                        local_fnames)
     cmd = 'rsync -azvh '
-    cmd += ' '.join(local_fnames_to_send) + ' '
+    cmd += fname_str + ' '
     cmd += '{}@{}:'.format(username, server_address)
     cmd += '{}'.format(remote_path.rstrip('/') + '/')
     print(cmd)
@@ -71,7 +78,7 @@ def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
             os.system(cmd)
             print('Success!')
         except Exception as e:
-            print('Network Error')
+            print('Error!')
             print(e)
     print('DONE ({:.2f} s)'.format(time.time() - tic))
     print_divider()
