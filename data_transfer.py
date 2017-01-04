@@ -22,7 +22,7 @@ def mkdir(path):
         pass
 
 
-def print_byte_size(fname):
+def get_byte_size(fname):
     nbytes = float(os.path.getsize(fname))
     byte_units = ['Bytes', 'kB', 'MB', 'GB', 'TB']
     for i, u in enumerate(byte_units):
@@ -63,20 +63,34 @@ class FileForWebserver(object):
                  **kwargs):
         """
         Default username is here but can be editted from descedants with kwargs
+
+        Inputs:
+            local_path : Path of local directory
+            remote_path : Path of remote directory
+            username : Kepler (webserver) username
         """
-        self.set_local_path(local_path)
-        self.set_remote_path(remote_path)
-        self.set_username(username)
+        self.username = username
+        self.local_path = local_path
+        self.remote_path = remote_path
+        mkdir(self.local_path)
+        self.username = username
 
     def send_to_webserver(self, testing=False):
         scp_to_webserver(
-            fname_local=self.get_local_fname(),
-            fname_remote=self.get_remote_fname(),
+            fname_local=self.local_fname,
+            fname_remote=self.remote_fname,
             username=self.username,
             testing=testing)
 
-    def set_username(self, username):
-        self.username = username
+    @property
+    def local_fname(self):
+        """Full local path to file"""
+        return os.path.join(self.local_path, self.fname)
+
+    @property
+    def remote_fname(self):
+        """Full remote path to file"""
+        return os.path.join(self.remote_path, self.fname)
 
     def set_fname(self, fname):
         """Base filename"""
@@ -86,25 +100,8 @@ class FileForWebserver(object):
         """Get base filename"""
         return self.fname
 
-    def set_local_path(self, path):
-        """Path of local directory, make it if it does not exist"""
-        self.local_path = path
-        mkdir(self.local_path)
-
-    def set_remote_path(self, path):
-        """Path of remote directory, make it if it does not exist"""
-        self.remote_path = path
-
-    def get_local_fname(self):
-        """Full local path to file"""
-        return os.path.join(self.local_path, self.fname)
-
-    def get_remote_fname(self):
-        """Full remote path to file"""
-        return os.path.join(self.remote_path, self.fname)
-
     def open_file(self):
-        self.file = open(self.get_local_fname(), 'w')
+        self.file = open(self.local_fname, 'w')
 
     def get_file(self):
         return self.file
@@ -118,22 +115,22 @@ class FileForWebserver(object):
             self.get_file().write(data_string)
             self.print_local_file_saved()
         except Exception as e:
-            print('Cannot write here:', self.get_local_fname())
+            print('Cannot write here:', self.local_fname)
             print(e)
         finally:
             self.close_file()
 
     def df_to_file(self, df):
         try:
-            df.to_csv(self.get_local_fname(), index=None)
+            df.to_csv(self.local_fname, index=None)
             self.print_local_file_saved()
         except Exception as e:
-            print('Cannot write here:', self.get_local_fname())
+            print('Cannot write here:', self.local_fname)
             print(e)
 
     def print_local_file_saved(self):
         print('Saved ({}):\n    {}'.format(
-            print_byte_size(self.get_local_fname()), self.get_local_fname()))
+            get_byte_size(self.local_fname), self.local_fname))
 
 
 class CsvForWebserver(FileForWebserver):
@@ -154,7 +151,7 @@ class CsvForWebserver(FileForWebserver):
     def get_remote_csv_fname_from_nickname(nickname, **kwargs):
         """Shortcut to get remote fname from nickname"""
         csvfile = CsvForWebserver.from_nickname(nickname, **kwargs)
-        return csvfile.get_remote_fname()
+        return csvfile.remote_fname
 
 
 class GeoJsonForWebserver(FileForWebserver):
