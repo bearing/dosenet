@@ -316,6 +316,9 @@ class Injector(object):
                     mode.upper()),
                 ansi=ANSI_RED)
             return None
+        except ValueError:
+            # AES: message length not a multiple of block size
+            print_status('Bad AES TCP packet (blocksize error)', ansi=ANSI_RED)
 
         return packet
 
