@@ -3,6 +3,7 @@ import os
 import time
 
 REMOTE_USERNAME = 'jccurtis'
+WEBSERVER_ADDRESS = 'kepler.berkeley.edu'
 # Default geojson paths
 LOCAL_GEOJSON_PATH = os.path.join(os.getcwd(), 'tmp/geojson/')
 REMOTE_GEOJSON_PATH = \
@@ -31,39 +32,50 @@ def get_byte_size(fname):
     raise TypeError('File larger than 1000 TB?: {}'.format(fname))
 
 
-def scp_to_webserver(fname_local, fname_remote, username=REMOTE_USERNAME,
-                     testing=False):
+def scp_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
+                     server_address=WEBSERVER_ADDRESS, testing=False):
     """
-    Transfer file to webserver (DECF KEPLER)
-    Must be run under 'dosenet' linux user so that the SSH keypair setup
-    between DOSENET & DECF Kepler works without login
-    Not ideal: uses Joseph Curtis' account (jccurtis) for the SCP
+    Transfer files to webserver (DECF KEPLER). Should be run under 'dosenet'
+    linux user so that the SSH keypair setup between DOSENET & DECF Kepler
+    works without login
+
+    Inputs:
+        local_fnames(iterable) : local file paths
+        remote_path(str) : remote directory
+        username(str) : remote username
     """
-    cmd = 'scp '
-    cmd += '{} '.format(fname_local)
-    cmd += '{}@kepler.berkeley.edu:'.format(username)
-    cmd += '{}'.format(fname_remote)
     print('Webserver transfer:')
-    print('    {}'.format(cmd))
+    local_fnames_to_send = []
+    for fname in local_fnames:
+        if not os.path.isfile(fname):
+            print('    Cannot locate:', fname)
+        else:
+            local_fnames_to_send.append(fname)
+    if len(local_fnames_to_send) == 0:
+        print('    No files to send, exiting ...')
+        return None
+    cmd = 'scp '
+    cmd += ' '.join(local_fnames_to_send) + ' '
+    cmd += '{}@{}:'.format(username, server_address)
+    cmd += '{}'.format(remote_path.rstrip('/') + '/')
+    print('\n    {}\n'.format(cmd))
     if testing:
-        print('    Not executed (testing)')
-    else:
-        try:
-            tic = time.time()
-            os.system(cmd)
-            print('    Success! ({:.2f} s)'.format(time.time() - tic))
-        except Exception as e:
-            print('    Network Error ({:.2f} s)'.format(time.time() - tic))
-            print(e)
+        print('    Testing mode, exiting ...')
+        return None
+    try:
+        tic = time.time()
+        # Run the scp cmd and wait until it returns
+        os.system(cmd)
+        print('    Success! ({:.2f} s)'.format(time.time() - tic))
+    except Exception as e:
+        print('    Network Error ({:.2f} s)'.format(time.time() - tic))
+        print(e)
 
 
 class FileForWebserver(object):
 
-    def __init__(self, base_fname, local_path, remote_path,
-                 username=REMOTE_USERNAME, **kwargs):
+    def __init__(self, base_fname, local_path, remote_path, **kwargs):
         """
-        Default username is here but can be editted from descedants with kwargs
-
         Inputs:
             base_fname : Filename without directory
             local_path : Path of local directory
@@ -71,16 +83,14 @@ class FileForWebserver(object):
             username : Kepler (webserver) username
         """
         self.base_fname = base_fname
-        self.username = username
         self.local_path = local_path
         self.remote_path = remote_path
         mkdir(self.local_path)
 
     def send_to_webserver(self, testing=False):
         scp_to_webserver(
-            fname_local=self.local_fname,
-            fname_remote=self.remote_fname,
-            username=self.username,
+            local_fnames=[self.local_fname],
+            remote_path=self.remote_path,
             testing=testing)
 
     @property
