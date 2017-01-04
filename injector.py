@@ -743,14 +743,18 @@ class TcpHandler(SocketServer.StreamRequestHandler):
             data = firstdata + remainder
         else:
             is_aes = True
+            print('Expecting AES message of length {}'.format(msg_len))
             bytes_recvd = 0
             buffer_size = 1024
             datalist = [firstdata]
             while bytes_recvd < msg_len - buffer_size:
                 datalist.append(self.request.recv(buffer_size))
                 bytes_recvd += buffer_size
+                print('Received {} bytes'.format(bytes_recvd))
             remainder_len = msg_len - bytes_recvd
             datalist.append(self.request.recv(remainder_len))
+            bytes_recvd += remainder_len
+            print('Received {} bytes'.format(bytes_recvd))
             data = ''.join(datalist)
 
         self.server.injector.handle(
