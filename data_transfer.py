@@ -59,16 +59,18 @@ def scp_to_webserver(fname_local, fname_remote, username=REMOTE_USERNAME,
 
 class FileForWebserver(object):
 
-    def __init__(self, local_path, remote_path, username=REMOTE_USERNAME,
-                 **kwargs):
+    def __init__(self, base_fname, local_path, remote_path,
+                 username=REMOTE_USERNAME, **kwargs):
         """
         Default username is here but can be editted from descedants with kwargs
 
         Inputs:
+            base_fname : Filename without directory
             local_path : Path of local directory
             remote_path : Path of remote directory
             username : Kepler (webserver) username
         """
+        self.base_fname = base_fname
         self.username = username
         self.local_path = local_path
         self.remote_path = remote_path
@@ -85,20 +87,12 @@ class FileForWebserver(object):
     @property
     def local_fname(self):
         """Full local path to file"""
-        return os.path.join(self.local_path, self.fname)
+        return os.path.join(self.local_path, self.base_fname)
 
     @property
     def remote_fname(self):
         """Full remote path to file"""
-        return os.path.join(self.remote_path, self.fname)
-
-    def set_fname(self, fname):
-        """Base filename"""
-        self.fname = fname
-
-    def get_fname(self):
-        """Get base filename"""
-        return self.fname
+        return os.path.join(self.remote_path, self.base_fname)
 
     def open_file(self):
         self.file = open(self.local_fname, 'w')
@@ -143,8 +137,7 @@ class CsvForWebserver(FileForWebserver):
 
     @classmethod
     def from_nickname(cls, nickname, **kwargs):
-        obj = cls(**kwargs)
-        obj.set_fname(nickname + '.csv')
+        obj = cls(base_fname=nickname + '.csv', **kwargs)
         return obj
 
     @staticmethod
@@ -164,6 +157,5 @@ class GeoJsonForWebserver(FileForWebserver):
 
     @classmethod
     def from_fname(cls, fname=GEOJSON_FNAME, **kwargs):
-        obj = cls(**kwargs)
-        obj.set_fname(fname)
+        obj = cls(base_fname=fname, **kwargs)
         return obj

@@ -67,7 +67,7 @@ def main(testing=False, verbose=False, **kwargs):
             ('CPM', latest_data['cpm']),
             ('mREM/hr', dose_mrem),
             ('&microSv/hr', dose_usv),
-            ('csv_location', csvfile.get_fname()),
+            ('csv_location', csvfile.base_fname),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
                   'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
