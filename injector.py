@@ -49,6 +49,7 @@ TCP_PORT = 5100
 TEST_TCP_PORT = 5101    # for -s mode
 
 HASH_LENGTH = 32
+PREPEND_LENGTH = 5      # for AES encryption from D3S
 
 ANSI_RESET = '\033[0m'    # reset / default
 ANSI_BOLD = '\033[1m'
@@ -245,7 +246,7 @@ class Injector(object):
             self.handle(test_packet, mode='test')
             time.sleep(1.1)
 
-    def handle(self, encrypted_packet,
+    def handle(self, encrypted_packet, is_aes=False,
                client_address=None, request=None, mode=None):
         """
         Handle one request from either UDP or TCP.
@@ -728,10 +729,31 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     """
 
     def handle(self):
-        data = self.rfile.read()
+        is_aes = False
+        firstdata = self.request.recv(PREPEND_LENGTH)
+        try:
+            msg_len = int(firstdata)
+        except ValueError:
+            # not AES. get the remainder of the RSA-encrypted message in one go
+            remainder = self.request.recv(256)
+            data = firstdata + remainder
+        else:
+            is_aes = True
+            bytes_recvd = 0
+            buffer_size = 1024
+            datalist = [firstdata]
+            while bytes_recvd < msg_len - buffer_size:
+                datalist.append(self.request.recv(buffer_size))
+                bytes_recvd += buffer_size
+            remainder_len = msg_len - bytes_recvd
+            datalist.append(self.request.recv(remainder_len))
+            data = ''.join(datalist)
 
         self.server.injector.handle(
-            data, client_address=self.client_address, request=self.request,
+            data,
+            is_aes=is_aes,
+            client_address=self.client_address,
+            request=self.request,
             mode='tcp')
 
 
