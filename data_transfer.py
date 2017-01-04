@@ -3,7 +3,7 @@
 from __future__ import print_function
 import os
 import time
-from utils import print_divider
+from utils import print_divider, mkdir
 
 
 REMOTE_USERNAME = 'jccurtis'
@@ -19,14 +19,10 @@ LOCAL_CSV_DIR = os.path.join(LOCAL_DATA_DIR, 'dosenet/')
 REMOTE_CSV_DIR = os.path.join(REMOTE_DATA_DIR, 'dosenet/')
 # Default geojson base filename
 GEOJSON_FNAME_BASE = 'output.geojson'
-
-
-def mkdir(path):
-    if not os.path.isdir(path):
-        print('MAKING DIRECTORY:', path)
-        os.makedirs(path)
-    else:
-        pass
+# Make dirs
+mkdir(LOCAL_DATA_DIR)
+mkdir(LOCAL_GEOJSON_DIR)
+mkdir(LOCAL_CSV_DIR)
 
 
 def get_byte_size(fname):
