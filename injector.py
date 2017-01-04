@@ -746,7 +746,7 @@ class TcpHandler(SocketServer.StreamRequestHandler):
             print('Expecting AES message of length {}'.format(msg_len))
             bytes_recvd = 0
             buffer_size = 1024
-            datalist = [firstdata]
+            datalist = []
             while bytes_recvd < msg_len:
                 request_size = min(msg_len - bytes_recvd, buffer_size)
                 datalist.append(self.request.recv(request_size))
