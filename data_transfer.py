@@ -75,7 +75,6 @@ class FileForWebserver(object):
         self.local_path = local_path
         self.remote_path = remote_path
         mkdir(self.local_path)
-        self.username = username
 
     def send_to_webserver(self, testing=False):
         scp_to_webserver(
