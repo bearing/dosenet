@@ -1,6 +1,8 @@
 from __future__ import print_function
 import os
 import time
+from utils import print_divider
+
 
 REMOTE_USERNAME = 'jccurtis'
 WEBSERVER_ADDRESS = 'kepler.berkeley.edu'
@@ -44,15 +46,17 @@ def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
         remote_path(str) : remote directory
         username(str) : remote username
     """
+    tic = time.time()
+    print_divider()
     print('Webserver transfer:')
     local_fnames_to_send = []
     for fname in local_fnames:
         if not os.path.isfile(fname):
-            print('    Cannot locate:', fname)
+            print('Cannot locate:', fname)
         else:
             local_fnames_to_send.append(fname)
     if len(local_fnames_to_send) == 0:
-        print('    No files to send, exiting ...')
+        print('No files to send, exiting ...')
         return None
     cmd = 'rsync -azvh '
     cmd += ' '.join(local_fnames_to_send) + ' '
@@ -60,16 +64,18 @@ def send_to_webserver(local_fnames, remote_path, username=REMOTE_USERNAME,
     cmd += '{}'.format(remote_path.rstrip('/') + '/')
     print('\n    {}\n'.format(cmd))
     if testing:
-        print('    Testing mode, exiting ...')
+        print('Testing mode, exiting ...')
         return None
     try:
-        tic = time.time()
         # Run the transfer cmd and wait until it returns
         os.system(cmd)
-        print('    Success! ({:.2f} s)'.format(time.time() - tic))
+        print('Success!')
     except Exception as e:
-        print('    Network Error ({:.2f} s)'.format(time.time() - tic))
+        print('Network Error')
         print(e)
+    finally:
+        print('DONE ({:.2f} s)'.format(time.time() - tic))
+        print_divider()
 
 
 def nickname_to_remote_csv_fname(nickname, **kwargs):
@@ -156,5 +162,5 @@ class DataFile(object):
             print(e)
 
     def print_local_file_saved(self):
-        print('Saved ({}):\n    {}'.format(
+        print('Saved ({}): {}'.format(
             get_byte_size(self.local_fname), self.local_fname))
