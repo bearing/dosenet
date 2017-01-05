@@ -245,6 +245,7 @@ class DoseNetSlacker(object):
         """Check SQL database, post messages. Blocks execution."""
 
         while True:
+<<<<<<< b220e71a22d62801476dc793df0a5acc95e34888
 <<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
             time.sleep(self.interval_s)
             try:
@@ -448,6 +449,13 @@ if __name__ == '__main__':
         msg = tb.format_exc()
         slacker.post('Exception: {}: {}'.format(type(e), msg))
 =======
+=======
+            data = self.get_db_data()
+            self.check_for_outages(data)
+            self.check_for_high_countrates(data)
+            self.check_for_new_stations(data)
+
+>>>>>>> slacker.py: framework for loop
             self.slack.api_call(
                 'chat.postMessage',
                 channel=SLACK_CHANNEL,
@@ -455,6 +463,30 @@ if __name__ == '__main__':
                 icon_emoji=ICON,
                 text='Testing')
             time.sleep(self.interval_s)
+
+    def get_db_data(self):
+        """
+        Read station data from SQL.
+        """
+        pass
+
+    def check_for_outages(self, data):
+        """
+        Look for active stations that haven't posted data in the last ... time.
+        """
+        pass
+
+    def check_for_high_countrates(self, data):
+        """
+        Look for active stations with countrate > xxx.
+        """
+        pass
+
+    def check_for_new_stations(self, data):
+        """
+        Look for active stations that are posting for the first time.
+        """
+        pass
 
 
 if __name__ == '__main__':
