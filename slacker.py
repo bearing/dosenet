@@ -78,8 +78,10 @@ INTERVAL = 300
 SLACK_USER = 'dosenet_server'
 ICON = ':radioactive_sign:'
 SLACK_CHANNEL = '#random'
+TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
+<<<<<<< 1d4fbc53df309d7d1817d76d565c794aee368184
 if socket.gethostname().startswith('plimley'):
     TOKEN_PATH = './'
 elif socket.gethostname() == 'dosenet':
@@ -87,6 +89,10 @@ elif socket.gethostname() == 'dosenet':
 else:
     raise RuntimeError('Unknown host {}, cannot load Slack token'.format(
 >>>>>>> renamed slack_outage_reporter.py; basic class and loading
+=======
+if socket.gethostname() != 'dosenet':
+    raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
+>>>>>>> slacker.py: only runs on dosenet server
         socket.gethostname()))
 
 
