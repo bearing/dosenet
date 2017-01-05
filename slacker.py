@@ -74,13 +74,13 @@ import socket
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
-INTERVAL = 300
 SLACK_USER = 'dosenet_server'
 ICON = ':radioactive_sign:'
 SLACK_CHANNEL = '#random'
 TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
+<<<<<<< d7d44a92d4662c2422eba49aa28f2bf44f6586f9
 <<<<<<< 1d4fbc53df309d7d1817d76d565c794aee368184
 if socket.gethostname().startswith('plimley'):
     TOKEN_PATH = './'
@@ -90,6 +90,12 @@ else:
     raise RuntimeError('Unknown host {}, cannot load Slack token'.format(
 >>>>>>> renamed slack_outage_reporter.py; basic class and loading
 =======
+=======
+CHECK_INTERVAL_S = 5 * 60
+COUNTRATE_THRESHOLD_CPM = 20
+OUTAGE_DURATION_THRESHOLD_S = 1 * 60 * 60
+
+>>>>>>> slacker.py: add constants for thresholds
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
 >>>>>>> slacker.py: only runs on dosenet server
@@ -127,8 +133,12 @@ class DoseNetSlacker(object):
     def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt'):
         self.get_slack(tokenfile)
         self.get_sql()
+<<<<<<< d7d44a92d4662c2422eba49aa28f2bf44f6586f9
         self.interval_s = INTERVAL
 >>>>>>> renamed slack_outage_reporter.py; basic class and loading
+=======
+        self.interval_s = CHECK_INTERVAL_S
+>>>>>>> slacker.py: add constants for thresholds
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
