@@ -88,7 +88,7 @@ def send_to_webserver(local_fnames, remote_dir=REMOTE_DATA_DIR,
 def nickname_to_remote_csv_fname(nickname, **kwargs):
     """Shortcut to get remote fname from nickname"""
     csvfile = DataFile.csv_from_nickname(nickname, **kwargs)
-    return csvfile.remote_fname
+    return csvfile.base_fname
 
 
 class DataFile(object):
