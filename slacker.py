@@ -5,6 +5,10 @@ Requires official slackclient:
 
 Requires token to be set for SLACK:
     This has been configured for the Slack Bot named
+<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
+=======
+
+>>>>>>> renamed slack_outage_reporter.py; basic class and loading
         dosenet_server
 
     https://api.slack.com/bot-users
@@ -12,6 +16,7 @@ Requires token to be set for SLACK:
 """
 
 from __future__ import print_function
+<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
 import argparse
 import os
 import time
@@ -62,11 +67,32 @@ INJECTOR_CMD = ('bash', '/home/dosenet/git/dosenet/start-injector-in-tmux.sh')
 
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
+=======
+import os
+import time
+import socket
+from slackclient import SlackClient
+from mysql.mysql_tools import SQLObject
+
+INTERVAL = 300
+SLACK_USER = 'dosenet_server'
+ICON = ':radioactive_sign:'
+SLACK_CHANNEL = '#random'
+TOKEN_NAME = 'ucbdosenet_slack_token.txt'
+
+if socket.gethostname().startswith('plimley'):
+    TOKEN_PATH = './'
+elif socket.gethostname() == 'dosenet':
+    TOKEN_PATH = os.path.expanduser('~/')
+else:
+    raise RuntimeError('Unknown host {}, cannot load Slack token'.format(
+>>>>>>> renamed slack_outage_reporter.py; basic class and loading
         socket.gethostname()))
 
 
 class DoseNetSlacker(object):
 
+<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
     def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt',
                  test=False, verbose=False, restart_injector=False):
         self.test = test
@@ -91,13 +117,22 @@ class DoseNetSlacker(object):
         self.initialize_station_status()
         self.post_initial_report()
         print('Posted initial report at {}'.format(datetime.datetime.now()))
+=======
+    def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt'):
+        self.get_slack(tokenfile)
+        self.get_sql()
+        self.interval_s = INTERVAL
+>>>>>>> renamed slack_outage_reporter.py; basic class and loading
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
 
         filename = os.path.join(TOKEN_PATH, TOKEN_NAME)
+<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
         if self.v:
             print('Loading Slack token from {}'.format(filename))
+=======
+>>>>>>> renamed slack_outage_reporter.py; basic class and loading
         with open(filename, 'r') as f:
             slack_token = f.read().rstrip()
         self.slack = SlackClient(slack_token)
@@ -111,6 +146,7 @@ class DoseNetSlacker(object):
             print('Could not find SQL database! Starting without it')
             self.sql = None
 
+<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
     def initialize_station_status(self):
         """
         Initialize records in memory and check the SQL database
@@ -197,10 +233,13 @@ class DoseNetSlacker(object):
 
         return elapsed_time
 
+=======
+>>>>>>> renamed slack_outage_reporter.py; basic class and loading
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
 
         while True:
+<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
             time.sleep(self.interval_s)
             try:
                 self.diff_status_and_report()
@@ -402,3 +441,18 @@ if __name__ == '__main__':
     except Exception as e:
         msg = tb.format_exc()
         slacker.post('Exception: {}: {}'.format(type(e), msg))
+=======
+            self.slack.api_call(
+                'chat.postMessage',
+                channel=SLACK_CHANNEL,
+                username=SLACK_USER,
+                icon_emoji=ICON,
+                text='Testing')
+            time.sleep(self.interval_s)
+
+
+if __name__ == '__main__':
+    slacker = DoseNetSlacker('./ucbdosenet_slack_token')
+    print('Running DoseNetSlacker...')
+    slacker.run()
+>>>>>>> renamed slack_outage_reporter.py; basic class and loading
