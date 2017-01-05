@@ -19,12 +19,15 @@ import socket
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
-INTERVAL = 300
 SLACK_USER = 'dosenet_server'
 ICON = ':radioactive_sign:'
 SLACK_CHANNEL = '#random'
 TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
+
+CHECK_INTERVAL_S = 5 * 60
+COUNTRATE_THRESHOLD_CPM = 20
+OUTAGE_DURATION_THRESHOLD_S = 1 * 60 * 60
 
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
@@ -36,7 +39,7 @@ class DoseNetSlacker(object):
     def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt'):
         self.get_slack(tokenfile)
         self.get_sql()
-        self.interval_s = INTERVAL
+        self.interval_s = CHECK_INTERVAL_S
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
