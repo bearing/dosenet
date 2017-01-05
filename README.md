@@ -11,6 +11,13 @@
 This readme may not be fully up to date. (see #23)
 For a to-do, see the issue list in GitHub and Waffle.
 
+## For testing purposes
+Temporarily add the repo to your path
+
+```bash
+export PYTHONPATH=`pwd`:$PYTHONPATH
+```
+
 ---
 ## What goes where?
 This is all contained in the GitHub repository, stored by convention in 'dosenet' in the user's home folder. eg. `cd ~/dosenet/` or `cd ~/git/dosenet` would get you where you want to be.

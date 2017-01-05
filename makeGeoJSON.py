@@ -6,15 +6,13 @@ from geojson import Point, Feature, FeatureCollection
 import time
 import datetime
 from mysql.mysql_tools import SQLObject
-from data_transfer import GeoJsonForWebserver, CsvForWebserver
+from data_transfer import DataFile, nickname_to_remote_csv_fname
 from collections import OrderedDict
 
 docstring = """
 Main makeGeoJSON and transfer to KEPLER webserver 
 
 Returns:
-    Plot.ly graphs -
-      Updates dose over time graphs on plot.ly for ALL stations
     output.geojson -
       GeoJSON file for the web page >> copied to Kepler (web server)
         via SCP (SSH CP) command
@@ -36,7 +34,7 @@ Last updated:
 Originally adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 """
 
-def main(testing=False, verbose=False, **kwargs):
+def main(verbose=False):
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Open database tool
@@ -61,13 +59,13 @@ def main(testing=False, verbose=False, **kwargs):
             continue
         dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
-        csvfile = CsvForWebserver.from_nickname(latest_data['nickname'])
+        csv_fname = nickname_to_remote_csv_fname(latest_data['nickname'])
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
             ('mREM/hr', dose_mrem),
             ('&microSv/hr', dose_usv),
-            ('csv_location', csvfile.get_fname()),
+            ('csv_location', csv_fname),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
                   'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
@@ -86,12 +84,8 @@ def main(testing=False, verbose=False, **kwargs):
     # -------------------------------------------------------------------------
     # Make geojson file
     # -------------------------------------------------------------------------
-    geojsonfile = GeoJsonForWebserver.from_fname(**kwargs)
+    geojsonfile = DataFile.default_geojson()
     geojsonfile.write_to_file(dump)
-    # -------------------------------------------------------------------------
-    # Transfer to webserver
-    # -------------------------------------------------------------------------
-    geojsonfile.send_to_webserver(testing=testing)
     # -------------------------------------------------------------------------
     # Finished!
     # -------------------------------------------------------------------------
@@ -102,8 +96,6 @@ def main(testing=False, verbose=False, **kwargs):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=docstring)
-    parser.add_argument('-t', '--testing', action='store_true', default=False,
-                        help='Testing mode to not send data to KEPLER')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
     args = parser.parse_args()
