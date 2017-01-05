@@ -6,7 +6,7 @@ import time
 from utils import print_divider, mkdir
 
 
-REMOTE_USERNAME = 'jccurtis'
+REMOTE_USERNAME = 'jhanks'
 WEBSERVER_ADDRESS = 'kepler.berkeley.edu'
 # Default paths
 LOCAL_DATA_DIR = os.path.join(os.getcwd(), 'tmp/')
