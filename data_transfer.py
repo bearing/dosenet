@@ -1,28 +1,31 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
 import time
+from utils import print_divider, mkdir
 
-REMOTE_USERNAME = 'jccurtis'
+
+REMOTE_USERNAME = 'jhanks'
+WEBSERVER_ADDRESS = 'kepler.berkeley.edu'
+# Default paths
+LOCAL_DATA_DIR = os.path.join(os.getcwd(), 'tmp/')
+REMOTE_DATA_DIR = '/var/www/html/htdocs-nuc-groups/radwatch/sites/default/files/'
 # Default geojson paths
-LOCAL_GEOJSON_PATH = os.path.join(os.getcwd(), 'tmp/geojson/')
-REMOTE_GEOJSON_PATH = \
-    '/var/www/html/htdocs-nuc-groups/radwatch/sites/default/files/'
-# Default geojson filename
-GEOJSON_FNAME = 'output.geojson'
+LOCAL_GEOJSON_DIR = LOCAL_DATA_DIR
+REMOTE_GEOJSON_DIR = REMOTE_DATA_DIR
 # Default CSV paths
-LOCAL_CSV_PATH = os.path.join(os.getcwd(), 'tmp/csv/')
-REMOTE_CSV_PATH = os.path.join(REMOTE_GEOJSON_PATH, 'dosenet/')
+LOCAL_CSV_DIR = os.path.join(LOCAL_DATA_DIR, 'dosenet/')
+REMOTE_CSV_DIR = os.path.join(REMOTE_DATA_DIR, 'dosenet/')
+# Default geojson base filename
+GEOJSON_FNAME_BASE = 'output.geojson'
+# Make dirs
+mkdir(LOCAL_DATA_DIR)
+mkdir(LOCAL_GEOJSON_DIR)
+mkdir(LOCAL_CSV_DIR)
 
 
-def mkdir(path):
-    if not os.path.isdir(path):
-        print('MAKING DIRECTORY:', path)
-        os.makedirs(path)
-    else:
-        pass
-
-
-def print_byte_size(fname):
+def get_byte_size(fname):
     nbytes = float(os.path.getsize(fname))
     byte_units = ['Bytes', 'kB', 'MB', 'GB', 'TB']
     for i, u in enumerate(byte_units):
@@ -31,80 +34,112 @@ def print_byte_size(fname):
     raise TypeError('File larger than 1000 TB?: {}'.format(fname))
 
 
-def scp_to_webserver(fname_local, fname_remote, username=REMOTE_USERNAME,
-                     testing=False):
+def send_to_webserver(local_fnames, remote_dir=REMOTE_DATA_DIR,
+                      username=REMOTE_USERNAME,
+                      server_address=WEBSERVER_ADDRESS, testing=False):
     """
-    Transfer file to webserver (DECF KEPLER)
-    Must be run under 'dosenet' linux user so that the SSH keypair setup
-    between DOSENET & DECF Kepler works without login
-    Not ideal: uses Joseph Curtis' account (jccurtis) for the SCP
+    Transfer files to webserver (DECF KEPLER). Should be run under 'dosenet'
+    linux user so that the SSH keypair setup between DOSENET & DECF Kepler
+    works without login
+
+    Inputs:
+        local_fnames(iterable or str) : local file paths
+        remote_dir(str) : remote directory
+        username(str) : remote username
     """
-    cmd = 'scp '
-    cmd += '{} '.format(fname_local)
-    cmd += '{}@kepler.berkeley.edu:'.format(username)
-    cmd += '{}'.format(fname_remote)
+    tic = time.time()
+    print_divider()
     print('Webserver transfer:')
-    print('    {}'.format(cmd))
+    if isinstance(local_fnames, (list, tuple)):
+        local_fnames_to_send = []
+        for fname in local_fnames:
+            if not os.path.isfile(fname):
+                print('Cannot locate:', fname)
+            else:
+                local_fnames_to_send.append(fname)
+        if len(local_fnames_to_send) == 0:
+            print('No files to send, exiting ...')
+            return None
+        fname_str = ' '.join(local_fnames_to_send)
+    elif isinstance(local_fnames, str):
+        fname_str = local_fnames
+    else:
+        raise TypeError('`local_fnames` should be iterable or string:',
+                        local_fnames)
+    cmd = 'rsync -azvh '
+    cmd += fname_str + ' '
+    cmd += '{}@{}:'.format(username, server_address)
+    cmd += '{}'.format(remote_dir.rstrip('/') + '/')
+    print(cmd)
     if testing:
-        print('    Not executed (testing)')
+        print('Testing mode, not sending ...')
     else:
         try:
-            tic = time.time()
+            # Run the transfer cmd and wait until it returns
             os.system(cmd)
-            print('    Success! ({:.2f} s)'.format(time.time() - tic))
+            print('Success!')
         except Exception as e:
-            print('    Network Error ({:.2f} s)'.format(time.time() - tic))
+            print('Error!')
             print(e)
+    print('DONE ({:.2f} s)'.format(time.time() - tic))
+    print_divider()
 
 
-class FileForWebserver(object):
+def nickname_to_remote_csv_fname(nickname, **kwargs):
+    """Shortcut to get remote fname from nickname"""
+    csvfile = DataFile.csv_from_nickname(nickname, **kwargs)
+    return csvfile.base_fname
 
-    def __init__(self, local_path, remote_path, username=REMOTE_USERNAME,
-                 **kwargs):
+
+class DataFile(object):
+
+    def __init__(self, base_fname, local_dir, remote_dir, **kwargs):
         """
-        Default username is here but can be editted from descedants with kwargs
+        Inputs:
+            base_fname : Filename without directory
+            local_dir : Path of local directory
+            remote_dir : Path of remote directory
+            username : Kepler (webserver) username
         """
-        self.set_local_path(local_path)
-        self.set_remote_path(remote_path)
-        self.set_username(username)
+        self.base_fname = base_fname
+        self.local_dir = local_dir
+        self.remote_dir = remote_dir
+        mkdir(self.local_dir)
+
+    @classmethod
+    def csv_from_nickname(cls, nickname):
+        obj = cls(
+            base_fname=nickname + '.csv',
+            local_dir=LOCAL_CSV_DIR,
+            remote_dir=REMOTE_CSV_DIR)
+        return obj
+
+    @classmethod
+    def default_geojson(cls):
+        obj = cls(
+            base_fname=GEOJSON_FNAME_BASE,
+            local_dir=LOCAL_GEOJSON_DIR,
+            remote_dir=REMOTE_GEOJSON_DIR)
+        return obj
 
     def send_to_webserver(self, testing=False):
-        scp_to_webserver(
-            fname_local=self.get_local_fname(),
-            fname_remote=self.get_remote_fname(),
-            username=self.username,
+        send_to_webserver(
+            local_fnames=[self.local_fname],
+            remote_dir=self.remote_dir,
             testing=testing)
 
-    def set_username(self, username):
-        self.username = username
-
-    def set_fname(self, fname):
-        """Base filename"""
-        self.fname = fname
-
-    def get_fname(self):
-        """Get base filename"""
-        return self.fname
-
-    def set_local_path(self, path):
-        """Path of local directory, make it if it does not exist"""
-        self.local_path = path
-        mkdir(self.local_path)
-
-    def set_remote_path(self, path):
-        """Path of remote directory, make it if it does not exist"""
-        self.remote_path = path
-
-    def get_local_fname(self):
+    @property
+    def local_fname(self):
         """Full local path to file"""
-        return os.path.join(self.local_path, self.fname)
+        return os.path.join(self.local_dir, self.base_fname)
 
-    def get_remote_fname(self):
+    @property
+    def remote_fname(self):
         """Full remote path to file"""
-        return os.path.join(self.remote_path, self.fname)
+        return os.path.join(self.remote_dir, self.base_fname)
 
     def open_file(self):
-        self.file = open(self.get_local_fname(), 'w')
+        self.file = open(self.local_fname, 'w')
 
     def get_file(self):
         return self.file
@@ -118,58 +153,19 @@ class FileForWebserver(object):
             self.get_file().write(data_string)
             self.print_local_file_saved()
         except Exception as e:
-            print('Cannot write here:', self.get_local_fname())
+            print('Cannot write here:', self.local_fname)
             print(e)
         finally:
             self.close_file()
 
     def df_to_file(self, df):
-        self.open_file()
         try:
-            df.to_csv(self.get_local_fname(), index=None)
+            df.to_csv(self.local_fname, index=None)
             self.print_local_file_saved()
         except Exception as e:
-            print('Cannot write here:', self.get_local_fname())
+            print('Cannot write here:', self.local_fname)
             print(e)
-        finally:
-            self.close_file()
 
     def print_local_file_saved(self):
-        print('Saved ({}):\n    {}'.format(
-            print_byte_size(self.get_local_fname()), self.get_local_fname()))
-
-
-class CsvForWebserver(FileForWebserver):
-
-    def __init__(self, local_path=LOCAL_CSV_PATH, remote_path=REMOTE_CSV_PATH,
-                 **kwargs):
-        """Defaults for local and remote are contained in this init"""
-        super(CsvForWebserver, self).__init__(
-            local_path=local_path, remote_path=remote_path, **kwargs)
-
-    @classmethod
-    def from_nickname(cls, nickname, **kwargs):
-        obj = cls(**kwargs)
-        obj.set_fname(nickname + '.csv')
-        return obj
-
-    @staticmethod
-    def get_remote_csv_fname_from_nickname(nickname, **kwargs):
-        """Shortcut to get remote fname from nickname"""
-        csvfile = CsvForWebserver.from_nickname(nickname, **kwargs)
-        return csvfile.get_remote_fname()
-
-
-class GeoJsonForWebserver(FileForWebserver):
-
-    def __init__(self, local_path=LOCAL_GEOJSON_PATH,
-                 remote_path=REMOTE_GEOJSON_PATH, **kwargs):
-        """Defaults for local and remote are contained in this init"""
-        super(GeoJsonForWebserver, self).__init__(
-            local_path=local_path, remote_path=remote_path, **kwargs)
-
-    @classmethod
-    def from_fname(cls, fname=GEOJSON_FNAME, **kwargs):
-        obj = cls(**kwargs)
-        obj.set_fname(fname)
-        return obj
+        print('Saved ({}): {}'.format(
+            get_byte_size(self.local_fname), self.local_fname))

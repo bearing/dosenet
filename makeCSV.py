@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from mysql.mysql_tools import SQLObject
-from data_transfer import CsvForWebserver
+from data_transfer import DataFile
 import time
 
 docstring = """
@@ -13,7 +13,7 @@ Joseph Curtis
 Lawrence Berkeley National Laboratory
 """
 
-def main(testing=False, verbose=False, **kwargs):
+def main(verbose=False, **kwargs):
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Mysql data base interface
@@ -33,9 +33,8 @@ def main(testing=False, verbose=False, **kwargs):
         print('(id={}) {}'.format(sid, name))
         df = DB.getLastYear(sid)
         print('    Loaded last year of data')
-        csvfile = CsvForWebserver.from_nickname(nick)
+        csvfile = DataFile.csv_from_nickname(nick)
         csvfile.df_to_file(df)
-        csvfile.send_to_webserver(testing=testing)
         print()
 
     print('Total run time: {:.2f} sec'.format(time.time() - start_time))
@@ -44,8 +43,6 @@ def main(testing=False, verbose=False, **kwargs):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=docstring)
-    parser.add_argument('-t', '--testing', action='store_true', default=False,
-                        help='Testing mode to not send data to KEPLER')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
     args = parser.parse_args()
