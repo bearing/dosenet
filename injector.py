@@ -27,8 +27,10 @@ import socket
 import SocketServer
 import datetime
 from collections import OrderedDict
+import ast
 import multiprocessing
 import Crypto.Random
+from Crypto.Cipher import AES
 
 # Extensible way for adding future imports
 import_list = ['crypt', 'mysql', 'udp']
@@ -38,6 +40,7 @@ from crypt import cust_crypt as ccrypt
 from mysql.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
+SYMMETRIC_KEY = os.path.expanduser('~/secret.aes')
 
 UDP_PORT = 5005
 TEST_UDP_PORT = 5006    # for -s mode
@@ -46,6 +49,7 @@ TCP_PORT = 5100
 TEST_TCP_PORT = 5101    # for -s mode
 
 HASH_LENGTH = 32
+PREPEND_LENGTH = 5      # for AES encryption from D3S
 
 ANSI_RESET = '\033[0m'    # reset / default
 ANSI_BOLD = '\033[1m'
@@ -75,6 +79,7 @@ class Injector(object):
                  test_serve=False,
                  test_ports=False,
                  private_key=PRIVATE_KEY,
+                 symmetric_key=SYMMETRIC_KEY,
                  udp_port=None,
                  tcp_port=None,
                  **kwargs):
@@ -93,6 +98,8 @@ class Injector(object):
                 test_serve is also True. Default: False
             private_key (str) - Fully qualified static path of private key
                 Default: '~/.ssh/id_rsa_lbl'
+            symmetric_key (str) - Fully qualified static path of AES key
+                Default: '~/secret.aes'
             udp_port (int) - Which port to listen for UDP data on.
                 Default: 5005 (or 5006 for testing)
             tcp_port (int) - which port to listen for TCP data on.
@@ -109,6 +116,7 @@ class Injector(object):
         else:
             self.test_ports = test_ports
         self.private_key = private_key
+        self.symmetric_key = symmetric_key
 
         if udp_port is None:
             if self.test_ports:
@@ -134,6 +142,13 @@ class Injector(object):
         print('\tPrivate Key:', self.private_key)
         de = ccrypt.public_d_encrypt(key_file_lst=[self.private_key])
         self.decrypter = de
+
+        # AES decryption
+        print('\tSymmetric Key:', self.symmetric_key)
+        with open(self.symmetric_key, 'r') as keyfile:
+            key = keyfile.read()
+            assert len(key) == 32
+            self.aes = AES.new(key, mode=AES.MODE_ECB)
 
         # Get ip information
         self.ip = self.get_external_ip()
@@ -231,7 +246,7 @@ class Injector(object):
             self.handle(test_packet, mode='test')
             time.sleep(1.1)
 
-    def handle(self, encrypted_packet,
+    def handle(self, encrypted_packet, is_aes=False,
                client_address=None, request=None, mode=None):
         """
         Handle one request from either UDP or TCP.
@@ -255,7 +270,8 @@ class Injector(object):
                 db.getStationReturnInfo()
         """
 
-        packet = self.handle_decryption(encrypted_packet, mode=mode)
+        packet = self.handle_decryption(
+            encrypted_packet, is_aes=is_aes, mode=mode)
         if packet is None:
             return
 
@@ -275,13 +291,18 @@ class Injector(object):
 
         self.handle_return_packet(field_dict, request)
 
-    def handle_decryption(self, encrypted, mode=None):
+    def handle_decryption(self, encrypted, is_aes=False, mode=None):
         """
         Decrypt packet and handle errors.
         """
 
+        if is_aes:
+            decrypt = self.decrypt_packet_aes
+        else:
+            decrypt = self.decrypt_packet_rsa
+
         try:
-            packet = self.decrypt_packet(encrypted)
+            packet = decrypt(encrypted)
         except UnencryptedPacket:
             # print to screen. this could be a test message
             print_status(
@@ -295,12 +316,16 @@ class Injector(object):
                     mode.upper()),
                 ansi=ANSI_RED)
             return None
+        except ValueError:
+            # AES: message length not a multiple of block size
+            print_status('Bad AES TCP packet (blocksize error)', ansi=ANSI_RED)
+            return None
 
         return packet
 
-    def decrypt_packet(self, encrypted):
+    def decrypt_packet_rsa(self, encrypted):
         """
-        Decrypt packet using private key.
+        Decrypt packet using RSA private key.
 
         May raise UnencryptedPacket or BadPacket.
         """
@@ -328,6 +353,23 @@ class Injector(object):
         elif any(v > 127 for v in ascii_values_decrypted):
             raise BadPacket(
                 'Bad character values in decrypted packet (>127): {}'.format(
+                    ascii_values_decrypted))
+
+        return decrypted
+
+    def decrypt_packet_aes(self, encrypted):
+        """
+        Decrypt packet using AES symmetric key. For D3S packets.
+
+        May raise BadPacket.
+        """
+
+        decrypted = self.aes.decrypt(encrypted)
+        ascii_values_decrypted = [ord(c) for c in decrypted]
+
+        if any(v > 127 for v in ascii_values_decrypted):
+            raise BadPacket(
+                'Bad character values in decrypted AES packet: {}'.format(
                     ascii_values_decrypted))
 
         return decrypted
@@ -370,16 +412,23 @@ class Injector(object):
         num_log_fields = 5
         num_data_fields_old = 5
         num_data_fields_new = 6
+        num_d3s_fields = 5
 
         if (len(field_list) != num_log_fields and
                 len(field_list) != num_data_fields_old and
-                len(field_list) != num_data_fields_new):
+                len(field_list) != num_data_fields_new and
+                len(field_list) != num_d3s_fields):
             raise PacketLengthError(
-                'Found {} fields instead of {}, {}, or {}'.format(
+                'Found {} fields instead of {}, {}, {}, or {}'.format(
                     len(field_list),
-                    num_log_fields, num_data_fields_old, num_data_fields_new))
+                    num_log_fields, num_data_fields_old, num_data_fields_new,
+                    num_d3s_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
+        elif (len(field_list) == num_d3s_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) > 4096):
+            request_type = 'd3s'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
         elif len(field_list) == num_data_fields_new:
@@ -438,6 +487,10 @@ class Injector(object):
             # position 2 is "LOG" - already checked in classify_request()
             ind_msgCode = 3
             ind_msgText = 4
+        elif request_type == 'd3s':
+            ind_deviceTime = 2
+            ind_spectrum = 3
+            ind_error_flag = 4
 
         field_dict = OrderedDict()
 
@@ -456,6 +509,12 @@ class Injector(object):
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
             self.check_countrate(field_dict)
+
+        elif request_type == 'd3s':
+            field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            spectrum_str = str(field_list[ind_spectrum]).replace(';', ',')
+            field_dict['spectrum'] = ast.literal_eval(spectrum_str)
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         elif request_type == 'log':
             field_dict['msgCode'] = int(field_list[ind_msgCode])
@@ -489,7 +548,10 @@ class Injector(object):
             print_status('Injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.inject
-
+        elif request_type == 'd3s':
+            print_status('Injecting D3S {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectD3S
         elif request_type == 'log':
             print_status('Injecting {} to log: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
@@ -560,6 +622,9 @@ def format_packet(data, client_address):
     elif 'msgCode' in data.keys():
         output = '#{}, code {}: {}'.format(
             data['stationID'], data['msgCode'], data['msgText'])
+    elif 'spectrum' in data.keys():
+        output = '#{}, {} total counts, err {}'.format(
+            data['stationID'], sum(data['spectrum']), data['error_flag'])
     else:
         # ???
         output = ' [packet type unknown to format_packet()]'
@@ -671,10 +736,30 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     """
 
     def handle(self):
-        data = self.request.recv(1024)
+        is_aes = False
+        firstdata = self.request.recv(PREPEND_LENGTH)
+        try:
+            msg_len = int(firstdata)
+        except ValueError:
+            # not AES. get the remainder of the RSA-encrypted message in one go
+            remainder = self.request.recv(256)
+            data = firstdata + remainder
+        else:
+            is_aes = True
+            bytes_recvd = 0
+            buffer_size = 1024
+            datalist = []
+            while bytes_recvd < msg_len:
+                request_size = min(msg_len - bytes_recvd, buffer_size)
+                datalist.append(self.request.recv(request_size))
+                bytes_recvd += len(datalist[-1])
+            data = ''.join(datalist)
 
         self.server.injector.handle(
-            data, client_address=self.client_address, request=self.request,
+            data,
+            is_aes=is_aes,
+            client_address=self.client_address,
+            request=self.request,
             mode='tcp')
 
 

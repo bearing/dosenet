@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import MySQLdb as mdb
+import numpy as np
 import pandas as pd
 import sys
 import datetime
@@ -122,6 +123,22 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
+    def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime,
+                      **kwargs):
+        """
+        Insert a row of D3S data into the d3s table.
+        """
+        spectrum = np.array(spectrum, dtype=np.uint16)
+        spectrum_blob = spectrum.tobytes()
+        sql_cmd = (
+            "INSERT INTO " +
+            "d3s(deviceTime, stationID, channelCounts, errorFlag) " +
+            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {});".format(
+                deviceTime, stationID, '%s', error_flag))
+        # let MySQLdb library handle the special characters in the blob
+        self.cursor.execute(sql_cmd, (spectrum_blob,))
+        self.db.commit()
+
     def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
         """
         Insert a log message into the stationlog table.
@@ -135,6 +152,11 @@ class SQLObject:
         """Authenticate the data packet and then insert into database"""
         self.authenticatePacket(data, packettype='data')
         self.insertIntoDosenet(**data)
+
+    def injectD3S(self, data):
+        """Authenticate the D3S data packet and then insert into database"""
+        self.authenticatePacket(data, packettype='d3s')
+        self.insertIntoD3S(**data)
 
     def injectLog(self, data):
         """Authenticate the log packet and then insert into database"""
@@ -152,7 +174,8 @@ class SQLObject:
         Raises error if anything doesn't match.
 
         packettype can be either "data" (a normal data packet)
-        or "log" (a log entry from the device).
+        or "log" (a log entry from the device)
+        or "d3s" (D3S data).
         '''
         if not isinstance(data, dict):
             raise TypeError('Inject data is not a dict: {}'.format(data))
@@ -161,6 +184,13 @@ class SQLObject:
         if packettype == 'data':
             data_types = {'hash': str, 'stationID': int, 'cpm': float,
                           'cpm_error': float, 'error_flag': int}
+        elif packettype == 'd3s':
+            data_types = {'hash': str, 'stationID': int, 'spectrum': list,
+                          'error_flag': int}
+            if len(data['spectrum']) != 4096:
+                raise AuthenticationError(
+                    'Spectrum length is {}, should be 4096'.format(
+                        len(data['spectrum'])))
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'msgText': str}
