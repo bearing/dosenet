@@ -380,6 +380,30 @@ class DoseNetSlacker(object):
             else:
                 keep_trying = False
 
+    def get_db_data(self):
+        """
+        Read station data from SQL.
+        """
+        pass
+
+    def check_for_outages(self, data):
+        """
+        Look for active stations that haven't posted data in the last ... time.
+        """
+        pass
+
+    def check_for_high_countrates(self, data):
+        """
+        Look for active stations with countrate > xxx.
+        """
+        pass
+
+    def check_for_new_stations(self, data):
+        """
+        Look for active stations that are posting for the first time.
+        """
+        pass
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
