@@ -23,14 +23,11 @@ INTERVAL = 300
 SLACK_USER = 'dosenet_server'
 ICON = ':radioactive_sign:'
 SLACK_CHANNEL = '#random'
+TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
-if socket.gethostname().startswith('plimley'):
-    TOKEN_PATH = './'
-elif socket.gethostname() == 'dosenet':
-    TOKEN_PATH = os.path.expanduser('~/')
-else:
-    raise RuntimeError('Unknown host {}, cannot load Slack token'.format(
+if socket.gethostname() != 'dosenet':
+    raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
         socket.gethostname()))
 
 
