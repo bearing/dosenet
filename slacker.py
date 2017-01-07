@@ -21,7 +21,7 @@ from mysql.mysql_tools import SQLObject
 
 SLACK_USER = 'dosenet_server'
 ICON = ':radioactive_sign:'
-SLACK_CHANNEL = '#random'
+SLACK_CHANNEL = '#dosenet-bot-testing'
 TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
