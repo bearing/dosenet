@@ -66,7 +66,8 @@ def send_to_webserver(local_fnames, remote_dir=REMOTE_DATA_DIR,
     else:
         raise TypeError('`local_fnames` should be iterable or string:',
                         local_fnames)
-    cmd = 'rsync -azvh '
+
+    cmd = 'rsync -rzvh '
     cmd += fname_str + ' '
     cmd += '{}@{}:'.format(username, server_address)
     cmd += '{}'.format(remote_dir.rstrip('/') + '/')
