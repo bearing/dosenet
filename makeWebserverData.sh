@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
-. ~/.keychain/$HOSTNAME-sh
-~/anaconda/bin/python ~/git/dosenet/makeCSV.py
-~/anaconda/bin/python ~/git/dosenet/makeGeoJSON.py
-~/anaconda/bin/python ~/git/dosenet/sendDataToWebserver.py
+LOGTAG=makeWebserverData
+HOMEPATH=/home/dosenet
+PYTHONPATH=$HOMEPATH/anaconda/bin/
+PATH=$PYTHONPATH:$PATH
+
+. $HOMEPATH/.keychain/$HOSTNAME-sh
+
+python $HOMEPATH/git/dosenet/makeCSV.py
+python $HOMEPATH/git/dosenet/makeGeoJSON.py
+python $HOMEPATH/git/dosenet/sendDataToWebserver.py
+
+logger --stderr --id --tag $LOGTAG "Finished sending data to webserver"
+
