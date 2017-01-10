@@ -5,13 +5,7 @@ Requires official slackclient:
 
 Requires token to be set for SLACK:
     This has been configured for the Slack Bot named
-<<<<<<< eac4afa3ee9d4a38051cf6e4845223ea19a5e4bc
-<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
-=======
 
->>>>>>> renamed slack_outage_reporter.py; basic class and loading
-=======
->>>>>>> slacker.py: update methods
         dosenet_server
 
     https://api.slack.com/bot-users
@@ -19,7 +13,6 @@ Requires token to be set for SLACK:
 """
 
 from __future__ import print_function
-<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
 import argparse
 import os
 import time
@@ -70,45 +63,11 @@ INJECTOR_CMD = ('bash', '/home/dosenet/git/dosenet/start-injector-in-tmux.sh')
 
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
-=======
-import os
-import time
-import socket
-import pandas as pd
-from slackclient import SlackClient
-from mysql.mysql_tools import SQLObject
-
-SLACK_USER = 'dosenet_server'
-ICON = ':radioactive_sign:'
-SLACK_CHANNEL = '#dosenet-bot-testing'
-TOKEN_PATH = os.path.expanduser('~/')
-TOKEN_NAME = 'ucbdosenet_slack_token.txt'
-
-<<<<<<< d7d44a92d4662c2422eba49aa28f2bf44f6586f9
-<<<<<<< 1d4fbc53df309d7d1817d76d565c794aee368184
-if socket.gethostname().startswith('plimley'):
-    TOKEN_PATH = './'
-elif socket.gethostname() == 'dosenet':
-    TOKEN_PATH = os.path.expanduser('~/')
-else:
-    raise RuntimeError('Unknown host {}, cannot load Slack token'.format(
->>>>>>> renamed slack_outage_reporter.py; basic class and loading
-=======
-=======
-CHECK_INTERVAL_S = 5 * 60
-COUNTRATE_THRESHOLD_CPM = 20
-OUTAGE_DURATION_THRESHOLD_S = 1 * 60 * 60
-
->>>>>>> slacker.py: add constants for thresholds
-if socket.gethostname() != 'dosenet':
-    raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
->>>>>>> slacker.py: only runs on dosenet server
         socket.gethostname()))
 
 
 class DoseNetSlacker(object):
 
-<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
     def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt',
                  test=False, verbose=False, restart_injector=False):
         self.test = test
@@ -133,26 +92,13 @@ class DoseNetSlacker(object):
         self.initialize_station_status()
         self.post_initial_report()
         print('Posted initial report at {}'.format(datetime.datetime.now()))
-=======
-    def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt'):
-        self.get_slack(tokenfile)
-        self.get_sql()
-<<<<<<< d7d44a92d4662c2422eba49aa28f2bf44f6586f9
-        self.interval_s = INTERVAL
->>>>>>> renamed slack_outage_reporter.py; basic class and loading
-=======
-        self.interval_s = CHECK_INTERVAL_S
->>>>>>> slacker.py: add constants for thresholds
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
 
         filename = os.path.join(TOKEN_PATH, TOKEN_NAME)
-<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
         if self.v:
             print('Loading Slack token from {}'.format(filename))
-=======
->>>>>>> renamed slack_outage_reporter.py; basic class and loading
         with open(filename, 'r') as f:
             slack_token = f.read().rstrip()
         self.slack = SlackClient(slack_token)
@@ -166,7 +112,6 @@ class DoseNetSlacker(object):
             print('Could not find SQL database! Starting without it')
             self.sql = None
 
-<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
     def initialize_station_status(self):
         """
         Initialize records in memory and check the SQL database
@@ -253,15 +198,10 @@ class DoseNetSlacker(object):
 
         return elapsed_time
 
-=======
->>>>>>> renamed slack_outage_reporter.py; basic class and loading
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
 
         while True:
-<<<<<<< eac4afa3ee9d4a38051cf6e4845223ea19a5e4bc
-<<<<<<< b220e71a22d62801476dc793df0a5acc95e34888
-<<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
             time.sleep(self.interval_s)
             try:
                 self.diff_status_and_report()
@@ -463,61 +403,3 @@ if __name__ == '__main__':
     except Exception as e:
         msg = tb.format_exc()
         slacker.post('Exception: {}: {}'.format(type(e), msg))
-=======
-=======
-            data = self.get_db_data()
-            self.check_for_outages(data)
-            self.check_for_high_countrates(data)
-            self.check_for_new_stations(data)
-=======
-            self.get_db_data()
-            for stationID in self.stations.index.values:
-                this_last_day = self.sql.getLastDay(stationID)
-                this_last_hour = self.sql.getDataForStationByInterval(
-                    stationID, 'INTERVAL 1 HOUR')
-                this_out = self.check_for_outages(this_last_day)
-                this_high = self.check_for_high_countrates(this_last_day)
-                this_new = self.check_for_new_stations(this_last_day)
->>>>>>> slacker.py: update methods
-
->>>>>>> slacker.py: framework for loop
-            self.slack.api_call(
-                'chat.postMessage',
-                channel=SLACK_CHANNEL,
-                username=SLACK_USER,
-                icon_emoji=ICON,
-                text='Testing')
-            time.sleep(self.interval_s)
-
-    def get_db_data(self):
-        """
-        Read station data from SQL.
-        """
-        self.stations = self.sql.getActiveStations()
-
-    def check_for_outages(self, last_day):
-        """
-        Look for active stations that haven't posted data in the last ... time.
-        """
-        if len(last_day.index) > 0:
-            pass
-        return out
-
-    def check_for_high_countrates(self, last_day):
-        """
-        Look for active stations with countrate > xxx.
-        """
-        pass
-
-    def check_for_new_stations(self, last_day):
-        """
-        Look for active stations that are posting for the first time.
-        """
-        pass
-
-
-if __name__ == '__main__':
-    slacker = DoseNetSlacker('./ucbdosenet_slack_token')
-    print('Running DoseNetSlacker...')
-    slacker.run()
->>>>>>> renamed slack_outage_reporter.py; basic class and loading
