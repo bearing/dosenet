@@ -5,10 +5,13 @@ Requires official slackclient:
 
 Requires token to be set for SLACK:
     This has been configured for the Slack Bot named
+<<<<<<< eac4afa3ee9d4a38051cf6e4845223ea19a5e4bc
 <<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
 =======
 
 >>>>>>> renamed slack_outage_reporter.py; basic class and loading
+=======
+>>>>>>> slacker.py: update methods
         dosenet_server
 
     https://api.slack.com/bot-users
@@ -71,6 +74,7 @@ if socket.gethostname() != 'dosenet':
 import os
 import time
 import socket
+import pandas as pd
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
@@ -255,6 +259,7 @@ class DoseNetSlacker(object):
         """Check SQL database, post messages. Blocks execution."""
 
         while True:
+<<<<<<< eac4afa3ee9d4a38051cf6e4845223ea19a5e4bc
 <<<<<<< b220e71a22d62801476dc793df0a5acc95e34888
 <<<<<<< 37e005d17fc0a96120c6652d1b7dbe526045538f
             time.sleep(self.interval_s)
@@ -464,6 +469,16 @@ if __name__ == '__main__':
             self.check_for_outages(data)
             self.check_for_high_countrates(data)
             self.check_for_new_stations(data)
+=======
+            self.get_db_data()
+            for stationID in self.stations.index.values:
+                this_last_day = self.sql.getLastDay(stationID)
+                this_last_hour = self.sql.getDataForStationByInterval(
+                    stationID, 'INTERVAL 1 HOUR')
+                this_out = self.check_for_outages(this_last_day)
+                this_high = self.check_for_high_countrates(this_last_day)
+                this_new = self.check_for_new_stations(this_last_day)
+>>>>>>> slacker.py: update methods
 
 >>>>>>> slacker.py: framework for loop
             self.slack.api_call(
@@ -478,21 +493,23 @@ if __name__ == '__main__':
         """
         Read station data from SQL.
         """
-        pass
+        self.stations = self.sql.getActiveStations()
 
-    def check_for_outages(self, data):
+    def check_for_outages(self, last_day):
         """
         Look for active stations that haven't posted data in the last ... time.
         """
-        pass
+        if len(last_day.index) > 0:
+            pass
+        return out
 
-    def check_for_high_countrates(self, data):
+    def check_for_high_countrates(self, last_day):
         """
         Look for active stations with countrate > xxx.
         """
         pass
 
-    def check_for_new_stations(self, data):
+    def check_for_new_stations(self, last_day):
         """
         Look for active stations that are posting for the first time.
         """
