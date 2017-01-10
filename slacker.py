@@ -492,21 +492,23 @@ class DoseNetSlacker(object):
         """
         Read station data from SQL.
         """
-        pass
+        self.stations = self.sql.getActiveStations()
 
-    def check_for_outages(self, data):
+    def check_for_outages(self, last_day):
         """
         Look for active stations that haven't posted data in the last ... time.
         """
-        pass
+        if len(last_day.index) > 0:
+            pass
+        return out
 
-    def check_for_high_countrates(self, data):
+    def check_for_high_countrates(self, last_day):
         """
         Look for active stations with countrate > xxx.
         """
         pass
 
-    def check_for_new_stations(self, data):
+    def check_for_new_stations(self, last_day):
         """
         Look for active stations that are posting for the first time.
         """
