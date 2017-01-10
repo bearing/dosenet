@@ -5,7 +5,6 @@ Requires official slackclient:
 
 Requires token to be set for SLACK:
     This has been configured for the Slack Bot named
-
         dosenet_server
 
     https://api.slack.com/bot-users
@@ -16,6 +15,7 @@ from __future__ import print_function
 import os
 import time
 import socket
+import pandas as pd
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
@@ -62,10 +62,14 @@ class DoseNetSlacker(object):
         """Check SQL database, post messages. Blocks execution."""
 
         while True:
-            data = self.get_db_data()
-            self.check_for_outages(data)
-            self.check_for_high_countrates(data)
-            self.check_for_new_stations(data)
+            self.get_db_data()
+            for stationID in self.stations.index.values:
+                this_last_day = self.sql.getLastDay(stationID)
+                this_last_hour = self.sql.getDataForStationByInterval(
+                    stationID, 'INTERVAL 1 HOUR')
+                this_out = self.check_for_outages(this_last_day)
+                this_high = self.check_for_high_countrates(this_last_day)
+                this_new = self.check_for_new_stations(this_last_day)
 
             self.slack.api_call(
                 'chat.postMessage',
@@ -79,21 +83,23 @@ class DoseNetSlacker(object):
         """
         Read station data from SQL.
         """
-        pass
+        self.stations = self.sql.getActiveStations()
 
-    def check_for_outages(self, data):
+    def check_for_outages(self, last_day):
         """
         Look for active stations that haven't posted data in the last ... time.
         """
-        pass
+        if len(last_day.index) > 0:
+            pass
+        return out
 
-    def check_for_high_countrates(self, data):
+    def check_for_high_countrates(self, last_day):
         """
         Look for active stations with countrate > xxx.
         """
         pass
 
-    def check_for_new_stations(self, data):
+    def check_for_new_stations(self, last_day):
         """
         Look for active stations that are posting for the first time.
         """
