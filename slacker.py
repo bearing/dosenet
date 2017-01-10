@@ -60,6 +60,9 @@ MAX_STATION_ID = 9999
 
 INJECTOR_CMD = ('bash', '/home/dosenet/git/dosenet/start-injector-in-tmux.sh')
 
+MIN_STATION_ID = 1
+MAX_STATION_ID = 9999
+
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
         socket.gethostname()))
@@ -404,6 +407,40 @@ class DoseNetSlacker(object):
         Look for active stations that are posting for the first time.
         """
         pass
+
+
+class DoseNetAlertSituation(object):
+    """
+    Represents a specific issue on a single station, as long as the issue
+    persists. Gets deleted when issue is resolved.
+    """
+
+    pass
+
+
+class StationOutage(DoseNetAlertSituation):
+    """Single station that has older data, no longer has data."""
+    pass
+
+
+class NewStation(DoseNetAlertSituation):
+    """Single station that has data for the first time ever."""
+    pass
+
+
+class HighCountrate(DoseNetAlertSituation):
+    """Single station with data above a given countrate threshold."""
+    pass
+
+
+class FullOutage(DoseNetAlertSituation):
+    """
+    All deployed stations are not reporting.
+
+    Could be an injector problem, or a device code bug.
+    """
+    pass
+
 
 
 if __name__ == '__main__':
