@@ -29,6 +29,9 @@ CHECK_INTERVAL_S = 5 * 60
 COUNTRATE_THRESHOLD_CPM = 20
 OUTAGE_DURATION_THRESHOLD_S = 1 * 60 * 60
 
+MIN_STATION_ID = 1
+MAX_STATION_ID = 9999
+
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
         socket.gethostname()))
@@ -104,6 +107,40 @@ class DoseNetSlacker(object):
         Look for active stations that are posting for the first time.
         """
         pass
+
+
+class DoseNetAlertSituation(object):
+    """
+    Represents a specific issue on a single station, as long as the issue
+    persists. Gets deleted when issue is resolved.
+    """
+
+    pass
+
+
+class StationOutage(DoseNetAlertSituation):
+    """Single station that has older data, no longer has data."""
+    pass
+
+
+class NewStation(DoseNetAlertSituation):
+    """Single station that has data for the first time ever."""
+    pass
+
+
+class HighCountrate(DoseNetAlertSituation):
+    """Single station with data above a given countrate threshold."""
+    pass
+
+
+class FullOutage(DoseNetAlertSituation):
+    """
+    All deployed stations are not reporting.
+
+    Could be an injector problem, or a device code bug.
+    """
+    pass
+
 
 
 if __name__ == '__main__':
