@@ -303,9 +303,11 @@ class SQLObject:
     def getStationReturnInfo(self, stationID):
         """Read gitBranch and needsUpdate from stations table."""
         self.refresh()
-        df = pd.read_sql(
-            "SELECT gitBranch, needsUpdate FROM dosimeter_network.stations " +
-            "WHERE `ID` = {};".format(stationID), con=self.db)
+        col_list = "gitBranch, needsUpdate"
+        q = "SELECT {} FROM stations WHERE `ID` = {};".format(
+            col_list, stationID)
+        df = self.pdFromSql(q)
+
         needs_update = df['needsUpdate'][0]
         git_branch = df['gitBranch'][0]
 
@@ -330,10 +332,10 @@ def setSingleStationUpdate(self, stationID, needs_update=0):
         raise AssertionError('needs_update should be a bool or int (0, 1)')
 
     needs_update = int(needs_update)    # db expects 0 or 1
-    sql_cmd = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
+    q = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
         needs_update, stationID)
-    self.cursor.execute(sql_cmd)
-    self.db.commit()
+    self.cursor.execute(q)
+    self.refresh()
 
 def setAllStationsUpdate(self, needs_update=1):
     """
@@ -350,9 +352,9 @@ def setAllStationsUpdate(self, needs_update=1):
         raise AssertionError('needs_update should be a bool or int (0, 1)')
 
     needs_update = int(needs_update)    # db expects 0 or 1
-    sql_cmd = "UPDATE stations SET needsUpdate={}".format(needs_update)
-    self.cursor.execute(sql_cmd)
-    self.db.commit()
+    q = "UPDATE stations SET needsUpdate={}".format(needs_update)
+    self.cursor.execute(q)
+    self.refresh()
 
 # ---------------------------------------------------------------------------
 #       FETCH METHODS
