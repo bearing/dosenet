@@ -29,7 +29,7 @@ TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
 CHECK_INTERVAL_S = 5 * 60
 HIGH_THRESH_CPM = 20
-HIGH_INTERVAL_STR = 'INTERVAL 1 DAY'
+HIGH_INTERVAL_STR = 'INTERVAL 1 WEEK'
 HIGH_SQL = ' '.join((
     "SELECT * FROM dosimeter_network.dosnet",
     "WHERE (stationID = {}".format('{}'),
