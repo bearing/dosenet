@@ -239,12 +239,21 @@ def setAllStationsUpdate(self, needs_update=1):
 #       FETCH METHODS
 # ---------------------------------------------------------------------------
 
+    def dfFromSql(self, q):
+        """Pandas dataframe from SQL query"""
+        df = pd.read_sql(q, con=self.db)
+        return df
+
+    def rawSql(self, q):
+        """Raw result of SQL query"""
+        self.cursor.execute(q)
+        out = self.cursor.fetchall()
+        return out
+
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
-        df = pd.read_sql(
-            "SELECT * \
-            FROM dosimeter_network.stations;",
-            con=self.db)
+        q = "SELECT * FROM dosimeter_network.stations;")
+        df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
         return df
@@ -258,29 +267,40 @@ def setAllStationsUpdate(self, needs_update=1):
 
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
-        df = pd.read_sql(
-            "SELECT * \
-            FROM dosimeter_network.stations \
-            WHERE `ID` = {};".format(stationID),
-            con=self.db)
+        q = "SELECT * FROM dosimeter_network.stations WHERE `ID` = {};".format(
+                stationID))
+        df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
         return df
 
     def getLatestStationData(self, stationID):
-        df = pd.read_sql(
-            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
-             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
-             cpmtorem, cpmtousv, display, nickname, timezone \
-             FROM dosnet \
-             INNER JOIN stations \
-             ON dosnet.stationID = stations.ID \
-             WHERE deviceTime = \
-                (SELECT MAX(deviceTime) \
-                 FROM dosnet \
-                 WHERE stationID='{0}') \
-             AND stationID='{0}';".format(stationID),
-            con=self.db)
+        """Return most recent data entry for given station."""
+        col_list = ', '.join((
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "cpm",
+            "cpmError",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "cpmtorem",
+            "cpmtousv",
+            "display",
+            "nickname",
+            "timezone"
+        ))
+        q = ' '.join((
+            "SELECT {cols} FROM dosnet".format(cols=col_list),
+            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "WHERE deviceTime = ",
+            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+                stationID),
+            "AND stationID='{}';".format(stationID)))
+        df = self.dfFromSql(q)
         df.set_index(df['Name'], inplace=True)
         # Add timezone columns
         df = self.addTimeColumnsToDataframe(df, stationID=stationID)
@@ -301,6 +321,7 @@ def setAllStationsUpdate(self, needs_update=1):
         return self.getStations().loc[0, :]
 
     def getNextTestStation(self):
+        """What is this useful for?"""
         test_station = self.getStations().loc[
             self.test_station_ids[self.test_station_ids_ix], :]
         # Cycle!
@@ -311,36 +332,48 @@ def setAllStationsUpdate(self, needs_update=1):
         return test_station
 
     def getTimezoneFromID(self, stationID):
-        self.cursor.execute(
-            "SELECT timezone FROM stations \
-            WHERE `ID` = {};".format(stationID))
-        tz = self.cursor.fetchall()
+        """Returns the string representation of a station's timezone."""
+        q = "SELECT timezone FROM stations WHERE `ID` = {};".format(stationID)
+        tz = self.rawSql(q)
         return tz[0][0]
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
-        q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), cpm, cpmError \
-        FROM dosnet \
-        WHERE `dosnet`.`stationID`='{}' \
-        AND receiveTime \
-        BETWEEN '{}' \
-        AND '{}';".format(stationID, timemin, timemax)
-        df = pd.read_sql(q, con=self.db)
+        """Get the data for a station between timemin and timemax."""
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "cpm",
+            "cpmError")
+        q = ' '.join(
+            "SELECT {} FROM dosnet".format(col_list),
+            "WHERE `dosnet`.`stationID`='{}'".format(stationID),
+            "AND receiveTime BETWEEN '{}' AND '{}';".format(timemin, timemax))
+        df = self.dfFromSql(q)
         return self.addTimeColumnsToDataframe(df)
 
     def getDataForStationByInterval(self, stationID, intervalStr):
-        # Make the query for this station on this interval
+        """
+        Get the last (interval) of data from this station.
+        intervalStr looks like 'INTERVAL 1 DAY'.
+        """
+
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "cpm",
+            "cpmError")
+        q = ' '.join(
+            "SELECT {} FROM dosnet".format(col_list),
+            "WHERE stationID={}".format(stationID),
+            "AND deviceTime >= (NOW() - {})".format(intervalStr),
+            "ORDER BY deviceTime DESC;")
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
-            cpm, cpmError\
-            FROM dosnet \
-            WHERE stationID={} \
-            AND deviceTime >= (NOW() - {}) \
-            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
-            df = pd.read_sql(q, con=self.db)
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            df = self.dfFromSql(q)
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
@@ -353,7 +386,8 @@ def setAllStationsUpdate(self, needs_update=1):
             receiveTime_utc
             receiveTime_local
 
-        http://stackoverflow.com/questions/17159207/change-timezone-of-date-time-column-in-pandas-and-add-as-hierarchical-index
+        stackoverflow.com/questions/17159207/change-timezone-of-date-time-
+          column-in-pandas-and-add-as-hierarchical-index
         """
         # Select timezone to use
         if isinstance(tz, str):
@@ -368,13 +402,15 @@ def setAllStationsUpdate(self, needs_update=1):
             this_tz = 'US/Pacific'
         # Sanity check
         assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
-        # Rename exist unix epoch seconds columns
+        # Rename existing unix epoch seconds columns
         df.rename(inplace=True, columns={
             'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix',
             'UNIX_TIMESTAMP(receiveTime)': 'receiveTime_unix'})
         # Timezones are evil but pandas are fuzzy ...
-        deviceTime = pd.Index(pd.to_datetime(df['deviceTime_unix'], unit='s')).tz_localize('UTC')
-        receiveTime = pd.Index(pd.to_datetime(df['receiveTime_unix'], unit='s')).tz_localize('UTC')
+        deviceTime = pd.Index(pd.to_datetime(
+            df['deviceTime_unix'], unit='s')).tz_localize('UTC')
+        receiveTime = pd.Index(pd.to_datetime(
+            df['receiveTime_unix'], unit='s')).tz_localize('UTC')
         df['deviceTime_utc'] = deviceTime
         df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
         df['receiveTime_utc'] = receiveTime
@@ -401,6 +437,7 @@ def setAllStationsUpdate(self, needs_update=1):
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
 
     def testLastMethods(self, stationID=1):
+        """Test SQLObject.getLast* methods"""
         print('Testing last data methods with stationID={}\n'.format(stationID))
         for method in [self.getLastDay, self.getLastWeek, self.getLastMonth,
                        self.getLastYear]:
