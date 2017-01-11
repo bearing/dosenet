@@ -28,12 +28,12 @@ TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 CHECK_INTERVAL_S = 5 * 60
 HIGH_THRESH_CPM = 20
 HIGH_INTERVAL_STR = 'INTERVAL 1 DAY'
-HIGH_SQL = ' '.join(
+HIGH_SQL = ' '.join((
     "SELECT * FROM dosimeter_network.dosnet",
     "WHERE (stationID = {}".format('{}'),
     "AND cpm > {}".format(HIGH_THRESH_CPM),
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
-    "ORDER BY deviceTime DESC;")
+    "ORDER BY deviceTime DESC;"))
 OUTAGE_DURATION_THRESH_S = 1 * 60 * 60
 
 MIN_STATION_ID = 1
