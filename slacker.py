@@ -51,16 +51,24 @@ if socket.gethostname() != 'dosenet':
 
 class DoseNetSlacker(object):
 
-    def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt', test=False):
+    def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt',
+                 test=False, verbose=False):
         self.test = test
+        self.v = verbose
         self.get_slack(tokenfile)
         self.get_sql()
         if self.test:
             self.interval_s = TEST_CHECK_INTERVAL_S
             self.outage_interval_s = TEST_OUTAGE_DURATION_THRESH_S
+            print('Starting DoseNetSlacker in test mode: ' +
+                  'check interval {}s, outage interval {}s'.format(
+                      self.interval_s, self.outage_interval_s))
         else:
             self.interval_s = CHECK_INTERVAL_S
             self.outage_interval_s = OUTAGE_DURATION_THRESH_S
+            if self.v:
+                print('Check interval: {}s'.format(self.interval_s))
+                print('Outage interval: {}s'.format(self.outage_interval_s))
         self.initialize_station_status()
         self.post_initial_report()
 
@@ -68,6 +76,8 @@ class DoseNetSlacker(object):
         """Load slack token from file."""
 
         filename = os.path.join(TOKEN_PATH, TOKEN_NAME)
+        if self.v:
+            print('Loading Slack token from {}'.format(filename))
         with open(filename, 'r') as f:
             slack_token = f.read().rstrip()
         self.slack = SlackClient(slack_token)
@@ -108,6 +118,11 @@ class DoseNetSlacker(object):
             'ID': self.stations.index.values
         })
         self.status.set_index('ID', drop=True, inplace=True)
+
+        if self.v:
+            print('\nStatus Dataframe:')
+            print(self.status)
+            print('\n')
 
     def diff_status_and_report(self):
         """
@@ -277,8 +292,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '-t', '--test', action='store_true',
         help='Test mode: watch all stations, short intervals')
+    parser.add_argument(
+        '-v', '--verbose', action='store_true',
+        help='Verbose printing, for debug'
+    )
     args = parser.parse_args()
 
-    slacker = DoseNetSlacker('./ucbdosenet_slack_token', test=args.test)
+    slacker = DoseNetSlacker(
+        './ucbdosenet_slack_token', test=args.test, verbose=args.verbose)
     print('Running DoseNetSlacker...')
     slacker.run()
