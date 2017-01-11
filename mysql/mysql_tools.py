@@ -492,9 +492,10 @@ class SQLObject:
                   '{}'.format(stationID))
             return pd.DataFrame({})
         elif len(df) > 1:
-            print('[SQL WARNING] more than one recent result for stationID=' +
-                  '{}'.format(stationID))
-            print(df)
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
             return df.iloc[0]
         else:
             return df.iloc[0]
