@@ -450,46 +450,6 @@ class DoseNetSlacker(object):
             icon_emoji=icon_emoji,
             text=msg_text)
 
-    def check_for_new_stations(self, last_day):
-        """
-        Look for active stations that are posting for the first time.
-        """
-        pass
-
-
-class DoseNetAlertSituation(object):
-    """
-    Represents a specific issue on a single station, as long as the issue
-    persists. Gets deleted when issue is resolved.
-    """
-
-    pass
-
-
-class StationOutage(DoseNetAlertSituation):
-    """Single station that has older data, no longer has data."""
-    pass
-
-
-class NewStation(DoseNetAlertSituation):
-    """Single station that has data for the first time ever."""
-    pass
-
-
-class HighCountrate(DoseNetAlertSituation):
-    """Single station with data above a given countrate threshold."""
-    pass
-
-
-class FullOutage(DoseNetAlertSituation):
-    """
-    All deployed stations are not reporting.
-
-    Could be an injector problem, or a device code bug.
-    """
-    pass
-
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
