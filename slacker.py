@@ -14,6 +14,7 @@ Requires token to be set for SLACK:
 from __future__ import print_function
 import os
 import time
+import datetime
 import socket
 import numpy as np
 import pandas as pd
@@ -185,6 +186,7 @@ class DoseNetSlacker(object):
         while True:
             time.sleep(self.interval_s)
             self.update_station_status()
+            print('Posted at {}'.format(datetime.datetime.now()))
 
     def get_db_data(self):
         """
