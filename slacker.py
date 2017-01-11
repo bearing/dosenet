@@ -96,17 +96,94 @@ class DoseNetSlacker(object):
         })
         self.status.set_index('ID', drop=True, inplace=True)
 
+    def update_station_status(self):
+        """
+        Check new station records and report any changes.
+        """
+
+        undeployed = []
+        out = []
+        high = []
+
+        new_active_stations = []
+        not_out = []
+        not_high = []
+
+
+        self.get_db_data()
+
+        # 1. get the raw state from the database.
+        for stationID in self.stations.index.values:
+            if stationID not in self.status.index.values:
+                new_active_stations.append(stationID)
+            this_elapsed_time = self.get_elapsed_time(stationID)
+            if this_elapsed_time = None:
+                undeployed.append(stationID)
+            if this_elapsed_time > OUTAGE_DURATION_THRESH_S:
+                out.append(stationID)
+            if self.check_for_high_countrates(stationID):
+                high.append(stationID)
+
+        # 2. compare with existing / previous Slacker status dataframe
+        # 2a. previous outages
+        prev_out = self.status[self.status['out']].index.values
+        for stationID in prev_out:
+            try:
+                # we already know it's an outage, no need to report
+                out.remove(stationID)
+            except ValueError:
+                # it used to be out, but no longer.
+                not_out.append(stationID)
+        # 2b. previous high countrate
+        prev_high = self.status[self.status['high']].index.values
+        for stationID in prev_high:
+            try:
+                high.remove(stationID)
+            except ValueError:
+                not_high.append(stationID)
+        # 2c. previous undeployed
+        prev_und = self.status[self.status['undeployed']].index.values
+        for stationID in prev_und:
+            try:
+                undeployed.remove(stationID)
+            except ValueError:
+                new_active_stations.append(stationID)
+
+        # 3. post report
+        # 3a. all stations
+        if len(out) == len(self.stations.index) - len(prev_out):
+            assert (not not_out), 'Logic problem on all out!'
+            self.post('Systemwide outage!!')
+        # 3b. individual station outages
+        else:
+            self.post_each_station(out, 'down!')
+        # 3c. individual stations back online
+        self.post_each_station(not_out, 'back online.')
+        # 3d. high countrate
+        self.post_each_station(high, 'misbehaving with CPM > {}!'.format(
+            HIGH_THRESH_CPM))
+        # 3e. no more high countrate
+        self.post_each_station(not_high, 'recovered from high CPM.')
+        # 3f. new active stations
+        self.post_each_station(
+            new_active_stations, 'online for the first time!')
+
+    def post_each_station(self, station_list, adj_text):
+        """
+        Post a generic message about each station in a list.
+        """
+        for stationID in station_list:
+            msg = 'Station {} ({}) is {}}'.format(
+                stationID,
+                self.stations['Name'][stationID],
+                adj_text)
+            self.post(msg)
 
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
 
-        return  # temp
         while True:
-            self.get_db_data()
-            for stationID in self.stations.index.values:
-                pass
-
-
+            self.update_station_status()
             time.sleep(self.interval_s)
 
     def get_db_data(self):
