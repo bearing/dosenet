@@ -502,7 +502,7 @@ class DoseNetSlacker(object):
         Check how long it's been since the device posted data.
         """
 
-        df = self.sql.getLatestStationData(stationID)
+        df = self.sql.getLatestStationData(stationID, verbose=False)
         try:
             elapsed_time = time.time() - df['deviceTime_unix']
         except KeyError:
