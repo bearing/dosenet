@@ -50,6 +50,7 @@ class DoseNetSlacker(object):
         self.get_slack(tokenfile)
         self.get_sql()
         self.interval_s = CHECK_INTERVAL_S
+        self.initialize_station_status()
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
@@ -67,6 +68,33 @@ class DoseNetSlacker(object):
         except:     # MySQLdb/connections.py _mysql_exceptions.OperationalError
             print('Could not find SQL database! Starting without it')
             self.sql = None
+
+    def initialize_station_status(self):
+        """
+        Initialize records in memory and check the SQL database
+        for the first time.
+        """
+
+        undeployed = []
+        out = []
+        high = []
+
+        self.get_db_data()
+        for stationID in self.stations.index.values:
+            this_elapsed_time = self.get_elapsed_time(stationID)
+            undeployed.append(this_elapsed_time is None)
+            out.append(this_elapsed_time > OUTAGE_DURATION_THRESH_S)
+            high.append(self.check_for_high_countrates(stationID))
+
+        self.status = pd.DataFrame({
+            'undeployed': undeployed,
+            'out': out,
+            'high': high,
+            'ID': self.stations.index.values
+        })
+        self.status.set_index('ID', drop=True, inplace=True)
+        self.post_initial_report()
+
 
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
