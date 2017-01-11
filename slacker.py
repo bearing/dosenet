@@ -520,6 +520,38 @@ class DoseNetSlacker(object):
         is_high = len(df.index) > 0
         return is_high
 
+    def post_initial_report(self):
+        """
+        Compose a report based on the initial status as DoseNetSlacker starts.
+        """
+
+        n_out = np.sum(self.status['out'])
+        n_high = np.sum(self.status['high'])
+        n_undeployed = np.sum(self.status['undeployed'])
+
+        header = ' '.join((
+            '[Startup Report]\n',
+            'I see {out} outages,'.format(n_out),
+            '{high} high countrates,'.format(n_high),
+            'and {undeployed} undeployed stations.\n'.format(n_undeployed)
+            ))
+
+        outage_list = tuple(self.sql.stations['Name'][self.status['out']])
+        high_list = tuple(self.sql.stations['Name'][self.status['high']])
+        und_list = tuple(self.sql.stations['Name'][self.status['undeployed']])
+        outage_text = 'Outages: ' + ', '.join(outage_list) + '\n'
+        high_text = 'High countrate: ' + ', '.join(high_list) + '\n'
+        und_text = 'Undeployed: ' + ', '.join(und_list) + '\n'
+
+        report_text = header + outage_text + high_text + und_text
+
+        self.slack.api_call(
+            'chat.postMessage',
+            channel=SLACK_CHANNEL,
+            username=SLACK_USER,
+            icon_emoji=ICON,
+            text=report_text)
+
     def check_for_new_stations(self, last_day):
         """
         Look for active stations that are posting for the first time.
