@@ -29,6 +29,7 @@ TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
 CHECK_INTERVAL_S = 5 * 60
+TEST_CHECK_INTERVAL_S = 60
 HIGH_THRESH_CPM = 20
 HIGH_INTERVAL_STR = 'INTERVAL 1 WEEK'
 HIGH_SQL = ' '.join((
@@ -38,6 +39,7 @@ HIGH_SQL = ' '.join((
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
     "ORDER BY deviceTime DESC;"))
 OUTAGE_DURATION_THRESH_S = 1 * 60 * 60
+TEST_OUTAGE_DURATION_THRESH_S = 300
 
 MIN_STATION_ID = 1
 MAX_STATION_ID = 9999
@@ -50,9 +52,15 @@ if socket.gethostname() != 'dosenet':
 class DoseNetSlacker(object):
 
     def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt', test=False):
+        self.test = test
         self.get_slack(tokenfile)
         self.get_sql()
-        self.interval_s = CHECK_INTERVAL_S
+        if self.test:
+            self.interval_s = TEST_CHECK_INTERVAL_S
+            self.outage_interval_s = TEST_OUTAGE_DURATION_THRESH_S
+        else:
+            self.interval_s = CHECK_INTERVAL_S
+            self.outage_interval_s = OUTAGE_DURATION_THRESH_S
         self.initialize_station_status()
         self.post_initial_report()
 
@@ -90,7 +98,7 @@ class DoseNetSlacker(object):
         for stationID in self.stations.index.values:
             this_elapsed_time = self.get_elapsed_time(stationID)
             undeployed.append(this_elapsed_time is None)
-            out.append(this_elapsed_time > OUTAGE_DURATION_THRESH_S)
+            out.append(this_elapsed_time > self.outage_interval_s)
             high.append(self.check_for_high_countrates(stationID))
 
         self.status = pd.DataFrame({
