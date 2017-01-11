@@ -26,8 +26,15 @@ TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
 CHECK_INTERVAL_S = 5 * 60
-COUNTRATE_THRESHOLD_CPM = 20
-OUTAGE_DURATION_THRESHOLD_S = 1 * 60 * 60
+HIGH_THRESH_CPM = 20
+HIGH_INTERVAL_STR = 'INTERVAL 1 DAY'
+HIGH_SQL = ' '.join(
+    "SELECT * FROM dosimeter_network.dosnet",
+    "WHERE (stationID = {}".format('{}'),
+    "AND cpm > {}".format(HIGH_THRESH_CPM),
+    "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
+    "ORDER BY deviceTime DESC;")
+OUTAGE_DURATION_THRESH_S = 1 * 60 * 60
 
 MIN_STATION_ID = 1
 MAX_STATION_ID = 9999
