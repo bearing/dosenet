@@ -275,7 +275,7 @@ class SQLObject:
         del df['ID']
         return df
 
-    def getLatestStationData(self, stationID):
+    def getLatestStationData(self, stationID, verbose=True):
         """Return most recent data entry for given station."""
         col_list = ', '.join((
             "UNIX_TIMESTAMP(deviceTime)",
@@ -306,13 +306,15 @@ class SQLObject:
         # Add timezone columns
         df = self.addTimeColumnsToDataframe(df, stationID=stationID)
         if len(df) == 0:
-            print('[SQL WARNING] no data returned for stationID=' +
-                  '{}'.format(stationID))
+            if verbose:
+                print('[SQL WARNING] no data returned for stationID={}'.format(
+                        stationID))
             return pd.DataFrame({})
         elif len(df) > 1:
-            print('[SQL WARNING] more than one recent result for stationID=' +
-                  '{}'.format(stationID))
-            print(df)
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
             return df.iloc[0]
         else:
             return df.iloc[0]
