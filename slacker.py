@@ -279,6 +279,6 @@ if __name__ == '__main__':
         help='Test mode: watch all stations, short intervals')
     args = parser.parse_args()
 
-    slacker = DoseNetSlacker('./ucbdosenet_slack_token', test=args['test'])
+    slacker = DoseNetSlacker('./ucbdosenet_slack_token', test=args.test)
     print('Running DoseNetSlacker...')
     slacker.run()
