@@ -66,23 +66,6 @@ class SQLObject:
         """Clear the cache of any query results."""
         self.db.commit()
 
-    def getVerifiedStationList(self):
-        """
-        this gets run, but the result doesn't seem to be used except in
-        unused functions
-        """
-        try:
-            sql_cmd = ("SELECT `ID`, `IDLatLongHash` FROM " +
-                       "dosimeter_network.stations;")
-            self.cursor.execute(sql_cmd)
-            self.verified_stations = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-            msg = 'Error: Could not get list of stations from the database!'
-            print(msg)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
-
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
         """
