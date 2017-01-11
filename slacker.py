@@ -422,9 +422,9 @@ class DoseNetSlacker(object):
 
         header = ' '.join((
             '[Startup Report]\n',
-            'I see {out} outages,'.format(n_out),
-            '{high} high countrates,'.format(n_high),
-            'and {undeployed} undeployed stations.\n'.format(n_undeployed)
+            'I see {} outages,'.format(n_out),
+            '{} high countrates,'.format(n_high),
+            'and {} undeployed stations.\n'.format(n_undeployed)
             ))
 
         outage_list = tuple(self.sql.stations['Name'][self.status['out']])
