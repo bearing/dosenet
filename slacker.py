@@ -386,6 +386,7 @@ class DoseNetSlacker(object):
         """
         Read station data from SQL.
         """
+        self.sql.refresh()
         # self.stations = self.sql.getActiveStations()
         self.stations = self.sql.getStations()
 
@@ -394,6 +395,7 @@ class DoseNetSlacker(object):
         Check how long it's been since the device posted data.
         """
 
+        self.sql.refresh()
         df = self.sql.getLatestStationData(stationID, verbose=False)
         try:
             elapsed_time = time.time() - df['deviceTime_unix']
@@ -407,6 +409,7 @@ class DoseNetSlacker(object):
         """
         Look for active stations with countrate > xxx.
         """
+        self.sql.refresh()
         df = self.sql.dfFromSql(HIGH_SQL.format(stationID))
         is_high = len(df.index) > 0
         return is_high
