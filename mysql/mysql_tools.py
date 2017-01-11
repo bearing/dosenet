@@ -358,6 +358,17 @@ def setAllStationsUpdate(self, needs_update=1):
 #       FETCH METHODS
 # ---------------------------------------------------------------------------
 
+    def dfFromSql(self, q):
+        """Pandas dataframe from SQL query"""
+        df = pd.read_sql(q, con=self.db)
+        return df
+
+    def rawSql(self, q):
+        """Raw result of SQL query"""
+        self.cursor.execute(q)
+        out = self.cursor.fetchall()
+        return out
+
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
         q = "SELECT * FROM dosimeter_network.stations;"
@@ -635,6 +646,8 @@ def setAllStationsUpdate(self, needs_update=1):
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getAQDataForStationByInterval(self, stationID, intervalStr):
         try:
@@ -704,7 +717,8 @@ def setAllStationsUpdate(self, needs_update=1):
         df.rename(inplace=True, columns={
             'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix'})
         # Timezones are evil but pandas are fuzzy ...
-        deviceTime = pd.Index(pd.to_datetime(df['deviceTime_unix'], unit='s')).tz_localize('UTC')
+        deviceTime = pd.Index(pd.to_datetime(
+            df['deviceTime_unix'], unit='s')).tz_localize('UTC')
         df['deviceTime_utc'] = deviceTime
         df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
         # Rearrange the columns (iterate in opposite order of placement)
