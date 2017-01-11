@@ -254,7 +254,7 @@ def setAllStationsUpdate(self, needs_update=1):
 
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
-        q = "SELECT * FROM dosimeter_network.stations;")
+        q = "SELECT * FROM dosimeter_network.stations;"
         df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
@@ -270,7 +270,7 @@ def setAllStationsUpdate(self, needs_update=1):
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
         q = "SELECT * FROM dosimeter_network.stations WHERE `ID` = {};".format(
-                stationID))
+                stationID)
         df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
