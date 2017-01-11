@@ -66,9 +66,22 @@ class SQLObject:
         """Clear the cache of any query results."""
         self.db.commit()
 
-# ---------------------------------------------------------------------------
-#       INJECTION-RELATED METHODS
-# ---------------------------------------------------------------------------
+    def getVerifiedStationList(self):
+        """
+        this gets run, but the result doesn't seem to be used except in
+        unused functions
+        """
+        try:
+            sql_cmd = ("SELECT `ID`, `IDLatLongHash` FROM " +
+                       "dosimeter_network.stations;")
+            self.cursor.execute(sql_cmd)
+            self.verified_stations = self.cursor.fetchall()
+        except Exception as e:
+            raise e
+            msg = 'Error: Could not get list of stations from the database!'
+            print(msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
 
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
@@ -300,77 +313,6 @@ class SQLObject:
         # Everything checks out
         return None
 
-    def getStationReturnInfo(self, stationID):
-        """Read gitBranch and needsUpdate from stations table."""
-        self.refresh()
-        col_list = "gitBranch, needsUpdate"
-        q = "SELECT {} FROM stations WHERE `ID` = {};".format(
-            col_list, stationID)
-        df = self.pdFromSql(q)
-
-        needs_update = df['needsUpdate'][0]
-        git_branch = df['gitBranch'][0]
-
-        return git_branch, needs_update
-
-# ---------------------------------------------------------------------------
-#       STATION-UPDATE-RELATED METHODS
-# ---------------------------------------------------------------------------
-
-    def setSingleStationUpdate(self, stationID, needs_update=0):
-        """
-        Set needsUpdate = {} for a single station in stations table. Default: 0
-
-        Do this after you tell the device to update and reboot, because after
-        that it doesn't need the update.
-
-        (You could also use this to set needsUpdate = 1 for a single station.)
-        """
-
-        if (not isinstance(needs_update, int) and
-                not isinstance(needs_update, bool)):
-            raise AssertionError('needs_update should be a bool or int (0, 1)')
-
-        needs_update = int(needs_update)    # db expects 0 or 1
-        q = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
-            needs_update, stationID)
-        self.cursor.execute(q)
-        self.refresh()
-
-    def setAllStationsUpdate(self, needs_update=1):
-        """
-        Set needsUpdate = {} for all stations in stations table. Default: 1
-
-        Do this if there is a bug in the code such that all stations need to
-        update. Of course you have to fix the bug first ;-)
-
-        (You could also use this to set needsUpdate = 0 for all stations.)
-        """
-
-        if (not isinstance(needs_update, int) and
-                not isinstance(needs_update, bool)):
-            raise AssertionError('needs_update should be a bool or int (0, 1)')
-
-        needs_update = int(needs_update)    # db expects 0 or 1
-        q = "UPDATE stations SET needsUpdate={}".format(needs_update)
-        self.cursor.execute(q)
-        self.refresh()
-
-# ---------------------------------------------------------------------------
-#       FETCH METHODS
-# ---------------------------------------------------------------------------
-
-    def dfFromSql(self, q):
-        """Pandas dataframe from SQL query"""
-        df = pd.read_sql(q, con=self.db)
-        return df
-
-    def rawSql(self, q):
-        """Raw result of SQL query"""
-        self.cursor.execute(q)
-        out = self.cursor.fetchall()
-        return out
-
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
         q = "SELECT * FROM dosimeter_network.stations;"
@@ -520,11 +462,24 @@ class SQLObject:
         tz = self.rawSql(q)
         return tz[0][0]
 
-    def getD3SDataForStationByRange(self, stationID, timemin, timemax):
+    def getStationReturnInfo(self, stationID):
+        """Read gitBranch and needsUpdate from stations table."""
+        self.refresh()
+        col_list = "gitBranch, needsUpdate"
+        q = "SELECT {} FROM stations WHERE `ID` = {};".format(
+            col_list, stationID)
+        df = self.pdFromSql(q)
+
+        needs_update = df['needsUpdate'][0]
+        git_branch = df['gitBranch'][0]
+
+        return git_branch, needs_update
+
+    def getDataForStationByRange(self, stationID, timemin, timemax):
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
-            FROM d3s \
-            WHERE `d3s`.`stationID`='{}' \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), cpm, cpmError \
+            FROM dosnet \
+            WHERE `dosnet`.`stationID`='{}' \
             AND UNIX_TIMESTAMP(deviceTime) \
             BETWEEN '{}' \
             AND '{}' \
@@ -535,11 +490,11 @@ class SQLObject:
             print(e)
             return pd.DataFrame({})
 
-    def getDataForStationByRange(self, stationID, timemin, timemax):
+    def getD3SDataForStationByRange(self, stationID, timemin, timemax):
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), cpm, cpmError \
-            FROM dosnet \
-            WHERE `dosnet`.`stationID`='{}' \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
+            FROM d3s \
+            WHERE `d3s`.`stationID`='{}' \
             AND UNIX_TIMESTAMP(deviceTime) \
             BETWEEN '{}' \
             AND '{}' \
