@@ -118,7 +118,7 @@ class DoseNetSlacker(object):
             if stationID not in self.status.index.values:
                 new_active_stations.append(stationID)
             this_elapsed_time = self.get_elapsed_time(stationID)
-            if this_elapsed_time = None:
+            if this_elapsed_time is None:
                 undeployed.append(stationID)
             if this_elapsed_time > OUTAGE_DURATION_THRESH_S:
                 out.append(stationID)
