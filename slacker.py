@@ -15,6 +15,7 @@ from __future__ import print_function
 import os
 import time
 import socket
+import numpy as np
 import pandas as pd
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
