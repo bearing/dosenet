@@ -206,6 +206,7 @@ class DoseNetSlacker(object):
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
 
+        return  # temp
         while True:
             time.sleep(self.interval_s)
             try:
@@ -497,19 +498,27 @@ class DoseNetSlacker(object):
         """
         self.stations = self.sql.getActiveStations()
 
-    def check_for_outages(self, last_day):
+    def get_elapsed_time(self, stationID):
         """
-        Look for active stations that haven't posted data in the last ... time.
+        Check how long it's been since the device posted data.
         """
-        if len(last_day.index) > 0:
-            pass
-        return out
 
-    def check_for_high_countrates(self, last_day):
+        df = self.sql.getLatestStationData(stationID)
+        try:
+            elapsed_time = time.time() - df['deviceTime_unix']
+        except KeyError:
+            # no station data
+            elapsed_time = None
+
+        return elapsed_time
+
+    def check_for_high_countrates(self, stationID):
         """
         Look for active stations with countrate > xxx.
         """
-        pass
+        df = self.sql.dfFromSql(HIGH_SQL.format(stationID))
+        is_high = len(df.index) > 0
+        return is_high
 
     def check_for_new_stations(self, last_day):
         """
