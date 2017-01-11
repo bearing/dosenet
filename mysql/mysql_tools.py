@@ -898,6 +898,8 @@ class SQLObject:
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:
