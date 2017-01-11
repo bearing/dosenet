@@ -183,8 +183,8 @@ class DoseNetSlacker(object):
         """Check SQL database, post messages. Blocks execution."""
 
         while True:
-            self.update_station_status()
             time.sleep(self.interval_s)
+            self.update_station_status()
 
     def get_db_data(self):
         """
