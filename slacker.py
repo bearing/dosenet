@@ -162,12 +162,19 @@ class DoseNetSlacker(object):
 
         report_text = header + outage_text + high_text + und_text
 
+        self.post(report_text)
+
+    def post(self, msg_text, channel=SLACK_CHANNEL, icon_emoji=ICON):
+        """
+        Post a message on Slack. Defaults are filled in already
+        """
+
         self.slack.api_call(
             'chat.postMessage',
-            channel=SLACK_CHANNEL,
+            channel=channel,
             username=SLACK_USER,
-            icon_emoji=ICON,
-            text=report_text)
+            icon_emoji=icon_emoji,
+            text=msg_text)
 
     def check_for_new_stations(self, last_day):
         """
