@@ -12,6 +12,7 @@ Requires token to be set for SLACK:
 """
 
 from __future__ import print_function
+import argparse
 import os
 import time
 import datetime
@@ -48,7 +49,7 @@ if socket.gethostname() != 'dosenet':
 
 class DoseNetSlacker(object):
 
-    def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt'):
+    def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt', test=False):
         self.get_slack(tokenfile)
         self.get_sql()
         self.interval_s = CHECK_INTERVAL_S
@@ -264,6 +265,12 @@ class DoseNetSlacker(object):
 
 
 if __name__ == '__main__':
-    slacker = DoseNetSlacker('./ucbdosenet_slack_token')
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-t', '--test', action='store_true',
+        help='Test mode: watch all stations, short intervals')
+    args = parser.parse_args()
+
+    slacker = DoseNetSlacker('./ucbdosenet_slack_token', test=args['test'])
     print('Running DoseNetSlacker...')
     slacker.run()
