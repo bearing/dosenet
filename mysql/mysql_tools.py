@@ -85,23 +85,6 @@ class SQLObject:
             # email_message.send_email(
             #     process=os.path.basename(__file__), error_message=msg)
 
-    def checkHashFromRAM(self, ID):
-        "unused"
-        # Essentially the same as doing the following in MySQL
-        # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
-        try:
-            for i in range(len(self.verified_stations)):
-                if self.verified_stations[i][0] == ID:
-                    dbHash = self.verified_stations[i][1]
-                    return dbHash
-        except Exception as e:
-            raise e
-            return False
-            msg = 'Error: Could not find a station matching that ID'
-            print(msg)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
-
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
         """
@@ -274,10 +257,6 @@ class SQLObject:
         if verbose:
             print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def getHashList(self):
-        "unused"
-        return self.verified_stations
-
     def authenticatePacket(self, data, packettype='data'):
         '''
         Checks keys in data.
@@ -335,22 +314,6 @@ class SQLObject:
 
         # Everything checks out
         return None
-
-    def getHashFromDB(self, ID):
-        "unused"
-        # RUN "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
-        try:
-            self.cursor.execute("SELECT IDLatLongHash FROM stations \
-                            WHERE `ID` = '%s';" % (ID))
-            dbHash = self.cursor.fetchall()
-            return dbHash
-        except (KeyboardInterrupt, SystemExit):
-            print('User interrupted for some reason, byeeeee')
-            sys.exit(0)
-        except (Exception) as e:
-            print(e)
-            print('Exception: Could not get hash from database. ' +
-                  'Is the DoseNet server online and running MySQL?')
 
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
