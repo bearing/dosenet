@@ -147,7 +147,7 @@ class DoseNetSlacker(object):
         n_undeployed = np.sum(self.status['undeployed'])
 
         header = ' '.join((
-            '[Startup Report]\n',
+            '[DoseNet Slacker Startup Report]\n',
             'I see {} outages,'.format(n_out),
             '{} high countrates,'.format(n_high),
             'and {} undeployed stations.\n'.format(n_undeployed)
