@@ -52,6 +52,7 @@ class DoseNetSlacker(object):
         self.get_sql()
         self.interval_s = CHECK_INTERVAL_S
         self.initialize_station_status()
+        self.post_initial_report()
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
@@ -94,7 +95,6 @@ class DoseNetSlacker(object):
             'ID': self.stations.index.values
         })
         self.status.set_index('ID', drop=True, inplace=True)
-        self.post_initial_report()
 
 
     def run(self):
