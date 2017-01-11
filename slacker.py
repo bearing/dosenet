@@ -78,11 +78,14 @@ class DoseNetSlacker(object):
         for the first time.
         """
 
+        self.get_db_data()
+        self.update_station_status()
+
+    def update_station_status(self):
         undeployed = []
         out = []
         high = []
 
-        self.get_db_data()
         for stationID in self.stations.index.values:
             this_elapsed_time = self.get_elapsed_time(stationID)
             undeployed.append(this_elapsed_time is None)
@@ -97,7 +100,7 @@ class DoseNetSlacker(object):
         })
         self.status.set_index('ID', drop=True, inplace=True)
 
-    def update_station_status(self):
+    def diff_status_and_report(self):
         """
         Check new station records and report any changes.
         """
@@ -168,6 +171,9 @@ class DoseNetSlacker(object):
         # 3f. new active stations
         self.post_each_station(
             new_active_stations, 'online for the first time!')
+
+        # 4. update status
+        self.update_station_status()
 
     def post_each_station(self, station_list, adj_text):
         """
