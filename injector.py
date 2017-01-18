@@ -839,7 +839,6 @@ class DosenetUdpServer(SocketServer.ForkingUDPServer):
         this process.
         """
 
-        Crypto.Random.atfork()
         SocketServer.UDPServer.serve_forever(self, *args, **kwargs)
 
 
@@ -873,7 +872,6 @@ class DosenetTcpServer(SocketServer.ForkingTCPServer):
         this process.
         """
 
-        Crypto.Random.atfork()
         SocketServer.TCPServer.serve_forever(self, *args, **kwargs)
 
 
@@ -886,6 +884,8 @@ class UdpHandler(SocketServer.DatagramRequestHandler):
     receives. (The handling code is ultimately the same, but let's not create
     a pile of object attributes.)
     """
+
+    Crypto.Random.atfork()
 
     def handle(self):
         # UDP request is a tuple of (data, socket) instead of just socket
@@ -905,6 +905,8 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     receives. (The handling code is ultimately the same, but let's not create
     a pile of object attributes.)
     """
+
+    Crypto.Random.atfork()
 
     def handle(self):
         is_aes = False
