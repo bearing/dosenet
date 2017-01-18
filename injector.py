@@ -718,11 +718,11 @@ class UdpHandler(SocketServer.DatagramRequestHandler):
     a pile of object attributes.)
     """
 
-    Crypto.Random.atfork()
-
     def handle(self):
         # UDP request is a tuple of (data, socket) instead of just socket
         data = self.request[0]
+
+        Crypto.Random.atfork()
 
         self.server.injector.handle(
             data, client_address=self.client_address, request=self.request,
@@ -739,9 +739,9 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     a pile of object attributes.)
     """
 
-    Crypto.Random.atfork()
-
     def handle(self):
+        Crypto.Random.atfork()
+
         is_aes = False
         firstdata = self.request.recv(PREPEND_LENGTH)
         try:
