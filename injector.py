@@ -638,7 +638,7 @@ def format_packet(data, client_address):
     return output
 
 
-class DosenetUdpServer(SocketServer.UDPServer):
+class DosenetUdpServer(SocketServer.ForkingUDPServer):
     """
     Server object to handle UDP requests.
 
@@ -676,7 +676,7 @@ class DosenetUdpServer(SocketServer.UDPServer):
         SocketServer.UDPServer.serve_forever(self, *args, **kwargs)
 
 
-class DosenetTcpServer(SocketServer.TCPServer):
+class DosenetTcpServer(SocketServer.ForkingTCPServer):
     """
     Server object to handle TCP requests.
 
