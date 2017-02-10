@@ -542,9 +542,9 @@ class DoseNetSlacker(object):
         outage_list = tuple(self.stations['Name'][self.status['out']])
         high_list = tuple(self.stations['Name'][self.status['high']])
         und_list = tuple(self.stations['Name'][self.status['undeployed']])
-        outage_text = 'Outages: ' + ', '.join(outage_list) + '\n'
-        high_text = 'High countrate: ' + ', '.join(high_list) + '\n'
-        und_text = 'Undeployed: ' + ', '.join(und_list) + '\n'
+        outage_text = '*Outages:* ' + ', '.join(outage_list) + '\n'
+        high_text = '*High countrate:* ' + ', '.join(high_list) + '\n'
+        und_text = '*Undeployed:* ' + ', '.join(und_list) + '\n'
 
         report_text = header + outage_text + high_text + und_text
 
