@@ -496,8 +496,8 @@ class DoseNetSlacker(object):
         Read station data from SQL.
         """
         self.sql.refresh()
-        # self.stations = self.sql.getActiveStations()
-        self.stations = self.sql.getStations()
+        self.stations = self.sql.getActiveStations()
+        # self.stations = self.sql.getStations()
 
     def get_elapsed_time(self, stationID):
         """
