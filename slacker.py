@@ -204,7 +204,7 @@ class DoseNetSlacker(object):
         Post a generic message about each station in a list.
         """
         for stationID in station_list:
-            msg = 'Station {} ({}) is {}}'.format(
+            msg = 'Station {} ({}) is {}'.format(
                 stationID,
                 self.stations['Name'][stationID],
                 adj_text)
