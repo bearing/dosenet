@@ -215,7 +215,7 @@ class DoseNetSlacker(object):
 
         while True:
             time.sleep(self.interval_s)
-            self.update_station_status()
+            self.diff_status_and_report()
             print('Posted at {}'.format(datetime.datetime.now()))
 
     def get_db_data(self):
