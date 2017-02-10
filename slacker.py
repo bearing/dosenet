@@ -548,7 +548,7 @@ class DoseNetSlacker(object):
 
         report_text = header + outage_text + high_text + und_text
 
-        self.post(report_text)
+        self.post(report_text, icon_emoji=ICONS['startup'])
 
     def post(self, msg_text, channel=SLACK_CHANNEL, icon_emoji=ICON):
         """
