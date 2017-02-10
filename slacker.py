@@ -23,10 +23,19 @@ from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
 SLACK_USER = 'dosenet_server'
-ICON = ':radioactive_sign:'
 SLACK_CHANNEL = '#dosenet-bot-testing'
 TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
+
+ICONS = {
+    'startup': ':radioactive_sign:',
+    'out': ':confused:',
+    'high': ':scream:',
+    'new_active': ':sunglasses:',
+    'not_out': ':joy:',
+    'not_high': ':sweat_smile:',
+    'all_out': ':weary:'
+}
 
 CHECK_INTERVAL_S = 5 * 60
 TEST_CHECK_INTERVAL_S = 60
@@ -181,20 +190,26 @@ class DoseNetSlacker(object):
         # 3a. all stations
         if len(out) == len(self.stations.index) - len(prev_out):
             assert (not not_out), 'Logic problem on all out!'
-            self.post('*_Systemwide outage!!_*')
+            self.post('*_Systemwide outage!!_*', icon_emoji=ICONS['all_out'])
         # 3b. individual station outages
         else:
-            self.post_each_station(out, 'down!')
+            self.post_each_station(out, 'down!', icon_emoji=ICONS['out'])
         # 3c. individual stations back online
-        self.post_each_station(not_out, 'back online.')
+        self.post_each_station(
+            not_out, 'back online.',
+            icon_emoji=ICONS['not_out'])
         # 3d. high countrate
-        self.post_each_station(high, 'misbehaving with CPM > {}!'.format(
-            HIGH_THRESH_CPM))
+        self.post_each_station(
+            high, 'misbehaving with CPM > {}!'.format(HIGH_THRESH_CPM),
+            icon_emoji=ICONS['high'])
         # 3e. no more high countrate
-        self.post_each_station(not_high, 'recovered from high CPM.')
+        self.post_each_station(
+            not_high, 'recovered from high CPM.',
+            icon_emoji=ICONS['not_high'])
         # 3f. new active stations
         self.post_each_station(
-            new_active_stations, 'online for the first time!')
+            new_active_stations, 'online for the first time!',
+            icon_emoji=ICONS['new_active'])
 
         # 4. update status
         self.update_station_status()
@@ -275,7 +290,7 @@ class DoseNetSlacker(object):
 
         report_text = header + outage_text + high_text + und_text
 
-        self.post(report_text)
+        self.post(report_text, icon_emoji=ICONS['startup'])
 
     def post(self, msg_text, channel=SLACK_CHANNEL, icon_emoji=ICON):
         """
