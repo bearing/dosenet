@@ -437,7 +437,13 @@ class DoseNetSlacker(object):
         high_text = '*High countrate:* ' + ', '.join(high_list) + '\n'
         und_text = '*Undeployed:* ' + ', '.join(und_list) + '\n'
 
-        report_text = header + outage_text + high_text + und_text
+        report_text = header
+        if outage_list:
+            report_text += outage_text
+        if high_list:
+            report_text += high_text
+        if und_list:
+            report_text += und_text
 
         self.post(report_text, icon_emoji=ICONS['startup'])
 
