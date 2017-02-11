@@ -448,10 +448,13 @@ class DoseNetSlacker(object):
         self.post(report_text, icon_emoji=ICONS['startup'])
 
     def post(self, msg_text, channel=SLACK_CHANNEL,
-             icon_emoji=':radioactive_sign:'):
+             icon_emoji=None):
         """
         Post a message on Slack. Defaults are filled in already
         """
+
+        if icon_emoji is None:
+            icon_emoji = ':radioactive_sign:'
 
         self.slack.api_call(
             'chat.postMessage',
