@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env/bash
 # runs slacker.py
 
 LOGTAG=Slack
