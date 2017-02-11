@@ -214,7 +214,7 @@ class DoseNetSlacker(object):
         # 4. update status
         self.update_station_status()
 
-    def post_each_station(self, station_list, adj_text):
+    def post_each_station(self, station_list, adj_text, icon_emoji=None):
         """
         Post a generic message about each station in a list.
         """
@@ -223,7 +223,7 @@ class DoseNetSlacker(object):
                 stationID,
                 self.stations['Name'][stationID],
                 adj_text)
-            self.post(msg)
+            self.post(msg, icon_emoji=icon_emoji)
 
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
@@ -299,10 +299,13 @@ class DoseNetSlacker(object):
         self.post(report_text, icon_emoji=ICONS['startup'])
 
     def post(self, msg_text, channel=SLACK_CHANNEL,
-             icon_emoji=':radioactive_sign:'):
+             icon_emoji=None):
         """
         Post a message on Slack. Defaults are filled in already
         """
+
+        if icon_emoji is None:
+            icon_emoji = ':radioactive_sign:'
 
         self.slack.api_call(
             'chat.postMessage',
