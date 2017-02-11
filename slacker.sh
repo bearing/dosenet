@@ -6,7 +6,7 @@ SLACKER_PATH=/home/dosenet/git/dosenet_slack_outage
 
 logger --stderr --id --tag=$LOGTAG "Starting slacker.py..."
 
-python $SLACKER_PATH/slacker.py &
+/home/dosenet/anaconda/bin/python $SLACKER_PATH/slacker.py &
 
 if [[ $? -eq 0 ]]
 then
