@@ -47,7 +47,7 @@ HIGH_SQL = ' '.join((
     "AND cpm > {}".format(HIGH_THRESH_CPM),
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
     "ORDER BY deviceTime DESC;"))
-OUTAGE_DURATION_THRESH_S = 1 * 60 * 60
+OUTAGE_DURATION_THRESH_S = 30 * 60
 TEST_OUTAGE_DURATION_THRESH_S = 300
 
 MIN_STATION_ID = 1
