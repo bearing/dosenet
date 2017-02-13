@@ -428,7 +428,7 @@ class DoseNetSlacker(object):
             'I see {} outages,'.format(n_out),
             '{} high countrates,'.format(n_high),
             'and {} undeployed stations.\n'.format(n_undeployed)
-            ))
+        ))
 
         outage_list = tuple(self.stations['Name'][self.status['out']])
         high_list = tuple(self.stations['Name'][self.status['high']])
