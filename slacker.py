@@ -226,6 +226,42 @@ class DoseNetSlacker(object):
             new_active, 'online for the first time!',
             icon_emoji=ICONS['new_active'])
 
+    def report_one_condition(b, message_text, icon_emoji=None):
+        """
+        Post a message to Slack about one condition for one or more stations.
+        """
+
+        if icon_emoji is None:
+            icon_emoji = ''
+
+        id_list = b[b].index.tolist()
+        name_list = [self.stations['Name'][this_id] for this_id in id_list]
+
+        n = np.sum(b)
+        assert(n == len(id_list))
+
+        if n == 1:
+            message = '{} {} (#{}) is {}'.format(
+                icon_emoji,
+                name_list[0],
+                id_list[0],
+                message_text)
+        elif n > 1:
+            message = '{} {} stations are {}:'.format(
+                icon_emoji,
+                n,
+                message_text)
+            for i in xrange(n):
+                message += '\n{} (#{})'.format(
+                    name_list[i],
+                    id_list[i])
+        else:
+            return None
+
+        self.post(message, channel=SLACK_CHANNEL)
+
+        return None
+
     def check_for_high_countrates(self, stationID):
         """
         Look for active stations with countrate > xxx.
