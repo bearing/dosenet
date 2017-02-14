@@ -190,7 +190,8 @@ class DoseNetSlacker(object):
         Find differences between current status and previous status.
         """
 
-        cur = self.get_status()
+        new = self.get_status()
+        cur = new.copy()
         prev = self.status
 
         cur.rename(columns=lambda x: 'new_' + x, inplace=True)
@@ -226,7 +227,7 @@ class DoseNetSlacker(object):
             new_active, 'online for the first time!',
             icon_emoji=ICONS['new_active'])
 
-        self.status = cur
+        self.status = new
 
     def report_one_condition(self, b, message_text, icon_emoji=None):
         """
