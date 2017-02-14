@@ -48,6 +48,7 @@ HIGH_SQL = ' '.join((
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
     "ORDER BY deviceTime DESC;"))
 OUTAGE_DURATION_THRESH_S = 30 * 60
+ALMOST_OUT_DURATION_THRESH_S = 20 * 60
 TEST_OUTAGE_DURATION_THRESH_S = 300
 
 MIN_STATION_ID = 1
@@ -69,12 +70,14 @@ class DoseNetSlacker(object):
         if self.test:
             self.interval_s = TEST_CHECK_INTERVAL_S
             self.outage_interval_s = TEST_OUTAGE_DURATION_THRESH_S
+            self.almost_out_interval_s = TEST_OUTAGE_DURATION_THRESH_S / 2
             print('Starting DoseNetSlacker in test mode: ' +
                   'check interval {}s, outage interval {}s'.format(
                       self.interval_s, self.outage_interval_s))
         else:
             self.interval_s = CHECK_INTERVAL_S
             self.outage_interval_s = OUTAGE_DURATION_THRESH_S
+            self.almost_out_interval_s = ALMOST_OUT_DURATION_THRESH_S
             if self.v:
                 print('Check interval: {}s'.format(self.interval_s))
                 print('Outage interval: {}s'.format(self.outage_interval_s))
@@ -119,24 +122,27 @@ class DoseNetSlacker(object):
         else:
             self.stations = self.sql.getActiveStations()
 
-    def get_statuses(self):
+    def get_status(self):
         """Check elapsed times and classify each station.
 
         Returns a status dataframe."""
 
         undeployed = []
         out = []
+        almost_out = []
         high = []
 
         for stationID in self.stations.index.values:
             this_elapsed_time = self.get_elapsed_time(stationID)
             undeployed.append(this_elapsed_time is None)
             out.append(this_elapsed_time > self.outage_interval_s)
+            almost_out.append(this_elapsed_time > self.almost_out_interval_s)
             high.append(self.check_for_high_countrates(stationID))
 
         status = pd.DataFrame({
             'undeployed': undeployed,
             'out': out,
+            'almost': almost_out,
             'high': high,
             'ID': self.stations.index.values
         })
@@ -152,7 +158,7 @@ class DoseNetSlacker(object):
     def update_station_status(self):
         """Get status and save into self.stations"""
 
-        self.status = self.get_statuses()
+        self.status = self.get_status()
 
     def get_elapsed_time(self, stationID):
         """
