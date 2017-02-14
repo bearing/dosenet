@@ -84,6 +84,7 @@ class DoseNetSlacker(object):
                 print('Outage interval: {}s'.format(self.outage_interval_s))
         self.initialize_station_status()
         self.post_initial_report()
+        print('Posted initial report at {}'.format(datetime.datetime.now()))
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
