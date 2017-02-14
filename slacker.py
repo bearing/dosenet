@@ -226,6 +226,8 @@ class DoseNetSlacker(object):
             new_active, 'online for the first time!',
             icon_emoji=ICONS['new_active'])
 
+        self.status = cur
+
     def report_one_condition(self, b, message_text, icon_emoji=None):
         """
         Post a message to Slack about one condition for one or more stations.
