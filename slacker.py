@@ -109,7 +109,18 @@ class DoseNetSlacker(object):
         self.get_db_data()
         self.update_station_status()
 
+    def get_db_data(self):
+        """
+        Read station data from SQL.
+        """
+        self.sql.refresh()
+        self.stations = self.sql.getActiveStations()
+        # self.stations = self.sql.getStations()
+
     def update_station_status(self):
+        """
+        Write self.status dataframe.
+        """
         undeployed = []
         out = []
         high = []
@@ -132,6 +143,29 @@ class DoseNetSlacker(object):
             print('\nStatus Dataframe:')
             print(self.status)
             print('\n')
+
+    def get_elapsed_time(self, stationID):
+        """
+        Check how long it's been since the device posted data.
+        """
+
+        self.sql.refresh()
+        df = self.sql.getLatestStationData(stationID, verbose=False)
+        try:
+            elapsed_time = time.time() - df['deviceTime_unix']
+        except KeyError:
+            # no station data
+            elapsed_time = None
+
+        return elapsed_time
+
+    def run(self):
+        """Check SQL database, post messages. Blocks execution."""
+
+        while True:
+            time.sleep(self.interval_s)
+            self.diff_status_and_report()
+            print('Posted at {}'.format(datetime.datetime.now()))
 
     def diff_status_and_report(self):
         """
@@ -213,48 +247,6 @@ class DoseNetSlacker(object):
         # 4. update status
         self.update_station_status()
 
-    def post_each_station(self, station_list, adj_text, icon_emoji=None):
-        """
-        Post a generic message about each station in a list.
-        """
-        for stationID in station_list:
-            msg = 'Station {} ({}) is {}'.format(
-                stationID,
-                self.stations['Name'][stationID],
-                adj_text)
-            self.post(msg, icon_emoji=icon_emoji)
-
-    def run(self):
-        """Check SQL database, post messages. Blocks execution."""
-
-        while True:
-            time.sleep(self.interval_s)
-            self.diff_status_and_report()
-            print('Posted at {}'.format(datetime.datetime.now()))
-
-    def get_db_data(self):
-        """
-        Read station data from SQL.
-        """
-        self.sql.refresh()
-        self.stations = self.sql.getActiveStations()
-        # self.stations = self.sql.getStations()
-
-    def get_elapsed_time(self, stationID):
-        """
-        Check how long it's been since the device posted data.
-        """
-
-        self.sql.refresh()
-        df = self.sql.getLatestStationData(stationID, verbose=False)
-        try:
-            elapsed_time = time.time() - df['deviceTime_unix']
-        except KeyError:
-            # no station data
-            elapsed_time = None
-
-        return elapsed_time
-
     def check_for_high_countrates(self, stationID):
         """
         Look for active stations with countrate > xxx.
@@ -296,6 +288,17 @@ class DoseNetSlacker(object):
             report_text += und_text
 
         self.post(report_text, icon_emoji=ICONS['startup'])
+
+    def post_each_station(self, station_list, adj_text, icon_emoji=None):
+        """
+        Post a generic message about each station in a list.
+        """
+        for stationID in station_list:
+            msg = 'Station {} ({}) is {}'.format(
+                stationID,
+                self.stations['Name'][stationID],
+                adj_text)
+            self.post(msg, icon_emoji=icon_emoji)
 
     def post(self, msg_text, channel=SLACK_CHANNEL,
              icon_emoji=None):
