@@ -23,7 +23,8 @@ from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
 SLACK_USER = 'dosenet_server'
-SLACK_CHANNEL = '#bugs_and_outages'
+# SLACK_CHANNEL = '#bugs_and_outages'
+SLACK_CHANNEL = '#dosenet-bot-testing'
 TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
