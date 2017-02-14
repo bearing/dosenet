@@ -7,7 +7,7 @@ DELAY_TIME_S=10
 
 sleep $DELAY_TIME_S
 
-/home/dosenet/anaconda/bin/python $SLACKER_PATH/slacker.py &
+/home/dosenet/anaconda/bin/python $SLACKER_PATH/slacker.py -i &
 
 if [[ $? -eq 0 ]]
 then
