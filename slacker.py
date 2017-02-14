@@ -186,83 +186,44 @@ class DoseNetSlacker(object):
 
     def diff_status_and_report(self):
         """
-        Check new station records and report any changes.
+        Find differences between current status and previous status.
         """
 
-        undeployed = []
-        out = []
-        high = []
+        cur = self.get_status()
+        prev = self.status
 
-        new_active_stations = []
-        not_out = []
-        not_high = []
+        cur.rename(columns=lambda x: 'new_' + x, inplace=True)
+        both = pd.concat([prev, cur], axis=1)
 
-        self.get_current_station_list()
+        enabled = pd.isnull(both['out']) & pd.notnull(both['new_out'])
+        disabled = pd.notnull(both['out']) & pd.isnull(both['new_out'])
 
-        # 1. get the raw state from the database.
-        for stationID in self.stations.index.values:
-            if stationID not in self.status.index.values:
-                new_active_stations.append(stationID)
-            this_elapsed_time = self.get_elapsed_time(stationID)
-            if this_elapsed_time is None:
-                undeployed.append(stationID)
-            if this_elapsed_time > OUTAGE_DURATION_THRESH_S:
-                out.append(stationID)
-            if self.check_for_high_countrates(stationID):
-                high.append(stationID)
+        new_out = ~both['out'].dropna() & both['new_out'].dropna()
+        not_out = both['out'].dropna() & ~both['new_out'].dropna()
+        new_high = ~both['high'].dropna() & both['new_high'].dropna()
+        not_high = both['high'].dropna() & ~both['new_high'].dropna()
 
-        # 2. compare with existing / previous Slacker status dataframe
-        # 2a. previous outages
-        prev_out = self.status[self.status['out']].index.values
-        for stationID in prev_out:
-            try:
-                # we already know it's an outage, no need to report
-                out.remove(stationID)
-            except ValueError:
-                # it used to be out, but no longer.
-                not_out.append(stationID)
-        # 2b. previous high countrate
-        prev_high = self.status[self.status['high']].index.values
-        for stationID in prev_high:
-            try:
-                high.remove(stationID)
-            except ValueError:
-                not_high.append(stationID)
-        # 2c. previous undeployed
-        prev_und = self.status[self.status['undeployed']].index.values
-        for stationID in prev_und:
-            try:
-                undeployed.remove(stationID)
-            except ValueError:
-                new_active_stations.append(stationID)
+        enabled_inactive = enabled & both['new_undeployed'].dropna()
+        enabled_active = enabled & ~both['new_undeployed'].dropna()
+        new_active = (both['undeployed'].dropna() &
+                      ~both['new_undeployed'].dropna())
+        new_almost = ~both['out'].dropna() & both['new_almost'].dropna()
 
-        # 3. post report
-        # 3a. all stations
-        if len(out) == len(self.stations.index) - len(prev_out):
-            assert (not not_out), 'Logic problem on all out!'
+        # all stations out - server problem
+        if np.all(both['new_almost'].dropna()):
             self.post('*_Systemwide outage!!_*', icon_emoji=ICONS['all_out'])
-        # 3b. individual station outages
-        else:
-            self.post_each_station(out, 'down!', icon_emoji=ICONS['out'])
-        # 3c. individual stations back online
-        self.post_each_station(
-            not_out, 'back online.',
-            icon_emoji=ICONS['not_out'])
-        # 3d. high countrate
-        self.post_each_station(
-            high, 'misbehaving with CPM > {}!'.format(HIGH_THRESH_CPM),
+        self.report_one_condition(
+            new_out, 'down!', icon_emoji=ICONS['out'])
+        self.report_one_condition(
+            not_out, 'back online.', icon_emoji=ICONS['not_out'])
+        self.report_one_condition(
+            new_high, 'misbehaving with CPM > {}!'.format(HIGH_THRESH_CPM),
             icon_emoji=ICONS['high'])
-        # 3e. no more high countrate
-        self.post_each_station(
-            not_high, 'recovered from high CPM.',
-            icon_emoji=ICONS['not_high'])
-        # 3f. new active stations
-        self.post_each_station(
-            new_active_stations, 'online for the first time!',
+        self.report_one_condition(
+            not_high, 'recovered from high CPM.', icon_emoji=ICONS['not_high'])
+        self.report_one_condition(
+            new_active, 'online for the first time!',
             icon_emoji=ICONS['new_active'])
-
-        # 4. update status
-        self.update_station_status()
 
     def check_for_high_countrates(self, stationID):
         """
