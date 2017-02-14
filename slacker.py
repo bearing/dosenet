@@ -55,6 +55,8 @@ TEST_OUTAGE_DURATION_THRESH_S = 300
 MIN_STATION_ID = 1
 MAX_STATION_ID = 9999
 
+INJECTOR_CMD = ('bash', '/home/dosenet/git/dosenet/start-injector-in-tmux.sh')
+
 if socket.gethostname() != 'dosenet':
     raise RuntimeError('Unknown host {}, cannot connect to MySQL db'.format(
         socket.gethostname()))
@@ -63,9 +65,10 @@ if socket.gethostname() != 'dosenet':
 class DoseNetSlacker(object):
 
     def __init__(self, tokenfile='~/ucbdosenet_slack_token.txt',
-                 test=False, verbose=False):
+                 test=False, verbose=False, restart_injector=False):
         self.test = test
         self.v = verbose
+        self.restart_injector = restart_injector
         self.get_slack(tokenfile)
         self.get_sql()
         if self.test:
@@ -214,6 +217,9 @@ class DoseNetSlacker(object):
         # all stations out - server problem
         if np.all(both['new_almost'].dropna()):
             self.post('*_Systemwide outage!!_*', icon_emoji=ICONS['all_out'])
+            if self.restart_injector:
+                self.post('Restarting injector...')
+                subprocess.call(INJECTOR_CMD)
         self.report_one_condition(
             new_out, 'down!', icon_emoji=ICONS['out'])
         self.report_one_condition(
@@ -342,11 +348,14 @@ if __name__ == '__main__':
         help='Test mode: watch all stations, short intervals')
     parser.add_argument(
         '-v', '--verbose', action='store_true',
-        help='Verbose printing, for debug'
-    )
+        help='Verbose printing, for debug')
+    parser.add_argument(
+        '-i', '--injector', action='store_true',
+        help='Auto restart of injector')
     args = parser.parse_args()
 
     slacker = DoseNetSlacker(
-        './ucbdosenet_slack_token', test=args.test, verbose=args.verbose)
+        './ucbdosenet_slack_token',
+        test=args.test, verbose=args.verbose, restart_injector=args.injector)
     print('Running DoseNetSlacker...')
     slacker.run()
