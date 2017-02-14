@@ -106,21 +106,22 @@ class DoseNetSlacker(object):
         for the first time.
         """
 
-        self.get_db_data()
+        self.get_current_station_list()
         self.update_station_status()
 
-    def get_db_data(self):
+    def get_current_station_list(self):
         """
-        Read station data from SQL.
+        Get station list from SQL.
         """
         self.sql.refresh()
         self.stations = self.sql.getActiveStations()
         # self.stations = self.sql.getStations()
 
-    def update_station_status(self):
-        """
-        Write self.status dataframe.
-        """
+    def get_statuses(self):
+        """Check elapsed times and classify each station.
+
+        Returns a status dataframe."""
+
         undeployed = []
         out = []
         high = []
@@ -131,18 +132,25 @@ class DoseNetSlacker(object):
             out.append(this_elapsed_time > self.outage_interval_s)
             high.append(self.check_for_high_countrates(stationID))
 
-        self.status = pd.DataFrame({
+        status = pd.DataFrame({
             'undeployed': undeployed,
             'out': out,
             'high': high,
             'ID': self.stations.index.values
         })
-        self.status.set_index('ID', drop=True, inplace=True)
+        status.set_index('ID', drop=True, inplace=True)
 
         if self.v:
             print('\nStatus Dataframe:')
             print(self.status)
             print('\n')
+
+        return status
+
+    def update_station_status(self):
+        """Get status and save into self.stations"""
+
+        self.status = self.get_statuses()
 
     def get_elapsed_time(self, stationID):
         """
@@ -180,7 +188,7 @@ class DoseNetSlacker(object):
         not_out = []
         not_high = []
 
-        self.get_db_data()
+        self.get_current_station_list()
 
         # 1. get the raw state from the database.
         for stationID in self.stations.index.values:
