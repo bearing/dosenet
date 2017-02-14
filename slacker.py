@@ -24,8 +24,8 @@ from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
 SLACK_USER = 'dosenet_server'
-# SLACK_CHANNEL = '#bugs_and_outages'
-SLACK_CHANNEL = '#dosenet-bot-testing'
+SLACK_CHANNEL = '#bugs_and_outages'
+# SLACK_CHANNEL = '#dosenet-bot-testing'
 TOKEN_PATH = os.path.expanduser('~/')
 TOKEN_NAME = 'ucbdosenet_slack_token.txt'
 
@@ -49,8 +49,8 @@ HIGH_SQL = ' '.join((
     "AND cpm > {}".format(HIGH_THRESH_CPM),
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
     "ORDER BY deviceTime DESC;"))
-OUTAGE_DURATION_THRESH_S = 30 * 60
-ALMOST_OUT_DURATION_THRESH_S = 20 * 60
+OUTAGE_DURATION_THRESH_S = 16 * 60
+ALMOST_OUT_DURATION_THRESH_S = 6 * 60
 TEST_OUTAGE_DURATION_THRESH_S = 300
 
 MIN_STATION_ID = 1
@@ -220,6 +220,7 @@ class DoseNetSlacker(object):
                   both['new_undeployed'].dropna()):
             self.post('*_Systemwide outage!!_*', icon_emoji=ICONS['all_out'])
             if self.restart_injector:
+                print('Restarting injector...')
                 self.post('Restarting injector...')
                 subprocess.call(INJECTOR_CMD)
         self.report_one_condition(
