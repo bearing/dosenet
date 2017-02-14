@@ -155,7 +155,7 @@ class DoseNetSlacker(object):
 
         if self.v:
             print('\nStatus Dataframe:')
-            print(self.status)
+            print(status)
             print('\n')
 
         return status
