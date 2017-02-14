@@ -215,7 +215,8 @@ class DoseNetSlacker(object):
         new_almost = ~both['out'].dropna() & both['new_almost'].dropna()
 
         # all stations out - server problem
-        if np.all(both['new_almost'].dropna()):
+        if np.all(both['new_almost'].dropna() |
+                  both['new_undeployed'].dropna()):
             self.post('*_Systemwide outage!!_*', icon_emoji=ICONS['all_out'])
             if self.restart_injector:
                 self.post('Restarting injector...')
