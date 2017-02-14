@@ -556,6 +556,17 @@ class DoseNetSlacker(object):
 
         self.post(report_text, icon_emoji=ICONS['startup'])
 
+    def post_each_station(self, station_list, adj_text, icon_emoji=None):
+        """
+        Post a generic message about each station in a list.
+        """
+        for stationID in station_list:
+            msg = 'Station {} ({}) is {}'.format(
+                stationID,
+                self.stations['Name'][stationID],
+                adj_text)
+            self.post(msg, icon_emoji=icon_emoji)
+
     def post(self, msg_text, channel=SLACK_CHANNEL,
              icon_emoji=None):
         """
