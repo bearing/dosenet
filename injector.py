@@ -270,46 +270,26 @@ class Injector(object):
                 db.getStationReturnInfo()
         """
 
-        tic = time.time()
-
         packet = self.handle_decryption(
             encrypted_packet, is_aes=is_aes, mode=mode)
         if packet is None:
             return
 
-        toc = time.time()
-        print('  handle_decryption took {} ms'.format((toc - tic) * 1000))
-
         field_list = self.get_fields(packet)
-
-        tic = time.time()
-        print('  get_fields took {} ms'.format((tic - toc) * 1000))
 
         request_type = self.handle_request_type(
             field_list, mode=mode, packet=packet)
         if request_type is None:
             return
 
-        toc = time.time()
-        print('  handle_request_type took {} ms'.format((toc - tic) * 1000))
-
         field_dict = self.handle_parsing(field_list, request_type, mode=mode)
         if field_dict is None:
             return
 
-        tic = time.time()
-        print('  handle_parsing took {} ms'.format((tic - toc) * 1000))
-
         self.handle_injection(field_dict, request_type,
                               mode=mode, client_address=client_address)
 
-        toc = time.time()
-        print('  handle_injection took {} ms'.format((toc - tic) * 1000))
-
         self.handle_return_packet(field_dict, request)
-
-        tic = time.time()
-        print('  handle_return_packet took {} ms'.format((tic - toc) * 1000))
 
     def handle_decryption(self, encrypted, is_aes=False, mode=None):
         """
@@ -591,6 +571,7 @@ class Injector(object):
         """
 
         stationID = field_dict['stationID']
+        tic = time.time()
         try:
             git_branch, needs_update = self.db.getStationReturnInfo(stationID)
         except IndexError:
@@ -598,11 +579,17 @@ class Injector(object):
             print_status(
                 "Station ID {} missing from `stations` table!", ansi=ANSI_CYAN)
             return
+        toc = time.time()
+        print('getStationReturnInfo took {} ms'.format((toc - tic) * 1000))
 
         return_packet = "{},{}".format(git_branch, needs_update)
 
+        tic = time.time()
         try:
             request.sendall(return_packet)
+            toc = time.time()
+            print('request.sendall(return_packet) took {} ms'.format(
+                (toc - tic) * 1000))
         except socket.error as e:
             print_status("Socket error on TCP return packet: {}".format(e))
         except AttributeError:
@@ -613,8 +600,11 @@ class Injector(object):
                 raise
         else:
             # unset needs_update flag
+            tic = time.time()
             self.db.setSingleStationUpdate(
                 field_dict['stationID'], needs_update=0)
+            toc = time.time()
+            print('setSingleStationUpdate took {} ms'.format((toc - tic) * 1000))
 
 
 def print_status(status_text, ansi=None):
