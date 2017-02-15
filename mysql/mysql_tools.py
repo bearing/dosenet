@@ -204,8 +204,13 @@ class SQLObject:
 
     def inject(self, data):
         """Authenticate the data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='data')
+        toc = time.time()
+        print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoDosenet(**data)
+        tic = time.time()
+        print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
     def injectD3S(self, data):
         """Authenticate the D3S data packet and then insert into database"""
