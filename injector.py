@@ -591,6 +591,12 @@ class Injector(object):
                 pass
             else:
                 raise
+        else:
+            # unset needs_update flag
+            # *** takes ~50 ms - only do if needed!
+            if needs_update != 0:
+                self.db.setSingleStationUpdate(
+                    field_dict['stationID'], needs_update=0)
 
 
 def print_status(status_text, ansi=None):

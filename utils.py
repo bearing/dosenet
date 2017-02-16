@@ -8,7 +8,11 @@ def mkdir(path):
         pass
 
 def get_console_width():
-    rows, columns = os.popen('stty size', 'r').read().split()
+    try:
+        rows, columns = os.popen('stty size', 'r').read().split()
+    except ValueError:
+        # happens within cron because there's no TTY
+        return 0
     return int(columns)
 
 

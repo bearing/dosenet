@@ -60,7 +60,7 @@ then
 fi
 
 echo "Restarting injector in tmux"
-bash -c ~/git/dosenet/injector-in-tmux.sh &> /dev/null
+bash -c ~/git/dosenet/start-injector-in-tmux.sh &> /dev/null
 
 # tmux new-session -d -s INJECTOR 
 
