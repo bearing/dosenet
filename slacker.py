@@ -49,7 +49,7 @@ HIGH_SQL = ' '.join((
     "AND cpm > {}".format(HIGH_THRESH_CPM),
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
     "ORDER BY deviceTime DESC;"))
-OUTAGE_DURATION_THRESH_S = 16 * 60
+OUTAGE_DURATION_THRESH_S = 6 * 60 * 60
 ALMOST_OUT_DURATION_THRESH_S = 6 * 60
 TEST_OUTAGE_DURATION_THRESH_S = 300
 
@@ -215,14 +215,19 @@ class DoseNetSlacker(object):
                       ~both['new_undeployed'].dropna())
         new_almost = ~both['out'].dropna() & both['new_almost'].dropna()
 
-        # all stations out - server problem
+        # all stations out - server problem - but ignore at midnight
+        now = datetime.datetime.now()
+        not_midnight = not (now.hour == 0 and now.minutes < 10)
         if np.all(both['new_almost'].dropna() |
-                  both['new_undeployed'].dropna()):
-            self.post('*_Systemwide outage!!_*', icon_emoji=ICONS['all_out'])
+                  both['new_undeployed'].dropna()) and not_midnight:
             if self.restart_injector:
                 print('Restarting injector...')
-                self.post('Restarting injector...')
+                msg = '*_Systemwide outage!!_* Restarting injector...'
                 subprocess.call(INJECTOR_CMD)
+            else:
+                msg = '*_Systemwide outage!!_*'
+            self.post(msg, icon_emoji=ICONS['all_out'])
+
         self.report_one_condition(
             new_out, 'down!', icon_emoji=ICONS['out'])
         self.report_one_condition(
