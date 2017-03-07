@@ -3,11 +3,11 @@
 from __future__ import print_function
 from mysql.mysql_tools import SQLObject
 from data_transfer import DataFile
-import numpy as np
 import time
 import datetime as dt
 import math
 import pandas as pd
+import multiprocessing
 
 docstring = """
 MYSQL to CSV writer.
@@ -20,6 +20,11 @@ Affiliation:
     Applied Nuclear Physics Division
     Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 """
+
+get_day = False
+get_week = False
+get_month = False
+get_year = False
 
 def get_rounded_time(t):
     # set resolution to nearest minute
@@ -50,18 +55,65 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
+def make_station_files(DB,sid,nick):
+    df = DB.getAll(sid)
+    print('    Loaded raw data')
+    csvfile = DataFile.csv_from_nickname(nick)
+    csvfile.df_to_file(df)
+
+    df = DB.getLastHour(sid)
+    print('    Loaded last hour of data')
+    compressed_nick = nick + '_hour'
+    csvfile = DataFile.csv_from_nickname(compressed_nick)
+    csvfile.df_to_file(df)
+
+    if get_day:
+        df = get_compressed_data(DB,sid,30,48)
+        print('    Compressed last day of data')
+        compressed_nick = nick + '_day'
+        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile.df_to_file(df)
+
+    if get_week:
+        df = get_compressed_data(DB,sid,60,168)
+        print('    Compressed last week of data')
+        compressed_nick = nick + '_week'
+        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile.df_to_file(df)
+
+    if get_month:
+        df = get_compressed_data(DB,sid,240,180)
+        print('    Compressed last month of data')
+        compressed_nick = nick + '_month'
+        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile.df_to_file(df)
+
+    if get_year:
+        df = get_compressed_data(DB,sid,2880,183)
+        print('    Compressed last year of data')
+        compressed_nick = nick + '_year'
+        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile.df_to_file(df)
+
 def main(verbose=False, 
          last_day=False,
          last_week=False,
          last_month=False,
          last_year=False,
          **kwargs):
-    if last_year:
-        last_month = True
-    if last_month:
-        last_week = True
-    if last_week:
-        last_day = True
+    get_year = last_year
+    if get_year:
+        get_month = True
+    else:
+        get_month = last_month
+    if get_month:
+        get_week = True
+    else:
+        get_week = last_week
+    if get_week:
+        get_day = True
+    else:
+        get_day = last_day
 
     start_time = time.time()
     # -------------------------------------------------------------------------
@@ -77,49 +129,18 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
+    all_processes = []
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
-        df = DB.getAll(sid)
-        print('    Loaded raw data')
-        csvfile = DataFile.csv_from_nickname(nick)
-        csvfile.df_to_file(df)
-
-        df = DB.getLastHour(sid)
-        print('    Loaded last hour of data')
-        compressed_nick = nick + '_hour'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
-        csvfile.df_to_file(df)
-
-        if last_day:
-            df = get_compressed_data(DB,sid,30,48)
-            print('    Compressed last day of data')
-            compressed_nick = nick + '_day'
-            csvfile = DataFile.csv_from_nickname(compressed_nick)
-            csvfile.df_to_file(df)
-
-        if last_week:
-            df = get_compressed_data(DB,sid,60,168)
-            print('    Compressed last week of data')
-            compressed_nick = nick + '_week'
-            csvfile = DataFile.csv_from_nickname(compressed_nick)
-            csvfile.df_to_file(df)
-
-        if last_month:
-            df = get_compressed_data(DB,sid,240,180)
-            print('    Compressed last month of data')
-            compressed_nick = nick + '_month'
-            csvfile = DataFile.csv_from_nickname(compressed_nick)
-            csvfile.df_to_file(df)
-
-        if last_year:
-            df = get_compressed_data(DB,sid,2880,183)
-            print('    Compressed last year of data')
-            compressed_nick = nick + '_year'
-            csvfile = DataFile.csv_from_nickname(compressed_nick)
-            csvfile.df_to_file(df)
-
+        p = multiprocessing.Process(target=make_station_files,
+                                    args=(DB,sid,nick,))
+        p.start()
+        all_processes.append(p)
         print()
+
+    for p in all_processes:
+        p.join()
 
     print('Total run time: {:.2f} sec'.format(time.time() - start_time))
 
