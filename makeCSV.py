@@ -20,29 +20,35 @@ Affiliation:
     Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 """
 
-# integration_time (min) = time to average over for condenced data
-# n_intervals = number of intervals to collect (1 day = 60/integration_time * 24)
-def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
-    # get current time and set resolution to nearest minute
-    t = dt.datetime.now()
+def get_time_range(t):
+    # set resolution to nearest minute
     td = dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
     to_min = dt.timedelta(minutes=round(td.total_seconds()/60))
     t = dt.datetime.combine(t,dt.time(0))+to_min
-    
-    # data interval for full day is 30 minutes
+    return time.mktime(t.timetuple())
+
+# integration_time (min) = time to average over for condenced data
+# n_intervals = number of intervals to collect (1 day = 60/integration_time * 24)
+def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
-    max_time = time.mktime(t.timetuple())
-    new_df = pd.DataFrame(columns=column_list)
-    for idx in range(n_intervals):
-        min_time = max_time - interval
-        df = DB.getDataForStationByRange(sid,max_time,min_time)
-        count_total = df.loc[:,'cpm'].sum()*5
-        cpm = count_total/integration_time
-        cpm_error = math.sqrt(count_total)/integration_time
-        new_df.loc[idx] = df.loc[len(df)/2].tolist()
-        new_df.loc[idx,'cpm'] = cpm
-        new_df.loc[idx,'cpmError'] = cpm_error
-    return new_df
+    max_time = get_rownded_time(dt.datetime.now())
+
+    try:
+        compressed_df = pd.DataFrame(columns=column_list)
+        for idx in range(n_intervals):
+            min_time = max_time - interval
+            df = DB.getDataForStationByRange(sid,min_time,max_time)
+            count_total = df.loc[:,'cpm'].sum()*5
+            cpm = count_total/integration_time
+            cpm_error = math.sqrt(count_total)/integration_time
+            compressed_df.loc[idx] = df.loc[len(df)/2].tolist()
+            compressed_df.loc[idx,'cpm'] = cpm
+            compressed_df.loc[idx,'cpmError'] = cpm_error
+            max_time = min_time
+        return compressed_df
+    except (Exception) as e:
+        print(e)
+        return pd.DataFrame({})
 
 def main(verbose=False, **kwargs):
     start_time = time.time()
