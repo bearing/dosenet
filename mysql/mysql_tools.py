@@ -436,7 +436,7 @@ class SQLObject:
         return df
 
     def getLastHour(self, stationID):
-        return.self.getDataForStationByInterval(stationID, 'INTERVAL 1 HOUR')
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 HOUR')
 
     def getLastDay(self, stationID):
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 DAY')
