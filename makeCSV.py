@@ -33,20 +33,20 @@ def get_rounded_time(t):
 def get_compressed_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-    min_time = max_time - interval*n_intervals
 
-    comp_data = np.array([['deviceTime_unix','cpm','cpmError']])
-    while max_time > min_time:
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+    for idx in range(n_intervals):
         df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
         if len(df) > 0:
             cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
             cpm_err = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
             # use time-bin central time
             itime = df.iloc[len(df)/2,0]
-            comp_data = np.append(comp_data,[[itime,cpm,cpm_err]],axis=0)
+            comp_df.loc[idx,'deviceTime_unix'] = itime
+            comp_df.loc[idx,'cpm'] = cpm
+            comp_df.loc[idx,'cpmError'] = cpm_err
             max_time = max_time - interval
 
-    comp_df = pd.DataFrame(data=comp_data[1:,:], columns=comp_data[0,:])
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
