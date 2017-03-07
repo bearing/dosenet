@@ -55,7 +55,8 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(DB,sid,nick):
+def make_station_files(sid,nick):
+    DB = SQLObject()
     df = DB.getAll(sid)
     print('    Loaded raw data')
     csvfile = DataFile.csv_from_nickname(nick)
@@ -134,7 +135,7 @@ def main(verbose=False,
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(DB,sid,nick,))
+                                    args=(sid,nick,))
         p.start()
         all_processes.append(p)
         print()
