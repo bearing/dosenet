@@ -20,7 +20,7 @@ Affiliation:
     Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 """
 
-def get_time_range(t):
+def get_rounded_time(t):
     # set resolution to nearest minute
     td = dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
     to_min = dt.timedelta(minutes=round(td.total_seconds()/60))
@@ -31,7 +31,7 @@ def get_time_range(t):
 # n_intervals = number of intervals to collect (1 day = 60/integration_time * 24)
 def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
-    max_time = get_rownded_time(dt.datetime.now())
+    max_time = get_rounded_time(dt.datetime.now())
 
     try:
         compressed_df = pd.DataFrame(columns=column_list)
