@@ -32,12 +32,12 @@ def get_rounded_time(t):
 def get_compressed_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
+    min_time = max_time - interval*n_intervals
 
     compressed_df = pd.DataFrame(columns=['deviceTime_unix','receiveTime_unix','cpm','cpmError'])
-    for idx in range(n_intervals):
-        try:
-            min_time = max_time - interval
-            df = DB.getDataForStationByRange(sid,min_time,max_time)
+    while max_time > min_time:
+        df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
+        if len(df) > 0:
             cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
             cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
 
@@ -45,9 +45,7 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
             compressed_df.loc[idx,'receiveTime_unix'] = df.loc[len(df)/2,'receiveTime_unix']
             compressed_df.loc[idx,'cpm'] = cpm
             compressed_df.loc[idx,'cpmError'] = cpm_error
-            max_time = min_time
-        except (Exception) as e:
-            print(e)
+            max_time = max_time - interval
 
     compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
     return compressed_df
