@@ -34,17 +34,21 @@ def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
     max_time = get_rounded_time(dt.datetime.now())
 
     try:
-        compressed_df = pd.DataFrame(columns=column_list)
+        compressed_df = pd.DataFrame(columns=['deviceTime_unix','receiveTime_unix','cpm','cpmError'])
         for idx in range(n_intervals):
             min_time = max_time - interval
             df = DB.getDataForStationByRange(sid,min_time,max_time)
-            count_total = df.loc[:,'cpm'].sum()*5
-            cpm = count_total/integration_time
-            cpm_error = math.sqrt(count_total)/integration_time
-            compressed_df.loc[idx] = df.loc[len(df)/2].tolist()
+            cpm = df.loc[:,'cpm'].sum()*5/integration_time
+            cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/integration_time
+
+            compressed_df.loc[idx,'deviceTime_unix'] = df.loc[len(df)/2,'deviceTime_unix']
+            compressed_df.loc[idx,'receiveTime_unix'] = df.loc[len(df)/2,'receiveTime_unix']
             compressed_df.loc[idx,'cpm'] = cpm
             compressed_df.loc[idx,'cpmError'] = cpm_error
+
             max_time = min_time
+
+        DB.addTimeColumnsToDataframe(compressed_df,sid)
         return compressed_df
     except (Exception) as e:
         print(e)
