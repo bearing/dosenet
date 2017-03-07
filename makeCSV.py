@@ -104,19 +104,19 @@ def main(verbose=False,
          last_month=False,
          last_year=False,
          **kwargs):
-    get_year = last_year
+    global get_year = last_year
     if get_year:
-        get_month = True
+        global get_month = True
     else:
-        get_month = last_month
+        global get_month = last_month
     if get_month:
-        get_week = True
+        global get_week = True
     else:
-        get_week = last_week
+        global get_week = last_week
     if get_week:
-        get_day = True
+        global get_day = True
     else:
-        get_day = last_day
+        global get_day = last_day
 
     start_time = time.time()
     # -------------------------------------------------------------------------
