@@ -39,6 +39,7 @@ def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
         for idx in range(n_intervals):
             min_time = max_time - interval
             df = DB.getDataForStationByRange(sid,min_time,max_time)
+            print('integrating from {} - {} over {} entries'.format(min_time,max_time,len(df)))
             cpm = df.loc[:,'cpm'].sum()*5/integration_time
             cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/integration_time
 
@@ -48,9 +49,7 @@ def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
             compressed_df.loc[idx,'cpmError'] = cpm_error
             max_time = min_time
 
-        print(compressed_df.columns.tolist())
         compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
-        print(compressed_df.columns.tolist())
         proc_time = dt.datetime.now() - proc_time
         print('interval {} process time = {}'.format(idx,proc_time))
         return compressed_df
