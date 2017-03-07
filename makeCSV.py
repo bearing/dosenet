@@ -55,7 +55,8 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(sid,nick):
+def make_station_files(sid,name,nick):
+    print('(id={}) {}'.format(sid, name))
     DB = SQLObject()
     df = DB.getAll(sid)
     print('    Loaded raw data')
@@ -116,6 +117,7 @@ def main(verbose=False,
     else:
         get_day = last_day
 
+    print('get_year = {}, get_month = {}, get_week = {}, get_day = {}'.format(get_year,get_month,get_week,get_day))
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Mysql data base interface
@@ -133,9 +135,8 @@ def main(verbose=False,
     all_processes = []
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,nick,))
+                                    args=(sid,name,nick,))
         p.start()
         all_processes.append(p)
         print()
