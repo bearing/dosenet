@@ -361,14 +361,18 @@ class SQLObject:
         return tz[0][0]
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
-        q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), cpm, cpmError \
-        FROM dosnet \
-        WHERE `dosnet`.`stationID`='{}' \
-        AND receiveTime \
-        BETWEEN '{}' \
-        AND '{}';".format(stationID, timemin, timemax)
-        df = pd.read_sql(q, con=self.db)
-        return self.addTimeColumnsToDataframe(df)
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), cpm, cpmError \
+            FROM dosnet \
+            WHERE `dosnet`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}';".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
 
     def getDataForStationByInterval(self, stationID, intervalStr):
         # Make the query for this station on this interval
@@ -431,6 +435,9 @@ class SQLObject:
         df = df[new_cols]
         return df
 
+    def getLastHour(self, stationID):
+        return.self.getDataForStationByInterval(stationID, 'INTERVAL 1 HOUR')
+
     def getLastDay(self, stationID):
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 DAY')
 
@@ -442,6 +449,9 @@ class SQLObject:
 
     def getLastYear(self, stationID):
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
+
+    def getAll(self, stationID):
+        return self.getDataForStationByRange(stationID, time.mktime(datetime.date(2015,6,1).timetuple()), time.time())
 
     def testLastMethods(self, stationID=1):
         print('Testing last data methods with stationID={}\n'.format(stationID))
