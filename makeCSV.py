@@ -47,11 +47,11 @@ def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
             compressed_df.loc[idx,'cpm'] = cpm
             compressed_df.loc[idx,'cpmError'] = cpm_error
             max_time = min_time
-            proc_time = dt.datetime.now() - proc_time
 
         print(compressed_df.columns.tolist())
-        DB.addTimeColumnsToDataframe(compressed_df,sid)
+        compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
         print(compressed_df.columns.tolist())
+        proc_time = dt.datetime.now() - proc_time
         print('interval {} process time = {}'.format(idx,proc_time))
         return compressed_df
     except (Exception) as e:
