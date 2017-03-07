@@ -451,7 +451,8 @@ class SQLObject:
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
 
     def getAll(self, stationID):
-        return self.getDataForStationByRange(stationID, time.mktime(datetime.date(2015,6,1).timetuple()), time.time())
+        min_time = time.mktime(datetime.date(2015,6,1).timetuple())
+        return self.getDataForStationByRange(stationID, min_time, time.time())
 
     def testLastMethods(self, stationID=1):
         print('Testing last data methods with stationID={}\n'.format(stationID))
