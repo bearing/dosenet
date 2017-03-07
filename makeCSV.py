@@ -57,6 +57,7 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
 
 def make_station_files(sid,name,nick):
     print('(id={}) {}'.format(sid, name))
+    print('get_year = {}, get_month = {}, get_week = {}, get_day = {}'.format(get_year,get_month,get_week,get_day))
     DB = SQLObject()
     df = DB.getAll(sid)
     print('    Loaded raw data')
@@ -117,7 +118,6 @@ def main(verbose=False,
     else:
         get_day = last_day
 
-    print('get_year = {}, get_month = {}, get_week = {}, get_day = {}'.format(get_year,get_month,get_week,get_day))
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Mysql data base interface
