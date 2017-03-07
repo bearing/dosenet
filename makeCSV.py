@@ -42,9 +42,9 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
             cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
             cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
 
-            this_df = pd.DataFrame([df.loc[len(df)/2,'deviceTime_unix'],
+            this_df = pd.DataFrame([[df.loc[len(df)/2,'deviceTime_unix'],
                                     df.loc[len(df)/2,'receiveTime_unix'],
-                                    cpm,cpm_error],
+                                    cpm,cpm_error]],
                                     columns=column_list)
             compressed_df.append(this_df, ignore_index=True)
             max_time = max_time - interval
