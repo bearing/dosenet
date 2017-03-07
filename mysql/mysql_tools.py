@@ -428,12 +428,10 @@ class SQLObject:
         df['receiveTime_local'] = receiveTime.tz_convert(this_tz)
         # Rearrange the columns (iterate in opposite order of placement)
         new_cols = df.columns.tolist()
-        print(new_cols)
         for colname in ['receiveTime_unix', 'receiveTime_local',
                         'receiveTime_utc', 'deviceTime_unix',
                         'deviceTime_local', 'deviceTime_utc']:
             new_cols.insert(0, new_cols.pop(new_cols.index(colname)))
-        print(new_cols)
         df = df[new_cols]
         return df
 
