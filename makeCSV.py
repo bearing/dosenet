@@ -21,11 +21,6 @@ Affiliation:
     Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 """
 
-get_day = False
-get_week = False
-get_month = False
-get_year = False
-
 def get_rounded_time(t):
     # set resolution to nearest minute
     td = dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
@@ -55,8 +50,7 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(sid,name,nick):
-    print('(id={}) {}'.format(sid, name))
+def make_station_files(sid,nick,get_data):
     print('get_year = {}, get_month = {}, get_week = {}, get_day = {}'.format(get_year,get_month,get_week,get_day))
     DB = SQLObject()
     df = DB.getAll(sid)
@@ -70,28 +64,28 @@ def make_station_files(sid,name,nick):
     csvfile = DataFile.csv_from_nickname(compressed_nick)
     csvfile.df_to_file(df)
 
-    if get_day:
+    if get_data['get_day']:
         df = get_compressed_data(DB,sid,30,48)
         print('    Compressed last day of data')
         compressed_nick = nick + '_day'
         csvfile = DataFile.csv_from_nickname(compressed_nick)
         csvfile.df_to_file(df)
 
-    if get_week:
+    if get_data['get_week']:
         df = get_compressed_data(DB,sid,60,168)
         print('    Compressed last week of data')
         compressed_nick = nick + '_week'
         csvfile = DataFile.csv_from_nickname(compressed_nick)
         csvfile.df_to_file(df)
 
-    if get_month:
+    if get_data['get_month']:
         df = get_compressed_data(DB,sid,240,180)
         print('    Compressed last month of data')
         compressed_nick = nick + '_month'
         csvfile = DataFile.csv_from_nickname(compressed_nick)
         csvfile.df_to_file(df)
 
-    if get_year:
+    if get_data['get_year']:
         df = get_compressed_data(DB,sid,2880,183)
         print('    Compressed last year of data')
         compressed_nick = nick + '_year'
@@ -104,19 +98,10 @@ def main(verbose=False,
          last_month=False,
          last_year=False,
          **kwargs):
-    global get_year = last_year
-    if get_year:
-        global get_month = True
-    else:
-        global get_month = last_month
-    if get_month:
-        global get_week = True
-    else:
-        global get_week = last_week
-    if get_week:
-        global get_day = True
-    else:
-        global get_day = last_day
+    get_data = {'get_day': last_day or last_week or last_month or last_year,
+                'get_week': last_week or last_month or last_year,
+                'get_month': last_month or last_year,
+                'get_year': last_year}
 
     start_time = time.time()
     # -------------------------------------------------------------------------
@@ -135,8 +120,9 @@ def main(verbose=False,
     all_processes = []
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
+        print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,))
+                                    args=(sid,nick,get_data))
         p.start()
         all_processes.append(p)
         print()
