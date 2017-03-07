@@ -30,7 +30,7 @@ def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
     t = dt.datetime.combine(t,dt.time(0))+to_min
     
     # data interval for full day is 30 minutes
-    interval = datetime.timedelta(minutes=integration_time).total_seconds()
+    interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = time.mktime(t.timetuple())
     new_df = pd.DataFrame(columns=column_list)
     for idx in range(n_intervals):
