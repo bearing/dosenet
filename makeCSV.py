@@ -51,7 +51,7 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     return comp_df
 
 def make_station_files(sid,nick,get_data):
-    print('get_year = {}, get_month = {}, get_week = {}, get_day = {}'.format(get_year,get_month,get_week,get_day))
+    print(get_data)
     DB = SQLObject()
     df = DB.getAll(sid)
     print('    Loaded raw data')
