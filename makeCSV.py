@@ -26,7 +26,7 @@ def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
     # get current time and set resolution to nearest minute
     t = dt.datetime.now()
     td = dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
-    to_min = dt.timedelta(minutes=round(current_td.total_seconds()/60))
+    to_min = dt.timedelta(minutes=round(td.total_seconds()/60))
     t = dt.datetime.combine(t,dt.time(0))+to_min
     
     # data interval for full day is 30 minutes
