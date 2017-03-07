@@ -29,35 +29,46 @@ def get_rounded_time(t):
 
 # integration_time (min) = time to average over for condenced data
 # n_intervals = number of intervals to collect (1 day = 60/integration_time * 24)
-def get_compressed_data(DB,sid,column_list,integration_time,n_intervals):
+def get_compressed_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
 
-    try:
-        compressed_df = pd.DataFrame(columns=['deviceTime_unix','receiveTime_unix','cpm','cpmError'])
-        proc_time = dt.datetime.now()
-        for idx in range(n_intervals):
+    compressed_df = pd.DataFrame(columns=['deviceTime_unix','receiveTime_unix','cpm','cpmError'])
+    proc_time = dt.datetime.now()
+    for idx in range(n_intervals):
+        try:
             min_time = max_time - interval
             df = DB.getDataForStationByRange(sid,min_time,max_time)
             print('integrating from {} - {} over {} entries'.format(min_time,max_time,len(df)))
-            cpm = df.loc[:,'cpm'].sum()*5/integration_time
-            cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/integration_time
+            cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
+            cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
 
             compressed_df.loc[idx,'deviceTime_unix'] = df.loc[len(df)/2,'deviceTime_unix']
             compressed_df.loc[idx,'receiveTime_unix'] = df.loc[len(df)/2,'receiveTime_unix']
             compressed_df.loc[idx,'cpm'] = cpm
             compressed_df.loc[idx,'cpmError'] = cpm_error
             max_time = min_time
+        except (Exception) as e:
+            print(e)
 
-        compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
-        proc_time = dt.datetime.now() - proc_time
-        print('interval {} process time = {}'.format(idx,proc_time))
-        return compressed_df
-    except (Exception) as e:
-        print(e)
-        return pd.DataFrame({})
+    compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
+    proc_time = dt.datetime.now() - proc_time
+    print('interval {} process time = {}'.format(idx,proc_time))
+    return compressed_df
 
-def main(verbose=False, **kwargs):
+def main(verbose=False, 
+         last_day=False,
+         last_week=False,
+         last_month=False,
+         last_year=False,
+         **kwargs):
+    if last_year:
+        last_month = True
+    if last_month:
+        last_week = True
+    if last_week:
+        last_day = True
+
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Mysql data base interface
@@ -86,29 +97,33 @@ def main(verbose=False, **kwargs):
         csvfile = DataFile.csv_from_nickname(compressed_nick)
         csvfile.df_to_file(df)
 
-        df = get_compressed_data(DB,sid,df.columns.tolist(),30,48)
-        print('    Compressed last day of data')
-        compressed_nick = nick + '_day'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
-        csvfile.df_to_file(df)
+        if last_day:
+            df = get_compressed_data(DB,sid,30,48)
+            print('    Compressed last day of data')
+            compressed_nick = nick + '_day'
+            csvfile = DataFile.csv_from_nickname(compressed_nick)
+            csvfile.df_to_file(df)
 
-        df = get_compressed_data(DB,sid,df.columns.tolist(),60,168)
-        print('    Compressed last week of data')
-        compressed_nick = nick + '_week'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
-        csvfile.df_to_file(df)
+        if last_week:
+            df = get_compressed_data(DB,sid,60,168)
+            print('    Compressed last week of data')
+            compressed_nick = nick + '_week'
+            csvfile = DataFile.csv_from_nickname(compressed_nick)
+            csvfile.df_to_file(df)
 
-        df = get_compressed_data(DB,sid,df.columns.tolist(),240,180)
-        print('    Compressed last month of data')
-        compressed_nick = nick + '_month'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
-        csvfile.df_to_file(df)
+        if last_month:
+            df = get_compressed_data(DB,sid,240,180)
+            print('    Compressed last month of data')
+            compressed_nick = nick + '_month'
+            csvfile = DataFile.csv_from_nickname(compressed_nick)
+            csvfile.df_to_file(df)
 
-        df = get_compressed_data(DB,sid,df.columns.tolist(),2880,183)
-        print('    Compressed last year of data')
-        compressed_nick = nick + '_year'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
-        csvfile.df_to_file(df)
+        if last_year:
+            df = get_compressed_data(DB,sid,2880,183)
+            print('    Compressed last year of data')
+            compressed_nick = nick + '_year'
+            csvfile = DataFile.csv_from_nickname(compressed_nick)
+            csvfile.df_to_file(df)
 
         print()
 
@@ -120,5 +135,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=docstring)
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
+    parser.add_argument('-v', '--verbose', action='store_true', default=False,
+                        help='Print more output')
+    parser.add_argument('-d', '--last-day', action='store_true',
+                        help='get compressed csv for last day')
+    parser.add_argument('-w', '--last-week', action='store_true',
+                        help='get compressed csv for last week')
+    parser.add_argument('-m', '--last-month', action='store_true',
+                        help='get compressed csv for last month')
+    parser.add_argument('-y', '--last-year', action='store_true',
+                        help='get compressed csv for last year')
     args = parser.parse_args()
     main(**vars(args))
