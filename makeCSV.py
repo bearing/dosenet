@@ -3,6 +3,7 @@
 from __future__ import print_function
 from mysql.mysql_tools import SQLObject
 from data_transfer import DataFile
+import numpy as np
 import time
 import datetime as dt
 import math
@@ -34,23 +35,20 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - interval*n_intervals
 
-    column_list = ['deviceTime_unix','receiveTime_unix','cpm','cpmError']
-    compressed_df = pd.DataFrame(columns=column_list)
+    comp_data = np.array([['deviceTime_unix','cpm','cpmError']])
     while max_time > min_time:
         df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
         if len(df) > 0:
             cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
-            cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
-
-            this_df = pd.DataFrame([[df.loc[len(df)/2,'deviceTime_unix'],
-                                    df.loc[len(df)/2,'receiveTime_unix'],
-                                    cpm,cpm_error]],
-                                    columns=column_list)
-            compressed_df.append(this_df, ignore_index=True)
+            cpm_err = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
+            # use time-bin central time
+            itime = df.loc[len(df)/2,'deviceTime_unix']
+            comp_data = np.append(comp_data,[[itime,cpm,cpm_err]],axis=0)
             max_time = max_time - interval
 
-    compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
-    return compressed_df
+    comp_df = pd.DataFrame(data=comp_data[1:,:], columns=comp_data[0,:])
+    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
+    return comp_df
 
 def main(verbose=False, 
          last_day=False,
