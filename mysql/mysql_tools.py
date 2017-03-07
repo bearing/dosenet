@@ -391,8 +391,7 @@ class SQLObject:
 
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
-        Input dataframe from query with UNIX_TIMESTAMP for deviceTime and
-        receiveTime. The output has 6 time columns:
+        Input dataframe from query with UNIX_TIMESTAMP for deviceTime. The output has 3 time columns:
             deviceTime_unix (renamed from UNIX_TIMESTAMP(deviceTime))
             deviceTime_utc
             deviceTime_local

@@ -42,7 +42,7 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
             cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
             cpm_err = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
             # use time-bin central time
-            itime = df.loc[len(df)/2,'deviceTime_unix']
+            itime = df.iloc[len(df)/2,0]
             comp_data = np.append(comp_data,[[itime,cpm,cpm_err]],axis=0)
             max_time = max_time - interval
 
