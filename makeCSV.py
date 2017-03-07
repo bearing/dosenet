@@ -135,8 +135,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=docstring)
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
-    parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                        help='Print more output')
     parser.add_argument('-d', '--last-day', action='store_true',
                         help='get compressed csv for last day')
     parser.add_argument('-w', '--last-week', action='store_true',
