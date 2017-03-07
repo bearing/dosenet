@@ -34,17 +34,19 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - interval*n_intervals
 
-    compressed_df = pd.DataFrame(columns=['deviceTime_unix','receiveTime_unix','cpm','cpmError'])
+    column_list = ['deviceTime_unix','receiveTime_unix','cpm','cpmError']
+    compressed_df = pd.DataFrame(columns=column_list)
     while max_time > min_time:
         df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
         if len(df) > 0:
             cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
             cpm_error = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
 
-            compressed_df.loc[idx,'deviceTime_unix'] = df.loc[len(df)/2,'deviceTime_unix']
-            compressed_df.loc[idx,'receiveTime_unix'] = df.loc[len(df)/2,'receiveTime_unix']
-            compressed_df.loc[idx,'cpm'] = cpm
-            compressed_df.loc[idx,'cpmError'] = cpm_error
+            this_df = pd.DataFrame([df.loc[len(df)/2,'deviceTime_unix'],
+                                    df.loc[len(df)/2,'receiveTime_unix'],
+                                    cpm,cpm_error],
+                                    columns=column_list)
+            compressed_df.append(this_df, ignore_index=True)
             max_time = max_time - interval
 
     compressed_df = DB.addTimeColumnsToDataframe(compressed_df,sid)
