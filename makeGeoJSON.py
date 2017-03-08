@@ -68,7 +68,6 @@ def main(verbose=False):
             ('csv_location', csv_fname),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
-                  'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
                   'timezone']:
             properties[k] = str(latest_data[k])
         feature_list.append(Feature(geometry=point, properties=properties))
