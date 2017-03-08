@@ -25,8 +25,8 @@ def get_rounded_time(t):
     """
     set resolution for input time to nearest minute
 
-    Input: time (sec) to be truncated
-    Returns: truncated time (sec)
+    Input: datetime oject to be truncated
+    Returns: truncated time oject
     """
     rounded_min = round(t.second/60)
     t = dt.datetime(t.year,t.hour,t.minute+rounded_min)
@@ -37,10 +37,10 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     get station data from the database for some number of time bins
 
     Args:
-        arg1: database object
-        arg2: station ID
-        arg3: time bin (min) to average over
-        arg4: number of time bins to retreive
+        DB: database object
+        sid: station ID
+        integration_time: time bin (min) to average over
+        n_intervals: number of time bins to retreive
     Returns:
         DataFrame with 3 time columns and 2 data columns:
             deviceTime_[utc, local, unix] cpm, cpmError
@@ -69,10 +69,10 @@ def make_station_files(sid,name,nick,get_data):
     generage all csv files for a station
 
     Args:
-        arg1: station ID
-        arg2: station Name
-        arg3: station csv file nickname
-        arg4: dictionary of booleans for which data ranges to retreive
+        sid: station ID
+        name: station Name
+        nick: station csv file nickname
+        get_data: dictionary of booleans for which data ranges to retreive
             determined from command line arguments
     """
     print(get_data)
