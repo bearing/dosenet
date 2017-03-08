@@ -59,7 +59,7 @@ def main(verbose=False):
             continue
         dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
-        csv_fname = nickname_to_remote_csv_fname(latest_data['nickname'])
+        csv_fname = latest_data['nickname']
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
@@ -68,7 +68,6 @@ def main(verbose=False):
             ('csv_location', csv_fname),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
-                  'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
                   'timezone']:
             properties[k] = str(latest_data[k])
         feature_list.append(Feature(geometry=point, properties=properties))

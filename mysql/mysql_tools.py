@@ -361,19 +361,23 @@ class SQLObject:
         return tz[0][0]
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
-        q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), cpm, cpmError \
-        FROM dosnet \
-        WHERE `dosnet`.`stationID`='{}' \
-        AND receiveTime \
-        BETWEEN '{}' \
-        AND '{}';".format(stationID, timemin, timemax)
-        df = pd.read_sql(q, con=self.db)
-        return self.addTimeColumnsToDataframe(df)
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), cpm, cpmError \
+            FROM dosnet \
+            WHERE `dosnet`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}';".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
 
     def getDataForStationByInterval(self, stationID, intervalStr):
         # Make the query for this station on this interval
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
             cpm, cpmError\
             FROM dosnet \
             WHERE stationID={} \
@@ -387,14 +391,10 @@ class SQLObject:
 
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
-        Input dataframe from query with UNIX_TIMESTAMP for deviceTime and
-        receiveTime. The output has 6 time columns:
+        Input dataframe from query with UNIX_TIMESTAMP for deviceTime. The output has 3 time columns:
             deviceTime_unix (renamed from UNIX_TIMESTAMP(deviceTime))
             deviceTime_utc
             deviceTime_local
-            receiveTime_unix (renamed from UNIX_TIMESTAMP(receiveTime))
-            receiveTime_utc
-            receiveTime_local
 
         http://stackoverflow.com/questions/17159207/change-timezone-of-date-time-column-in-pandas-and-add-as-hierarchical-index
         """
@@ -413,23 +413,22 @@ class SQLObject:
         assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
         # Rename exist unix epoch seconds columns
         df.rename(inplace=True, columns={
-            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix',
-            'UNIX_TIMESTAMP(receiveTime)': 'receiveTime_unix'})
+            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix'})
         # Timezones are evil but pandas are fuzzy ...
         deviceTime = pd.Index(pd.to_datetime(df['deviceTime_unix'], unit='s')).tz_localize('UTC')
-        receiveTime = pd.Index(pd.to_datetime(df['receiveTime_unix'], unit='s')).tz_localize('UTC')
         df['deviceTime_utc'] = deviceTime
         df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
-        df['receiveTime_utc'] = receiveTime
-        df['receiveTime_local'] = receiveTime.tz_convert(this_tz)
         # Rearrange the columns (iterate in opposite order of placement)
         new_cols = df.columns.tolist()
-        for colname in ['receiveTime_unix', 'receiveTime_local',
-                        'receiveTime_utc', 'deviceTime_unix',
-                        'deviceTime_local', 'deviceTime_utc']:
+        for colname in ['deviceTime_unix',
+                        'deviceTime_local',
+                        'deviceTime_utc']:
             new_cols.insert(0, new_cols.pop(new_cols.index(colname)))
         df = df[new_cols]
         return df
+
+    def getLastHour(self, stationID):
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 HOUR')
 
     def getLastDay(self, stationID):
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 DAY')
@@ -442,6 +441,9 @@ class SQLObject:
 
     def getLastYear(self, stationID):
         return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
+
+    def getAll(self, stationID):
+        return self.getDataForStationByInterval(stationID, 'INTERVAL 10 YEAR')
 
     def testLastMethods(self, stationID=1):
         print('Testing last data methods with stationID={}\n'.format(stationID))
