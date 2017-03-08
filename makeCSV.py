@@ -50,7 +50,7 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(sid,nick,get_data):
+def make_station_files(sid,name,nick,get_data):
     print(get_data)
     DB = SQLObject()
     df = DB.getAll(sid)
@@ -59,38 +59,30 @@ def make_station_files(sid,nick,get_data):
     csvfile.df_to_file(df)
 
     df = DB.getLastHour(sid)
-    print('    Loaded last hour of data')
-    compressed_nick = nick + '_hour'
-    csvfile = DataFile.csv_from_nickname(compressed_nick)
+    csvfile = DataFile.csv_from_nickname(nick+'_hour')
     csvfile.df_to_file(df)
 
     if get_data['get_day']:
         df = get_compressed_data(DB,sid,30,48)
-        print('    Compressed last day of data')
-        compressed_nick = nick + '_day'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile = DataFile.csv_from_nickname(nick + '_day')
         csvfile.df_to_file(df)
 
     if get_data['get_week']:
         df = get_compressed_data(DB,sid,60,168)
-        print('    Compressed last week of data')
-        compressed_nick = nick + '_week'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile = DataFile.csv_from_nickname(nick + '_week')
         csvfile.df_to_file(df)
 
     if get_data['get_month']:
         df = get_compressed_data(DB,sid,240,180)
-        print('    Compressed last month of data')
-        compressed_nick = nick + '_month'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile = DataFile.csv_from_nickname(nick + '_month')
         csvfile.df_to_file(df)
 
     if get_data['get_year']:
         df = get_compressed_data(DB,sid,2880,183)
-        print('    Compressed last year of data')
-        compressed_nick = nick + '_year'
-        csvfile = DataFile.csv_from_nickname(compressed_nick)
+        csvfile = DataFile.csv_from_nickname(nick + '_year')
         csvfile.df_to_file(df)
+
+    print('    Loaded compressed data for (id={}) {}'.format(sid, name))
 
 def main(verbose=False, 
          last_day=False,
@@ -122,7 +114,7 @@ def main(verbose=False,
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,nick,get_data))
+                                    args=(sid,name,nick,get_data,))
         p.start()
         all_processes.append(p)
         print()
