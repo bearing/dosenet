@@ -25,10 +25,8 @@ def get_rounded_time(t):
     """
     set resolution for input time to nearest minute
 
-    Args:
-        arg1: input time (sec) to be truncated
-    Returns:
-        truncated time (sec)
+    Input: time (sec) to be truncated
+    Returns: truncated time (sec)
     """
     rounded_min = round(t.second/60)
     t = dt.datetime(t.year,t.hour,t.minute+rounded_min)
