@@ -59,7 +59,7 @@ def main(verbose=False):
             continue
         dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
         dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
-        csv_fname = nickname_to_remote_csv_fname(latest_data['nickname'])
+        csv_fname = latest_data['nickname']
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
