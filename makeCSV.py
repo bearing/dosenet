@@ -22,15 +22,29 @@ Affiliation:
 """
 
 def get_rounded_time(t):
-    # set resolution to nearest minute
-    td = dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond)
-    to_min = dt.timedelta(minutes=round(td.total_seconds()/60))
-    t = dt.datetime.combine(t,dt.time(0))+to_min
+    """
+    set resolution for input time to nearest minute
+
+    Input: datetime oject to be truncated
+    Returns: truncated time oject
+    """
+    rounded_min = round(t.second/60)
+    t = dt.datetime(t.year,t.hour,t.minute+rounded_min)
     return time.mktime(t.timetuple())
 
-# integration_time (min) = time to average over for condenced data
-# n_intervals = number of intervals to collect (1 day = 60/integration_time * 24)
 def get_compressed_data(DB,sid,integration_time,n_intervals):
+    """
+    get station data from the database for some number of time bins
+
+    Args:
+        DB: database object
+        sid: station ID
+        integration_time: time bin (min) to average over
+        n_intervals: number of time bins to retreive
+    Returns:
+        DataFrame with 3 time columns and 2 data columns:
+            deviceTime_[utc, local, unix] cpm, cpmError
+    """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
 
@@ -51,6 +65,16 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     return comp_df
 
 def make_station_files(sid,name,nick,get_data):
+    """
+    generage all csv files for a station
+
+    Args:
+        sid: station ID
+        name: station Name
+        nick: station csv file nickname
+        get_data: dictionary of booleans for which data ranges to retreive
+            determined from command line arguments
+    """
     print(get_data)
     DB = SQLObject()
     df = DB.getAll(sid)
