@@ -20,6 +20,7 @@ import socket
 import numpy as np
 import pandas as pd
 import subprocess
+import traceback as tb
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
 
@@ -341,12 +342,23 @@ class DoseNetSlacker(object):
         if icon_emoji is None:
             icon_emoji = ':radioactive_sign:'
 
-        self.slack.api_call(
-            'chat.postMessage',
-            channel=channel,
-            username=SLACK_USER,
-            icon_emoji=icon_emoji,
-            text=msg_text)
+        keep_trying = True
+        n_tries = 0
+        while keep_trying and n_tries < 5:
+            try:
+                self.slack.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    username=SLACK_USER,
+                    icon_emoji=icon_emoji,
+                    text=msg_text)
+            except ValueError as e:
+                if 'JSON' in e.__str__():
+                    print('JSON error in slack module!')
+                time.sleep(5)
+                n_tries += 1
+            else:
+                keep_trying = False
 
 
 if __name__ == '__main__':
@@ -366,4 +378,8 @@ if __name__ == '__main__':
         './ucbdosenet_slack_token',
         test=args.test, verbose=args.verbose, restart_injector=args.injector)
     print('Running DoseNetSlacker...')
-    slacker.run()
+    try:
+        slacker.run()
+    except Exception as e:
+        msg = tb.format_exc()
+        slacker.post('Exception: {}: {}'.format(type(e), msg))
