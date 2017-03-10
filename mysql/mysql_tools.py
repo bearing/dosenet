@@ -360,6 +360,34 @@ class SQLObject:
         tz = self.cursor.fetchall()
         return tz[0][0]
 
+    def getD3SDataForStationByRange(self, stationID, timemin, timemax):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), channelCounts \
+            FROM d3s \
+            WHERE `d3s`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def getD3SDataForStationByInterval(self, stationID, intervalStr):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), channelCounts \
+            FROM d3s \
+            WHERE `d3s`.`stationID`='{}' \
+            AND deviceTime >= (NOW() - {}) \
+            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
     def getDataForStationByRange(self, stationID, timemin, timemax):
         try:
             q = "SELECT UNIX_TIMESTAMP(deviceTime), cpm, cpmError \
@@ -367,7 +395,8 @@ class SQLObject:
             WHERE `dosnet`.`stationID`='{}' \
             AND UNIX_TIMESTAMP(deviceTime) \
             BETWEEN '{}' \
-            AND '{}';".format(stationID, timemin, timemax)
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
             df = pd.read_sql(q, con=self.db)
             return df
         except (Exception) as e:
