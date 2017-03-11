@@ -138,6 +138,7 @@ class SQLObject:
                 deviceTime, stationID, counts, '%s', error_flag))
         # let MySQLdb library handle the special characters in the blob
         print(sql_cmd)
+        print('%s = {}'.format(spectrum_blob))
         self.cursor.execute(sql_cmd, (spectrum_blob,))
         self.db.commit()
 
