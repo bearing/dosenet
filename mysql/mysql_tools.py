@@ -130,7 +130,6 @@ class SQLObject:
         """
         counts = sum(spectrum)
         spectrum = np.array(spectrum, dtype=np.uint8)
-        print('numpy spectrum = {}'.format(spectrum))
         spectrum_blob = spectrum.tobytes()
         sql_cmd = (
             "INSERT INTO " +
@@ -138,10 +137,6 @@ class SQLObject:
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, counts, '%s', error_flag))
         # let MySQLdb library handle the special characters in the blob
-        print(sql_cmd)
-        print('%s = {}, sum(s) = {}'.format(
-            np.fromstring(spectrum_blob,dtype=np.uint8),
-            sum(np.fromstring(spectrum_blob,dtype=np.uint8))))
         self.cursor.execute(sql_cmd, (spectrum_blob,))
         self.db.commit()
 
