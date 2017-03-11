@@ -129,7 +129,9 @@ class SQLObject:
         Insert a row of D3S data into the d3s table.
         """
         counts = sum(spectrum)
+        print('pre-processed spectrum = {}'.format(spectrum))
         spectrum = np.array(spectrum, dtype=np.uint8)
+        print('numpy spectrum = {}'.format(spectrum))
         spectrum_blob = spectrum.tobytes()
         sql_cmd = (
             "INSERT INTO " +
