@@ -128,14 +128,16 @@ class SQLObject:
         """
         Insert a row of D3S data into the d3s table.
         """
-        spectrum = np.array(spectrum, dtype=np.uint16)
+        counts = sum(spectrum)
+        spectrum = np.array(spectrum, dtype=np.uint8)
         spectrum_blob = spectrum.tobytes()
         sql_cmd = (
             "INSERT INTO " +
-            "d3s(deviceTime, stationID, channelCounts, errorFlag) " +
-            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {});".format(
-                deviceTime, stationID, '%s', error_flag))
+            "d3s(deviceTime, stationID, counts, channelCounts, errorFlag) " +
+            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
+                deviceTime, stationID, counts, '%s', error_flag))
         # let MySQLdb library handle the special characters in the blob
+        print(sql_cmd)
         self.cursor.execute(sql_cmd, (spectrum_blob,))
         self.db.commit()
 
