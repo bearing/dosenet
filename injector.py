@@ -624,13 +624,17 @@ def format_packet(data, client_address):
             data['stationID'], data['cpm'], data['cpm_error'],
             data['error_flag'])
         if 'deviceTime' in data:
-            output += ' at {:.3f}'.format(data['deviceTime'])
+            output += ' at {}'.format(
+                datetime.datetime.fromtimestamp(data['deviceTime']))
     elif 'msgCode' in data.keys():
         output = '#{}, code {}: {}'.format(
             data['stationID'], data['msgCode'], data['msgText'])
     elif 'spectrum' in data.keys():
         output = '#{}, {} total counts, err {}'.format(
             data['stationID'], sum(data['spectrum']), data['error_flag'])
+        if 'deviceTime' in data:
+            output += ' at {}'.format(
+                datetime.datetime.fromtimestamp(data['deviceTime']))
     else:
         # ???
         output = ' [packet type unknown to format_packet()]'
