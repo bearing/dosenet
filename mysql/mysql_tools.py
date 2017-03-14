@@ -250,6 +250,14 @@ class SQLObject:
         del df['display']
         return df
 
+    def getActiveD3SStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[1]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
         df = pd.read_sql(
@@ -363,7 +371,7 @@ class SQLObject:
 
     def getD3SDataForStationByRange(self, stationID, timemin, timemax):
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), channelCounts \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
             FROM d3s \
             WHERE `d3s`.`stationID`='{}' \
             AND UNIX_TIMESTAMP(deviceTime) \
@@ -378,7 +386,7 @@ class SQLObject:
 
     def getD3SDataForStationByInterval(self, stationID, intervalStr):
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), channelCounts \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
             FROM d3s \
             WHERE `d3s`.`stationID`='{}' \
             AND deviceTime >= (NOW() - {}) \

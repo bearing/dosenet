@@ -5,6 +5,7 @@ from mysql.mysql_tools import SQLObject
 from data_transfer import DataFile
 import time
 import datetime as dt
+import numpy as np
 import math
 import pandas as pd
 import multiprocessing
@@ -21,6 +22,17 @@ Affiliation:
     Lawrence Berkeley National Laboratory, Berkeley, U.S.A.
 """
 
+def rebin(array,n):
+    """
+    rebin a 1d numpy array by n (should force to be factor of array length)
+    """
+    return array.reshape(len(array)/n,n).sum(1)
+
+def get_channels(channels,rebin_factor):
+    full_array = np.fromstring(channels,dtype=np.uint8)
+    rebin_array = rebin(full_array,rebin_factor)
+    return rebin_array
+
 def get_rounded_time(t):
     """
     set resolution for input time to nearest minute
@@ -28,11 +40,44 @@ def get_rounded_time(t):
     Input: datetime oject to be truncated
     Returns: truncated time oject
     """
-    rounded_min = round(t.second/60)
-    t = dt.datetime(t.year,t.hour,t.minute+rounded_min)
+    rounded_min = int(round(t.second/60.0))
+    t = dt.datetime(t.year,t.month,t.day,t.hour,t.minute+rounded_min)
     return time.mktime(t.timetuple())
 
-def get_compressed_data(DB,sid,integration_time,n_intervals):
+def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
+    """
+    get d3s station data from the database for some number of time bins
+
+    Args:
+        DB: database object
+        sid: station ID
+        integration_time: time bin (min) to average over
+        n_intervals: number of time bins to retreive
+    Returns:
+        DataFrame with 3 time columns and 2 data columns:
+            deviceTime_[utc, local, unix] cpm, cpmError
+    """
+    interval = dt.timedelta(minutes=integration_time).total_seconds()
+    max_time = get_rounded_time(dt.datetime.now())
+
+    comp_df = pd.DataFrame(columns=['deviceTime_unix',
+                                    'cpm','cpmError',
+                                    'channels'])
+    for idx in range(n_intervals):
+        df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
+        if len(df) > 0:
+            channels = np.array([get_channels(x,8) 
+                                 for x in df.loc[:,'channelCounts']]).sum(0)
+            counts = df.loc[:,'counts'].sum()
+            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
+            comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
+            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
+            max_time = max_time - interval
+
+    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
+    return comp_df
+
+def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals):
     """
     get station data from the database for some number of time bins
 
@@ -52,19 +97,60 @@ def get_compressed_data(DB,sid,integration_time,n_intervals):
     for idx in range(n_intervals):
         df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
         if len(df) > 0:
-            cpm = df.loc[:,'cpm'].sum()*5/(len(df)*5)
-            cpm_err = math.sqrt(df.loc[:,'cpm'].sum()*5)/(len(df)*5)
-            # use time-bin central time
-            itime = df.iloc[len(df)/2,0]
-            comp_df.loc[idx,'deviceTime_unix'] = itime
-            comp_df.loc[idx,'cpm'] = cpm
-            comp_df.loc[idx,'cpmError'] = cpm_err
+            counts = df.loc[:,'cpm'].sum()*5
+            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
+            comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
+            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
             max_time = max_time - interval
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(sid,name,nick,get_data):
+def make_d3s_station_files(sid,name,nick,get_data):
+    """
+    generage all csv files for a station
+
+    Args:
+        sid: station ID
+        name: station Name
+        nick: station csv file nickname
+        get_data: dictionary of booleans for which data ranges to retreive
+            determined from command line arguments
+    """
+    print(get_data)
+    DB = SQLObject()
+    df = DB.getAll(sid)
+    print('    Loaded raw data')
+    csvfile = DataFile.csv_from_nickname(nick+'_d3s')
+    csvfile.df_to_file(df)
+
+    df = DB.getLastHour(sid)
+    csvfile = DataFile.csv_from_nickname(nick+'_d3s_hour')
+    csvfile.df_to_file(df)
+
+    if get_data['get_day']:
+        df = get_compressed_d3s_data(DB,sid,30,48)
+        csvfile = DataFile.csv_from_nickname(nick + '_d3s_day')
+        csvfile.df_to_file(df)
+
+    if get_data['get_week']:
+        df = get_compressed_d3s_data(DB,sid,60,168)
+        csvfile = DataFile.csv_from_nickname(nick + '_d3s_week')
+        csvfile.df_to_file(df)
+
+    if get_data['get_month']:
+        df = get_compressed_d3s_data(DB,sid,240,180)
+        csvfile = DataFile.csv_from_nickname(nick + '_d3s_month')
+        csvfile.df_to_file(df)
+
+    if get_data['get_year']:
+        df = get_compressed_d3s_data(DB,sid,2880,183)
+        csvfile = DataFile.csv_from_nickname(nick + '_d3s_year')
+        csvfile.df_to_file(df)
+
+    print('    Loaded compressed data for (id={}) {}'.format(sid, name))
+
+def make_dosenet_station_files(sid,name,nick,get_data):
     """
     generage all csv files for a station
 
@@ -87,22 +173,22 @@ def make_station_files(sid,name,nick,get_data):
     csvfile.df_to_file(df)
 
     if get_data['get_day']:
-        df = get_compressed_data(DB,sid,30,48)
+        df = get_compressed_dosenet_data(DB,sid,30,48)
         csvfile = DataFile.csv_from_nickname(nick + '_day')
         csvfile.df_to_file(df)
 
     if get_data['get_week']:
-        df = get_compressed_data(DB,sid,60,168)
+        df = get_compressed_dosenet_data(DB,sid,60,168)
         csvfile = DataFile.csv_from_nickname(nick + '_week')
         csvfile.df_to_file(df)
 
     if get_data['get_month']:
-        df = get_compressed_data(DB,sid,240,180)
+        df = get_compressed_dosenet_data(DB,sid,240,180)
         csvfile = DataFile.csv_from_nickname(nick + '_month')
         csvfile.df_to_file(df)
 
     if get_data['get_year']:
-        df = get_compressed_data(DB,sid,2880,183)
+        df = get_compressed_dosenet_data(DB,sid,2880,183)
         csvfile = DataFile.csv_from_nickname(nick + '_year')
         csvfile.df_to_file(df)
 
@@ -127,8 +213,14 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # Pick active stations
     # -------------------------------------------------------------------------
+    print('Getting active stations')
     stations = DB.getActiveStations()
     print(stations)
+    print()
+
+    print('Getting active D3S stations')
+    d3s_stations = DB.getActiveD3SStations()
+    print(d3s_stations)
     print()
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
@@ -142,6 +234,10 @@ def main(verbose=False,
         p.start()
         all_processes.append(p)
         print()
+
+    for sid, name, nick in zip(d3s_stations.index, d3s_stations['Name'],
+                               d3s_stations['nickname']):
+        print('(id={}) {}'.format(sid, name))
 
     for p in all_processes:
         p.join()
