@@ -129,11 +129,11 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         print('No data-type specified')
         return None
 
-    df = DB.getAll(sid)
+    df = DB.getAll(sid,request_type)
     csvfile = DataFile.csv_from_nickname(nick)
     csvfile.df_to_file(df)
 
-    df = DB.getLastHour(sid)
+    df = DB.getLastHour(sid,request_type)
     csvfile = DataFile.csv_from_nickname(nick+'_hour')
     csvfile.df_to_file(df)
 
