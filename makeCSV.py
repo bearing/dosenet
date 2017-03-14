@@ -44,6 +44,14 @@ def get_rounded_time(t):
     t = dt.datetime(t.year,t.month,t.day,t.hour,t.minute+rounded_min)
     return time.mktime(t.timetuple())
 
+def format_d3s_data(df):
+    df['channelCounts'] = df['channelCounts'].apply(
+        lambda x: np.fromstring(x,dtype=np.uint8))
+    df.insert(4,'cpmError',df['counts'].apply(lambda x: math.sqrt(x)/5))
+    df['counts'] = df['counts']/5
+    df.rename(columns = {'counts':'cpm'}, inplace = True)
+    return df
+
 def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     """
     get d3s station data from the database for some number of time bins
@@ -66,8 +74,8 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     for idx in range(n_intervals):
         df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
         if len(df) > 0:
-            channels = np.array([get_channels(x,8) 
-                                 for x in df.loc[:,'channelCounts']]).sum(0)
+            comp_df.loc[idx,'channels'] = np.array(
+                [get_channels(x,8) for x in df.loc[:,'channelCounts']]).sum(0)
             counts = df.loc[:,'counts'].sum()
             comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
             comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
@@ -130,10 +138,14 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         return None
 
     df = DB.getAll(sid,request_type)
+    if request_type == 'd3s':
+        df = format_d3s_data(df)
     csvfile = DataFile.csv_from_nickname(nick)
     csvfile.df_to_file(df)
 
     df = DB.getLastHour(sid,request_type)
+    if request_type == 'd3s':
+        df = format_d3s_data(df)
     csvfile = DataFile.csv_from_nickname(nick+'_hour')
     csvfile.df_to_file(df)
 
