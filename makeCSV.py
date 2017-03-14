@@ -118,7 +118,6 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
-    print(get_data)
     DB = SQLObject()
 
     if request_type == 'd3s':
@@ -131,7 +130,6 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         return None
 
     df = DB.getAll(sid)
-    print('    Loaded raw data')
     csvfile = DataFile.csv_from_nickname(nick)
     csvfile.df_to_file(df)
 
@@ -159,7 +157,7 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         csvfile = DataFile.csv_from_nickname(nick + '_year')
         csvfile.df_to_file(df)
 
-    print('    Loaded compressed data for (id={}) {}'.format(sid, name))
+    print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
 def main(verbose=False, 
          last_day=False,

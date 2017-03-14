@@ -465,23 +465,53 @@ class SQLObject:
         df = df[new_cols]
         return df
 
-    def getLastHour(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 HOUR')
+    def getLastHour(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            return self.getD3SDataForStationByInterval(stationID,
+                                                       'INTERVAL 1 HOUR')
+        else:
+            return self.getDataForStationByInterval(stationID,
+                                                    'INTERVAL 1 HOUR')
 
-    def getLastDay(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 DAY')
+    def getLastDay(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            return self.getD3SDataForStationByInterval(stationID,
+                                                       'INTERVAL 1 DAY')
+        else:
+            return self.getDataForStationByInterval(stationID,
+                                                    'INTERVAL 1 DAY')
 
-    def getLastWeek(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 WEEK')
+    def getLastWeek(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            return self.getD3SDataForStationByInterval(stationID,
+                                                       'INTERVAL 1 WEEK')
+        else:
+            return self.getDataForStationByInterval(stationID,
+                                                    'INTERVAL 1 WEEK')
 
-    def getLastMonth(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 MONTH')
+    def getLastMonth(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            return self.getD3SDataForStationByInterval(stationID,
+                                                       'INTERVAL 1 MONTH')
+        else:
+            return self.getDataForStationByInterval(stationID,
+                                                    'INTERVAL 1 MONTH')
 
-    def getLastYear(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
+    def getLastYear(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            return self.getD3SDataForStationByInterval(stationID,
+                                                       'INTERVAL 1 YEAR')
+        else:
+            return self.getDataForStationByInterval(stationID,
+                                                    'INTERVAL 1 YEAR')
 
-    def getAll(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 10 YEAR')
+    def getAll(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            return self.getD3SDataForStationByInterval(stationID,
+                                                       'INTERVAL 10 YEAR')
+        else:
+            return self.getDataForStationByInterval(stationID,
+                                                    'INTERVAL 10 YEAR')
 
     def testLastMethods(self, stationID=1):
         print('Testing last data methods with stationID={}\n'.format(stationID))
