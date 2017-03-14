@@ -218,7 +218,7 @@ class DoseNetSlacker(object):
 
         # all stations out - server problem - but ignore at midnight
         now = datetime.datetime.now()
-        not_midnight = not (now.hour == 0 and now.minutes < 10)
+        not_midnight = not (now.hour == 0 and now.minute < 10)
         if np.all(both['new_almost'].dropna() |
                   both['new_undeployed'].dropna()) and not_midnight:
             if self.restart_injector:
