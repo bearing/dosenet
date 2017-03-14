@@ -30,11 +30,16 @@ if [[ $DISPLAY ]]
 	then let "numargs++"
 fi
 
+read -p "Which sensors on(1)/off(0) (<silicon><d3s><><><><>): " DEVICES
+if [[ $DEVICES ]]
+  then let "numargs++"
+fi
+
 read -p "ID (optional): " ID
 
 CONV=0.0036
 
-if [[ $numargs < 5 ]]
+if [[ $numargs < 6 ]]
 then
   echo "Only the ID is optional. All other requested inputs are required"!
   echo "As a reminder, this runs addDosimeterToDB.py: "
@@ -45,9 +50,9 @@ fi
 echo "Adding new station to database"
 if [[ $ID ]]
 then
-  python ~/git/dosenet/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY
+  python ~/git/dosenet/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY "$DEVICES"
 else
-  python ~/git/dosenet/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY  
+  python ~/git/dosenet/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY "$DEVICES"
 fi
 
 status=$?
