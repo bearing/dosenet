@@ -120,23 +120,24 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
     """
     print(get_data)
     DB = SQLObject()
-    df = DB.getAll(sid)
-    print('    Loaded raw data')
-    csvfile = DataFile.csv_from_nickname(nick+'_d3s')
-    csvfile.df_to_file(df)
-
-    df = DB.getLastHour(sid)
-    csvfile = DataFile.csv_from_nickname(nick+'_d3s_hour')
-    csvfile.df_to_file(df)
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data
         nick = nick + '_d3s'
-    elif request_type = 'dosenet':
+    elif request_type == 'dosenet':
         get_compressed_data = get_compressed_dosenet_data
     else:
         print('No data-type specified')
         return None
+
+    df = DB.getAll(sid)
+    print('    Loaded raw data')
+    csvfile = DataFile.csv_from_nickname(nick)
+    csvfile.df_to_file(df)
+
+    df = DB.getLastHour(sid)
+    csvfile = DataFile.csv_from_nickname(nick+'_hour')
+    csvfile.df_to_file(df)
 
     if get_data['get_day']:
         df = get_compressed_data(DB,sid,30,48)
