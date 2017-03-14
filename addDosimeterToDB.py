@@ -239,10 +239,12 @@ if __name__ == "__main__":
     lon = parse.args.long[0]
     cpmtorem = parse.args.conv[0]
     display = parse.args.display[0]
+    devices = parse.args.devices[0]
     if not parse.args.ID:
-        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, devices)
     else:
         ID = parse.args.ID[0]
         print 'Forced ID: ', ID
-        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, ID)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display,
+                        devices, ID)
     sys.exit(0)
