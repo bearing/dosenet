@@ -50,11 +50,9 @@ fi
 echo "Adding new station to database"
 if [[ $ID ]]
 then
-  python ~/git/dosenet-ali-dev/addDosimeterToDB.py --ID $ID "${NAME}" 
-    "${NICKNAME}" $LAT $LONG $CONV $DISPLAY "$DEVICES"
+  python ~/git/dosenet-ali-dev/addDosimeterToDB.py --ID $ID "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY "$DEVICES"
 else
-  python ~/git/dosenet-ali-dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" 
-    $LAT $LONG $CONV $DISPLAY "$DEVICES"
+  python ~/git/dosenet-ali-dev/addDosimeterToDB.py "${NAME}" "${NICKNAME}" $LAT $LONG $CONV $DISPLAY "$DEVICES"
 fi
 
 status=$?
