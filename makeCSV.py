@@ -106,7 +106,7 @@ def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_d3s_station_files(sid,name,nick,get_data):
+def make_station_files(sid,name,nick,get_data,request_type=None):
     """
     generage all csv files for a station
 
@@ -116,6 +116,7 @@ def make_d3s_station_files(sid,name,nick,get_data):
         nick: station csv file nickname
         get_data: dictionary of booleans for which data ranges to retreive
             determined from command line arguments
+        request type: specify sensor (silicon,d3s,etc)
     """
     print(get_data)
     DB = SQLObject()
@@ -128,67 +129,32 @@ def make_d3s_station_files(sid,name,nick,get_data):
     csvfile = DataFile.csv_from_nickname(nick+'_d3s_hour')
     csvfile.df_to_file(df)
 
-    if get_data['get_day']:
-        df = get_compressed_d3s_data(DB,sid,30,48)
-        csvfile = DataFile.csv_from_nickname(nick + '_d3s_day')
-        csvfile.df_to_file(df)
-
-    if get_data['get_week']:
-        df = get_compressed_d3s_data(DB,sid,60,168)
-        csvfile = DataFile.csv_from_nickname(nick + '_d3s_week')
-        csvfile.df_to_file(df)
-
-    if get_data['get_month']:
-        df = get_compressed_d3s_data(DB,sid,240,180)
-        csvfile = DataFile.csv_from_nickname(nick + '_d3s_month')
-        csvfile.df_to_file(df)
-
-    if get_data['get_year']:
-        df = get_compressed_d3s_data(DB,sid,2880,183)
-        csvfile = DataFile.csv_from_nickname(nick + '_d3s_year')
-        csvfile.df_to_file(df)
-
-    print('    Loaded compressed data for (id={}) {}'.format(sid, name))
-
-def make_dosenet_station_files(sid,name,nick,get_data):
-    """
-    generage all csv files for a station
-
-    Args:
-        sid: station ID
-        name: station Name
-        nick: station csv file nickname
-        get_data: dictionary of booleans for which data ranges to retreive
-            determined from command line arguments
-    """
-    print(get_data)
-    DB = SQLObject()
-    df = DB.getAll(sid)
-    print('    Loaded raw data')
-    csvfile = DataFile.csv_from_nickname(nick)
-    csvfile.df_to_file(df)
-
-    df = DB.getLastHour(sid)
-    csvfile = DataFile.csv_from_nickname(nick+'_hour')
-    csvfile.df_to_file(df)
+    if request_type == 'd3s':
+        get_compressed_data = get_compressed_d3s_data
+        nick = nick + '_d3s'
+    elif request_type = 'dosenet':
+        get_compressed_data = get_compressed_dosenet_data
+    else:
+        print('No data-type specified')
+        return None
 
     if get_data['get_day']:
-        df = get_compressed_dosenet_data(DB,sid,30,48)
+        df = get_compressed_data(DB,sid,30,48)
         csvfile = DataFile.csv_from_nickname(nick + '_day')
         csvfile.df_to_file(df)
 
     if get_data['get_week']:
-        df = get_compressed_dosenet_data(DB,sid,60,168)
+        df = get_compressed_data(DB,sid,60,168)
         csvfile = DataFile.csv_from_nickname(nick + '_week')
         csvfile.df_to_file(df)
 
     if get_data['get_month']:
-        df = get_compressed_dosenet_data(DB,sid,240,180)
+        df = get_compressed_data(DB,sid,240,180)
         csvfile = DataFile.csv_from_nickname(nick + '_month')
         csvfile.df_to_file(df)
 
     if get_data['get_year']:
-        df = get_compressed_dosenet_data(DB,sid,2880,183)
+        df = get_compressed_data(DB,sid,2880,183)
         csvfile = DataFile.csv_from_nickname(nick + '_year')
         csvfile.df_to_file(df)
 
@@ -230,7 +196,7 @@ def main(verbose=False,
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,))
+                                    args=(sid,name,nick,get_data,'dosenet'))
         p.start()
         all_processes.append(p)
         print()
@@ -238,6 +204,10 @@ def main(verbose=False,
     for sid, name, nick in zip(d3s_stations.index, d3s_stations['Name'],
                                d3s_stations['nickname']):
         print('(id={}) {}'.format(sid, name))
+        p = multiprocessing.Process(target=make_station_files,
+                                    args=(sid,name,nick,get_data,'d3s'))
+        p.start()
+        all_processes.append(p)
 
     for p in all_processes:
         p.join()
