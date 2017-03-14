@@ -29,6 +29,10 @@ def rebin(array,n):
     return array.reshape(len(array)/n,n).sum(1)
 
 def get_channels(channels,rebin_factor):
+    """
+    convert channel counts binary string from the database into a numpy array
+    and rebin by rebin_factor
+    """
     full_array = np.fromstring(channels,dtype=np.uint8)
     rebin_array = rebin(full_array,rebin_factor)
     return rebin_array
@@ -45,6 +49,9 @@ def get_rounded_time(t):
     return time.mktime(t.timetuple())
 
 def format_d3s_data(df):
+    """
+    format raw d3s data from database to format for output csv files
+    """
     df['channelCounts'] = df['channelCounts'].apply(
         lambda x: np.fromstring(x,dtype=np.uint8))
     df.insert(4,'cpmError',df['counts'].apply(lambda x: math.sqrt(x)/5))
