@@ -23,6 +23,7 @@ import subprocess
 import traceback as tb
 from slackclient import SlackClient
 from mysql.mysql_tools import SQLObject
+import MySQLdb as mdb
 
 SLACK_USER = 'dosenet_server'
 SLACK_CHANNEL = '#bugs_and_outages'
@@ -187,7 +188,11 @@ class DoseNetSlacker(object):
 
         while True:
             time.sleep(self.interval_s)
-            self.diff_status_and_report()
+            try:
+                self.diff_status_and_report()
+            except mdb.OperationalError:
+                self.post('MySQL server has gone away... will try again',
+                          icon_emoji=':disappointed:')
             print('Posted at {}'.format(datetime.datetime.now()))
 
     def diff_status_and_report(self):
