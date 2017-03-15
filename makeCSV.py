@@ -52,11 +52,17 @@ def format_d3s_data(df):
     """
     format raw d3s data from database to format for output csv files
     """
-    df['channelCounts'] = df['channelCounts'].apply(
-        lambda x: np.fromstring(x,dtype=np.uint8))
     df.insert(4,'cpmError',df['counts'].apply(lambda x: math.sqrt(x)/5))
     df['counts'] = df['counts']/5
     df.rename(columns = {'counts':'cpm'}, inplace = True)
+
+    df_channels = df['channelCounts'].apply(lambda x: get_channels(x,8))
+    # convert one column of list of channel counts to ncolumns = nchannels
+    df_channels = pd.DataFrame(
+        data=np.array(df_channels.as_matrix().tolist()))
+    # append to full df and remove original channelCount column
+    del df['channelCounts']
+    df = df.join(df_channels)
     return df
 
 def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
@@ -89,6 +95,12 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
             comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
             max_time = max_time - interval
 
+    # convert one column of list of channel counts to ncolumns = nchannels
+    df_channels = pd.DataFrame(
+        data=np.array(comp_df['channels'].as_matrix().tolist()))
+    # append to full df and remove original channelCount column
+    del comp_df['channels']
+    comp_df = comp_df.join(df_channels)
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
