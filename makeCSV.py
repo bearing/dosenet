@@ -55,14 +55,13 @@ def format_d3s_data(df):
     df.insert(4,'cpmError',df['counts'].apply(lambda x: math.sqrt(x)/5))
     df['counts'] = df['counts']/5
     df.rename(columns = {'counts':'cpm'}, inplace = True)
-    df.rename(columns = {'channelCounts':'channels'}, inplace = True)
 
     df_channels = df['channelCounts'].apply(lambda x: get_channels(x,8))
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
         data=np.array(df_channels.as_matrix().tolist()))
     # append to full df and remove original channelCount column
-    del df['channelCount']
+    del df['channelCounts']
     df = df.join(df_channels)
     return df
 
