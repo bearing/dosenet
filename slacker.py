@@ -396,7 +396,21 @@ class DoseNetSlacker(object):
         """
 
         self.sql.refresh()
-        df = self.sql.getLatestStationData(stationID, verbose=False)
+        try:
+            df = self.sql.getLatestStationData(stationID, verbose=False)
+        except IndexError:
+            # on SQLObject.getTimezoneFromID
+            # posted in Slack 3/24/2017 at 1:46pm
+            # try to replicate and debug
+            q = "SELECT timezone FROM stations WHERE `ID` = {};".format(
+                stationID)
+            tz = self.rawSql(q)
+            msg = '\n'.join(
+                'IndexError in SQLObject.getTimezoneFromID',
+                'q = {}'.format(q),
+                'tz = self.rawSql(q) = {}'.format(tz))
+            slacker.post('Exception: {}'.format(msg))
+
         try:
             elapsed_time = time.time() - df['deviceTime_unix']
         except KeyError:
