@@ -86,6 +86,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
                                     'channels'])
     for idx in range(n_intervals):
         df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
+        max_time = max_time - interval
         if len(df) > 0:
             comp_df.loc[idx,'channels'] = np.array(
                 [get_channels(x,8) for x in df.loc[:,'channelCounts']]).sum(0)
@@ -93,7 +94,6 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
             comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
             comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
             comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
-            max_time = max_time - interval
 
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
