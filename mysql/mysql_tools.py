@@ -319,6 +319,34 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
+    def getLatestD3SStationData(self, stationID):
+        df = pd.read_sql(
+            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
+             cpmtorem, display, nickname, timezone \
+             FROM d3s \
+             INNER JOIN stations \
+             ON dosnet.stationID = stations.ID \
+             WHERE deviceTime = \
+                (SELECT MAX(deviceTime) \
+                 FROM d3s \
+                 WHERE stationID='{0}') \
+             AND stationID='{0}';".format(stationID),
+            con=self.db)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            print('[SQL WARNING] no data returned for stationID=' +
+                  '{}'.format(stationID))
+            return pd.DataFrame({})
+        elif len(df) > 1:
+            print('[SQL WARNING] more than one recent result for stationID=' +
+                  '{}'.format(stationID))
+            print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
+
     def getLatestStationData(self, stationID):
         df = pd.read_sql(
             "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
