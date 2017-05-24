@@ -128,13 +128,14 @@ class SQLObject:
         """
         Insert a row of D3S data into the d3s table.
         """
-        spectrum = np.array(spectrum, dtype=np.uint16)
+        counts = sum(spectrum)
+        spectrum = np.array(spectrum, dtype=np.uint8)
         spectrum_blob = spectrum.tobytes()
         sql_cmd = (
             "INSERT INTO " +
-            "d3s(deviceTime, stationID, channelCounts, errorFlag) " +
-            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {});".format(
-                deviceTime, stationID, '%s', error_flag))
+            "d3s(deviceTime, stationID, counts, channelCounts, errorFlag) " +
+            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
+                deviceTime, stationID, counts, '%s', error_flag))
         # let MySQLdb library handle the special characters in the blob
         self.cursor.execute(sql_cmd, (spectrum_blob,))
         self.db.commit()
@@ -249,6 +250,14 @@ class SQLObject:
         del df['display']
         return df
 
+    def getActiveD3SStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[1]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
         df = pd.read_sql(
@@ -310,6 +319,34 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
+    def getLatestD3SStationData(self, stationID):
+        df = pd.read_sql(
+            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
+             cpmtorem, display, nickname, timezone \
+             FROM d3s \
+             INNER JOIN stations \
+             ON dosnet.stationID = stations.ID \
+             WHERE deviceTime = \
+                (SELECT MAX(deviceTime) \
+                 FROM d3s \
+                 WHERE stationID='{0}') \
+             AND stationID='{0}';".format(stationID),
+            con=self.db)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            print('[SQL WARNING] no data returned for stationID=' +
+                  '{}'.format(stationID))
+            return pd.DataFrame({})
+        elif len(df) > 1:
+            print('[SQL WARNING] more than one recent result for stationID=' +
+                  '{}'.format(stationID))
+            print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
+
     def getLatestStationData(self, stationID):
         df = pd.read_sql(
             "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
@@ -360,20 +397,53 @@ class SQLObject:
         tz = self.cursor.fetchall()
         return tz[0][0]
 
+    def getD3SDataForStationByRange(self, stationID, timemin, timemax):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
+            FROM d3s \
+            WHERE `d3s`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def getD3SDataForStationByInterval(self, stationID, intervalStr):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
+            FROM d3s \
+            WHERE `d3s`.`stationID`='{}' \
+            AND deviceTime >= (NOW() - {}) \
+            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
     def getDataForStationByRange(self, stationID, timemin, timemax):
-        q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), cpm, cpmError \
-        FROM dosnet \
-        WHERE `dosnet`.`stationID`='{}' \
-        AND receiveTime \
-        BETWEEN '{}' \
-        AND '{}';".format(stationID, timemin, timemax)
-        df = pd.read_sql(q, con=self.db)
-        return self.addTimeColumnsToDataframe(df)
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), cpm, cpmError \
+            FROM dosnet \
+            WHERE `dosnet`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
 
     def getDataForStationByInterval(self, stationID, intervalStr):
         # Make the query for this station on this interval
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
             cpm, cpmError\
             FROM dosnet \
             WHERE stationID={} \
@@ -387,14 +457,10 @@ class SQLObject:
 
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
-        Input dataframe from query with UNIX_TIMESTAMP for deviceTime and
-        receiveTime. The output has 6 time columns:
+        Input dataframe from query with UNIX_TIMESTAMP for deviceTime. The output has 3 time columns:
             deviceTime_unix (renamed from UNIX_TIMESTAMP(deviceTime))
             deviceTime_utc
             deviceTime_local
-            receiveTime_unix (renamed from UNIX_TIMESTAMP(receiveTime))
-            receiveTime_utc
-            receiveTime_local
 
         http://stackoverflow.com/questions/17159207/change-timezone-of-date-time-column-in-pandas-and-add-as-hierarchical-index
         """
@@ -413,35 +479,61 @@ class SQLObject:
         assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
         # Rename exist unix epoch seconds columns
         df.rename(inplace=True, columns={
-            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix',
-            'UNIX_TIMESTAMP(receiveTime)': 'receiveTime_unix'})
+            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix'})
         # Timezones are evil but pandas are fuzzy ...
         deviceTime = pd.Index(pd.to_datetime(df['deviceTime_unix'], unit='s')).tz_localize('UTC')
-        receiveTime = pd.Index(pd.to_datetime(df['receiveTime_unix'], unit='s')).tz_localize('UTC')
         df['deviceTime_utc'] = deviceTime
         df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
-        df['receiveTime_utc'] = receiveTime
-        df['receiveTime_local'] = receiveTime.tz_convert(this_tz)
         # Rearrange the columns (iterate in opposite order of placement)
         new_cols = df.columns.tolist()
-        for colname in ['receiveTime_unix', 'receiveTime_local',
-                        'receiveTime_utc', 'deviceTime_unix',
-                        'deviceTime_local', 'deviceTime_utc']:
+        for colname in ['deviceTime_unix',
+                        'deviceTime_local',
+                        'deviceTime_utc']:
             new_cols.insert(0, new_cols.pop(new_cols.index(colname)))
         df = df[new_cols]
         return df
 
-    def getLastDay(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 DAY')
+    def getLastHour(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            func = self.getD3SDataForStationByInterval
+        else:
+            func = self.getDataForStationByInterval
+        return func(stationID,'INTERVAL 1 HOUR')
 
-    def getLastWeek(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 WEEK')
+    def getLastDay(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            func = self.getD3SDataForStationByInterval
+        else:
+            func = self.getDataForStationByInterval
+        return func(stationID,'INTERVAL 1 DAY')
 
-    def getLastMonth(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 MONTH')
+    def getLastWeek(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            func = self.getD3SDataForStationByInterval
+        else:
+            func = self.getDataForStationByInterval
+        return func(stationID,'INTERVAL 1 WEEK')
 
-    def getLastYear(self, stationID):
-        return self.getDataForStationByInterval(stationID, 'INTERVAL 1 YEAR')
+    def getLastMonth(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            func = self.getD3SDataForStationByInterval
+        else:
+            func = self.getDataForStationByInterval
+        return func(stationID,'INTERVAL 1 MONTH')
+
+    def getLastYear(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            func = self.getD3SDataForStationByInterval
+        else:
+            func = self.getDataForStationByInterval
+        return func(stationID,'INTERVAL 1 YEAR')
+
+    def getAll(self, stationID, request_type=None):
+        if request_type == 'd3s':
+            func = self.getD3SDataForStationByInterval
+        else:
+            func = self.getDataForStationByInterval
+        return func(stationID,'INTERVAL 10 YEAR')
 
     def testLastMethods(self, stationID=1):
         print('Testing last data methods with stationID={}\n'.format(stationID))

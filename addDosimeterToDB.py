@@ -37,11 +37,14 @@ class Parser:
             'conv', type=float, nargs=1, help='CPM to mrem', metavar='CONV')
         parser.add_argument(
             'display', type=int, nargs=1, help='display on(1)/off(0)', metavar='DISPLAY')
+        parser.add_argument(
+            'devices', type=str, nargs=1, help='sensors on(1)/off(0)', metavar='DEVICES')
         self.args = parser.parse_args()
 
 
 class DBTool:
-    def __init__(self, name, nickname, lat, lon, cpmtorem, display, *ID):
+    def __init__(self, name, nickname, lat, lon, cpmtorem,
+                 display, devices, *ID):
         # Open database connection
         self.db = mdb.connect(
             "127.0.0.1",
@@ -62,6 +65,7 @@ class DBTool:
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
         self.display = display
+        self.devices = devices
         # prepare a cursor object using cursor() method
         self.cursor = self.db.cursor()
         self.md5hash = ''
@@ -94,21 +98,27 @@ class DBTool:
 
         # Adds a row to dosimeter_network.stations
         sql = ("INSERT INTO stations " +
-               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
+               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`," +
+               "`display`,`devices`,IDLatLongHash,`nickname`,`timezone`) " +
                "VALUES " +
-               "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
-               % (self.ID,self.name, self.lat, self.lon, self.cpmtorem, self.cpmtousv, self.display, self.nickname, self.timezone))
+               "('{}','{}','{}','{}','{}','{}','{}','{}',".format(
+                    self.ID, self.name, self.lat, self.lon, self.cpmtorem,
+                    self.cpmtousv, self.display, self.devices) +
+               "'This should not be here :(','{}','{}');".format(
+                    self.nickname,self.timezone))
         self.runSQL(sql)
         self.main()
 
     def addDosimeterWithID(self):
-        sql = (
-            "INSERT INTO stations " +
-            "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`,`display`,IDLatLongHash,`nickname`,`timezone`) " +
-            "VALUES " +
-            "('%s','%s','%s','%s','%s','%s','%s','This should not be here :(','%s','%s');"
-            % (self.ID, self.name, self.lat, self.lon, self.cpmtorem,
-               self.cpmtousv, self.display, self.nickname, self.timezone))
+        sql = ("INSERT INTO stations " +
+               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`," +
+               "`display`,`devices`,IDLatLongHash,`nickname`,`timezone`) " +
+               "VALUES " +
+               "('{}','{}','{}','{}','{}','{}','{}','{}',".format(
+                    self.ID, self.name, self.lat, self.lon, self.cpmtorem,
+                    self.cpmtousv, self.display, self.devices) +
+               "'This should not be here :(','{}','{}');".format(
+                    self.nickname,self.timezone))
         self.runSQL(sql)
         self.main()
 
@@ -228,10 +238,12 @@ if __name__ == "__main__":
     lon = parse.args.long[0]
     cpmtorem = parse.args.conv[0]
     display = parse.args.display[0]
+    devices = parse.args.devices[0]
     if not parse.args.ID:
-        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, devices)
     else:
         ID = parse.args.ID[0]
         print 'Forced ID: ', ID
-        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, ID)
+        dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display,
+                        devices, ID)
     sys.exit(0)

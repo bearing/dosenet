@@ -30,7 +30,7 @@ Affiliation:
 Created:
     Sun 2015-06-07
 Last updated:
-    2016-04-01
+    2017-03-14
 Originally adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 """
 
@@ -44,6 +44,7 @@ def main(verbose=False):
     # Get dataframe of active stations
     # -------------------------------------------------------------------------
     active_stations = DB.getActiveStations()
+    d3s_stations = DB.getActiveD3SStations()
     print(active_stations)
     # -------------------------------------------------------------------------
     # Make geojson features and URLs for raw CSV data
@@ -55,20 +56,21 @@ def main(verbose=False):
                        active_stations.loc[ix, 'Lat']])
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         latest_data = DB.getLatestStationData(ix)
+        has_d3s = ix in d3s_stations.index.values
         if len(latest_data) == 0:
             continue
-        dose_mrem = latest_data['cpmtorem'] * latest_data['cpm']
-        dose_usv = latest_data['cpmtousv'] * latest_data['cpm']
-        csv_fname = nickname_to_remote_csv_fname(latest_data['nickname'])
+        dose_mrem = 0.0036 * latest_data['cpm']
+        dose_usv = 0.036 * latest_data['cpm']
+        csv_fname = latest_data['nickname']
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
             ('mREM/hr', dose_mrem),
             ('&microSv/hr', dose_usv),
             ('csv_location', csv_fname),
+            ('has_d3s', has_d3s),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
-                  'receiveTime_unix', 'receiveTime_utc', 'receiveTime_local',
                   'timezone']:
             properties[k] = str(latest_data[k])
         feature_list.append(Feature(geometry=point, properties=properties))
