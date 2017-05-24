@@ -123,12 +123,12 @@ def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
     for idx in range(n_intervals):
         df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
+        max_time = max_time - interval
         if len(df) > 0:
             counts = df.loc[:,'cpm'].sum()*5
             comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
             comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
             comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
-            max_time = max_time - interval
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
