@@ -576,7 +576,7 @@ class Injector(object):
         elif request_type == 'AQ':
             print_status('Injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
-            inject_method = self.db.inject #similar to counter
+            inject_method = self.db.injectAQ
 
         try:
             inject_method(data)
