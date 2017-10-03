@@ -413,6 +413,7 @@ class Injector(object):
         num_data_fields_old = 5
         num_data_fields_new = 6
         num_d3s_fields = 5
+        num_AQ_fields = 5
 
         if (len(field_list) != num_log_fields and
                 len(field_list) != num_data_fields_old and
@@ -425,6 +426,8 @@ class Injector(object):
                     num_d3s_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
+        elif len(field_list) == num_AQ_fields and len(field_list[3]) == 9:
+            request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
                 len(field_list[3]) > 4096):
@@ -491,6 +494,13 @@ class Injector(object):
             ind_deviceTime = 2
             ind_spectrum = 3
             ind_error_flag = 4
+        elif request_type == 'AQ':
+            ind_deviceTime = 2
+            ind_average_data = 3
+            ind_conc_one = 0
+            ind_conc_twopointfive = 1
+            ind_conc_ten = 2
+            ind_error_flag = 4
 
         field_dict = OrderedDict()
 
@@ -519,6 +529,13 @@ class Injector(object):
         elif request_type == 'log':
             field_dict['msgCode'] = int(field_list[ind_msgCode])
             field_dict['msgText'] = field_list[ind_msgText]
+            
+        elif request_type == 'AQ':
+            field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            field_dict['oneMicron'] = float(field_list[ind_average_data][ind_conc_one])
+            field_dict['twoPointFiveMicron'] = float(field_list[ind_average_data][ind_conc_twopointfive])
+            field_dict['tenMicron'] = float(field_list[ind_average_data][ind_conc_ten])
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         return field_dict
 
@@ -556,6 +573,10 @@ class Injector(object):
             print_status('Injecting {} to log: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectLog
+        elif request_type == 'AQ':
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectAQ
 
         try:
             inject_method(data)
