@@ -31,7 +31,6 @@ import ast
 import multiprocessing
 import Crypto.Random
 from Crypto.Cipher import AES
-import ast
 
 # Extensible way for adding future imports
 import_list = ['crypt', 'mysql', 'udp']
