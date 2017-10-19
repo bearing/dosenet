@@ -245,7 +245,7 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
-            test_title = 1
+            test_time = 1
             test_data = [10, 20, 30, 40, 50, 60, 70, 80, 90]
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
