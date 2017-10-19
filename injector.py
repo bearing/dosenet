@@ -233,6 +233,25 @@ class Injector(object):
             # encrypted packet
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
+    
+    def make_test_packet_AQ(self):
+        """
+        Put together a test message for AQ.
+        """
+        if self.test_packet is None:
+            inj_stat = self.db.getInjectorStation()
+            test_hash = inj_stat['IDLatLongHash']
+            test_id = inj_stat.name
+            test_one = 20
+            test_two = 30
+            test_ten = 40
+            test_error_flag = 0
+            raw_packet = '{},{},{},{},{},{}'.format(
+                test_hash, test_id, test_one, test_two, test_ten, test_error_flag)
+            publickey = '/home/dosenet/id_rsa.pub'
+            en = ccrypt.public_d_encrypt(key_file_lst=[publickey])
+            self.test_packet = en.encrypt_message(raw_packet)[0]
+        return self.test_packet
 
     def test(self):
         """
