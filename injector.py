@@ -31,6 +31,7 @@ import ast
 import multiprocessing
 import Crypto.Random
 from Crypto.Cipher import AES
+import ast
 
 # Extensible way for adding future imports
 import_list = ['crypt', 'mysql', 'udp']
@@ -82,6 +83,7 @@ class Injector(object):
                  symmetric_key=SYMMETRIC_KEY,
                  udp_port=None,
                  tcp_port=None,
+                 test_device = None,
                  **kwargs):
         """
         Initialise decryption & database objects.
@@ -108,6 +110,7 @@ class Injector(object):
                 Default: dynamically determined
         """
 
+        self.test_device = test_device
         self.verbose = verbose
         self.test_inject = test_inject
         self.test_serve = test_serve
@@ -242,12 +245,11 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
-            test_one = 20
-            test_two = 30
-            test_ten = 40
+            test_title = 1
+            test_data = [10, 20, 30, 40, 50, 60, 70, 80, 90]
             test_error_flag = 0
-            raw_packet = '{},{},{},{},{},{}'.format(
-                test_hash, test_id, test_one, test_two, test_ten, test_error_flag)
+            raw_packet = '{},{},{},{},{}'.format(
+                test_hash, test_id, test_time, test_data, test_error_flag)
             publickey = '/home/dosenet/id_rsa.pub'
             en = ccrypt.public_d_encrypt(key_file_lst=[publickey])
             self.test_packet = en.encrypt_message(raw_packet)[0]
@@ -261,7 +263,12 @@ class Injector(object):
         """
 
         while True:
-            test_packet = self.make_test_packet()
+            if self.test_device = "AQ":
+                test_packet = self.make_test_packet_AQ()
+            if self.test_device = "Pocket":
+                test_packet = self.make_test_packet()
+            else:
+                test_packet = self.make_test_packet()
             self.handle(test_packet, mode='test')
             time.sleep(1.1)
 
@@ -551,9 +558,10 @@ class Injector(object):
             
         elif request_type == 'AQ':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
-            field_dict['oneMicron'] = float(field_list[ind_average_data][ind_conc_one])
-            field_dict['twoPointFiveMicron'] = float(field_list[ind_average_data][ind_conc_twopointfive])
-            field_dict['tenMicron'] = float(field_list[ind_average_data][ind_conc_ten])
+            tmp = ast.literal_eval(float(field_list[average_data])
+            field_dict['oneMicron'] = tmp[ind_conc_one]
+            field_dict['twoPointFiveMicron'] = tmp[ind_conc_twopointfive]
+            field_dict['tenMicron'] = tmp[ind_conc_ten]
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         return field_dict
@@ -873,4 +881,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--ip', type=str, default=None,
         help='\n\t Force a custom listening IP address for the server.')
+    parser.add_argument(
+        '-d', '--test_device', type=str, default=None,
+        help='\n\t Pick a device to emulate: AQ or Pocket.')
     main(**vars(parser.parse_args()))
