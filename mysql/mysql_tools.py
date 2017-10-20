@@ -123,7 +123,7 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
     
-    def insertIntoAQ(self, stationID, one_micron, two_point_five_micron, ten_micron,
+    def insertIntoAQ(self, stationID, oneMicron, twoPointFiveMicron, tenMicron,
                      error_flag, deviceTime, **kwargs):
         """
         Insert a row of Air Quality data into the Air Quality table
