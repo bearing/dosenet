@@ -137,7 +137,7 @@ class SQLObject:
             "INSERT INTO " +
             "AQ(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
-                deviceTime, stationID, one_micron, two_point_five_micron, ten_micron, error_flag))
+                deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
