@@ -138,8 +138,8 @@ class SQLObject:
             "AQ(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, one_micron, two_point_five_micron, ten_micron, error_flag))
-            self.cursor.execute(sql_cmd)
-            self.db.commit()
+        self.cursor.execute(sql_cmd)
+        self.db.commit()
 
     def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime,
                       **kwargs):
