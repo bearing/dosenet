@@ -685,6 +685,12 @@ def format_packet(data, client_address):
         if 'deviceTime' in data:
             output += ' at {}'.format(
                 datetime.datetime.fromtimestamp(data['deviceTime']))
+    elif 'oneMicron' in data.keys():
+        output = '#{}, 1 Micron: {}, 2.5 Microns: {}, 10 Microns: {}, err {}'.format(
+            data['stationID'], data['oneMicron'], data['twoPointFiveMicron'], data['tenMicron'], data['error_flag'])
+        if 'deviceTime' in data:
+            output += ' at {}'.format(
+                datetime.datetime.fromtimestamp(data['deviceTime']))
     else:
         # ???
         output = ' [packet type unknown to format_packet()]'
