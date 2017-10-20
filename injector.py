@@ -245,7 +245,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+            test_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
