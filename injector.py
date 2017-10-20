@@ -246,9 +246,10 @@ class Injector(object):
             test_id = inj_stat.name
             test_time = 1
             test_data = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+            new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
-                test_hash, test_id, test_time, test_data, test_error_flag)
+                test_hash, test_id, test_time, new_test_data, test_error_flag)
             en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
@@ -450,7 +451,9 @@ class Injector(object):
                     num_d3s_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
-        elif len(field_list) == num_AQ_fields and len(field_list[3]) == 9:
+        elif len(field_list) == num_AQ_fields and 
+                field_list[3].startswith('[') and 
+                len(field_list[3]) > 8:
             request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
@@ -556,7 +559,8 @@ class Injector(object):
             
         elif request_type == 'AQ':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
-            tmp = ast.literal_eval(field_list[average_data])
+            pre_tmp = str(field_list[average_data]).replace(';', ',')
+            tmp = ast.literal_eval(pre_tmp)
             field_dict['oneMicron'] = tmp[ind_conc_one]
             field_dict['twoPointFiveMicron'] = tmp[ind_conc_twopointfive]
             field_dict['tenMicron'] = tmp[ind_conc_ten]
