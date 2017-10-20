@@ -608,6 +608,7 @@ class Injector(object):
             inject_method = self.db.injectAQ
 
         try:
+            print(data)
             inject_method(data)
         except Exception as e:
             print('Injection error:', e)
