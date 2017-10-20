@@ -557,7 +557,7 @@ class Injector(object):
             
         elif request_type == 'AQ':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
-            tmp = ast.literal_eval(float(field_list[average_data])
+            tmp = ast.literal_eval(field_list[average_data])
             field_dict['oneMicron'] = tmp[ind_conc_one]
             field_dict['twoPointFiveMicron'] = tmp[ind_conc_twopointfive]
             field_dict['tenMicron'] = tmp[ind_conc_ten]
