@@ -40,6 +40,7 @@ from crypt import cust_crypt as ccrypt
 from mysql.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
+PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa.pub')
 SYMMETRIC_KEY = os.path.expanduser('~/secret.aes')
 
 UDP_PORT = 5005
@@ -230,8 +231,7 @@ class Injector(object):
             raw_packet = '{},{},{},{},{}'.format(
                 test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
             # encrypter
-            publickey = '/home/dosenet/id_rsa.pub'
-            en = ccrypt.public_d_encrypt(key_file_lst=[publickey])
+            en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             # encrypted packet
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
@@ -249,8 +249,7 @@ class Injector(object):
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
                 test_hash, test_id, test_time, test_data, test_error_flag)
-            publickey = '/home/dosenet/id_rsa.pub'
-            en = ccrypt.public_d_encrypt(key_file_lst=[publickey])
+            en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
 
