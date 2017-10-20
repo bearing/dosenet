@@ -794,8 +794,10 @@ class TcpHandler(SocketServer.StreamRequestHandler):
     def handle(self):
         is_aes = False
         firstdata = self.request.recv(PREPEND_LENGTH)
+        print(firstdata)
         try:
             msg_len = int(firstdata)
+            print(msg_len)
         except ValueError:
             # not AES. get the remainder of the RSA-encrypted message in one go
             remainder = self.request.recv(256)
