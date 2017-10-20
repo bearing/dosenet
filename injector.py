@@ -40,7 +40,7 @@ from crypt import cust_crypt as ccrypt
 from mysql.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
-PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa.pub')
+PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl.pub')
 SYMMETRIC_KEY = os.path.expanduser('~/secret.aes')
 
 UDP_PORT = 5005
