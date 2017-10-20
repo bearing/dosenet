@@ -801,6 +801,7 @@ class TcpHandler(SocketServer.StreamRequestHandler):
         except ValueError:
             # not AES. get the remainder of the RSA-encrypted message in one go
             remainder = self.request.recv(256)
+            print(remainder)
             data = firstdata + remainder
         else:
             is_aes = True
