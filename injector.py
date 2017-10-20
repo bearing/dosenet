@@ -451,9 +451,9 @@ class Injector(object):
                     num_d3s_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
-        elif len(field_list) == num_AQ_fields and 
+        elif (len(field_list) == num_AQ_fields and 
                 field_list[3].startswith('[') and 
-                len(field_list[3]) > 8:
+                len(field_list[3]) > 8):
             request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
