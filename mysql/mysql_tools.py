@@ -135,7 +135,7 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "AQ(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
+            "air_quality(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
         self.cursor.execute(sql_cmd)
