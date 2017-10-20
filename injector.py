@@ -82,6 +82,7 @@ class Injector(object):
                  symmetric_key=SYMMETRIC_KEY,
                  udp_port=None,
                  tcp_port=None,
+                 test_device = None,
                  **kwargs):
         """
         Initialise decryption & database objects.
@@ -108,6 +109,7 @@ class Injector(object):
                 Default: dynamically determined
         """
 
+        self.test_device = test_device
         self.verbose = verbose
         self.test_inject = test_inject
         self.test_serve = test_serve
@@ -233,6 +235,24 @@ class Injector(object):
             # encrypted packet
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
+    
+    def make_test_packet_AQ(self):
+        """
+        Put together a test message for AQ.
+        """
+        if self.test_packet is None:
+            inj_stat = self.db.getInjectorStation()
+            test_hash = inj_stat['IDLatLongHash']
+            test_id = inj_stat.name
+            test_time = 1
+            test_data = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+            test_error_flag = 0
+            raw_packet = '{},{},{},{},{}'.format(
+                test_hash, test_id, test_time, test_data, test_error_flag)
+            publickey = '/home/dosenet/id_rsa.pub'
+            en = ccrypt.public_d_encrypt(key_file_lst=[publickey])
+            self.test_packet = en.encrypt_message(raw_packet)[0]
+        return self.test_packet
 
     def test(self):
         """
@@ -242,7 +262,12 @@ class Injector(object):
         """
 
         while True:
-            test_packet = self.make_test_packet()
+            if self.test_device = "AQ":
+                test_packet = self.make_test_packet_AQ()
+            if self.test_device = "Pocket":
+                test_packet = self.make_test_packet()
+            else:
+                test_packet = self.make_test_packet()
             self.handle(test_packet, mode='test')
             time.sleep(1.1)
 
@@ -413,6 +438,7 @@ class Injector(object):
         num_data_fields_old = 5
         num_data_fields_new = 6
         num_d3s_fields = 5
+        num_AQ_fields = 5
 
         if (len(field_list) != num_log_fields and
                 len(field_list) != num_data_fields_old and
@@ -425,6 +451,8 @@ class Injector(object):
                     num_d3s_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
+        elif len(field_list) == num_AQ_fields and len(field_list[3]) == 9:
+            request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
                 len(field_list[3]) > 4096):
@@ -491,6 +519,13 @@ class Injector(object):
             ind_deviceTime = 2
             ind_spectrum = 3
             ind_error_flag = 4
+        elif request_type == 'AQ':
+            ind_deviceTime = 2
+            ind_average_data = 3
+            ind_conc_one = 0
+            ind_conc_twopointfive = 1
+            ind_conc_ten = 2
+            ind_error_flag = 4
 
         field_dict = OrderedDict()
 
@@ -519,6 +554,14 @@ class Injector(object):
         elif request_type == 'log':
             field_dict['msgCode'] = int(field_list[ind_msgCode])
             field_dict['msgText'] = field_list[ind_msgText]
+            
+        elif request_type == 'AQ':
+            field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            tmp = ast.literal_eval(float(field_list[average_data])
+            field_dict['oneMicron'] = tmp[ind_conc_one]
+            field_dict['twoPointFiveMicron'] = tmp[ind_conc_twopointfive]
+            field_dict['tenMicron'] = tmp[ind_conc_ten]
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         return field_dict
 
@@ -556,6 +599,10 @@ class Injector(object):
             print_status('Injecting {} to log: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectLog
+        elif request_type == 'AQ':
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectAQ
 
         try:
             inject_method(data)
@@ -833,4 +880,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--ip', type=str, default=None,
         help='\n\t Force a custom listening IP address for the server.')
+    parser.add_argument(
+        '-d', '--test_device', type=str, default=None,
+        help='\n\t Pick a device to emulate: AQ or Pocket.')
     main(**vars(parser.parse_args()))
