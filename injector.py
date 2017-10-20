@@ -262,9 +262,9 @@ class Injector(object):
         """
 
         while True:
-            if self.test_device = "AQ":
+            if self.test_device == "AQ":
                 test_packet = self.make_test_packet_AQ()
-            if self.test_device = "Pocket":
+            if self.test_device == "Pocket":
                 test_packet = self.make_test_packet()
             else:
                 test_packet = self.make_test_packet()
