@@ -267,7 +267,6 @@ class Injector(object):
                 test_packet = self.make_test_packet()
             else:
                 test_packet = self.make_test_packet()
-            print(test_packet)
             self.handle(test_packet, mode='test')
             time.sleep(1.1)
 
