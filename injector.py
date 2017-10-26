@@ -235,7 +235,7 @@ class Injector(object):
             # encrypted packet
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
-    
+
     def make_test_packet_AQ(self):
         """
         Put together a test message for AQ.
@@ -254,6 +254,24 @@ class Injector(object):
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
 
+    def make_test_packet_CO2(self):
+        """
+        Same thing as above but slightly different test data
+        """
+        if self.test_packet is None:
+            inj_stat = self.db.getInjectorStation()
+            test_hash = inj_stat['IDLatLongHash']
+            test_id = inj_stat.name
+            test_time = time.time()
+            test_data = [500, 3]
+            new_test_data = str(test_data).replace(',', ';')
+            test_error_flag = 0
+            raw_packet = '{},{},{},{},{}'.format(
+                test_hash, test_id, test_time, new_test_data, test_error_flag)
+            en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
+            self.test_packet = en.encrypt_message(raw_packet)[0]
+        return self.test_packet
+
     def test(self):
         """
         Test packet handling with make_test_packet() and handle().
@@ -264,6 +282,8 @@ class Injector(object):
         while True:
             if self.test_device == "AQ":
                 test_packet = self.make_test_packet_AQ()
+            if self.test_device == 'CO2':
+                test_packet = self.make_test_packet_CO2()
             if self.test_device == "Pocket":
                 test_packet = self.make_test_packet()
             else:
@@ -445,6 +465,7 @@ class Injector(object):
                 len(field_list) != num_data_fields_old and
                 len(field_list) != num_data_fields_new and
                 len(field_list) != num_d3s_fields and
+                len(field_list) != num_AQ_fields and
                 len(field_list) != num_co2_fields):
             raise PacketLengthError(
                 'Found {} fields instead of {}, {}, {}, {}, or {}'.format(
@@ -453,15 +474,17 @@ class Injector(object):
                     num_d3s_fields, num_co2_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
-        elif (len(field_list) == num_AQ_fields and 
-                field_list[3].startswith('[') and 
+        elif (len(field_list) == num_AQ_fields and
+                field_list[3].startswith('[') and
                 len(field_list[3]) > 8):
             request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
                 len(field_list[3]) > 4096):
             request_type = 'd3s'
-        elif len(field_list) == num_co2_fields:
+        elif len(field_list) == num_co2_fields and
+            field_list[3].startswith('[') and
+            len(field_list[3]) > 2:
             request_type = 'co2'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
@@ -532,6 +555,12 @@ class Injector(object):
             ind_conc_twopointfive = 1
             ind_conc_ten = 2
             ind_error_flag = 4
+        elif request_type == 'co2':
+            ind_deviceTime = 2
+            ind_average_data = 3
+            ind_co2_conc = 0
+            ind_uv_index = 1
+            ind_error_flag = 4
 
         field_dict = OrderedDict()
 
@@ -560,7 +589,7 @@ class Injector(object):
         elif request_type == 'log':
             field_dict['msgCode'] = int(field_list[ind_msgCode])
             field_dict['msgText'] = field_list[ind_msgText]
-            
+
         elif request_type == 'AQ':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
             pre_tmp = str(field_list[ind_average_data]).replace(';', ',')
@@ -568,6 +597,13 @@ class Injector(object):
             field_dict['oneMicron'] = tmp[ind_conc_one]
             field_dict['twoPointFiveMicron'] = tmp[ind_conc_twopointfive]
             field_dict['tenMicron'] = tmp[ind_conc_ten]
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
+
+        elif request_type == 'co2':
+            field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            avg_data = ast.literal_eval(str(field_list[ind_average_data]).replace(';', ','))
+            field_dict['co2_conc'] = avg_data[ind_co2_conc]
+            field_dict['uv_index'] = avg_data[ind_uv_index]
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         return field_dict
@@ -610,6 +646,10 @@ class Injector(object):
             print_status('Injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectAQ
+        elif request_type == 'co2':
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectCO2
 
         try:
             print(data)
@@ -896,5 +936,5 @@ if __name__ == "__main__":
         help='\n\t Force a custom listening IP address for the server.')
     parser.add_argument(
         '-d', '--test_device', type=str, default=None,
-        help='\n\t Pick a device to emulate: AQ or Pocket.')
+        help='\n\t Pick a device to emulate: AQ, CO2 or Pocket.')
     main(**vars(parser.parse_args()))
