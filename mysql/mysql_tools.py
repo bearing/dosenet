@@ -241,8 +241,8 @@ class SQLObject:
             data_types = {'hash': str, 'stationID': int, 'oneMicron': float, 'twoPointFiveMicron':
                           float, 'tenMicron': float, 'error_flag': int}
         elif packettype == 'CO2':
-            data_types = {'hash': str, 'stationID': int, 'co2_conc': float, 'uv_index':
-                          float, 'error_flag': int}
+            data_types = {'hash': str, 'stationID': int, 'co2_conc': int, 'uv_index':
+                          int, 'error_flag': int}
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'msgText': str}
