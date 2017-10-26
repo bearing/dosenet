@@ -483,8 +483,8 @@ class Injector(object):
                 len(field_list[3]) > 4096):
             request_type = 'd3s'
         elif len(field_list) == num_co2_fields and
-            field_list[3].startswith('[') and
-            len(field_list[3]) > 2:
+                field_list[3].startswith('[') and
+                len(field_list[3]) > 2:
             request_type = 'co2'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
