@@ -736,6 +736,12 @@ def format_packet(data, client_address):
         if 'deviceTime' in data:
             output += ' at {}'.format(
                 datetime.datetime.fromtimestamp(data['deviceTime']))
+    elif 'co2_conc' in data.keys():
+        output = '#{}, CO2 Concentration: {}, UV Index: {}, err {}'.format(
+            data['stationID'], data['co2_conc'], data['uv_index'], data['error_flag'])
+        if 'deviceTime' in data:
+            output += ' at {}'.format(
+                datetime.datetime.fromtimestamp(data['deviceTime']))
     else:
         # ???
         output = ' [packet type unknown to format_packet()]'
