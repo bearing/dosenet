@@ -486,9 +486,7 @@ class Injector(object):
                 field_list[3].startswith('[') and
                 len(field_list[3]) > 2):
             request_type = 'co2'
-            print("This is working")
-            print(len(field_list[3]))
-            print(field_list[3][1])
+            print(field_list)
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
         elif len(field_list) == num_data_fields_new:
