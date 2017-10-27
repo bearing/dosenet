@@ -245,7 +245,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0]
+            test_data = [169, 229, 331, 428324, 11223, 4142, 522, 84, 24]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -476,7 +476,8 @@ class Injector(object):
             request_type = 'log'
         elif (len(field_list) == num_AQ_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) > 8):
+                len(field_list[3]) >= 27 and
+                len(field_list[3]) <= 50):
             request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
@@ -484,9 +485,9 @@ class Injector(object):
             request_type = 'd3s'
         elif (len(field_list) == num_co2_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) > 2):
+                len(field_list[3]) >= 6 and
+                len(field_list[3]) <= 11):
             request_type = 'co2'
-            print(field_list)
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
         elif len(field_list) == num_data_fields_new:

@@ -238,8 +238,8 @@ class SQLObject:
                     'Spectrum length is {}, should be 4096'.format(
                         len(data['spectrum'])))
         elif packettype == 'AQ':
-            data_types = {'hash': str, 'stationID': int, 'oneMicron': float, 'twoPointFiveMicron':
-                          float, 'tenMicron': float, 'error_flag': int}
+            data_types = {'hash': str, 'stationID': int, 'oneMicron': int, 'twoPointFiveMicron':
+                          int, 'tenMicron': int, 'error_flag': int}
         elif packettype == 'CO2':
             data_types = {'hash': str, 'stationID': int, 'co2_conc': int, 'uv_index':
                           int, 'error_flag': int}
