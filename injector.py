@@ -488,6 +488,7 @@ class Injector(object):
             request_type = 'co2'
             print("This is working")
             print(len(field_list[3]))
+            print(field_list[3])
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
         elif len(field_list) == num_data_fields_new:
