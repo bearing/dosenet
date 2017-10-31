@@ -158,6 +158,24 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
+    def insertIntoWeather(self, stationID, temperature, pressure,
+                          humidity, error_flag, deviceTime, **kwargs):
+        """
+        Insert a row of Weather data into the Weather table
+        """
+        if (not isinstance(deviceTime, int) and
+                not isinstance(deviceTime, float)):
+            if deviceTime is not None:
+                print('Warning: received non-numeric deviceTime! Ignoring')
+            deviceTime = time.time()
+        sql_cmd = (
+            "INSERT INTO " +
+            "weather(deviceTime, stationID, temperature, pressure, humidity, error_flag) " +
+            "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
+                deviceTime, stationID, temperature, pressure, humidity, error_flag))
+        self.cursor.execute(sql_cmd)
+        self.db.commit()
+
     def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime,
                       **kwargs):
         """
@@ -204,6 +222,11 @@ class SQLObject:
         self.authenticatePacket(data, packettype='CO2')
         self.insertIntoCO2(**data)
 
+    def injectWeather(self, data):
+        """Authenticate the Weather data packet and then insert into database"""
+        self.authenticatePacket(data, packettype='Weather')
+        self.insertIntoWeather(**data)
+
     def injectLog(self, data):
         """Authenticate the log packet and then insert into database"""
         self.authenticatePacket(data, packettype='log')
@@ -243,6 +266,9 @@ class SQLObject:
         elif packettype == 'CO2':
             data_types = {'hash': str, 'stationID': int, 'co2_conc': int, 'uv_index':
                           int, 'error_flag': int}
+        elif packettype == 'Weather':
+            data_types = {'hash': str, 'stationID': int, 'temperature': float, 'pressure':
+                          float, 'humidity': float, 'error_flag': int}
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'msgText': str}

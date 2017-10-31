@@ -256,7 +256,7 @@ class Injector(object):
 
     def make_test_packet_CO2(self):
         """
-        Same thing as above but slightly different test data
+        Put together a test message for CO2.
         """
         if self.test_packet is None:
             inj_stat = self.db.getInjectorStation()
@@ -264,6 +264,24 @@ class Injector(object):
             test_id = inj_stat.name
             test_time = time.time()
             test_data = [500, 3]
+            new_test_data = str(test_data).replace(',', ';')
+            test_error_flag = 0
+            raw_packet = '{},{},{},{},{}'.format(
+                test_hash, test_id, test_time, new_test_data, test_error_flag)
+            en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
+            self.test_packet = en.encrypt_message(raw_packet)[0]
+        return self.test_packet
+
+    def make_test_packet_Weather(self):
+        """
+        Put together a test message for Weather.
+        """
+        if self.test_packet is None:
+            inj_stat = self.db.getInjectorStation()
+            test_hash = inj_stat['IDLatLongHash']
+            test_id = inj_stat.name
+            test_time = time.time()
+            test_data = [21.5289489990064, 999.798637522079, 36,0051166252177]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -286,6 +304,8 @@ class Injector(object):
                 test_packet = self.make_test_packet_CO2()
             if self.test_device == "Pocket":
                 test_packet = self.make_test_packet()
+            if self.test_device == 'Weather':
+                test_packet = self.make_test_packet_Weather()
             else:
                 test_packet = self.make_test_packet()
             self.handle(test_packet, mode='test')
@@ -488,6 +508,11 @@ class Injector(object):
                 len(field_list[3]) >= 6 and
                 len(field_list[3]) <= 11):
             request_type = 'co2'
+        elif (len(field_list) == num_weather_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) >= 52 and
+                len(field_list[3]) <= 57):
+            request_type = 'weather'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
         elif len(field_list) == num_data_fields_new:
@@ -563,6 +588,13 @@ class Injector(object):
             ind_co2_conc = 0
             ind_uv_index = 1
             ind_error_flag = 4
+        elif request_type == 'weather':
+            ind_deviceTime = 2
+            ind_average_data = 3
+            ind_temp = 0
+            ind_pres = 1
+            ind_humid = 2
+            ind_error_flag = 4
 
         field_dict = OrderedDict()
 
@@ -594,8 +626,7 @@ class Injector(object):
 
         elif request_type == 'AQ':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
-            pre_tmp = str(field_list[ind_average_data]).replace(';', ',')
-            tmp = ast.literal_eval(pre_tmp)
+            tmp = ast.literal_eval(str(field_list[ind_average_data]).replace(';', ','))
             field_dict['oneMicron'] = tmp[ind_conc_one]
             field_dict['twoPointFiveMicron'] = tmp[ind_conc_twopointfive]
             field_dict['tenMicron'] = tmp[ind_conc_ten]
@@ -603,9 +634,17 @@ class Injector(object):
 
         elif request_type == 'co2':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
-            avg_data = ast.literal_eval(str(field_list[ind_average_data]).replace(';', ','))
-            field_dict['co2_conc'] = avg_data[ind_co2_conc]
-            field_dict['uv_index'] = avg_data[ind_uv_index]
+            tmp = ast.literal_eval(str(field_list[ind_average_data]).replace(';', ','))
+            field_dict['co2_conc'] = tmp[ind_co2_conc]
+            field_dict['uv_index'] = tmp[ind_uv_index]
+            field_dict['error_flag'] = int(field_list[ind_error_flag])
+
+        elif request_type == 'weather':
+            field_dict['deviceTime'] = float(field_list[ind_deviceTime])
+            tmp = ast.literal_eval(str(field_list[ind_average_data]).replace(';', ','))
+            field_dict['temperature'] = tmp[ind_temp]
+            field_dict['pressure'] = tmp[ind_pres]
+            field_dict['humidity'] = tmp[ind_humid]
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
         return field_dict
@@ -652,6 +691,10 @@ class Injector(object):
             print_status('Injecting {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectCO2
+        elif request_type == 'weather':
+            print_status('Injecting {}: {}'.format(
+                mode.upper(), format_packet(data, client_address)))
+            inject_method = self.db.injectWeather
 
         try:
             print(data)
@@ -741,6 +784,13 @@ def format_packet(data, client_address):
     elif 'co2_conc' in data.keys():
         output = '#{}, CO2 Concentration: {}, UV Index: {}, err {}'.format(
             data['stationID'], data['co2_conc'], data['uv_index'], data['error_flag'])
+        if 'deviceTime' in data:
+            output += ' at {}'.format(
+                datetime.datetime.fromtimestamp(data['deviceTime']))
+    elif 'temperature' in data.keys():
+        output = '#{}, Temperature: {}, Pressure: {}, Humidity: {}, err {}'.format(
+            data['stationID'], data['temperature'], data['pressure'], data['humidity'],
+            data['error_flag'])
         if 'deviceTime' in data:
             output += ' at {}'.format(
                 datetime.datetime.fromtimestamp(data['deviceTime']))
