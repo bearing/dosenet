@@ -994,5 +994,5 @@ if __name__ == "__main__":
         help='\n\t Force a custom listening IP address for the server.')
     parser.add_argument(
         '-d', '--test_device', type=str, default=None,
-        help='\n\t Pick a device to emulate: AQ, CO2 or Pocket.')
+        help='\n\t Pick a device to emulate: AQ, CO2, Weather or Pocket.')
     main(**vars(parser.parse_args()))
