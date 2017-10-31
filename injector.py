@@ -480,18 +480,20 @@ class Injector(object):
         num_d3s_fields = 5
         num_AQ_fields = 5
         num_co2_fields = 5
+        num_weather_fields = 5
 
         if (len(field_list) != num_log_fields and
                 len(field_list) != num_data_fields_old and
                 len(field_list) != num_data_fields_new and
                 len(field_list) != num_d3s_fields and
                 len(field_list) != num_AQ_fields and
-                len(field_list) != num_co2_fields):
+                len(field_list) != num_co2_fields and
+                len(field_list) != num_weather_fields):
             raise PacketLengthError(
                 'Found {} fields instead of {}, {}, {}, {}, or {}'.format(
                     len(field_list),
                     num_log_fields, num_data_fields_old, num_data_fields_new,
-                    num_d3s_fields, num_co2_fields))
+                    num_d3s_fields, num_co2_fields, num_weather_fields))
         elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
             request_type = 'log'
         elif (len(field_list) == num_AQ_fields and
