@@ -172,7 +172,7 @@ class SQLObject:
             "INSERT INTO " +
             "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
-                deviceTime, stationID, temperature, pressure, humidity, errorFlag))
+                deviceTime, stationID, temperature, pressure, humidity, error_flag))
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
