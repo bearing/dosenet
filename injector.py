@@ -482,7 +482,6 @@ class Injector(object):
         num_co2_fields = 5
         num_weather_fields = 5
 
-        print(field_list)
         if (len(field_list) != num_log_fields and
                 len(field_list) != num_data_fields_old and
                 len(field_list) != num_data_fields_new and
