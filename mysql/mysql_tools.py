@@ -141,7 +141,7 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
-    def insertIntoCO2(self, stationID, co2_conc, uv_index, error_flag, deviceTime, **kwargs):
+    def insertIntoCO2(self, stationID, co2, noise, error_flag, deviceTime, **kwargs):
         """
         Insert a row of CO2 data into the CO2 table
         """
@@ -152,9 +152,9 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "co2(deviceTime, stationID, co2_conc, uv_ind, error_flag) " +
+            "co2(deviceTime, stationID, co2, uv_ind, error_flag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
-                deviceTime, stationID, co2_conc, uv_index, error_flag))
+                deviceTime, stationID, co2, noise, error_flag))
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
@@ -264,7 +264,7 @@ class SQLObject:
             data_types = {'hash': str, 'stationID': int, 'oneMicron': int, 'twoPointFiveMicron':
                           int, 'tenMicron': int, 'error_flag': int}
         elif packettype == 'CO2':
-            data_types = {'hash': str, 'stationID': int, 'co2_conc': int, 'uv_index':
+            data_types = {'hash': str, 'stationID': int, 'co2': int, 'noise':
                           int, 'error_flag': int}
         elif packettype == 'Weather':
             data_types = {'hash': str, 'stationID': int, 'temperature': float, 'pressure':
