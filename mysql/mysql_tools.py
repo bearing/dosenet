@@ -152,7 +152,7 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "adc(deviceTime, stationID, co2_ppm, noise, error_flag) " +
+            "adc(deviceTime, stationID, co2_ppm, noise, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, co2_ppm, noise, error_flag))
         self.cursor.execute(sql_cmd)
@@ -170,9 +170,9 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "weather(deviceTime, stationID, temperature, pressure, humidity, error_flag) " +
+            "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
-                deviceTime, stationID, temperature, pressure, humidity, error_flag))
+                deviceTime, stationID, temperature, pressure, humidity, errorFlag))
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
