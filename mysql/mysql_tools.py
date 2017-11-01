@@ -267,8 +267,8 @@ class SQLObject:
             data_types = {'hash': str, 'stationID': int, 'co2_ppm': int, 'noise':
                           int, 'error_flag': int}
         elif packettype == 'Weather':
-            data_types = {'hash': str, 'stationID': int, 'temperature': float, 'pressure':
-                          float, 'humidity': float, 'error_flag': int}
+            data_types = {'hash': str, 'stationID': int, 'temperature': int, 'pressure':
+                          int, 'humidity': int, 'error_flag': int}
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'msgText': str}
