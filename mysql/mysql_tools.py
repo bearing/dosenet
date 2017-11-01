@@ -152,7 +152,7 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "adc(deviceTime, stationID, co2_ppm, noise, error_flag) " +
+            "adc(deviceTime, stationID, co2_ppm, noise, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, co2_ppm, noise, error_flag))
         self.cursor.execute(sql_cmd)
@@ -170,7 +170,7 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "weather(deviceTime, stationID, temperature, pressure, humidity, error_flag) " +
+            "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, temperature, pressure, humidity, error_flag))
         self.cursor.execute(sql_cmd)
@@ -267,8 +267,8 @@ class SQLObject:
             data_types = {'hash': str, 'stationID': int, 'co2_ppm': int, 'noise':
                           int, 'error_flag': int}
         elif packettype == 'Weather':
-            data_types = {'hash': str, 'stationID': int, 'temperature': float, 'pressure':
-                          float, 'humidity': float, 'error_flag': int}
+            data_types = {'hash': str, 'stationID': int, 'temperature': int, 'pressure':
+                          int, 'humidity': int, 'error_flag': int}
         elif packettype == 'log':
             data_types = {'hash': str, 'stationID': int, 'msgCode': int,
                           'msgText': str}
