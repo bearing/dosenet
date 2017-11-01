@@ -152,7 +152,7 @@ class SQLObject:
             deviceTime = time.time()
         sql_cmd = (
             "INSERT INTO " +
-            "co2(deviceTime, stationID, co2_ppm, uv_ind, error_flag) " +
+            "adc(deviceTime, stationID, co2_ppm, noise, error_flag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, co2_ppm, noise, error_flag))
         self.cursor.execute(sql_cmd)
