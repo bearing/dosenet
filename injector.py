@@ -587,7 +587,7 @@ class Injector(object):
         elif request_type == 'co2':
             ind_deviceTime = 2
             ind_average_data = 3
-            ind_co2 = 0
+            ind_co2_ppm = 0
             ind_noise = 1
             ind_error_flag = 4
         elif request_type == 'weather':
@@ -637,7 +637,7 @@ class Injector(object):
         elif request_type == 'co2':
             field_dict['deviceTime'] = float(field_list[ind_deviceTime])
             tmp = ast.literal_eval(str(field_list[ind_average_data]).replace(';', ','))
-            field_dict['co2'] = tmp[ind_co2]
+            field_dict['co2_ppm'] = tmp[ind_co2_ppm]
             field_dict['noise'] = tmp[ind_noise]
             field_dict['error_flag'] = int(field_list[ind_error_flag])
 
@@ -783,9 +783,9 @@ def format_packet(data, client_address):
         if 'deviceTime' in data:
             output += ' at {}'.format(
                 datetime.datetime.fromtimestamp(data['deviceTime']))
-    elif 'co2' in data.keys():
+    elif 'co2_ppm' in data.keys():
         output = '#{}, CO2 Concentration: {}, UV Index: {}, err {}'.format(
-            data['stationID'], data['co2'], data['noise'], data['error_flag'])
+            data['stationID'], data['co2_ppm'], data['noise'], data['error_flag'])
         if 'deviceTime' in data:
             output += ' at {}'.format(
                 datetime.datetime.fromtimestamp(data['deviceTime']))
