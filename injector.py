@@ -514,6 +514,7 @@ class Injector(object):
                 field_list[3].startswith('[') and
                 len(field_list[3]) >= 20 and
                 len(field_list[3]) <= 25):
+
             request_type = 'weather'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
@@ -699,7 +700,6 @@ class Injector(object):
             inject_method = self.db.injectWeather
 
         try:
-            print(data)
             inject_method(data)
         except Exception as e:
             print('Injection error:', e)
