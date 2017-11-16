@@ -245,7 +245,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [169.00, 229.00, 331.00, 428324.00, 11223.00, 4142.00, 522.00, 84.00, 24.00]
+            test_data = [169.01, 229.01, 331.01, 428324.01, 11223.01, 4142.01, 522.01, 84.01, 24.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -263,7 +263,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [500.00, 3.00]
+            test_data = [500.01, 3.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -281,7 +281,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [21.523, 999.80, 36.01]
+            test_data = [21.523, 999.81, 36.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
