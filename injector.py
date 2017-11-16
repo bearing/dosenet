@@ -508,7 +508,7 @@ class Injector(object):
         elif (len(field_list) == num_co2_fields and
                 field_list[3].startswith('[') and
                 len(field_list[3]) >= 12 and
-                len(field_list[3]) <= 16):
+                len(field_list[3]) <= 19):
             request_type = 'co2'
         elif (len(field_list) == num_weather_fields and
                 field_list[3].startswith('[') and
