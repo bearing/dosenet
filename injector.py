@@ -507,13 +507,13 @@ class Injector(object):
             request_type = 'd3s'
         elif (len(field_list) == num_co2_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 9 and
-                len(field_list[3]) <= 13):
+                len(field_list[3]) >= 12 and
+                len(field_list[3]) <= 16):
             request_type = 'co2'
         elif (len(field_list) == num_weather_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 14 and
-                len(field_list[3]) <= 19):
+                len(field_list[3]) >= 20 and
+                len(field_list[3]) <= 25):
             request_type = 'weather'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
