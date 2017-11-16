@@ -245,7 +245,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [169, 229, 331, 428324, 11223, 4142, 522, 84, 24]
+            test_data = [169.01, 229.01, 331.01, 428324.01, 11223.01, 4142.01, 522.01, 84.01, 24.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -263,7 +263,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [500, 3]
+            test_data = [500.01, 3.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -281,7 +281,7 @@ class Injector(object):
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
             test_time = time.time()
-            test_data = [21.5289489990064, 999.798637522079, 36.0051166252177]
+            test_data = [21.52, 999.81, 36.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
             raw_packet = '{},{},{},{},{}'.format(
@@ -498,8 +498,8 @@ class Injector(object):
             request_type = 'log'
         elif (len(field_list) == num_AQ_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 27 and
-                len(field_list[3]) <= 50):
+                len(field_list[3]) >= 54 and
+                len(field_list[3]) <= 77):
             request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
@@ -507,13 +507,13 @@ class Injector(object):
             request_type = 'd3s'
         elif (len(field_list) == num_co2_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 6 and
-                len(field_list[3]) <= 10):
+                len(field_list[3]) >= 12 and
+                len(field_list[3]) <= 16):
             request_type = 'co2'
         elif (len(field_list) == num_weather_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 11 and
-                len(field_list[3]) <= 16):
+                len(field_list[3]) >= 20 and
+                len(field_list[3]) <= 25):
             request_type = 'weather'
         elif len(field_list) == num_data_fields_old:
             request_type = 'data_old'
