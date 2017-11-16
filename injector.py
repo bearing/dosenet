@@ -700,7 +700,6 @@ class Injector(object):
             inject_method = self.db.injectWeather
 
         try:
-            print(data)
             inject_method(data)
         except Exception as e:
             print('Injection error:', e)
