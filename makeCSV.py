@@ -154,7 +154,6 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals):
         df = DB.getAQDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
         if len(df) > 0:
-            counts = df.loc[:,'cpm'].sum()*5
             comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
             comp_df.loc[idx,'PM1'] = df.loc[:,'PM1'].sum()/len(df)
             comp_df.loc[idx,'PM25'] = df.loc[:,'PM25'].sum()/len(df)
