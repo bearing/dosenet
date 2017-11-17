@@ -525,6 +525,22 @@ class SQLObject:
             print(e)
             return pd.DataFrame({})
 
+    def getAQDataForStationByRange(self, stationID, timemin, timemax):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
+            PM1, PM25, PM10 \
+            FROM air_quality \
+            WHERE `air_quality`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
     def getDataForStationByInterval(self, stationID, intervalStr):
         # Make the query for this station on this interval
         try:
@@ -543,7 +559,7 @@ class SQLObject:
     def getAQDataForStationByInterval(self, stationID, intervalStr):
         try:
             q = "SELECT UNIX_TIMESTAMP(deviceTime), \
-            PM1, PM25, PM10\
+            PM1, PM25, PM10 \
             FROM air_quality \
             WHERE stationID={} \
             AND deviceTime >= (NOW() - {}) \
@@ -604,6 +620,8 @@ class SQLObject:
     def getLastDay(self, stationID, request_type=None):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
+        elif request_type == 'aq':
+            func = self.getAQDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 DAY')
@@ -611,6 +629,8 @@ class SQLObject:
     def getLastWeek(self, stationID, request_type=None):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
+        elif request_type == 'aq':
+            func = self.getAQDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 WEEK')
@@ -618,6 +638,8 @@ class SQLObject:
     def getLastMonth(self, stationID, request_type=None):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
+        elif request_type == 'aq':
+            func = self.getAQDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 MONTH')
@@ -625,6 +647,8 @@ class SQLObject:
     def getLastYear(self, stationID, request_type=None):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
+        elif request_type == 'aq':
+            func = self.getAQDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 YEAR')
