@@ -56,7 +56,7 @@ def format_d3s_data(df):
     df['counts'] = df['counts']/5
     df.rename(columns = {'counts':'cpm'}, inplace = True)
 
-    df_channels = df['channelCounts'].apply(lambda x: get_channels(x,8))
+    df_channels = df['channelCounts'].apply(lambda x: get_channels(x,4))
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
         data=np.array(df_channels.as_matrix().tolist()))
@@ -89,7 +89,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
         max_time = max_time - interval
         if len(df) > 0:
             comp_df.loc[idx,'channels'] = np.array(
-                [get_channels(x,8) for x in df.loc[:,'channelCounts']]).sum(0)
+                [get_channels(x,4) for x in df.loc[:,'channelCounts']]).sum(0)
             counts = df.loc[:,'counts'].sum()
             comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
             comp_df.loc[idx,'cpm'] = counts/(len(df)*5)

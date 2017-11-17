@@ -335,6 +335,14 @@ class SQLObject:
                           index=df['devices'].index)]
         return df
 
+    def getActiveAQStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[2]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[2]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
         df = pd.read_sql(
@@ -532,6 +540,20 @@ class SQLObject:
             print(e)
             return pd.DataFrame({})
 
+    def getAQDataForStationByInterval(self, stationID, intervalStr):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
+            PM1, PM25, PM10\
+            FROM air_quality \
+            WHERE stationID={} \
+            AND deviceTime >= (NOW() - {}) \
+            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
         Input dataframe from query with UNIX_TIMESTAMP for deviceTime. The output has 3 time columns:
@@ -573,6 +595,8 @@ class SQLObject:
     def getLastHour(self, stationID, request_type=None):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
+        elif request_type == 'aq':
+            func = self.getAQDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 HOUR')
@@ -608,6 +632,8 @@ class SQLObject:
     def getAll(self, stationID, request_type=None):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
+        elif request_type == 'aq':
+            func = self.getAQDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 10 YEAR')
