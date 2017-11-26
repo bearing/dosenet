@@ -209,7 +209,7 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals):
 
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
     for idx in range(n_intervals):
-        df = DB.getWeatherDataForStationByRange(sid,max_time - interval,max_time)
+        df = DB.getADCDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
         if len(df) > 0:
             comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
