@@ -544,7 +544,7 @@ class SQLObject:
     def getADCDataForStationByRange(self, stationID, timemin, timemax):
         try:
             q = "SELECT UNIX_TIMESTAMP(deviceTime), \
-            co2_ppm, noise, \
+            co2_ppm, noise \
             FROM adc \
             WHERE `adc`.`stationID`='{}' \
             AND UNIX_TIMESTAMP(deviceTime) \
@@ -634,8 +634,7 @@ class SQLObject:
 
     def getADCDataForStationByInterval(self, stationID, intervalStr):
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
-            co2_ppm, noise, \
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), co2_ppm, noise \
             FROM adc \
             WHERE stationID={} \
             AND deviceTime >= (NOW() - {}) \
