@@ -149,7 +149,7 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
 
-    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','PM1','PM25','PM10'])
     for idx in range(n_intervals):
         df = DB.getAQDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
@@ -178,7 +178,8 @@ def get_compressed_weather_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
 
-    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','temperature',
+                                    'pressure','humidity'])
     for idx in range(n_intervals):
         df = DB.getWeatherDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
@@ -207,7 +208,7 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
 
-    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','co2_ppm','noise'])
     for idx in range(n_intervals):
         df = DB.getADCDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
