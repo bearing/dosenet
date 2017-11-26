@@ -162,6 +162,63 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
+def get_compressed_weather_data(DB,sid,integration_time,n_intervals):
+    """
+    get station data from the database for some number of time bins
+
+    Args:
+        DB: database object
+        sid: station ID
+        integration_time: time bin (min) to average over
+        n_intervals: number of time bins to retreive
+    Returns:
+        DataFrame with 3 time columns and 3 data columns:
+            deviceTime_[utc, local, unix] pm1.0, pm2.5, pm10
+    """
+    interval = dt.timedelta(minutes=integration_time).total_seconds()
+    max_time = get_rounded_time(dt.datetime.now())
+
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+    for idx in range(n_intervals):
+        df = DB.getWeatherDataForStationByRange(sid,max_time - interval,max_time)
+        max_time = max_time - interval
+        if len(df) > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
+            comp_df.loc[idx,'temperature'] = df.loc[:,'temperature'].sum()/len(df)
+            comp_df.loc[idx,'pressure'] = df.loc[:,'pressure'].sum()/len(df)
+            comp_df.loc[idx,'humidity'] = df.loc[:,'humidity'].sum()/len(df)
+
+    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
+    return comp_df
+
+def get_compressed_adc_data(DB,sid,integration_time,n_intervals):
+    """
+    get station data from the database for some number of time bins
+
+    Args:
+        DB: database object
+        sid: station ID
+        integration_time: time bin (min) to average over
+        n_intervals: number of time bins to retreive
+    Returns:
+        DataFrame with 3 time columns and 3 data columns:
+            deviceTime_[utc, local, unix] pm1.0, pm2.5, pm10
+    """
+    interval = dt.timedelta(minutes=integration_time).total_seconds()
+    max_time = get_rounded_time(dt.datetime.now())
+
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+    for idx in range(n_intervals):
+        df = DB.getWeatherDataForStationByRange(sid,max_time - interval,max_time)
+        max_time = max_time - interval
+        if len(df) > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
+            comp_df.loc[idx,'co2_ppm'] = df.loc[:,'co2_ppm'].sum()/len(df)
+            comp_df.loc[idx,'noise'] = df.loc[:,'noise'].sum()/len(df)
+
+    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
+    return comp_df
+
 def make_station_files(sid,name,nick,get_data,request_type=None):
     """
     generage all csv files for a station
@@ -182,6 +239,12 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
     elif request_type == 'aq':
         get_compressed_data = get_compressed_aq_data
         nick = nick + '_aq'
+    elif request_type == 'weather':
+        get_compressed_data = get_compressed_weather_data
+        nick = nick + '_weather'
+    elif request_type == 'adc':
+        get_compressed_data = get_compressed_adc_data
+        nick = nick + '_adc'
     elif request_type == 'dosenet':
         get_compressed_data = get_compressed_dosenet_data
     else:
@@ -251,9 +314,19 @@ def main(verbose=False,
     print(d3s_stations)
     print()
 
-    print('Getting active D3S stations')
+    print('Getting active air quality stations')
     aq_stations = DB.getActiveAQStations()
     print(aq_stations)
+    print()
+
+    print('Getting active CO2 stations')
+    adc_stations = DB.getActiveADCStations()
+    print(adc_stations)
+    print()
+
+    print('Getting active weather stations')
+    w_stations = DB.getActiveWeatherStations()
+    print(w_stations)
     print()
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
@@ -281,6 +354,22 @@ def main(verbose=False,
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
                                     args=(sid,name,nick,get_data,'aq'))
+        p.start()
+        all_processes.append(p)
+
+    for sid, name, nick in zip(w_stations.index, w_stations['Name'],
+                               w_stations['nickname']):
+        print('(id={}) {}'.format(sid, name))
+        p = multiprocessing.Process(target=make_station_files,
+                                    args=(sid,name,nick,get_data,'weather'))
+        p.start()
+        all_processes.append(p)
+
+    for sid, name, nick in zip(adc_stations.index, adc_stations['Name'],
+                               adc_stations['nickname']):
+        print('(id={}) {}'.format(sid, name))
+        p = multiprocessing.Process(target=make_station_files,
+                                    args=(sid,name,nick,get_data,'adc'))
         p.start()
         all_processes.append(p)
 

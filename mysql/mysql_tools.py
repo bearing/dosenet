@@ -343,6 +343,22 @@ class SQLObject:
                           index=df['devices'].index)]
         return df
 
+    def getActiveWeatherStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[3]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[3]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
+    def getActiveADCStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[4]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
         df = pd.read_sql(
@@ -525,6 +541,38 @@ class SQLObject:
             print(e)
             return pd.DataFrame({})
 
+    def getADCDataForStationByRange(self, stationID, timemin, timemax):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
+            co2_ppm, noise, \
+            FROM adc \
+            WHERE `adc`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def getWeatherDataForStationByRange(self, stationID, timemin, timemax):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
+            temperature, pressure, humidity \
+            FROM weather \
+            WHERE `weather`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = pd.read_sql(q, con=self.db)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
     def getAQDataForStationByRange(self, stationID, timemin, timemax):
         try:
             q = "SELECT UNIX_TIMESTAMP(deviceTime), \
@@ -561,6 +609,34 @@ class SQLObject:
             q = "SELECT UNIX_TIMESTAMP(deviceTime), \
             PM1, PM25, PM10 \
             FROM air_quality \
+            WHERE stationID={} \
+            AND deviceTime >= (NOW() - {}) \
+            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def getWeatherDataForStationByInterval(self, stationID, intervalStr):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
+            temperature, pressure, humidity \
+            FROM weather \
+            WHERE stationID={} \
+            AND deviceTime >= (NOW() - {}) \
+            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
+            df = pd.read_sql(q, con=self.db)
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def getADCDataForStationByInterval(self, stationID, intervalStr):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
+            co2_ppm, noise, \
+            FROM adc \
             WHERE stationID={} \
             AND deviceTime >= (NOW() - {}) \
             ORDER BY deviceTime DESC;".format(stationID, intervalStr)
@@ -613,6 +689,10 @@ class SQLObject:
             func = self.getD3SDataForStationByInterval
         elif request_type == 'aq':
             func = self.getAQDataForStationByInterval
+        elif request_type == 'weather':
+            func = self.getWeatherDataForStationByInterval
+        elif request_type == 'adc':
+            func = self.getADCDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 HOUR')
@@ -622,6 +702,10 @@ class SQLObject:
             func = self.getD3SDataForStationByInterval
         elif request_type == 'aq':
             func = self.getAQDataForStationByInterval
+        elif request_type == 'weather':
+            func = self.getWeatherDataForStationByInterval
+        elif request_type == 'adc':
+            func = self.getADCDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 DAY')
@@ -631,6 +715,10 @@ class SQLObject:
             func = self.getD3SDataForStationByInterval
         elif request_type == 'aq':
             func = self.getAQDataForStationByInterval
+        elif request_type == 'weather':
+            func = self.getWeatherDataForStationByInterval
+        elif request_type == 'adc':
+            func = self.getADCDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 WEEK')
@@ -640,6 +728,10 @@ class SQLObject:
             func = self.getD3SDataForStationByInterval
         elif request_type == 'aq':
             func = self.getAQDataForStationByInterval
+        elif request_type == 'weather':
+            func = self.getWeatherDataForStationByInterval
+        elif request_type == 'adc':
+            func = self.getADCDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 MONTH')
@@ -649,6 +741,10 @@ class SQLObject:
             func = self.getD3SDataForStationByInterval
         elif request_type == 'aq':
             func = self.getAQDataForStationByInterval
+        elif request_type == 'weather':
+            func = self.getWeatherDataForStationByInterval
+        elif request_type == 'adc':
+            func = self.getADCDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 YEAR')
@@ -658,6 +754,10 @@ class SQLObject:
             func = self.getD3SDataForStationByInterval
         elif request_type == 'aq':
             func = self.getAQDataForStationByInterval
+        elif request_type == 'weather':
+            func = self.getWeatherDataForStationByInterval
+        elif request_type == 'adc':
+            func = self.getADCDataForStationByInterval
         else:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 10 YEAR')
