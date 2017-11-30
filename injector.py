@@ -498,8 +498,8 @@ class Injector(object):
             request_type = 'log'
         elif (len(field_list) == num_AQ_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 54 and
-                len(field_list[3]) <= 77):
+                len(field_list[3]) >= 50 and
+                len(field_list[3]) <= 80):
             request_type = 'AQ'
         elif (len(field_list) == num_d3s_fields and
                 field_list[3].startswith('[') and
@@ -507,12 +507,12 @@ class Injector(object):
             request_type = 'd3s'
         elif (len(field_list) == num_co2_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 12 and
-                len(field_list[3]) <= 19):
+                len(field_list[3]) >= 10 and
+                len(field_list[3]) <= 18):
             request_type = 'co2'
         elif (len(field_list) == num_weather_fields and
                 field_list[3].startswith('[') and
-                len(field_list[3]) >= 20 and
+                len(field_list[3]) >= 19 and
                 len(field_list[3]) <= 25):
 
             request_type = 'weather'
