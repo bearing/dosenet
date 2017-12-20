@@ -43,9 +43,30 @@ def main(verbose=False):
     # -------------------------------------------------------------------------
     # Get dataframe of active stations
     # -------------------------------------------------------------------------
+    print('Getting active stations')
     active_stations = DB.getActiveStations()
-    d3s_stations = DB.getActiveD3SStations()
     print(active_stations)
+    print()
+
+    print('Getting active d3s stations')
+    d3s_stations = DB.getActiveD3SStations()
+    print(d3s_stations)
+    print()
+
+    print('Getting active air quality stations')
+    aq_stations = DB.getActiveAQStations()
+    print(aq_stations)
+    print()
+
+    print('Getting active CO2 stations')
+    adc_stations = DB.getActiveADCStations()
+    print(adc_stations)
+    print()
+
+    print('Getting active weather stations')
+    w_stations = DB.getActiveWeatherStations()
+    print(w_stations)
+    print()
     # -------------------------------------------------------------------------
     # Make geojson features and URLs for raw CSV data
     # -------------------------------------------------------------------------
@@ -57,6 +78,9 @@ def main(verbose=False):
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         latest_data = DB.getLatestStationData(ix)
         has_d3s = ix in d3s_stations.index.values
+        has_aq = ix in aq_stations.index.values
+        has_co2 = ix in adc_stations.index.values
+        has_w = ix in w_stations.index.values
         if len(latest_data) == 0:
             continue
         dose_mrem = 0.0036 * latest_data['cpm']
@@ -69,6 +93,9 @@ def main(verbose=False):
             ('&microSv/hr', dose_usv),
             ('csv_location', csv_fname),
             ('has_d3s', has_d3s),
+            ('has_aq', has_aq),
+            ('has_co2', has_co2),
+            ('has_w', has_w),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
                   'timezone']:
