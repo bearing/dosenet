@@ -32,10 +32,8 @@ class SQLObject:
             'ne170group',
             'ne170groupSpring2015',
             'dosimeter_network')
-        self.verified_stations = []
         self.cursor = self.db.cursor()
         self.set_session_tz(tz)
-        self.getVerifiedStationList()
         self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
         self.test_station_ids_ix = 0
 
@@ -68,39 +66,9 @@ class SQLObject:
         """Clear the cache of any query results."""
         self.db.commit()
 
-    def getVerifiedStationList(self):
-        """
-        this gets run, but the result doesn't seem to be used except in
-        unused functions
-        """
-        try:
-            sql_cmd = ("SELECT `ID`, `IDLatLongHash` FROM " +
-                       "dosimeter_network.stations;")
-            self.cursor.execute(sql_cmd)
-            self.verified_stations = self.cursor.fetchall()
-        except Exception as e:
-            raise e
-            msg = 'Error: Could not get list of stations from the database!'
-            print(msg)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
-
-    def checkHashFromRAM(self, ID):
-        "unused"
-        # Essentially the same as doing the following in MySQL
-        # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
-        try:
-            for i in range(len(self.verified_stations)):
-                if self.verified_stations[i][0] == ID:
-                    dbHash = self.verified_stations[i][1]
-                    return dbHash
-        except Exception as e:
-            raise e
-            return False
-            msg = 'Error: Could not find a station matching that ID'
-            print(msg)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
+# ---------------------------------------------------------------------------
+#       INJECTION-RELATED METHODS
+# ---------------------------------------------------------------------------
 
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
@@ -232,10 +200,6 @@ class SQLObject:
         self.authenticatePacket(data, packettype='log')
         self.insertIntoLog(**data)
 
-    def getHashList(self):
-        "unused"
-        return self.verified_stations
-
     def authenticatePacket(self, data, packettype='data'):
         '''
         Checks keys in data.
@@ -294,28 +258,81 @@ class SQLObject:
         # Everything checks out
         return None
 
-    def getHashFromDB(self, ID):
-        "unused"
-        # RUN "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
-        try:
-            self.cursor.execute("SELECT IDLatLongHash FROM stations \
-                            WHERE `ID` = '%s';" % (ID))
-            dbHash = self.cursor.fetchall()
-            return dbHash
-        except (KeyboardInterrupt, SystemExit):
-            print('User interrupted for some reason, byeeeee')
-            sys.exit(0)
-        except (Exception) as e:
-            print(e)
-            print('Exception: Could not get hash from database. ' +
-                  'Is the DoseNet server online and running MySQL?')
+    def getStationReturnInfo(self, stationID):
+        """Read gitBranch and needsUpdate from stations table."""
+        self.refresh()
+        col_list = "gitBranch, needsUpdate"
+        q = "SELECT {} FROM stations WHERE `ID` = {};".format(
+            col_list, stationID)
+        df = self.pdFromSql(q)
+
+        needs_update = df['needsUpdate'][0]
+        git_branch = df['gitBranch'][0]
+
+        return git_branch, needs_update
+
+# ---------------------------------------------------------------------------
+#       STATION-UPDATE-RELATED METHODS
+# ---------------------------------------------------------------------------
+
+    def setSingleStationUpdate(self, stationID, needs_update=0):
+        """
+        Set needsUpdate = {} for a single station in stations table. Default: 0
+
+        Do this after you tell the device to update and reboot, because after
+        that it doesn't need the update.
+
+        (You could also use this to set needsUpdate = 1 for a single station.)
+        """
+
+        if (not isinstance(needs_update, int) and
+                not isinstance(needs_update, bool)):
+            raise AssertionError('needs_update should be a bool or int (0, 1)')
+
+        needs_update = int(needs_update)    # db expects 0 or 1
+        q = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
+            needs_update, stationID)
+        self.cursor.execute(q)
+        self.refresh()
+
+    def setAllStationsUpdate(self, needs_update=1):
+        """
+        Set needsUpdate = {} for all stations in stations table. Default: 1
+
+        Do this if there is a bug in the code such that all stations need to
+        update. Of course you have to fix the bug first ;-)
+
+        (You could also use this to set needsUpdate = 0 for all stations.)
+        """
+
+        if (not isinstance(needs_update, int) and
+                not isinstance(needs_update, bool)):
+            raise AssertionError('needs_update should be a bool or int (0, 1)')
+
+        needs_update = int(needs_update)    # db expects 0 or 1
+        q = "UPDATE stations SET needsUpdate={}".format(needs_update)
+        self.cursor.execute(q)
+        self.refresh()
+
+# ---------------------------------------------------------------------------
+#       FETCH METHODS
+# ---------------------------------------------------------------------------
+
+    def dfFromSql(self, q):
+        """Pandas dataframe from SQL query"""
+        df = pd.read_sql(q, con=self.db)
+        return df
+
+    def rawSql(self, q):
+        """Raw result of SQL query"""
+        self.cursor.execute(q)
+        out = self.cursor.fetchall()
+        return out
 
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
-        df = pd.read_sql(
-            "SELECT * \
-            FROM dosimeter_network.stations;",
-            con=self.db)
+        q = "SELECT * FROM dosimeter_network.stations;"
+        df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
         return df
@@ -361,118 +378,52 @@ class SQLObject:
 
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
-        df = pd.read_sql(
-            "SELECT * \
-            FROM dosimeter_network.stations \
-            WHERE `ID` = {};".format(stationID),
-            con=self.db)
+        q = "SELECT * FROM dosimeter_network.stations WHERE `ID` = {};".format(
+                stationID)
+        df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
         return df
 
-    def getStationReturnInfo(self, stationID):
-        """Read gitBranch and needsUpdate from stations table."""
-        self.refresh()
-        df = pd.read_sql(
-            "SELECT gitBranch, needsUpdate FROM dosimeter_network.stations " +
-            "WHERE `ID` = {};".format(stationID), con=self.db)
-        needs_update = df['needsUpdate'][0]
-        git_branch = df['gitBranch'][0]
-
-        return git_branch, needs_update
-
-    def setSingleStationUpdate(self, stationID, needs_update=0):
-        """
-        Set needsUpdate = {} for a single station in stations table. Default: 0
-
-        Do this after you tell the device to update and reboot, because after
-        that it doesn't need the update.
-
-        (You could also use this to set needsUpdate = 1 for a single station.)
-        """
-
-        if (not isinstance(needs_update, int) and
-                not isinstance(needs_update, bool)):
-            raise AssertionError('needs_update should be a bool or int (0, 1)')
-
-        needs_update = int(needs_update)    # db expects 0 or 1
-        sql_cmd = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
-            needs_update, stationID)
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
-
-    def setAllStationsUpdate(self, needs_update=1):
-        """
-        Set needsUpdate = {} for all stations in stations table. Default: 1
-
-        Do this if there is a bug in the code such that all stations need to
-        update. Of course you have to fix the bug first ;-)
-
-        (You could also use this to set needsUpdate = 0 for all stations.)
-        """
-
-        if (not isinstance(needs_update, int) and
-                not isinstance(needs_update, bool)):
-            raise AssertionError('needs_update should be a bool or int (0, 1)')
-
-        needs_update = int(needs_update)    # db expects 0 or 1
-        sql_cmd = "UPDATE stations SET needsUpdate={}".format(needs_update)
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
-
-    def getLatestD3SStationData(self, stationID):
-        df = pd.read_sql(
-            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
-             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
-             cpmtorem, display, nickname, timezone \
-             FROM d3s \
-             INNER JOIN stations \
-             ON dosnet.stationID = stations.ID \
-             WHERE deviceTime = \
-                (SELECT MAX(deviceTime) \
-                 FROM d3s \
-                 WHERE stationID='{0}') \
-             AND stationID='{0}';".format(stationID),
-            con=self.db)
+    def getLatestStationData(self, stationID, verbose=True):
+        """Return most recent data entry for given station."""
+        col_list = ', '.join((
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "cpm",
+            "cpmError",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "cpmtorem",
+            "cpmtousv",
+            "display",
+            "nickname",
+            "timezone"
+        ))
+        q = ' '.join((
+            "SELECT {cols} FROM dosnet".format(cols=col_list),
+            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "WHERE deviceTime = ",
+            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+                stationID),
+            "AND stationID='{}';".format(stationID)))
+        df = self.dfFromSql(q)
         df.set_index(df['Name'], inplace=True)
         df = self.addTimeColumnsToDataframe(df, stationID=stationID)
         if len(df) == 0:
-            print('[SQL WARNING] no data returned for stationID=' +
-                  '{}'.format(stationID))
+            if verbose:
+                print('[SQL WARNING] no data returned for stationID={}'.format(
+                        stationID))
             return pd.DataFrame({})
         elif len(df) > 1:
-            print('[SQL WARNING] more than one recent result for stationID=' +
-                  '{}'.format(stationID))
-            print(df)
-            return df.iloc[0]
-        else:
-            return df.iloc[0]
-
-    def getLatestStationData(self, stationID):
-        df = pd.read_sql(
-            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
-             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
-             cpmtorem, cpmtousv, display, nickname, timezone \
-             FROM dosnet \
-             INNER JOIN stations \
-             ON dosnet.stationID = stations.ID \
-             WHERE deviceTime = \
-                (SELECT MAX(deviceTime) \
-                 FROM dosnet \
-                 WHERE stationID='{0}') \
-             AND stationID='{0}';".format(stationID),
-            con=self.db)
-        df.set_index(df['Name'], inplace=True)
-        # Add timezone columns
-        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        if len(df) == 0:
-            print('[SQL WARNING] no data returned for stationID=' +
-                  '{}'.format(stationID))
-            return pd.DataFrame({})
-        elif len(df) > 1:
-            print('[SQL WARNING] more than one recent result for stationID=' +
-                  '{}'.format(stationID))
-            print(df)
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
             return df.iloc[0]
         else:
             return df.iloc[0]
@@ -482,6 +433,7 @@ class SQLObject:
         return self.getStations().loc[0, :]
 
     def getNextTestStation(self):
+        """What is this useful for?"""
         test_station = self.getStations().loc[
             self.test_station_ids[self.test_station_ids_ix], :]
         # Cycle!
@@ -492,45 +444,31 @@ class SQLObject:
         return test_station
 
     def getTimezoneFromID(self, stationID):
-        self.cursor.execute(
-            "SELECT timezone FROM stations \
-            WHERE `ID` = {};".format(stationID))
-        tz = self.cursor.fetchall()
+        """Returns the string representation of a station's timezone."""
+        q = "SELECT timezone FROM stations WHERE `ID` = {};".format(stationID)
+        tz = self.rawSql(q)
         return tz[0][0]
-
-    def getD3SDataForStationByRange(self, stationID, timemin, timemax):
-        try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
-            FROM d3s \
-            WHERE `d3s`.`stationID`='{}' \
-            AND UNIX_TIMESTAMP(deviceTime) \
-            BETWEEN '{}' \
-            AND '{}' \
-            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
-            df = pd.read_sql(q, con=self.db)
-            return df
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-    def getD3SDataForStationByInterval(self, stationID, intervalStr):
-        try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
-            FROM d3s \
-            WHERE `d3s`.`stationID`='{}' \
-            AND deviceTime >= (NOW() - {}) \
-            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
-            df = pd.read_sql(q, con=self.db)
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
 
     def getDataForStationByRange(self, stationID, timemin, timemax):
         try:
             q = "SELECT UNIX_TIMESTAMP(deviceTime), cpm, cpmError \
             FROM dosnet \
             WHERE `dosnet`.`stationID`='{}' \
+            AND UNIX_TIMESTAMP(deviceTime) \
+            BETWEEN '{}' \
+            AND '{}' \
+            ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
+            df = self.dfFromSql(q)
+            return df
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+
+    def getD3SDataForStationByRange(self, stationID, timemin, timemax):
+        try:
+            q = "SELECT UNIX_TIMESTAMP(deviceTime), counts, channelCounts \
+            FROM d3s \
+            WHERE `d3s`.`stationID`='{}' \
             AND UNIX_TIMESTAMP(deviceTime) \
             BETWEEN '{}' \
             AND '{}' \
@@ -551,7 +489,7 @@ class SQLObject:
             BETWEEN '{}' \
             AND '{}' \
             ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
-            df = pd.read_sql(q, con=self.db)
+            df = self.dfFromSql(q)
             return df
         except (Exception) as e:
             print(e)
@@ -567,7 +505,7 @@ class SQLObject:
             BETWEEN '{}' \
             AND '{}' \
             ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
-            df = pd.read_sql(q, con=self.db)
+            df = self.dfFromSql(q)
             return df
         except (Exception) as e:
             print(e)
@@ -583,67 +521,107 @@ class SQLObject:
             BETWEEN '{}' \
             AND '{}' \
             ORDER BY deviceTime DESC;".format(stationID, timemin, timemax)
-            df = pd.read_sql(q, con=self.db)
+            df = self.dfFromSql(q)
             return df
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
 
     def getDataForStationByInterval(self, stationID, intervalStr):
-        # Make the query for this station on this interval
+        """
+        Get the last (interval) of data from this station.
+        intervalStr looks like 'INTERVAL 1 DAY'.
+        """
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "cpm",
+            "cpmError")
+        q = ' '.join(
+            "SELECT {} FROM dosnet".format(col_list),
+            "WHERE stationID={}".format(stationID),
+            "AND deviceTime >= (NOW() - {})".format(intervalStr),
+            "ORDER BY deviceTime DESC;")
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
-            cpm, cpmError\
-            FROM dosnet \
-            WHERE stationID={} \
-            AND deviceTime >= (NOW() - {}) \
-            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
-            df = pd.read_sql(q, con=self.db)
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            df = self.dfFromSql(q)
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+
+    def getD3SDataForStationByInterval(self, stationID, intervalStr):
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "counts",
+            "channelCounts")
+        q = ' '.join(
+            "SELECT {} FROM d3s".format(col_list),
+            "WHERE stationID={}".format(stationID),
+            "AND deviceTime >= (NOW() - {})".format(intervalStr),
+            "ORDER BY deviceTime DESC;")
+        try:
+            df = self.dfFromSql(q)
+        except (Exception) as e:
+            print(e)
+            return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getAQDataForStationByInterval(self, stationID, intervalStr):
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "PM1",
+            "PM25",
+            "PM10")
+        q = ' '.join(
+            "SELECT {} FROM air_quality".format(col_list),
+            "WHERE stationID={}".format(stationID),
+            "AND deviceTime >= (NOW() - {})".format(intervalStr),
+            "ORDER BY deviceTime DESC;")
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
-            PM1, PM25, PM10 \
-            FROM air_quality \
-            WHERE stationID={} \
-            AND deviceTime >= (NOW() - {}) \
-            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
-            df = pd.read_sql(q, con=self.db)
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            df = self.dfFromSql(q)
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getWeatherDataForStationByInterval(self, stationID, intervalStr):
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "temperature",
+            "pressure",
+            "humidity")
+        q = ' '.join(
+            "SELECT {} FROM weather".format(col_list),
+            "WHERE stationID={}".format(stationID),
+            "AND deviceTime >= (NOW() - {})".format(intervalStr),
+            "ORDER BY deviceTime DESC;")
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), \
-            temperature, pressure, humidity \
-            FROM weather \
-            WHERE stationID={} \
-            AND deviceTime >= (NOW() - {}) \
-            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
-            df = pd.read_sql(q, con=self.db)
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            df = self.dfFromSql(q)
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getADCDataForStationByInterval(self, stationID, intervalStr):
+        col_list = ', '.join(
+            "UNIX_TIMESTAMP(deviceTime)",
+            "co2_ppm",
+            "noise")
+        q = ' '.join(
+            "SELECT {} FROM adc".format(col_list),
+            "WHERE stationID={}".format(stationID),
+            "AND deviceTime >= (NOW() - {})".format(intervalStr),
+            "ORDER BY deviceTime DESC;")
         try:
-            q = "SELECT UNIX_TIMESTAMP(deviceTime), co2_ppm, noise \
-            FROM adc \
-            WHERE stationID={} \
-            AND deviceTime >= (NOW() - {}) \
-            ORDER BY deviceTime DESC;".format(stationID, intervalStr)
-            df = pd.read_sql(q, con=self.db)
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            df = self.dfFromSql(q)
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+        else:
+            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
@@ -652,7 +630,8 @@ class SQLObject:
             deviceTime_utc
             deviceTime_local
 
-        http://stackoverflow.com/questions/17159207/change-timezone-of-date-time-column-in-pandas-and-add-as-hierarchical-index
+        stackoverflow.com/questions/17159207/change-timezone-of-date-time-
+          column-in-pandas-and-add-as-hierarchical-index
         """
         # Select timezone to use
         if isinstance(tz, str):
@@ -667,11 +646,12 @@ class SQLObject:
             this_tz = 'US/Pacific'
         # Sanity check
         assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
-        # Rename exist unix epoch seconds columns
+        # Rename existing unix epoch seconds columns
         df.rename(inplace=True, columns={
             'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix'})
         # Timezones are evil but pandas are fuzzy ...
-        deviceTime = pd.Index(pd.to_datetime(df['deviceTime_unix'], unit='s')).tz_localize('UTC')
+        deviceTime = pd.Index(pd.to_datetime(
+            df['deviceTime_unix'], unit='s')).tz_localize('UTC')
         df['deviceTime_utc'] = deviceTime
         df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
         # Rearrange the columns (iterate in opposite order of placement)
@@ -762,6 +742,7 @@ class SQLObject:
         return func(stationID,'INTERVAL 10 YEAR')
 
     def testLastMethods(self, stationID=1):
+        """Test SQLObject.getLast* methods"""
         print('Testing last data methods with stationID={}\n'.format(stationID))
         for method in [self.getLastDay, self.getLastWeek, self.getLastMonth,
                        self.getLastYear]:
