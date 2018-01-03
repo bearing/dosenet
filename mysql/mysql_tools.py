@@ -510,7 +510,7 @@ class SQLObject:
         col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "temperature",
-            "pressure"
+            "pressure",
             "humidity"])
         q = ' '.join([
             "SELECT {} FROM weather".format(col_list),
@@ -529,7 +529,7 @@ class SQLObject:
         col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "PM1",
-            "PM25"
+            "PM25",
             "PM10"])
         q = ' '.join([
             "SELECT {} FROM air_quality".format(col_list),
