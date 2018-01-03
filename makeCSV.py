@@ -80,20 +80,23 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-
+    min_time = max_time - n_intervals*interval
+    df = DB.getD3SDataForStationByRange(sid,max_time - min_time,max_time)
     comp_df = pd.DataFrame(columns=['deviceTime_unix',
                                     'cpm','cpmError',
                                     'channels'])
     for idx in range(n_intervals):
-        df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
+        sub_df = df.where((df['deviceTime_unix']>(max_time-interval))&
+                          (df['deviceTime_unix']<(max_time))).dropna()
+        #df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
-        if len(df) > 0:
+        if len(sub_df) > 0:
             comp_df.loc[idx,'channels'] = np.array(
-                [get_channels(x,4) for x in df.loc[:,'channelCounts']]).sum(0)
-            counts = df.loc[:,'counts'].sum()
-            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
-            comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
-            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
+                [get_channels(x,4) for x in sub_df.loc[:,'channelCounts']]).sum(0)
+            counts = sub_df.loc[:,'counts'].sum()
+            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)/2,0]
+            comp_df.loc[idx,'cpm'] = counts/(len(sub_df)*5)
+            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(sub_df)*5)
 
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
@@ -286,7 +289,7 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
-def main(verbose=False, 
+def main(verbose=False,
          last_day=False,
          last_week=False,
          last_month=False,
