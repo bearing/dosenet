@@ -742,13 +742,13 @@ class Injector(object):
                 raise
         else:
             # unset needs_update flag
-            #tic = time.time()
+            tic = time.time()
             # *** takes ~50 ms - only do if needed!
             if needs_update != 0:
                 self.db.setSingleStationUpdate(
                     field_dict['stationID'], needs_update=0)
-            #toc = time.time()
-            #print('setSingleStationUpdate took {} ms'.format((toc - tic) * 1000))
+            toc = time.time()
+            print('setSingleStationUpdate took {} ms'.format((toc - tic) * 1000))
 
 
 def print_status(status_text, ansi=None):
