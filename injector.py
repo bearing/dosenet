@@ -722,7 +722,8 @@ class Injector(object):
                 "Station ID {} missing from `stations` table!", ansi=ANSI_CYAN)
             return
         toc = time.time()
-        print('getStationReturnInfo took {} ms'.format((toc - tic) * 1000))
+        if self.verbose:
+            print('getStationReturnInfo took {} ms'.format((toc - tic) * 1000))
 
         return_packet = "{},{}".format(git_branch, needs_update)
 
@@ -730,8 +731,9 @@ class Injector(object):
         try:
             request.sendall(return_packet)
             toc = time.time()
-            print('request.sendall(return_packet) took {} ms'.format(
-                (toc - tic) * 1000))
+            if self.verbose:
+                print('request.sendall(return_packet) took {} ms'.format(
+                      (toc - tic) * 1000))
         except socket.error as e:
             print_status("Socket error on TCP return packet: {}".format(e))
         except AttributeError:
@@ -748,8 +750,9 @@ class Injector(object):
                 self.db.setSingleStationUpdate(
                     field_dict['stationID'], needs_update=0)
             toc = time.time()
-            print('setSingleStationUpdate took {} ms'.format((toc - tic) * 1000))
-
+            if self.verbose
+                print('setSingleStationUpdate took {} ms'.format(
+                      (toc - tic) * 1000))
 
 def print_status(status_text, ansi=None):
     """
