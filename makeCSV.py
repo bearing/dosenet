@@ -86,8 +86,8 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
                                     'cpm','cpmError',
                                     'channels'])
     for idx in range(n_intervals):
-        sub_df = df.where((df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                          (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))).dropna()
+        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         #df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
         if len(sub_df) > 0:
