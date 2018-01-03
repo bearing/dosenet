@@ -85,10 +85,10 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     comp_df = pd.DataFrame(columns=['deviceTime_unix',
                                     'cpm','cpmError',
                                     'channels'])
+
     for idx in range(n_intervals):
         sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
-        #df = DB.getD3SDataForStationByRange(sid,max_time - interval,max_time)
         max_time = max_time - interval
         if len(sub_df) > 0:
             comp_df.loc[idx,'channels'] = np.array(
@@ -122,16 +122,19 @@ def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals):
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-
+    min_time = max_time - n_intervals*interval
+    df = DB.getDataForStationByRange(sid,max_time - min_time,max_time)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
+
     for idx in range(n_intervals):
-        df = DB.getDataForStationByRange(sid,max_time - interval,max_time)
+        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(df) > 0:
-            counts = df.loc[:,'cpm'].sum()*5
-            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
-            comp_df.loc[idx,'cpm'] = counts/(len(df)*5)
-            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(df)*5)
+        if len(sub_df) > 0:
+            counts = sub_df.loc[:,'cpm'].sum()*5
+            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)/2,0]
+            comp_df.loc[idx,'cpm'] = counts/(len(sub_df)*5)
+            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(sub_df)*5)
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
@@ -151,16 +154,19 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals):
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-
+    min_time = max_time - n_intervals*interval
+    df = DB.getAQDataForStationByRange(sid,max_time - min_time,max_time)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','PM1','PM25','PM10'])
+
     for idx in range(n_intervals):
-        df = DB.getAQDataForStationByRange(sid,max_time - interval,max_time)
+        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(df) > 0:
-            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
-            comp_df.loc[idx,'PM1'] = df.loc[:,'PM1'].sum()/len(df)
-            comp_df.loc[idx,'PM25'] = df.loc[:,'PM25'].sum()/len(df)
-            comp_df.loc[idx,'PM10'] = df.loc[:,'PM10'].sum()/len(df)
+        if len(sub_df) > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)/2,0]
+            comp_df.loc[idx,'PM1'] = sub_df.loc[:,'PM1'].sum()/len(sub_df)
+            comp_df.loc[idx,'PM25'] = sub_df.loc[:,'PM25'].sum()/len(sub_df)
+            comp_df.loc[idx,'PM10'] = sub_df.loc[:,'PM10'].sum()/len(sub_df)
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
@@ -180,17 +186,19 @@ def get_compressed_weather_data(DB,sid,integration_time,n_intervals):
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-
+    min_time = max_time - n_intervals*interval
+    df = DB.getWeatherDataForStationByRange(sid,max_time - min_time,max_time)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','temperature',
                                     'pressure','humidity'])
     for idx in range(n_intervals):
-        df = DB.getWeatherDataForStationByRange(sid,max_time - interval,max_time)
+        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(df) > 0:
-            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
-            comp_df.loc[idx,'temperature'] = df.loc[:,'temperature'].sum()/len(df)
-            comp_df.loc[idx,'pressure'] = df.loc[:,'pressure'].sum()/len(df)
-            comp_df.loc[idx,'humidity'] = df.loc[:,'humidity'].sum()/len(df)
+        if len(sub_df) > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)/2,0]
+            comp_df.loc[idx,'temperature'] = sub_df.loc[:,'temperature'].sum()/len(sub_df)
+            comp_df.loc[idx,'pressure'] = sub_df.loc[:,'pressure'].sum()/len(sub_df)
+            comp_df.loc[idx,'humidity'] = sub_df.loc[:,'humidity'].sum()/len(sub_df)
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
@@ -210,15 +218,17 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals):
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-
+    min_time = max_time - n_intervals*interval
+    df = DB.getADCDataForStationByRange(sid,max_time - min_time,max_time)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','co2_ppm','noise'])
     for idx in range(n_intervals):
-        df = DB.getADCDataForStationByRange(sid,max_time - interval,max_time)
+        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(df) > 0:
-            comp_df.loc[idx,'deviceTime_unix'] = df.iloc[len(df)/2,0]
-            comp_df.loc[idx,'co2_ppm'] = df.loc[:,'co2_ppm'].sum()/len(df)
-            comp_df.loc[idx,'noise'] = df.loc[:,'noise'].sum()/len(df)
+        if len(sub_df) > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)/2,0]
+            comp_df.loc[idx,'co2_ppm'] = sub_df.loc[:,'co2_ppm'].sum()/len(sub_df)
+            comp_df.loc[idx,'noise'] = sub_df.loc[:,'noise'].sum()/len(sub_df)
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
