@@ -201,7 +201,6 @@ class DoseNetSlacker(object):
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
 
-        return  # temp
         while True:
             time.sleep(self.interval_s)
             try:
