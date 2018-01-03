@@ -453,16 +453,16 @@ class SQLObject:
         """
         Get the data from this station between timemin and timemax.
         """
-        col_list = ', '.join(
+        col_list = ', '.join((
             "UNIX_TIMESTAMP(deviceTime)",
             "cpm",
-            "cpmError")
-        q = ' '.join(
+            "cpmError"))
+        q = ' '.join((
             "SELECT {} FROM dosnet".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"))
         try:
             df = self.dfFromSql(q)
             return df
@@ -471,16 +471,16 @@ class SQLObject:
             return pd.DataFrame({})
 
     def getD3SDataForStationByRange(self, stationID, timemin, timemax):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "counts",
-            "channelCounts")
-        q = ' '.join(
+            "channelCounts"])
+        q = ' '.join([
             "SELECT {} FROM d3s".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = pd.read_sql(q, con=self.db)
             return df
@@ -489,16 +489,16 @@ class SQLObject:
             return pd.DataFrame({})
 
     def getADCDataForStationByRange(self, stationID, timemin, timemax):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "co2_ppm",
-            "noise")
-        q = ' '.join(
+            "noise"])
+        q = ' '.join([
             "SELECT {} FROM adc".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
             return df
@@ -507,17 +507,17 @@ class SQLObject:
             return pd.DataFrame({})
 
     def getWeatherDataForStationByRange(self, stationID, timemin, timemax):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "temperature",
             "pressure"
-            "humidity")
-        q = ' '.join(
+            "humidity"])
+        q = ' '.join([
             "SELECT {} FROM weather".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
             return df
@@ -526,17 +526,17 @@ class SQLObject:
             return pd.DataFrame({})
 
     def getAQDataForStationByRange(self, stationID, timemin, timemax):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "PM1",
             "PM25"
-            "PM10")
-        q = ' '.join(
+            "PM10"])
+        q = ' '.join([
             "SELECT {} FROM air_quality".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
             return df
@@ -549,15 +549,15 @@ class SQLObject:
         Get the last (interval) of data from this station.
         intervalStr looks like 'INTERVAL 1 DAY'.
         """
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "cpm",
-            "cpmError")
-        q = ' '.join(
+            "cpmError"])
+        q = ' '.join([
             "SELECT {} FROM dosnet".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
         except (Exception) as e:
@@ -567,15 +567,15 @@ class SQLObject:
             return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getD3SDataForStationByInterval(self, stationID, intervalStr):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "counts",
-            "channelCounts")
-        q = ' '.join(
+            "channelCounts"])
+        q = ' '.join([
             "SELECT {} FROM d3s".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
         except (Exception) as e:
@@ -585,16 +585,16 @@ class SQLObject:
             return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getAQDataForStationByInterval(self, stationID, intervalStr):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "PM1",
             "PM25",
-            "PM10")
-        q = ' '.join(
+            "PM10"])
+        q = ' '.join([
             "SELECT {} FROM air_quality".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
         except (Exception) as e:
@@ -604,16 +604,16 @@ class SQLObject:
             return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getWeatherDataForStationByInterval(self, stationID, intervalStr):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "temperature",
             "pressure",
-            "humidity")
-        q = ' '.join(
+            "humidity"])
+        q = ' '.join([
             "SELECT {} FROM weather".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
         except (Exception) as e:
@@ -623,15 +623,15 @@ class SQLObject:
             return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getADCDataForStationByInterval(self, stationID, intervalStr):
-        col_list = ', '.join(
+        col_list = ', '.join([
             "UNIX_TIMESTAMP(deviceTime)",
             "co2_ppm",
-            "noise")
-        q = ' '.join(
+            "noise"])
+        q = ' '.join([
             "SELECT {} FROM adc".format(col_list),
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;")
+            "ORDER BY deviceTime DESC;"])
         try:
             df = self.dfFromSql(q)
         except (Exception) as e:
