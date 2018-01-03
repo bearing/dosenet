@@ -202,35 +202,77 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
-    def inject(self, data):
+    def inject(self, data, verbose=False):
         """Authenticate the data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='data')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoDosenet(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectD3S(self, data):
+    def injectD3S(self, data, verbose=False):
         """Authenticate the D3S data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='d3s')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoD3S(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectAQ(self, data):
+    def injectAQ(self, data, verbose=False):
         """Authenticate the AQ data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='AQ')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoAQ(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectCO2(self, data):
+    def injectCO2(self, data, verbose=False):
         """Authenticate the CO2 data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='CO2')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoCO2(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectWeather(self, data):
+    def injectWeather(self, data, verbose=False):
         """Authenticate the Weather data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='Weather')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoWeather(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectLog(self, data):
+    def injectLog(self, data, verbose=False):
         """Authenticate the log packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='log')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoLog(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
     def getHashList(self):
         "unused"
