@@ -69,6 +69,39 @@ class SQLObject:
 # ---------------------------------------------------------------------------
 #       INJECTION-RELATED METHODS
 # ---------------------------------------------------------------------------
+    def getVerifiedStationList(self):
+        """
+        this gets run, but the result doesn't seem to be used except in
+        unused functions
+        """
+        try:
+            sql_cmd = ("SELECT `ID`, `IDLatLongHash` FROM " +
+                       "dosimeter_network.stations;")
+            self.cursor.execute(sql_cmd)
+            self.verified_stations = self.cursor.fetchall()
+        except Exception as e:
+            raise e
+            msg = 'Error: Could not get list of stations from the database!'
+            print(msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
+
+    def checkHashFromRAM(self, ID):
+        "unused"
+        # Essentially the same as doing the following in MySQL
+        # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
+        try:
+            for i in range(len(self.verified_stations)):
+                if self.verified_stations[i][0] == ID:
+                    dbHash = self.verified_stations[i][1]
+                    return dbHash
+        except Exception as e:
+            raise e
+            return False
+            msg = 'Error: Could not find a station matching that ID'
+            print(msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
 
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
@@ -170,35 +203,77 @@ class SQLObject:
         self.cursor.execute(sql_cmd)
         self.db.commit()
 
-    def inject(self, data):
+    def inject(self, data, verbose=False):
         """Authenticate the data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='data')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoDosenet(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectD3S(self, data):
+    def injectD3S(self, data, verbose=False):
         """Authenticate the D3S data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='d3s')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoD3S(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectAQ(self, data):
+    def injectAQ(self, data, verbose=False):
         """Authenticate the AQ data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='AQ')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoAQ(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectCO2(self, data):
+    def injectCO2(self, data, verbose=False):
         """Authenticate the CO2 data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='CO2')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoCO2(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectWeather(self, data):
+    def injectWeather(self, data, verbose=False):
         """Authenticate the Weather data packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='Weather')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoWeather(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
-    def injectLog(self, data):
+    def injectLog(self, data, verbose=False):
         """Authenticate the log packet and then insert into database"""
+        tic = time.time()
         self.authenticatePacket(data, packettype='log')
+        toc = time.time()
+        if verbose:
+            print('authenticatePacket took {} ms'.format((toc - tic) * 1000))
         self.insertIntoLog(**data)
+        tic = time.time()
+        if verbose:
+            print('insertIntoDosenet took {} ms'.format((tic - toc) * 1000))
 
     def authenticatePacket(self, data, packettype='data'):
         '''
@@ -329,6 +404,22 @@ class SQLObject:
         out = self.cursor.fetchall()
         return out
 
+    def getHashFromDB(self, ID):
+        "unused"
+        # RUN "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
+        try:
+            self.cursor.execute("SELECT IDLatLongHash FROM stations \
+                            WHERE `ID` = '%s';" % (ID))
+            dbHash = self.cursor.fetchall()
+            return dbHash
+        except (KeyboardInterrupt, SystemExit):
+            print('User interrupted for some reason, byeeeee')
+            sys.exit(0)
+        except (Exception) as e:
+            print(e)
+            print('Exception: Could not get hash from database. ' +
+                  'Is the DoseNet server online and running MySQL?')
+
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
         q = "SELECT * FROM dosimeter_network.stations;"
@@ -412,6 +503,37 @@ class SQLObject:
                 stationID),
             "AND stationID='{}';".format(stationID)))
         df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        # Add timezone columns
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            if verbose:
+                print('[SQL WARNING] no data returned for stationID={}'.format(
+                        stationID))
+            return pd.DataFrame({})
+        elif len(df) > 1:
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
+
+    def getLatestD3SStationData(self, stationID):
+        df = pd.read_sql(
+            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
+             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
+             cpmtorem, display, nickname, timezone \
+             FROM d3s \
+             INNER JOIN stations \
+             ON dosnet.stationID = stations.ID \
+             WHERE deviceTime = \
+                (SELECT MAX(deviceTime) \
+                 FROM d3s \
+                 WHERE stationID='{0}') \
+             AND stationID='{0}';".format(stationID),
+            con=self.db)
         df.set_index(df['Name'], inplace=True)
         df = self.addTimeColumnsToDataframe(df, stationID=stationID)
         if len(df) == 0:
@@ -543,6 +665,7 @@ class SQLObject:
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
+
 
     def getDataForStationByInterval(self, stationID, intervalStr):
         """

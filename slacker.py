@@ -5,6 +5,7 @@ Requires official slackclient:
 
 Requires token to be set for SLACK:
     This has been configured for the Slack Bot named
+
         dosenet_server
 
     https://api.slack.com/bot-users
