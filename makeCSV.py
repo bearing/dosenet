@@ -124,6 +124,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
         data=np.array(comp_df['channels'].as_matrix().tolist()))
     # append to full df and remove original channelCount column
     del comp_df['channels']
+    print(comp_df)
     comp_df = comp_df.join(df_channels)
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
