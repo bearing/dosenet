@@ -59,10 +59,10 @@ def get_calibration(df,channelCounts,all=False):
                 temp = np.ndarray(shape=(12,))
                 temp.fill(1460/K_index)
                 calib_array.append(temp)
-        df.insert(5,'keV/ch',pd.DataFrame(calib_array))
+        df.insert(5,'keV_per_ch',pd.DataFrame(calib_array))
     else:
         K_index = np.argmax(channelCounts.sum(0)[500:700])
-        df.insert(5,'keV/ch',1460/K_index)
+        df.insert(5,'keV_per_ch',1460/K_index)
     return df
 
 def format_d3s_data(df, all=False):
@@ -103,8 +103,8 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     min_time = max_time - n_intervals*interval
     df = DB.getD3SDataForStationByRange(sid,max_time - min_time,max_time)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError',
-                                    'keV/ch','channels'])
-
+                                    'keV_per_ch','channels'])
+    print(comp_df)
     for idx in range(n_intervals):
         idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
@@ -117,7 +117,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
             comp_df.loc[idx,'deviceTime_unix'] = idf.iloc[len(idf)/2,0]
             comp_df.loc[idx,'cpm'] = counts/(len(idf)*5)
             comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(idf)*5)
-            comp_df.loc[idx,'keV/ch'] = 1460/np.argmax(channels[500:700])
+            comp_df.loc[idx,'keV_per_ch'] = 1460/np.argmax(channels[500:700])
 
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
