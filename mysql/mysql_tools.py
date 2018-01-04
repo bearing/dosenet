@@ -521,19 +521,29 @@ class SQLObject:
             return df.iloc[0]
 
     def getLatestD3SStationData(self, stationID):
-        df = pd.read_sql(
-            "SELECT UNIX_TIMESTAMP(deviceTime), UNIX_TIMESTAMP(receiveTime), \
-             stationID, cpm, cpmError, errorFlag, ID, Name, Lat, `Long`, \
-             cpmtorem, display, nickname, timezone \
-             FROM d3s \
-             INNER JOIN stations \
-             ON dosnet.stationID = stations.ID \
-             WHERE deviceTime = \
-                (SELECT MAX(deviceTime) \
-                 FROM d3s \
-                 WHERE stationID='{0}') \
-             AND stationID='{0}';".format(stationID),
-            con=self.db)
+        col_list = ', '.join((
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "counts",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "cpmtorem",
+            "display",
+            "nickname",
+            "timezone"
+        ))
+        q = ' '.join((
+            "SELECT {cols} FROM d3s".format(cols=col_list),
+            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "WHERE deviceTime = ",
+            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+                stationID),
+            "AND stationID='{}';".format(stationID)))
+        df = self.dfFromSql(q)
         df.set_index(df['Name'], inplace=True)
         df = self.addTimeColumnsToDataframe(df, stationID=stationID)
         if len(df) == 0:
@@ -549,6 +559,126 @@ class SQLObject:
             return df.iloc[0]
         else:
             return df.iloc[0]
+
+    def getLatestADCStationData(self, stationID):
+        col_list = ', '.join((
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "co2_ppm",
+            "noise",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "display",
+            "nickname",
+            "timezone"
+        ))
+        q = ' '.join((
+            "SELECT {cols} FROM adc".format(cols=col_list),
+            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "WHERE deviceTime = ",
+            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+                stationID),
+            "AND stationID='{}';".format(stationID)))
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            if verbose:
+                print('[SQL WARNING] no data returned for stationID={}'.format(
+                        stationID))
+            return pd.DataFrame({})
+        elif len(df) > 1:
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
+
+    def getLatestAQStationData(self, stationID):
+        col_list = ', '.join((
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "PM25",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "display",
+            "nickname",
+            "timezone"
+        ))
+        q = ' '.join((
+            "SELECT {cols} FROM air_quality".format(cols=col_list),
+            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "WHERE deviceTime = ",
+            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+                stationID),
+            "AND stationID='{}';".format(stationID)))
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            if verbose:
+                print('[SQL WARNING] no data returned for stationID={}'.format(
+                        stationID))
+            return pd.DataFrame({})
+        elif len(df) > 1:
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
+
+    def getLatestWeatherStationData(self, stationID):
+        col_list = ', '.join((
+            "UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "temperature",
+            "pressure",
+            "humidity",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "display",
+            "nickname",
+            "timezone"
+        ))
+        q = ' '.join((
+            "SELECT {cols} FROM weather".format(cols=col_list),
+            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "WHERE deviceTime = ",
+            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+                stationID),
+            "AND stationID='{}';".format(stationID)))
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
+        if len(df) == 0:
+            if verbose:
+                print('[SQL WARNING] no data returned for stationID={}'.format(
+                        stationID))
+            return pd.DataFrame({})
+        elif len(df) > 1:
+            if verbose:
+                print('[SQL WARNING] more than one recent result for ' +
+                      'stationID={}'.format(stationID))
+                print(df)
+            return df.iloc[0]
+        else:
+            return df.iloc[0]
+
 
     def getInjectorStation(self):
         "The injector est station is station 0."
