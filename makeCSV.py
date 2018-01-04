@@ -48,7 +48,24 @@ def get_rounded_time(t):
     t = dt.datetime(t.year,t.month,t.day,t.hour,t.minute+rounded_min)
     return time.mktime(t.timetuple())
 
-def format_d3s_data(df):
+def get_calibration(df,channelCounts,all=False):
+    if all:
+        calib_array = np.ndarray(shape=(12,))
+        for i in range(len(channelCounts)/12):
+            K_index = np.argmax(channelCounts[i*12:(i+1)*12].sum(0)[500:700])
+            if i==0:
+                calib_array.fill(1460/K_index)
+            else:
+                temp = np.ndarray(shape=(12,))
+                temp.fill(1460/K_index)
+                calib_array.append(temp)
+        df.insert(5,'keV/ch',pd.DataFrame(calib_array))
+    else:
+        K_index = np.argmax(channelCounts.sum(0)[500:700])
+        df.insert(5,'keV/ch',1460/K_index)
+    return df
+
+def format_d3s_data(df, all=False):
     """
     format raw d3s data from database to format for output csv files
     """
@@ -56,6 +73,9 @@ def format_d3s_data(df):
     df['counts'] = df['counts']/5
     df.rename(columns = {'counts':'cpm'}, inplace = True)
 
+    channel_array = np.array(
+                    [get_channels(x,4) for x in df.loc[:,'channelCounts']])
+    df = set_calibration(df,channel_array,all)
     df_channels = df['channelCounts'].apply(lambda x: get_channels(x,4))
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
@@ -82,21 +102,22 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
     df = DB.getD3SDataForStationByRange(sid,max_time - min_time,max_time)
-    comp_df = pd.DataFrame(columns=['deviceTime_unix',
-                                    'cpm','cpmError',
-                                    'channels'])
+    comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError',
+                                    'keV/ch','channels'])
 
     for idx in range(n_intervals):
-        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(sub_df) > 0:
-            comp_df.loc[idx,'channels'] = np.array(
-                [get_channels(x,4) for x in sub_df.loc[:,'channelCounts']]).sum(0)
-            counts = sub_df.loc[:,'counts'].sum()
-            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)/2,0]
-            comp_df.loc[idx,'cpm'] = counts/(len(sub_df)*5)
-            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(sub_df)*5)
+        if len(idf) > 0:
+            channels = np.array([get_channels(x,4)
+                                for x in idf.loc[:,'channelCounts']]).sum(0)
+            comp_df.loc[idx,'channels'] = channels
+            counts = idf.loc[:,'counts'].sum()
+            comp_df.loc[idx,'deviceTime_unix'] = idf.iloc[len(idf)/2,0]
+            comp_df.loc[idx,'cpm'] = counts/(len(idf)*5)
+            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(idf)*5)
+            comp_df.loc[idx,'keV/ch'] = 1460/np.argmax(channels[500:700])
 
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
