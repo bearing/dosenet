@@ -48,7 +48,7 @@ def get_rounded_time(t):
     t = dt.datetime(t.year,t.month,t.day,t.hour,t.minute+rounded_min)
     return time.mktime(t.timetuple())
 
-def get_calibration(df,channelCounts,all=False):
+def set_calibration(df,channelCounts,all=False):
     if all:
         calib_array = np.ndarray(shape=(12,))
         for i in range(len(channelCounts)/12):
