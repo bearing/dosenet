@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import division
 from mysql.mysql_tools import SQLObject
 from data_transfer import DataFile
 import time
@@ -51,18 +52,23 @@ def get_rounded_time(t):
 def set_calibration(df,chCounts,all=False):
     if all:
         calib_array = np.ndarray(shape=(12,))
-        for i in range(len(chCounts)/12):
+        for i in range(len(chCounts)//12):
             K_index = np.argmax(chCounts[i*12:(i+1)*12].sum(0)[500:700])+500
+            print('K channel = {} -> calib = {}'.format(K_index,1460/K_index))
             if i==0:
-                calib_array.fill(1460//K_index)
+                calib_array.fill(1460/K_index)
             else:
                 temp = np.ndarray(shape=(12,))
-                temp.fill(1460//K_index)
+                temp.fill(1460/K_index)
                 calib_array = np.append(calib_array,temp)
+        if len(calib_array) < len(chCounts):
+            temp.np.ndarray(shape=(len(chCounts)-len(calib_array),))
+            temp.fill(calib_array[-1])
+            calib_array = np.append(calib_array,temp)
         df.insert(5,'keV_per_ch',pd.DataFrame(calib_array))
     else:
         K_index = np.argmax(chCounts.sum(0)[500:700])+500
-        df.insert(5,'keV_per_ch',1460//K_index)
+        df.insert(5,'keV_per_ch',1460/K_index)
     return df
 
 def format_d3s_data(df, all=False):
