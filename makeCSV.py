@@ -48,20 +48,20 @@ def get_rounded_time(t):
     t = dt.datetime(t.year,t.month,t.day,t.hour,t.minute+rounded_min)
     return time.mktime(t.timetuple())
 
-def set_calibration(df,channelCounts,all=False):
+def set_calibration(df,chCounts,all=False):
     if all:
         calib_array = np.ndarray(shape=(12,))
-        for i in range(len(channelCounts)/12):
-            K_index = np.argmax(channelCounts[i*12:(i+1)*12].sum(0)[500:700])
+        for i in range(len(chCounts)/12):
+            K_index = np.argmax(chCounts[i*12:(i+1)*12].sum(0)[500:700])+500
             if i==0:
                 calib_array.fill(1460/K_index)
             else:
                 temp = np.ndarray(shape=(12,))
                 temp.fill(1460/K_index)
-                calib_array.append(temp)
+                calib_array = numpy.append(calib_array,temp)
         df.insert(5,'keV_per_ch',pd.DataFrame(calib_array))
     else:
-        K_index = np.argmax(channelCounts.sum(0)[500:700])
+        K_index = np.argmax(chCounts.sum(0)[500:700])+500
         df.insert(5,'keV_per_ch',1460/K_index)
     return df
 
@@ -117,7 +117,8 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
             comp_df.loc[idx,'deviceTime_unix'] = idf.iloc[len(idf)/2,0]
             comp_df.loc[idx,'cpm'] = counts/(len(idf)*5)
             comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(idf)*5)
-            comp_df.loc[idx,'keV_per_ch'] = 1460/np.argmax(channels[500:700])
+            K_index = np.argmax(channels[500:700])+500
+            comp_df.loc[idx,'keV_per_ch'] = 1460.0//K_index
 
     # convert one column of list of channel counts to ncolumns = nchannels
     df_channels = pd.DataFrame(
