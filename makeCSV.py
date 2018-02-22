@@ -62,7 +62,7 @@ def set_calibration(df,chCounts,all=False):
                 temp.fill(1460/K_index)
                 calib_array = np.append(calib_array,temp)
         if len(calib_array) < len(chCounts):
-            temp.np.ndarray(shape=(len(chCounts)-len(calib_array),))
+            temp = np.ndarray(shape=(len(chCounts)-len(calib_array),))
             temp.fill(calib_array[-1])
             calib_array = np.append(calib_array,temp)
         df.insert(5,'keV_per_ch',pd.DataFrame(calib_array))
