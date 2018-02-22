@@ -295,36 +295,42 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         return None
 
     df = DB.getAll(sid,request_type)
-    if request_type == 'd3s':
-        df = format_d3s_data(df)
-    csvfile = DataFile.csv_from_nickname(nick)
-    csvfile.df_to_file(df)
+    if len(df) > 0:
+        if request_type == 'd3s':
+            df = format_d3s_data(df,True)
+        csvfile = DataFile.csv_from_nickname(nick)
+        csvfile.df_to_file(df)
 
     df = DB.getLastHour(sid,request_type)
-    if request_type == 'd3s':
-        df = format_d3s_data(df)
-    csvfile = DataFile.csv_from_nickname(nick+'_hour')
-    csvfile.df_to_file(df)
+    if len(df) > 0:
+        if request_type == 'd3s':
+            df = format_d3s_data(df)
+        csvfile = DataFile.csv_from_nickname(nick+'_hour')
+        csvfile.df_to_file(df)
 
     if get_data['get_day']:
         df = get_compressed_data(DB,sid,30,48)
-        csvfile = DataFile.csv_from_nickname(nick + '_day')
-        csvfile.df_to_file(df)
+        if len(df) > 0:
+            csvfile = DataFile.csv_from_nickname(nick + '_day')
+            csvfile.df_to_file(df)
 
     if get_data['get_week']:
         df = get_compressed_data(DB,sid,60,168)
-        csvfile = DataFile.csv_from_nickname(nick + '_week')
-        csvfile.df_to_file(df)
+        if len(df) > 0:
+            csvfile = DataFile.csv_from_nickname(nick + '_week')
+            csvfile.df_to_file(df)
 
     if get_data['get_month']:
         df = get_compressed_data(DB,sid,240,180)
-        csvfile = DataFile.csv_from_nickname(nick + '_month')
-        csvfile.df_to_file(df)
+        if len(df) > 0:
+            csvfile = DataFile.csv_from_nickname(nick + '_month')
+            csvfile.df_to_file(df)
 
     if get_data['get_year']:
         df = get_compressed_data(DB,sid,2880,183)
-        csvfile = DataFile.csv_from_nickname(nick + '_year')
-        csvfile.df_to_file(df)
+        if len(df) > 0:
+            csvfile = DataFile.csv_from_nickname(nick + '_year')
+            csvfile.df_to_file(df)
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
