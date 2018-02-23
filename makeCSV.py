@@ -91,7 +91,8 @@ def format_d3s_data(df, all=False):
     df = df.join(df_channels)
     return df
 
-def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
+def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
+                            verbose):
     """
     get d3s station data from the database for some number of time bins
 
@@ -107,10 +108,11 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
-    df = DB.getD3SDataForStationByRange(sid,max_time - min_time,max_time)
+    df = DB.getD3SDataForStationByRange(sid,min_time,max_time,verbose)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError',
                                     'keV_per_ch','channels'])
-    print(comp_df)
+    if verbose:
+        print(comp_df)
     for idx in range(n_intervals):
         idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
@@ -131,12 +133,13 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals):
         data=np.array(comp_df['channels'].as_matrix().tolist()))
     # append to full df and remove original channelCount column
     del comp_df['channels']
-    print(comp_df)
+    if verbose:
+        print(comp_df)
     comp_df = comp_df.join(df_channels)
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals):
+def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
@@ -152,23 +155,24 @@ def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
-    df = DB.getDataForStationByRange(sid,max_time - min_time,max_time)
+    df = DB.getDataForStationByRange(sid,min_time,max_time,verbose)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
 
     for idx in range(n_intervals):
-        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(sub_df) > 0:
-            counts = sub_df.loc[:,'cpm'].sum()*5
-            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)//2,0]
-            comp_df.loc[idx,'cpm'] = counts/(len(sub_df)*5)
-            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(len(sub_df)*5)
+        ndata = len(subdf)
+        if ndata > 0:
+            counts = subdf.loc[:,'cpm'].sum()*5
+            comp_df.loc[idx,'deviceTime_unix'] = subdf.iloc[ndata//2,0]
+            comp_df.loc[idx,'cpm'] = counts/(ndata*5)
+            comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(ndata*5)
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_aq_data(DB,sid,integration_time,n_intervals):
+def get_compressed_aq_data(DB,sid,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
@@ -184,23 +188,24 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
-    df = DB.getAQDataForStationByRange(sid,max_time - min_time,max_time)
+    df = DB.getAQDataForStationByRange(sid,min_time,max_time,verbose)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','PM1','PM25','PM10'])
 
     for idx in range(n_intervals):
-        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(sub_df) > 0:
-            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)//2,0]
-            comp_df.loc[idx,'PM1'] = sub_df.loc[:,'PM1'].sum()/len(sub_df)
-            comp_df.loc[idx,'PM25'] = sub_df.loc[:,'PM25'].sum()/len(sub_df)
-            comp_df.loc[idx,'PM10'] = sub_df.loc[:,'PM10'].sum()/len(sub_df)
+        ndata = len(subdf)
+        if ndata > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = subdf.iloc[ndata//2,0]
+            comp_df.loc[idx,'PM1'] = subdf.loc[:,'PM1'].sum()/ndata
+            comp_df.loc[idx,'PM25'] = subdf.loc[:,'PM25'].sum()/ndata
+            comp_df.loc[idx,'PM10'] = subdf.loc[:,'PM10'].sum()/ndata
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_weather_data(DB,sid,integration_time,n_intervals):
+def get_compressed_weather_data(DB,sid,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
@@ -216,23 +221,24 @@ def get_compressed_weather_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
-    df = DB.getWeatherDataForStationByRange(sid,max_time - min_time,max_time)
+    df = DB.getWeatherDataForStationByRange(sid,min_time,max_time,verbose)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','temperature',
                                     'pressure','humidity'])
     for idx in range(n_intervals):
-        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(sub_df) > 0:
-            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)//2,0]
-            comp_df.loc[idx,'temperature'] = sub_df.loc[:,'temperature'].sum()/len(sub_df)
-            comp_df.loc[idx,'pressure'] = sub_df.loc[:,'pressure'].sum()/len(sub_df)
-            comp_df.loc[idx,'humidity'] = sub_df.loc[:,'humidity'].sum()/len(sub_df)
+        ndata = len(subdf)
+        if ndata > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = subdf.iloc[ndata//2,0]
+            comp_df.loc[idx,'temperature'] = subdf.loc[:,'temperature'].sum()/ndata
+            comp_df.loc[idx,'pressure'] = subdf.loc[:,'pressure'].sum()/ndata
+            comp_df.loc[idx,'humidity'] = subdf.loc[:,'humidity'].sum()/ndata
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_adc_data(DB,sid,integration_time,n_intervals):
+def get_compressed_adc_data(DB,sid,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
@@ -248,21 +254,22 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals):
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
-    df = DB.getADCDataForStationByRange(sid,max_time - min_time,max_time)
+    df = DB.getADCDataForStationByRange(sid,min_time,max_time,verbose)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','co2_ppm','noise'])
     for idx in range(n_intervals):
-        sub_df = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                     (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
-        if len(sub_df) > 0:
-            comp_df.loc[idx,'deviceTime_unix'] = sub_df.iloc[len(sub_df)//2,0]
-            comp_df.loc[idx,'co2_ppm'] = sub_df.loc[:,'co2_ppm'].sum()/len(sub_df)
-            comp_df.loc[idx,'noise'] = sub_df.loc[:,'noise'].sum()/len(sub_df)
+        ndata = len(subdf)
+        if ndata > 0:
+            comp_df.loc[idx,'deviceTime_unix'] = subdf.iloc[ndata//2,0]
+            comp_df.loc[idx,'co2_ppm'] = subdf.loc[:,'co2_ppm'].sum()/ndata
+            comp_df.loc[idx,'noise'] = subdf.loc[:,'noise'].sum()/ndata
 
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(sid,name,nick,get_data,request_type=None):
+def make_station_files(sid,name,nick,get_data,request_type=None,verbose):
     """
     generage all csv files for a station
 
@@ -294,14 +301,14 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         print('No data-type specified')
         return None
 
-    df = DB.getAll(sid,request_type)
+    df = DB.getAll(sid,request_type,verbose)
     if len(df) > 0:
         if request_type == 'd3s':
             df = format_d3s_data(df,True)
         csvfile = DataFile.csv_from_nickname(nick)
         csvfile.df_to_file(df)
 
-    df = DB.getLastHour(sid,request_type)
+    df = DB.getLastHour(sid,request_type,verbose)
     if len(df) > 0:
         if request_type == 'd3s':
             df = format_d3s_data(df)
@@ -309,25 +316,25 @@ def make_station_files(sid,name,nick,get_data,request_type=None):
         csvfile.df_to_file(df)
 
     if get_data['get_day']:
-        df = get_compressed_data(DB,sid,30,48)
+        df = get_compressed_data(DB,sid,30,48,verbose)
         if len(df) > 0:
             csvfile = DataFile.csv_from_nickname(nick + '_day')
             csvfile.df_to_file(df)
 
     if get_data['get_week']:
-        df = get_compressed_data(DB,sid,60,168)
+        df = get_compressed_data(DB,sid,60,168,verbose)
         if len(df) > 0:
             csvfile = DataFile.csv_from_nickname(nick + '_week')
             csvfile.df_to_file(df)
 
     if get_data['get_month']:
-        df = get_compressed_data(DB,sid,240,180)
+        df = get_compressed_data(DB,sid,240,180,verbose)
         if len(df) > 0:
             csvfile = DataFile.csv_from_nickname(nick + '_month')
             csvfile.df_to_file(df)
 
     if get_data['get_year']:
-        df = get_compressed_data(DB,sid,2880,183)
+        df = get_compressed_data(DB,sid,2880,183,verbose)
         if len(df) > 0:
             csvfile = DataFile.csv_from_nickname(nick + '_year')
             csvfile.df_to_file(df)
@@ -394,7 +401,7 @@ def main(verbose=False,
                                d3s_stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'d3s'))
+                                    args=(sid,name,nick,get_data,'d3s',verbose))
         p.start()
         all_processes.append(p)
 
@@ -402,7 +409,7 @@ def main(verbose=False,
                                aq_stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'aq'))
+                                    args=(sid,name,nick,get_data,'aq',verbose))
         p.start()
         all_processes.append(p)
 
@@ -410,7 +417,7 @@ def main(verbose=False,
                                w_stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'weather'))
+                                    args=(sid,name,nick,get_data,'weather',verbose))
         p.start()
         all_processes.append(p)
 
@@ -418,7 +425,7 @@ def main(verbose=False,
                                adc_stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'adc'))
+                                    args=(sid,name,nick,get_data,'adc',verbose))
         p.start()
         all_processes.append(p)
 
