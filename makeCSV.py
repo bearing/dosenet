@@ -115,7 +115,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
         print(comp_df)
     for idx in range(n_intervals):
         idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         if len(idf) > 0:
             channels = np.array([get_channels(x,4)
@@ -160,7 +160,7 @@ def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals,verbose):
 
     for idx in range(n_intervals):
         subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+                   (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(subdf)
         if ndata > 0:
@@ -193,7 +193,7 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals,verbose):
 
     for idx in range(n_intervals):
         subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+                   (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(subdf)
         if ndata > 0:
@@ -226,7 +226,7 @@ def get_compressed_weather_data(DB,sid,integration_time,n_intervals,verbose):
                                     'pressure','humidity'])
     for idx in range(n_intervals):
         subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+                   (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(subdf)
         if ndata > 0:
@@ -258,7 +258,7 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','co2_ppm','noise'])
     for idx in range(n_intervals):
         subdf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+                   (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(subdf)
         if ndata > 0:
@@ -281,7 +281,20 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
-    DB = SQLObject()
+    dbconnection_attempts = 0
+    while True:
+        try:
+            DB = SQLObject()
+            break
+        except (OperationalError) as e:
+            print(e)
+            print('Trying again...')
+            dbconnection_attempts += 1
+            if dbconnection_attempts < 5:
+                pass
+            else:
+                print('Giving up after 5 attempts')
+
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data
