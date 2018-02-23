@@ -113,8 +113,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
     if verbose:
         print(comp_df)
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&(df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         if len(idf) > 0:
             channels = np.array([get_channels(x,4)
@@ -158,8 +157,7 @@ def get_compressed_dosenet_data(DB,sid,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
 
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&(df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
         if ndata > 0:
@@ -191,8 +189,7 @@ def get_compressed_aq_data(DB,sid,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','PM1','PM25','PM10'])
 
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&(df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
         if ndata > 0:
@@ -224,8 +221,7 @@ def get_compressed_weather_data(DB,sid,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','temperature',
                                     'pressure','humidity'])
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&(df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
         if ndata > 0:
@@ -256,8 +252,7 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals,verbose):
     df = DB.getADCDataForStationByRange(sid,min_time,max_time,verbose)
     comp_df = pd.DataFrame(columns=['deviceTime_unix','co2_ppm','noise'])
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
-                    (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&(df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
         if ndata > 0:
