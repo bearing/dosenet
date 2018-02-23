@@ -112,7 +112,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
                                     'keV_per_ch','channels'])
     if verbose:
         print(comp_df)
-        print(list(my_dataframe.columns.values))
+        print(list(df.columns.values))
     for idx in range(n_intervals):
         idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
