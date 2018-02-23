@@ -269,7 +269,7 @@ def get_compressed_adc_data(DB,sid,integration_time,n_intervals,verbose):
     comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def make_station_files(sid,name,nick,get_data,request_type=None,verbose):
+def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
     """
     generage all csv files for a station
 
