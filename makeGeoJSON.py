@@ -82,7 +82,6 @@ def main(verbose=False):
         if ix in d3s_stations.index.values:
             latest_d3s_data = DB.getLatestD3SStationData(ix)['counts']
         latest_aq_data = None
-        has_aq =
         if ix in aq_stations.index.values:
             latest_aq_data = DB.getLatestAQStationData(ix)['PM25']
         latest_co2_data = None
