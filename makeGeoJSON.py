@@ -20,8 +20,9 @@ Returns:
 Run on DoseNet server!
 
 Authors:
-    Navrit Bal
+    2017-3-5 - Ali Hanks
     Joseph Curtis
+    Navrit Bal
 Project:
     DoseNet
 Affiliation:
@@ -77,25 +78,41 @@ def main(verbose=False):
                        active_stations.loc[ix, 'Lat']])
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         latest_data = DB.getLatestStationData(ix)
-        has_d3s = ix in d3s_stations.index.values
-        has_aq = ix in aq_stations.index.values
-        has_co2 = ix in adc_stations.index.values
-        has_w = ix in w_stations.index.values
+        latest_d3s_data = None
+        if ix in d3s_stations.index.values:
+            latest_d3s_data = DB.getLatestD3SStationData(ix)['counts']
+        latest_aq_data = None
+        has_aq =
+        if ix in aq_stations.index.values:
+            latest_aq_data = DB.getLatestAQStationData(ix)['PM25']
+        latest_co2_data = None
+        if ix in adc_stations.index.values:
+            latest_co2_data = DB.getLatestADCStationData(ix)['co2_ppm']
+        latest_t_data = None
+        latest_h_data = None
+        latest_p_data = None
+        if ix in w_stations.index.values:
+            temp_data = DB.getLatestWeatherStationData(ix)
+            latest_t_data = temp_data['temperature']
+            latest_h_data = temp_data['humidity']
+            latest_p_data = temp_data['pressure']
         if len(latest_data) == 0:
             continue
-        dose_mrem = 0.0036 * latest_data['cpm']
-        dose_usv = 0.036 * latest_data['cpm']
         csv_fname = latest_data['nickname']
         properties = OrderedDict([
             ('Name', latest_data['Name']),
             ('CPM', latest_data['cpm']),
-            ('mREM/hr', dose_mrem),
-            ('&microSv/hr', dose_usv),
+            ('counts', latest_d3s_data),
+            ('co2_ppm', latest_co2_data),
+            ('PM25', latest_aq_data),
+            ('temperature', latest_t_data),
+            ('humidity', latest_h_data),
+            ('pressure', latest_p_data),
             ('csv_location', csv_fname),
-            ('has_d3s', has_d3s),
-            ('has_aq', has_aq),
-            ('has_co2', has_co2),
-            ('has_w', has_w),
+            ('has_d3s', latest_d3s_data not None),
+            ('has_aq', latest_aq_data not None),
+            ('has_co2', latest_co2_data not None),
+            ('has_w', latest_t_data not None),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
                   'timezone']:
