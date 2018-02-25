@@ -108,10 +108,10 @@ def main(verbose=False):
             ('humidity', latest_h_data),
             ('pressure', latest_p_data),
             ('csv_location', csv_fname),
-            ('has_d3s', latest_d3s_data not None),
-            ('has_aq', latest_aq_data not None),
-            ('has_co2', latest_co2_data not None),
-            ('has_w', latest_t_data not None),
+            ('has_d3s', latest_d3s_data is not None),
+            ('has_aq', latest_aq_data is not None),
+            ('has_co2', latest_co2_data is not None),
+            ('has_w', latest_t_data is not None),
             ('Latest measurement', str(latest_data['deviceTime_local']))])
         for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
                   'timezone']:
