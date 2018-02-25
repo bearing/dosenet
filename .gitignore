@@ -1,4 +1,5 @@
 *.pyc
 dosenet.sublime-project
 dosenet.sublime-workspace
+ucbdosenet_slack_token.txt
 tmp/

@@ -4,6 +4,7 @@
 Run on DoseNet Server!
 
 Authors:
+    Ali Hanks (after 2017-06-01)
     Brian Plimley (after 2016-05-01)
     Joseph Curtis (after 2016-04-10)
     Navrit Bal (after 2015-06-15)
