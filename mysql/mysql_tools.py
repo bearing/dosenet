@@ -542,9 +542,9 @@ class SQLObject:
         ))
         q = ' '.join((
             "SELECT {cols} FROM d3s".format(cols=col_list),
-            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "INNER JOIN stations ON d3s.stationID = stations.ID",
             "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+            "(SELECT MAX(deviceTime) FROM d3s WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
         try:
@@ -586,9 +586,9 @@ class SQLObject:
         ))
         q = ' '.join((
             "SELECT {cols} FROM adc".format(cols=col_list),
-            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "INNER JOIN stations ON adc.stationID = stations.ID",
             "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+            "(SELECT MAX(deviceTime) FROM adc WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
         try:
@@ -630,9 +630,9 @@ class SQLObject:
         ))
         q = ' '.join((
             "SELECT {cols} FROM air_quality".format(cols=col_list),
-            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "INNER JOIN stations ON air_quality.stationID = stations.ID",
             "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+            "(SELECT MAX(deviceTime) FROM air_quality WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
         try:
@@ -676,9 +676,9 @@ class SQLObject:
         ))
         q = ' '.join((
             "SELECT {cols} FROM weather".format(cols=col_list),
-            "INNER JOIN stations ON dosnet.stationID = stations.ID",
+            "INNER JOIN stations ON weather.stationID = stations.ID",
             "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
+            "(SELECT MAX(deviceTime) FROM weather WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
         try:
