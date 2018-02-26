@@ -751,7 +751,7 @@ class Injector(object):
                 self.db.setSingleStationUpdate(
                     field_dict['stationID'], needs_update=0)
             toc = time.time()
-            if self.verbose
+            if self.verbose:
                 print('setSingleStationUpdate took {} ms'.format(
                       (toc - tic) * 1000))
 

@@ -339,7 +339,7 @@ class SQLObject:
         col_list = "gitBranch, needsUpdate"
         q = "SELECT {} FROM stations WHERE `ID` = {};".format(
             col_list, stationID)
-        df = self.pdFromSql(q)
+        df = self.dfFromSql(q)
 
         needs_update = df['needsUpdate'][0]
         git_branch = df['gitBranch'][0]
