@@ -365,6 +365,12 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
+def make_all_station_files(stations,get_data,request_type=None,verbose=False):
+    for sid, name, nick in zip(stations.index, stations['Name'],
+                               stations['nickname']):
+        print('(id={}) {}'.format(sid, name))
+        make_station_files(sid,name,nick,get_data,request_type,verbose)
+
 def main(verbose=False,
          last_day=False,
          last_week=False,
@@ -412,46 +418,31 @@ def main(verbose=False,
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
     all_processes = []
-    for sid, name, nick in zip(stations.index, stations['Name'],
-                               stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'dosenet'))
-        p.start()
-        all_processes.append(p)
-        print()
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(stations,get_data,'dosenet',verbose))
+    p.start()
+    all_processes.append(p)
+    print()
 
-    for sid, name, nick in zip(d3s_stations.index, d3s_stations['Name'],
-                               d3s_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'d3s',verbose))
-        p.start()
-        all_processes.append(p)
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(d3s_stations,get_data,'d3s',verbose))
+    p.start()
+    all_processes.append(p)
 
-    for sid, name, nick in zip(aq_stations.index, aq_stations['Name'],
-                               aq_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'aq',verbose))
-        p.start()
-        all_processes.append(p)
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(aq_stations,get_data,'aq',verbose))
+    p.start()
+    all_processes.append(p)
 
-    for sid, name, nick in zip(w_stations.index, w_stations['Name'],
-                               w_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'weather',verbose))
-        p.start()
-        all_processes.append(p)
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(w_stations,get_data,'weather',verbose))
+    p.start()
+    all_processes.append(p)
 
-    for sid, name, nick in zip(adc_stations.index, adc_stations['Name'],
-                               adc_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'adc',verbose))
-        p.start()
-        all_processes.append(p)
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(adc_stations,get_data,'adc',verbose))
+    p.start()
+    all_processes.append(p)
 
     for p in all_processes:
         p.join()
