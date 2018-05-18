@@ -94,10 +94,11 @@ def main(verbose=False):
         latest_h_data = None
         latest_p_data = None
         if ix in w_stations.index.values:
-            temp_data = DB.getLatestWeatherStationData(ix)
-            latest_t_data = temp_data['temperature']
-            latest_h_data = temp_data['humidity']
-            latest_p_data = temp_data['pressure']
+            if not DB.getLatestWeatherStationData(ix).empty:
+                temp_data = DB.getLatestWeatherStationData(ix)
+                latest_t_data = temp_data['temperature']
+                latest_h_data = temp_data['humidity']
+                latest_p_data = temp_data['pressure']
         if len(latest_data) == 0:
             continue
         csv_fname = latest_data['nickname']
