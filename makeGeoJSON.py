@@ -80,13 +80,16 @@ def main(verbose=False):
         latest_data = DB.getLatestStationData(ix)
         latest_d3s_data = None
         if ix in d3s_stations.index.values:
-            latest_d3s_data = DB.getLatestD3SStationData(ix)['counts']
+            if not DB.getLatestD3SStationData(ix).empty:
+                latest_d3s_data = DB.getLatestD3SStationData(ix)['counts']
         latest_aq_data = None
         if ix in aq_stations.index.values:
-            latest_aq_data = DB.getLatestAQStationData(ix)['PM25']
+            if not DB.getLatestAQStationData(ix).empty:
+                latest_aq_data = DB.getLatestAQStationData(ix)['PM25']
         latest_co2_data = None
         if ix in adc_stations.index.values:
-            latest_co2_data = DB.getLatestADCStationData(ix)['co2_ppm']
+            if not DB.getLatestADCStationData(ix).empty:
+                latest_co2_data = DB.getLatestADCStationData(ix)['co2_ppm']
         latest_t_data = None
         latest_h_data = None
         latest_p_data = None
