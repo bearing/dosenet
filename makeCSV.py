@@ -413,13 +413,9 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
-    all_processes = []
-    p = multiprocessing.Process(target=make_all_station_files,
-                                args=(stations,get_data,'dosenet',verbose))
-    p.start()
-    all_processes.append(p)
-    print()
+    make_all_station_files(stations,get_data,'dosenet',verbose)
 
+    all_processes = []
     p = multiprocessing.Process(target=make_all_station_files,
                                 args=(d3s_stations,get_data,'d3s',verbose))
     p.start()
@@ -429,6 +425,12 @@ def main(verbose=False,
                                 args=(aq_stations,get_data,'aq',verbose))
     p.start()
     all_processes.append(p)
+
+    for p in all_processes:
+        p.join()
+
+    # Run multiprocessing in two stages rather than spawning 5 processes
+    all_processes = []
 
     p = multiprocessing.Process(target=make_all_station_files,
                                 args=(w_stations,get_data,'weather',verbose))
@@ -442,6 +444,7 @@ def main(verbose=False,
 
     for p in all_processes:
         p.join()
+
 
     print('Total run time: {:.2f} sec'.format(time.time() - start_time))
 
