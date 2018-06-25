@@ -325,45 +325,47 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
         print('No data-type specified')
         return None
 
-    df = DB.getAll(sid,request_type,verbose)
-    if len(df) > 0:
-        if request_type == 'd3s':
-            df = format_d3s_data(df,True)
+    if get_data['get_day']:
+        df = get_compressed_data(DB,sid,30,48,verbose)
+        csvfile = DataFile.csv_from_nickname(nick + '_day')
+        csvfile.df_to_file(df)
+
+    elif get_data['get_week']:
+        df = get_compressed_data(DB,sid,60,168,verbose)
+        csvfile = DataFile.csv_from_nickname(nick + '_week')
+        csvfile.df_to_file(df)
+
+    elif get_data['get_month']:
+        df = get_compressed_data(DB,sid,240,180,verbose)
+        csvfile = DataFile.csv_from_nickname(nick + '_month')
+        csvfile.df_to_file(df)
+
+    elif get_data['get_year']:
+        df = get_compressed_data(DB,sid,2880,183,verbose)
+        csvfile = DataFile.csv_from_nickname(nick + '_year')
+        csvfile.df_to_file(df)
+    else:
+        df = DB.getAll(sid,request_type,verbose)
+        if len(df) > 0:
+            if request_type == 'd3s':
+                df = format_d3s_data(df,True)
         csvfile = DataFile.csv_from_nickname(nick)
         csvfile.df_to_file(df)
 
-    df = DB.getLastHour(sid,request_type,verbose)
-    if len(df) > 0:
-        if request_type == 'd3s':
-            df = format_d3s_data(df)
+        df = DB.getLastHour(sid,request_type,verbose)
+        if len(df) > 0:
+            if request_type == 'd3s':
+                df = format_d3s_data(df)
         csvfile = DataFile.csv_from_nickname(nick+'_hour')
         csvfile.df_to_file(df)
 
-    if get_data['get_day']:
-        df = get_compressed_data(DB,sid,30,48,verbose)
-        if len(df) > 0:
-            csvfile = DataFile.csv_from_nickname(nick + '_day')
-            csvfile.df_to_file(df)
-
-    if get_data['get_week']:
-        df = get_compressed_data(DB,sid,60,168,verbose)
-        if len(df) > 0:
-            csvfile = DataFile.csv_from_nickname(nick + '_week')
-            csvfile.df_to_file(df)
-
-    if get_data['get_month']:
-        df = get_compressed_data(DB,sid,240,180,verbose)
-        if len(df) > 0:
-            csvfile = DataFile.csv_from_nickname(nick + '_month')
-            csvfile.df_to_file(df)
-
-    if get_data['get_year']:
-        df = get_compressed_data(DB,sid,2880,183,verbose)
-        if len(df) > 0:
-            csvfile = DataFile.csv_from_nickname(nick + '_year')
-            csvfile.df_to_file(df)
-
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
+
+def make_all_station_files(stations,get_data,request_type=None,verbose=False):
+    for sid, name, nick in zip(stations.index, stations['Name'],
+                               stations['nickname']):
+        print('(id={}) {}'.format(sid, name))
+        make_station_files(sid,name,nick,get_data,request_type,verbose)
 
 def main(verbose=False,
          last_day=False,
@@ -371,9 +373,9 @@ def main(verbose=False,
          last_month=False,
          last_year=False,
          **kwargs):
-    get_data = {'get_day': last_day or last_week or last_month or last_year,
-                'get_week': last_week or last_month or last_year,
-                'get_month': last_month or last_year,
+    get_data = {'get_day': last_day,
+                'get_week': last_week,
+                'get_month': last_month,
                 'get_year': last_year}
 
     start_time = time.time()
@@ -411,50 +413,38 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
+    make_all_station_files(stations,get_data,'dosenet',verbose)
+
     all_processes = []
-    for sid, name, nick in zip(stations.index, stations['Name'],
-                               stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'dosenet'))
-        p.start()
-        all_processes.append(p)
-        print()
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(d3s_stations,get_data,'d3s',verbose))
+    p.start()
+    all_processes.append(p)
 
-    for sid, name, nick in zip(d3s_stations.index, d3s_stations['Name'],
-                               d3s_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'d3s',verbose))
-        p.start()
-        all_processes.append(p)
-
-    for sid, name, nick in zip(aq_stations.index, aq_stations['Name'],
-                               aq_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'aq',verbose))
-        p.start()
-        all_processes.append(p)
-
-    for sid, name, nick in zip(w_stations.index, w_stations['Name'],
-                               w_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'weather',verbose))
-        p.start()
-        all_processes.append(p)
-
-    for sid, name, nick in zip(adc_stations.index, adc_stations['Name'],
-                               adc_stations['nickname']):
-        print('(id={}) {}'.format(sid, name))
-        p = multiprocessing.Process(target=make_station_files,
-                                    args=(sid,name,nick,get_data,'adc',verbose))
-        p.start()
-        all_processes.append(p)
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(aq_stations,get_data,'aq',verbose))
+    p.start()
+    all_processes.append(p)
 
     for p in all_processes:
         p.join()
+
+    # Run multiprocessing in two stages rather than spawning 5 processes
+    all_processes = []
+
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(w_stations,get_data,'weather',verbose))
+    p.start()
+    all_processes.append(p)
+
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(adc_stations,get_data,'adc',verbose))
+    p.start()
+    all_processes.append(p)
+
+    for p in all_processes:
+        p.join()
+
 
     print('Total run time: {:.2f} sec'.format(time.time() - start_time))
 
