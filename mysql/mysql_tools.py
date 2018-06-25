@@ -86,6 +86,23 @@ class SQLObject:
             # email_message.send_email(
             #     process=os.path.basename(__file__), error_message=msg)
 
+    def checkHashFromRAM(self, ID):
+        "unused"
+        # Essentially the same as doing the following in MySQL
+        # "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
+        try:
+            for i in range(len(self.verified_stations)):
+                if self.verified_stations[i][0] == ID:
+                    dbHash = self.verified_stations[i][1]
+                    return dbHash
+        except Exception as e:
+            raise e
+            return False
+            msg = 'Error: Could not find a station matching that ID'
+            print(msg)
+            # email_message.send_email(
+            #     process=os.path.basename(__file__), error_message=msg)
+
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
         """
@@ -898,8 +915,6 @@ class SQLObject:
         except (Exception) as e:
             print(e)
             return pd.DataFrame({})
-        else:
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:
