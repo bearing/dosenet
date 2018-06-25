@@ -369,7 +369,7 @@ class DoseNetSlacker(object):
 
         keep_trying = True
         n_tries = 0
-        while keep_trying and n_tries < 5:
+        while keep_trying and n_tries < 10:
             try:
                 self.slack.api_call(
                     'chat.postMessage',
@@ -380,7 +380,7 @@ class DoseNetSlacker(object):
             except ValueError as e:
                 if 'JSON' in e.__str__():
                     print('JSON error in slack module!')
-                time.sleep(5)
+                time.sleep(10)
                 n_tries += 1
             else:
                 keep_trying = False
