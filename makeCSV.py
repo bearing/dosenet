@@ -328,9 +328,9 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
     if get_data['get_day']:
         df2 = get_compressed_data(DB,sid,30,1,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_day')
-        try
+        try:
             df1 = pd.read_csv(csvfile.local_fname,skiprows=0)
-        except
+        except:
             df1 = pd.DataFrame(columns=df2.columns)
         df = pd.concat([df1,df2])
         csvfile.df_to_file(df)
