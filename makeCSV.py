@@ -326,8 +326,10 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
         return None
 
     if get_data['get_day']:
-        df = get_compressed_data(DB,sid,30,48,verbose)
+        df2 = get_compressed_data(DB,sid,30,1,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_day')
+        df1 = pandas.read_csv(csvfile.local_fname(),skiprows=0)
+        df = pandas.concat([df1,df2])
         csvfile.df_to_file(df)
 
     elif get_data['get_week']:
