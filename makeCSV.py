@@ -330,15 +330,24 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
         csvfile = DataFile.csv_from_nickname(nick + '_day')
         try:
             df1 = pd.read_csv(csvfile.local_fname)
-
         except:
             df1 = pd.DataFrame(columns=df2.columns)
         df = pd.concat([df2,df1])
         csvfile.df_to_file(df)
 
+    #elif get_data['get_week']:
+    #    df = get_compressed_data(DB,sid,60,168,verbose)
+    #    csvfile = DataFile.csv_from_nickname(nick + '_week')
+    #    csvfile.df_to_file(df)
+
     elif get_data['get_week']:
-        df = get_compressed_data(DB,sid,60,168,verbose)
+        df2 = get_compressed_data(DB,sid,60,1,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_week')
+        try:
+            df1 = pd.read_csv(csvfile.local_fname)
+        except:
+            df1 = pd.DataFrame(columns=df2.columns)
+        df = pd.concat([df2,df1])
         csvfile.df_to_file(df)
 
     elif get_data['get_month']:
