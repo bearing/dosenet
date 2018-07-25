@@ -329,10 +329,11 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
         df2 = get_compressed_data(DB,sid,30,1,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_day')
         try:
-            df1 = pd.read_csv(csvfile.local_fname,skiprows=0)
+            df1 = pd.read_csv(csvfile.local_fname)
+
         except:
             df1 = pd.DataFrame(columns=df2.columns)
-        df = pd.concat([df1,df2])
+        df = pd.concat([df2,df1])
         csvfile.df_to_file(df)
 
     elif get_data['get_week']:
