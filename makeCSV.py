@@ -365,10 +365,16 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
         df = pd.concat([df2,df1])
         csvfile.df_to_file(df)
 
+    #elif get_data['get_year']:
+    #    df = get_compressed_data(DB,sid,2880,183,verbose)
+    #    csvfile = DataFile.csv_from_nickname(nick + '_year')
+    #    csvfile.df_to_file(df)
+
     elif get_data['get_year']:
         df = get_compressed_data(DB,sid,2880,183,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_year')
         csvfile.df_to_file(df)
+
     else:
         df = DB.getAll(sid,request_type,verbose)
         if len(df) > 0:
