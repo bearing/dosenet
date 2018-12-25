@@ -1,3 +1,10 @@
+# WARNING
+As it stands, a lot of things in this branch are broken, mostly as a result of
+me (Sagnik) changing the name of the `mysql` directory to `mysql_` in order to
+prevent name collision with the `mysql-connector` package (and also to be able
+to run the AWS test on Windows using Python 3). Please use this code only for
+testing and reference.
+
 ![](http://i.imgur.com/dVADwI5.png =512x "DoseNet logo")
 # Berkeley RadWatch Dosimeter Network
 # *LBL / UC Berkeley*
