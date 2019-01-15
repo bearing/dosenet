@@ -736,7 +736,7 @@ class SQLObject:
         """Returns the string representation of a station's timezone."""
         q = "SELECT timezone FROM stations WHERE `ID` = {};".format(stationID)
         tz = self.rawSql(q)
-        return tz[0][0]
+        return str(tz[0][0])
 
     def getDataForStationByRange(self, stationID, timemin, timemax, verbose=False):
         """
