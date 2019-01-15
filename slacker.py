@@ -46,7 +46,7 @@ TEST_CHECK_INTERVAL_S = 60
 HIGH_THRESH_CPM = 20
 HIGH_INTERVAL_STR = 'INTERVAL 1 WEEK'
 HIGH_SQL = ' '.join((
-    "SELECT * FROM dosimeter_network.dosnet",
+    "SELECT * FROM dosnet",
     "WHERE (stationID = {}".format('{}'),
     "AND cpm > {}".format(HIGH_THRESH_CPM),
     "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
