@@ -5,7 +5,7 @@ import geojson
 from geojson import Point, Feature, FeatureCollection
 import time
 import datetime
-from mysql.mysql_tools import SQLObject
+from mysql_tools.mysql_tools import SQLObject
 from data_transfer import DataFile, nickname_to_remote_csv_fname
 from collections import OrderedDict
 
