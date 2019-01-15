@@ -90,7 +90,7 @@ class SQLObject:
         """
         try:
             sql_cmd = ("SELECT `ID`, `IDLatLongHash` FROM " +
-                       "dosimeter_network.stations;")
+                       "stations;")
             self.cursor.execute(sql_cmd)
             self.verified_stations = self.cursor.fetchall()
         except Exception as e:
@@ -436,7 +436,7 @@ class SQLObject:
 
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
-        q = "SELECT * FROM dosimeter_network.stations;"
+        q = "SELECT * FROM stations;"
         df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
         del df['ID']
@@ -483,7 +483,7 @@ class SQLObject:
 
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
-        q = "SELECT * FROM dosimeter_network.stations WHERE `ID` = {};".format(
+        q = "SELECT * FROM stations WHERE `ID` = {};".format(
                 stationID)
         df = self.dfFromSql(q)
         df.set_index(df['ID'], inplace=True)
