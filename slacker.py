@@ -5,7 +5,6 @@ Requires official slackclient:
 
 Requires token to be set for SLACK:
     This has been configured for the Slack Bot named
-
         dosenet_server
 
     https://api.slack.com/bot-users
@@ -23,7 +22,7 @@ import pandas as pd
 import subprocess
 import traceback as tb
 from slackclient import SlackClient
-from mysql.mysql_tools import SQLObject
+from mysql_tools.mysql_tools import SQLObject
 import MySQLdb as mdb
 
 SLACK_USER = 'dosenet_server'
@@ -364,7 +363,7 @@ class DoseNetSlacker(object):
 
         keep_trying = True
         n_tries = 0
-        while keep_trying and n_tries < 5:
+        while keep_trying and n_tries < 10:
             try:
                 self.slack.api_call(
                     'chat.postMessage',
@@ -375,11 +374,10 @@ class DoseNetSlacker(object):
             except ValueError as e:
                 if 'JSON' in e.__str__():
                     print('JSON error in slack module!')
-                time.sleep(5)
+                time.sleep(10)
                 n_tries += 1
             else:
                 keep_trying = False
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

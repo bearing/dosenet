@@ -329,21 +329,29 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
         df = get_compressed_data(DB,sid,30,48,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_day')
         csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick + '_day')
+        jsonfile.df_to_json(df)
 
     elif get_data['get_week']:
         df = get_compressed_data(DB,sid,60,168,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_week')
         csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick + '_week')
+        jsonfile.df_to_json(df)
 
     elif get_data['get_month']:
         df = get_compressed_data(DB,sid,240,180,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_month')
         csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick + '_month')
+        jsonfile.df_to_json(df)
 
     elif get_data['get_year']:
         df = get_compressed_data(DB,sid,2880,183,verbose)
         csvfile = DataFile.csv_from_nickname(nick + '_year')
         csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick + '_year')
+        jsonfile.df_to_json(df)
     else:
         df = DB.getAll(sid,request_type,verbose)
         if len(df) > 0:
@@ -351,6 +359,8 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
                 df = format_d3s_data(df,True)
         csvfile = DataFile.csv_from_nickname(nick)
         csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick)
+        jsonfile.df_to_json(df)
 
         df = DB.getLastHour(sid,request_type,verbose)
         if len(df) > 0:
@@ -358,6 +368,8 @@ def make_station_files(sid,name,nick,get_data,request_type=None,verbose=False):
                 df = format_d3s_data(df)
         csvfile = DataFile.csv_from_nickname(nick+'_hour')
         csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick + '_hour')
+        jsonfile.df_to_json(df)
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 

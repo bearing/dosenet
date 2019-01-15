@@ -5,7 +5,6 @@ import os
 import time
 from utils import print_divider, mkdir
 
-
 REMOTE_USERNAME = 'jhanks'
 WEBSERVER_ADDRESS = 'kepler.berkeley.edu'
 # Default paths
@@ -123,6 +122,14 @@ class DataFile(object):
             remote_dir=REMOTE_GEOJSON_DIR)
         return obj
 
+    @classmethod
+    def json_from_nickname(cls, nickname):
+        obj = cls(
+            base_fname=nickname + '.json',
+            local_dir=LOCAL_CSV_DIR,
+            remote_dir=REMOTE_CSV_DIR)
+        return obj
+
     def send_to_webserver(self, testing=False):
         send_to_webserver(
             local_fnames=[self.local_fname],
@@ -164,7 +171,15 @@ class DataFile(object):
             df.to_csv(self.local_fname, index=None)
             self.print_local_file_saved()
         except Exception as e:
-            print('Cannot write here:', self.local_fname)
+            print('Cannot write here: {}'.format(self.local_fname))
+            print(e)
+
+    def df_to_json(self, df):
+        try:
+            df.to_json(self.local_fname)
+            self.print_local_file_saved()
+        except Exception as e:
+            print('Cannot write here: {}'.format(self.local_fname))
             print(e)
 
     def print_local_file_saved(self):
