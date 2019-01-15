@@ -8,7 +8,18 @@ import sys
 import datetime
 import time
 import pytz
+from mysql.connector import MySQLConnection
 
+USER = 'root'  # set while creating the instance
+HOST = 'dosenet-0.cork9lvwvd2g.us-west-1.rds.amazonaws.com'  # obtained AFTER creating the instance
+PORT = 3306  # default value (can be changed while creating the instance)
+PASSWORD = 'radiationisrad'  # set while creating the instance
+DATABASE = 'dosenet'   # set while creating the instance
+
+def connection_to_remote_db():
+    """Returns a connection to the remote database."""
+    return MySQLConnection(user=USER, host=HOST, port=PORT,
+                           password=PASSWORD, database=DATABASE)
 
 def datetime_tz(year, month, day, hour=0, minute=0, second=0, tz='UTC'):
     dt_naive = datetime.datetime(year, month, day, hour, minute, second)
@@ -27,12 +38,13 @@ def epoch_to_datetime(epoch, tz='UTC'):
 class SQLObject:
     def __init__(self, tz='+00:00'):
         # NOTE should eventually update names (jccurtis)
-        self.db = mdb.connect(
-            '127.0.0.1',
-            'ne170group',
-            'ne170groupSpring2015',
-            'dosimeter_network')
-        self.cursor = self.db.cursor()
+        #self.db = mdb.connect(
+        #    '127.0.0.1',
+        #    'ne170group',
+        #    'ne170groupSpring2015',
+        #    'dosimeter_network')
+        self.db = connection_to_remote_db()
+        self.cursor = self.db.cursor(buffered=True)
         self.set_session_tz(tz)
         self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
         self.test_station_ids_ix = 0
@@ -58,8 +70,10 @@ class SQLObject:
         """
         print('[CONFIG] Setting session timezone to: {}'.format(tz))
         self.cursor.execute("SET time_zone='{}';".format(tz))
+        self.refresh()
 
     def close(self):
+        self.cursor.close()
         self.db.close()
 
     def refresh(self):
