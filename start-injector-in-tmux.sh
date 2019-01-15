@@ -34,4 +34,3 @@ echo "  Please confirm via:"
 echo "  $ tmux attach-session -t INJECTOR"
 echo "  and then detach by:"
 echo "    [Ctrl-b] d"
-
