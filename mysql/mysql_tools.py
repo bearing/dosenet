@@ -38,11 +38,11 @@ def epoch_to_datetime(epoch, tz='UTC'):
 class SQLObject:
     def __init__(self, tz='+00:00'):
         # NOTE should eventually update names (jccurtis)
-        self.db = mdb.connect(
-            '127.0.0.1',
-            'ne170group',
-            'ne170groupSpring2015',
-            'dosimeter_network')
+        #self.db = mdb.connect(
+        #    '127.0.0.1',
+        #    'ne170group',
+        #    'ne170groupSpring2015',
+        #    'dosimeter_network')
         self.db = connection_to_remote_db()
         self.cursor = self.db.cursor(buffered=True)
         self.set_session_tz(tz)
