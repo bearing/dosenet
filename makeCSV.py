@@ -374,7 +374,8 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
 
     for idx in range(len(intervals)):
         df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
-        df = DB.addTimeColumnsToDataframe(df,sid)
+        if len(df) > 0:
+            df = DB.addTimeColumnsToDataframe(df,sid)
         csvfile = DataFile.csv_from_nickname(nick+name_sufix[idx])
         csvfile.df_to_file(df)
         jsonfile = DataFile.json_from_nickname(nick + name_sufix[idx])
@@ -443,16 +444,20 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
-    make_all_station_files(stations,get_data,'dosenet',verbose)
 
     all_processes = []
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(d3s_stations,get_data,'d3s',verbose))
+                                args=(stations,get_data,'dosenet',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
                                 args=(aq_stations,get_data,'aq',verbose))
+    p.start()
+    all_processes.append(p)
+
+    p = multiprocessing.Process(target=make_all_station_files,
+                                args=(adc_stations,get_data,'adc',verbose))
     p.start()
     all_processes.append(p)
 
@@ -468,9 +473,7 @@ def main(verbose=False,
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(adc_stations,get_data,'adc',verbose))
-    p.start()
-    all_processes.append(p)
+                                args=(d3s_stations,get_data,'d3s',verbose))
 
     for p in all_processes:
         p.join()
