@@ -20,6 +20,7 @@ do
 done
 #python $HOMEPATH/git/dosenet/makeCSV.py
 #python $HOMEPATH/git/dosenet/makeGeoJSON.py
+
 python $HOMEPATH/git/dosenet/sendDataToWebserver.py
 
 logger --stderr --id --tag $LOGTAG "Finished sending data to webserver"
