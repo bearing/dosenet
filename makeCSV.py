@@ -344,7 +344,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
         request type: specify sensor (silicon,d3s,etc)
     """
     dbconnection_attempts = 0
-    DB = Null
+    DB = None
     while True:
         try:
             DB = SQLObject()
