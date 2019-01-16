@@ -408,6 +408,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
     jsonfile.df_to_json(df)
 
     if len(df_all) > 0:
+        df_all = DB.addTimeColumnsToDataframe(df, stationID=sid)
         if request_type == 'd3s':
             df_all = format_d3s_data(df_all,True)
     csvfile = DataFile.csv_from_nickname(nick)

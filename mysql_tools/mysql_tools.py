@@ -912,7 +912,8 @@ class SQLObject:
             if verbose:
                 print('[SQL INFO] returning data for stationID={}'.format(
                         stationID))
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            return df
+            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getD3SDataForStationByInterval(self, stationID, intervalStr, verbose=False):
         col_list = ', '.join([
@@ -939,7 +940,8 @@ class SQLObject:
             if verbose:
                 print('[SQL INFO] returning data for stationID={}'.format(
                         stationID))
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            return df
+            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getAQDataForStationByInterval(self, stationID, intervalStr, verbose=False):
         col_list = ', '.join([
@@ -967,7 +969,8 @@ class SQLObject:
             if verbose:
                 print('[SQL INFO] returning data for stationID={}'.format(
                         stationID))
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            return df
+            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getWeatherDataForStationByInterval(self, stationID, intervalStr, verbose=False):
         col_list = ', '.join([
@@ -995,7 +998,8 @@ class SQLObject:
             if verbose:
                 print('[SQL INFO] returning data for stationID={}'.format(
                         stationID))
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            return df
+            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def getADCDataForStationByInterval(self, stationID, intervalStr, verbose=False):
         col_list = ', '.join([
@@ -1022,7 +1026,8 @@ class SQLObject:
             if verbose:
                 print('[SQL INFO] returning data for stationID={}'.format(
                         stationID))
-            return self.addTimeColumnsToDataframe(df, stationID=stationID)
+            return df
+            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
 
     def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
         """
