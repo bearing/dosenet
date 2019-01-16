@@ -90,13 +90,12 @@ def format_d3s_data(df, all=False):
     df = df.join(df_channels)
     return df
 
-def get_compressed_d3s_data(df,sid,integration_time,n_intervals,verbose):
+def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
     """
     get d3s station data from the database for some number of time bins
 
     Args:
         df: DataFrame of data
-        sid: station ID
         integration_time: time bin (min) to average over
         n_intervals: number of time bins to retreive
         verbose: sets verbosity for debugging
@@ -136,7 +135,6 @@ def get_compressed_d3s_data(df,sid,integration_time,n_intervals,verbose):
     if verbose:
         print(comp_df)
     comp_df = comp_df.join(df_channels)
-    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
 """
@@ -191,13 +189,12 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
     return comp_df
 """
 
-def get_compressed_dosenet_data(df,sid,integration_time,n_intervals,verbose):
+def get_compressed_dosenet_data(df,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
     Args:
         df: DataFrame of data
-        sid: station ID
         integration_time: time bin (min) to average over
         n_intervals: number of time bins to retreive
     Returns:
@@ -224,16 +221,14 @@ def get_compressed_dosenet_data(df,sid,integration_time,n_intervals,verbose):
             comp_df.loc[idx,'cpm'] = counts/(ndata*5)
             comp_df.loc[idx,'cpmError'] = math.sqrt(counts)/(ndata*5)
 
-    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_aq_data(df,sid,integration_time,n_intervals,verbose):
+def get_compressed_aq_data(df,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
     Args:
         df: DataFrame of data
-        sid: station ID
         integration_time: time bin (min) to average over
         n_intervals: number of time bins to retreive
     Returns:
@@ -259,16 +254,14 @@ def get_compressed_aq_data(df,sid,integration_time,n_intervals,verbose):
             comp_df.loc[idx,'PM25'] = idf.loc[:,'PM25'].sum()/ndata
             comp_df.loc[idx,'PM10'] = idf.loc[:,'PM10'].sum()/ndata
 
-    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_weather_data(df,sid,integration_time,n_intervals,verbose):
+def get_compressed_weather_data(df,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
     Args:
         df: DataFrame of data
-        sid: station ID
         integration_time: time bin (min) to average over
         n_intervals: number of time bins to retreive
     Returns:
@@ -294,16 +287,14 @@ def get_compressed_weather_data(df,sid,integration_time,n_intervals,verbose):
             comp_df.loc[idx,'pressure'] = idf.loc[:,'pressure'].sum()/ndata
             comp_df.loc[idx,'humidity'] = idf.loc[:,'humidity'].sum()/ndata
 
-    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
-def get_compressed_adc_data(df,sid,integration_time,n_intervals,verbose):
+def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
     """
     get station data from the database for some number of time bins
 
     Args:
         df: DataFrame of data
-        sid: station ID
         integration_time: time bin (min) to average over
         n_intervals: number of time bins to retreive
     Returns:
@@ -328,7 +319,6 @@ def get_compressed_adc_data(df,sid,integration_time,n_intervals,verbose):
             comp_df.loc[idx,'co2_ppm'] = idf.loc[:,'co2_ppm'].sum()/ndata
             comp_df.loc[idx,'noise'] = idf.loc[:,'noise'].sum()/ndata
 
-    comp_df = DB.addTimeColumnsToDataframe(comp_df,sid)
     return comp_df
 
 def make_station_files(sid,name,nick,request_type=None,verbose=False):
@@ -378,35 +368,17 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
         print('No data-type specified')
         return None
 
-    df = get_compressed_data(df_all,sid,5,12,verbose)
-    csvfile = DataFile.csv_from_nickname(nick+'_hour')
-    csvfile.df_to_file(df)
-    jsonfile = DataFile.json_from_nickname(nick + '_hour')
-    jsonfile.df_to_json(df)
+    intervals = [5,30,60,240,2880]
+    nintervals = [12,48,168,180,183]
+    name_sufix = ['_hour','_day','_week','_month','_year']
 
-    df = get_compressed_data(df_all,sid,30,48,verbose)
-    csvfile = DataFile.csv_from_nickname(nick + '_day')
-    csvfile.df_to_file(df)
-    jsonfile = DataFile.json_from_nickname(nick + '_day')
-    jsonfile.df_to_json(df)
-
-    df = get_compressed_data(df_all,sid,60,168,verbose)
-    csvfile = DataFile.csv_from_nickname(nick + '_week')
-    csvfile.df_to_file(df)
-    jsonfile = DataFile.json_from_nickname(nick + '_week')
-    jsonfile.df_to_json(df)
-
-    df = get_compressed_data(df_all,sid,240,180,verbose)
-    csvfile = DataFile.csv_from_nickname(nick + '_month')
-    csvfile.df_to_file(df)
-    jsonfile = DataFile.json_from_nickname(nick + '_month')
-    jsonfile.df_to_json(df)
-
-    df = get_compressed_data(df_all,sid,2880,183,verbose)
-    csvfile = DataFile.csv_from_nickname(nick + '_year')
-    csvfile.df_to_file(df)
-    jsonfile = DataFile.json_from_nickname(nick + '_year')
-    jsonfile.df_to_json(df)
+    for idx in range(len(intervals)):
+        df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
+        df = DB.addTimeColumnsToDataframe(df,sid)
+        csvfile = DataFile.csv_from_nickname(nick+name_sufix[idx])
+        csvfile.df_to_file(df)
+        jsonfile = DataFile.json_from_nickname(nick + name_sufix[idx])
+        jsonfile.df_to_json(df)
 
     if len(df_all) > 0:
         df_all = DB.addTimeColumnsToDataframe(df, stationID=sid)
