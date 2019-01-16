@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-LOGTAG=makeWebserverData
 HOMEPATH=/home/dosenet
 PYTHONPATH=$HOMEPATH/anaconda/bin/
 PATH=$PYTHONPATH:$PATH
@@ -8,7 +7,6 @@ PATH=$PYTHONPATH:$PATH
 . $HOMEPATH/.keychain/$HOSTNAME-sh
 
 # let devices post first
-logger --stderr --id --tag $LOGTAG "Making files for webserver..."
 for arg in "$@"
 do
     if [ "$arg" == "--geojson" ]
