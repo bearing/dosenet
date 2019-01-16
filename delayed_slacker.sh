@@ -2,12 +2,15 @@
 # runs slacker.py after waiting for SQL to be up
 
 LOGTAG=Slack
-SLACKER_PATH=/home/dosenet/git/dosenet_slack_outage
+HOMEPATH=/home/dosenet
+PYTHONPATH=$HOMEPATH/anaconda/bin/
+PATH=$PYTHONPATH:$PATH
+SLACKER_PATH=/home/dosenet/git/dosenet
 DELAY_TIME_S=10
 
 sleep $DELAY_TIME_S
 
-/home/dosenet/anaconda/bin/python $SLACKER_PATH/slacker.py -i &
+python $SLACKER_PATH/slacker.py -i &
 
 if [[ $? -eq 0 ]]
 then

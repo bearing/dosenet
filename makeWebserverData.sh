@@ -13,25 +13,9 @@ do
     then
         python $HOMEPATH/git/dosenet/makeGeoJSON.py
     fi
-    if [ "$arg" == "--last-hour" ]
+    if [ "$arg" == "--data" ]
     then
         python $HOMEPATH/git/dosenet/makeCSV.py
-    fi
-    if [ "$arg" == "--last-day" ]
-    then
-        python $HOMEPATH/git/dosenet/makeCSV.py --last-day
-    fi
-    if [ "$arg" == "--last-week" ]
-    then
-        python $HOMEPATH/git/dosenet/makeCSV.py --last-week
-    fi
-    if [ "$arg" == "--last-month" ]
-    then
-        python $HOMEPATH/git/dosenet/makeCSV.py --last-month
-    fi
-    if [ "$arg" == "--last-year" ]
-    then
-        python $HOMEPATH/git/dosenet/makeCSV.py --last-year
     fi
 done
 #python $HOMEPATH/git/dosenet/makeCSV.py
