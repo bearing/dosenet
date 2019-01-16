@@ -142,7 +142,7 @@ def get_compressed_d3s_data(df,sid,integration_time,n_intervals,verbose):
 """
 def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
                             verbose):
-    """
+
     get d3s station data from the database for some number of time bins
 
     Args:
@@ -153,7 +153,7 @@ def get_compressed_d3s_data(DB,sid,integration_time,n_intervals,
     Returns:
         DataFrame with 3 time columns and 2 data columns:
             deviceTime_[utc, local, unix] cpm, cpmError
-    """
+
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
     min_time = max_time - n_intervals*interval
