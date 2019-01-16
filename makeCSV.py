@@ -421,7 +421,7 @@ def make_all_station_files(stations,get_data,request_type=None,verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
-        make_station_files(sid,name,nick,get_data,request_type,verbose)
+        make_station_files(sid,name,nick,request_type,verbose)
 
 def main(verbose=False,
          last_day=False,
