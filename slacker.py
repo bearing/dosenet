@@ -91,6 +91,8 @@ class DoseNetSlacker(object):
         self.initialize_station_status()
         self.post_initial_report()
         print('Posted initial report at {}'.format(datetime.datetime.now()))
+        print('Checking and restarting injector? {}'.format(
+                self.restart_injector))
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
