@@ -6,17 +6,18 @@ PATH=$PYTHONPATH:$PATH
 
 . $HOMEPATH/.keychain/$HOSTNAME-sh
 
-sleep 60
 
 while [ 1 < 2 ]; do
   for arg in "$@"
   do
       if [ "$arg" == "--geojson" ]
       then
+          sleep 30
           python $HOMEPATH/git/dosenet/makeGeoJSON.py
       fi
       if [ "$arg" == "--data" ]
       then
+          sleep 150
           python $HOMEPATH/git/dosenet/makeCSV.py
       fi
   done
