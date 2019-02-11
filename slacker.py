@@ -120,7 +120,10 @@ class DoseNetSlacker(object):
         """
 
         self.get_current_station_list()
+        if self.v:
+            print('Current stations list: {}'.format(self.stations))
         self.update_station_status()
+
 
     def get_current_station_list(self):
         """
