@@ -18,6 +18,12 @@ import itertools
 import csv
 import re
 from timezonefinder.timezonefinder import TimezoneFinder
+from mysql.connector import MySQLConnection
+
+def connection_to_remote_db():
+    """Returns a connection to the remote database."""
+    return MySQLConnection(user=USER, host=HOST, port=PORT,
+                           password=PASSWORD, database=DATABASE)
 
 class Parser:
     def __init__(self):
@@ -46,11 +52,12 @@ class DBTool:
     def __init__(self, name, nickname, lat, lon, cpmtorem,
                  display, devices, *ID):
         # Open database connection
-        self.db = mdb.connect(
-            "127.0.0.1",
-            "ne170group",
-            "ne170groupSpring2015",
-            "dosimeter_network")
+        #self.db = mdb.connect(
+        #    "127.0.0.1",
+        #    "ne170group",
+        #    "ne170groupSpring2015",
+        #    "dosimeter_network")
+        self.db = connection_to_remote_db()
         try:
             self.ID = ID[0]
         except Exception as ex:
@@ -67,7 +74,8 @@ class DBTool:
         self.display = display
         self.devices = devices
         # prepare a cursor object using cursor() method
-        self.cursor = self.db.cursor()
+        #self.cursor = self.db.cursor()
+        self.cursor = self.db.cursor(buffered=True)
         self.md5hash = ''
         self.new_station = ''
         self.initialState = self.getInitialState()
