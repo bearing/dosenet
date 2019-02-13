@@ -20,6 +20,12 @@ import re
 from timezonefinder.timezonefinder import TimezoneFinder
 from mysql.connector import MySQLConnection
 
+USER = 'root'  # set while creating the instance
+HOST = 'dosenet-0.cork9lvwvd2g.us-west-1.rds.amazonaws.com'  # obtained AFTER creating the instance
+PORT = 3306  # default value (can be changed while creating the instance)
+PASSWORD = 'radiationisrad'  # set while creating the instance
+DATABASE = 'dosenet'   # set while creating the instance
+
 def connection_to_remote_db():
     """Returns a connection to the remote database."""
     return MySQLConnection(user=USER, host=HOST, port=PORT,
