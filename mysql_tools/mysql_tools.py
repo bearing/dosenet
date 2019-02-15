@@ -365,7 +365,7 @@ class SQLObject:
 # ---------------------------------------------------------------------------
 
     def sendSingleStationChange(self, stationID, column, value):
-        q = "UPDATE stations SET {} = {} WHERE `ID`={}".format(
+        q = "UPDATE stations SET `{}` = {} WHERE `ID`={}".format(
                 column,value,stationID)
         self.cursor.execute(q)
         self.refresh()
