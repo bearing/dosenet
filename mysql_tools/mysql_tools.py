@@ -364,6 +364,12 @@ class SQLObject:
 #       STATION-UPDATE-RELATED METHODS
 # ---------------------------------------------------------------------------
 
+    def sendSingleStationChange(self, stationID, column, value):
+        q = "UPDATE stations SET {} = {} WHERE `ID`={}".format(
+                column,value,stationID)
+        self.cursor.execute(q)
+        self.refresh()
+
     def setSingleStationUpdate(self, stationID, needs_update=0):
         """
         Set needsUpdate = {} for a single station in stations table. Default: 0

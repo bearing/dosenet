@@ -4,5 +4,20 @@ from mysql_tools.mysql_tools import SQLObject
 def get_stations():
     DB = SQLObject()
     df = DB.getStations()
-    df_sub = df[['Name','Lat','Long']]
+    df_sub = df[['Name','Lat','Long','display','devices']]
     print(df_sub)
+
+def get_station(ID):
+    DB = SQLObject()
+    df = DB.getSingleStation(ID)
+    print(df)
+
+def get_station_hash(ID):
+    DB = SQLObject()
+    hash = DB.getHashFromDB(ID)
+    print(hash)
+
+def station_update(ID,column,value):
+    DB = SQLObject()
+    #UPDATE `dosimeter_network`.`stations` SET `Long` = '8.668740' WHERE (`ID` ='48') and (`Name` = 'Westend');
+    DB.sendSingleStationChange(ID,column,value)
