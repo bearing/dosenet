@@ -1,5 +1,5 @@
 from mysql_tools.mysql_tools import SQLObject
-from utils import timeout
+from utils import timeout, TimeoutError
 
 def get_stations():
     DB = SQLObject()
@@ -32,5 +32,5 @@ def get_all_data(ID,data_type,max_time):
     try:
         df = sub_func(ID,data_type)
         print(df)
-    except Exception as e:
+    except TimeoutError as e:
         print(e)
