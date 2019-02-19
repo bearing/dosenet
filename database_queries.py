@@ -27,8 +27,10 @@ def get_all_data(ID,data_type,max_time):
     @timeout(max_time)
     def sub_func(ID,data_type):
             DB = SQLObject()
-            DB.getAll(ID,data_type,True)
+            df = DB.getAll(ID,data_type,True)
+            return df
     try:
-        sub_func(ID,data_type)
+        df = sub_func(ID,data_type)
+        print(df)
     except Exception as e:
         print(e)
