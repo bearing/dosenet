@@ -24,9 +24,11 @@ def station_update(ID,column,value):
 
 #@timeout(120)
 def get_all_data(ID,data_type,max_time):
-    try:
-        with timeout(max_time):
+    @timeout(max_time)
+    def sub_func(ID,data_type):
             DB = SQLObject()
             DB.getAll(ID,data_type,True)
+    try:
+        sub_func(ID,data_type)
     except Exception as e:
         print(e)
