@@ -33,4 +33,5 @@ def get_all_data(ID,data_type,max_time):
         df = sub_func(ID,data_type)
         print(df)
     except TimeoutError as e:
+        print("ERROR: opperation timeout error - ")
         print(e)
