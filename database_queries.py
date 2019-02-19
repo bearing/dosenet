@@ -22,7 +22,11 @@ def station_update(ID,column,value):
     #UPDATE `dosimeter_network`.`stations` SET `Long` = '8.668740' WHERE (`ID` ='48') and (`Name` = 'Westend');
     DB.sendSingleStationChange(ID,column,value)
 
-@timeout(120)
-def get_all_data(ID,data_type):
-    DB = SQLObject()
-    DB.getAll(ID,data_type,True)
+#@timeout(120)
+def get_all_data(ID,data_type,max_time):
+    try:
+        with timeout(max_time):
+            DB = SQLObject()
+            DB.getAll(ID,data_type,True)
+    except Exception as e:
+        print(e)
