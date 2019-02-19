@@ -10,6 +10,7 @@ import numpy as np
 import math
 import pandas as pd
 import multiprocessing
+from utils import timeout
 
 docstring = """
 MYSQL to CSV writer.
@@ -269,16 +270,13 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-def make_station_files(sid,name,nick,request_type=None,verbose=False):
+@timeout(120)
+def get_database_df(sid,request_type=None,verbose=False):
     """
-    generage all csv files for a station
+    gets dataframe of all station data from database and returns dataframe
 
     Args:
         sid: station ID
-        name: station Name
-        nick: station csv file nickname
-        get_data: dictionary of booleans for which data ranges to retreive
-            determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
     dbconnection_attempts = 0
@@ -296,7 +294,22 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
             else:
                 print('Giving up after 5 attempts')
 
-    df_all = DB.getAll(sid,request_type,verbose)
+    df = DB.getAll(sid,request_type,verbose)
+    return df
+
+def make_station_files(sid,name,nick,request_type=None,verbose=False):
+    """
+    generage all csv files for a station
+
+    Args:
+        sid: station ID
+        name: station Name
+        nick: station csv file nickname
+        get_data: dictionary of booleans for which data ranges to retreive
+            determined from command line arguments
+        request type: specify sensor (silicon,d3s,etc)
+    """
+    df_all = get_database_df(sid,request_type,verbose)
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data

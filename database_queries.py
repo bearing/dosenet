@@ -1,5 +1,5 @@
 from mysql_tools.mysql_tools import SQLObject
-
+from utils import timeout
 
 def get_stations():
     DB = SQLObject()
@@ -21,3 +21,7 @@ def station_update(ID,column,value):
     DB = SQLObject()
     #UPDATE `dosimeter_network`.`stations` SET `Long` = '8.668740' WHERE (`ID` ='48') and (`Name` = 'Westend');
     DB.sendSingleStationChange(ID,column,value)
+
+def get_all_data(ID,data_type):
+    DB = SQLObject()
+    DB.getAll(ID,data_type,True)
