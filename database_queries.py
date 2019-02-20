@@ -24,13 +24,10 @@ def station_update(ID,column,value):
 
 #@timeout(120)
 def get_all_data(ID,data_type,max_time):
-    def sub_func(ID,data_type):
-        DB = SQLObject()
-        df = DB.getAll(ID,data_type,True)
-        return df
     try:
         with timeout(max_time):
-            df = sub_func(ID,data_type)
+            DB = SQLObject()
+            df = DB.getAll(ID,data_type,True)
             print(df)
     except TimeoutError as e:
         print("ERROR: opperation timeout error - ")
