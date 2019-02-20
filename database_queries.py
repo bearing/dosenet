@@ -25,11 +25,11 @@ def station_update(ID,column,value):
 
 #@timeout(120)
 def get_all_data(ID,data_type,max_time):
-    DB = SQLObject()
     retry_counter = 0
     while retry_counter < 3:
         try:
             with timeout(max_time*(retry_counter+1)):
+                DB = SQLObject()
                 df = DB.getAll(ID,data_type,True)
                 return df
         except (TimeoutError) as e:
