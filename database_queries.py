@@ -28,10 +28,10 @@ def get_all_data(ID,data_type,max_time):
             DB = SQLObject()
             df = DB.getAll(ID,data_type,True)
             return df
-    try:
-        with timeout(max_time):
+    with timeout(max_time):
+        try:
             df = sub_func(ID,data_type)
             print(df)
-    except TimeoutError as e:
-        print("ERROR: opperation timeout error - ")
-        print(e)
+        except TimeoutError as e:
+            print("ERROR: opperation timeout error - ")
+            print(e)
