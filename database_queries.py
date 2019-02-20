@@ -23,15 +23,15 @@ def station_update(ID,column,value):
     #UPDATE `dosimeter_network`.`stations` SET `Long` = '8.668740' WHERE (`ID` ='48') and (`Name` = 'Westend');
     DB.sendSingleStationChange(ID,column,value)
 
-#@timeout(120)
 def get_all_data(ID,data_type,max_time):
     retry_counter = 0
+    DB = SQLObject()
     while retry_counter < 3:
         try:
             with timeout(max_time*(retry_counter+1)):
-                DB = SQLObject()
+                DB.refresh()
                 df = DB.getAll(ID,data_type,True)
-                return df
+                print(df)
         except (TimeoutError) as e:
             retry_counter = retry_counter + 1
             print(e)

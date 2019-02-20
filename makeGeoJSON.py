@@ -8,6 +8,7 @@ import datetime
 from mysql_tools.mysql_tools import SQLObject
 from data_transfer import DataFile, nickname_to_remote_csv_fname
 from collections import OrderedDict
+from utils import timeout, TimeoutError
 
 docstring = """
 Main makeGeoJSON and transfer to KEPLER webserver 
@@ -35,6 +36,64 @@ Last updated:
 Originally adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 """
 
+def get_stations(DB,data_type):
+    print('Getting active {} stations'.format(data_type))
+    while True:
+        try:
+            with timeout(120):
+                if data_type=='pocket':
+                    active_stations = DB.getActiveStations()
+                elif data_type=='d3s':
+                    active_stations = DB.getActiveD3SStations()
+                elif data_type=='aq':
+                    active_stations = DB.getActiveAQStations()
+                elif data_type=='adc':
+                    active_stations = DB.getActiveADCStations()
+                elif data_type=='weather':
+                    active_stations = DB.getActiveWeatherStations()
+                print(active_stations)
+                print()
+                return active_stations
+        except TimeoutError:
+            print("Timmed out getting active stations... trying again")
+
+def get_data(DB,ix,data_type,old_data=0.0):
+    try:
+        with timeout(600):
+            if data_type=="pocket":
+                data_df = DB.getLatestStationData(ix)
+                if not data_df.empty:
+                    return data_df
+                else:
+                    return pd.DataFrame({})
+            if data_type=="d3s":
+                data_df = DB.getLatestD3SStationData(ix)
+                if not data_df.empty:
+                    return data_df['counts']
+                else:
+                    return None
+            if data_type=="aq":
+                data_df = DB.getLatestAQStationData(ix)
+                if not data_df.empty:
+                    return data_df['PM25']
+                else:
+                    return None
+            if data_type=="adc":
+                data_df = DB.getLatestADCStationData(ix)
+                if not data_df.empty:
+                    return data_df['co2_ppm']
+                else:
+                    return None
+            if data_type=="weather":
+                data_df = DB.getLatestWeatherStationData(ix)
+                if not data_df.empty:
+                    return data_df
+                else:
+                    return pd.DataFrame({})
+    except TimeoutError:
+        print("Error: timed out getting data")
+        return old_data
+
 def main(verbose=False):
     start_time = time.time()
     # -------------------------------------------------------------------------
@@ -44,30 +103,12 @@ def main(verbose=False):
     # -------------------------------------------------------------------------
     # Get dataframe of active stations
     # -------------------------------------------------------------------------
-    print('Getting active stations')
-    active_stations = DB.getActiveStations()
-    print(active_stations)
-    print()
+    active_stations = get_stations(DB,'pocket')
+    d3s_stations = get_stations(DB,'d3s')
+    aq_stations = get_stations(DB,'aq')
+    adc_stations = get_stations(DB,'adc')
+    w_stations = get_stations(DB,'weather')
 
-    print('Getting active d3s stations')
-    d3s_stations = DB.getActiveD3SStations()
-    print(d3s_stations)
-    print()
-
-    print('Getting active air quality stations')
-    aq_stations = DB.getActiveAQStations()
-    print(aq_stations)
-    print()
-
-    print('Getting active CO2 stations')
-    adc_stations = DB.getActiveADCStations()
-    print(adc_stations)
-    print()
-
-    print('Getting active weather stations')
-    w_stations = DB.getActiveWeatherStations()
-    print(w_stations)
-    print()
     # -------------------------------------------------------------------------
     # Make geojson features and URLs for raw CSV data
     # -------------------------------------------------------------------------
@@ -77,35 +118,33 @@ def main(verbose=False):
         point = Point([active_stations.loc[ix, 'Long'],
                        active_stations.loc[ix, 'Lat']])
         # Get latest dose (CPM) and time to display in exported GeoJSON file
-        latest_data = DB.getLatestStationData(ix)
-        print('Station {}: CPM = {}'.format(ix,latest_data))
-        latest_d3s_data = None
+        if ix in active_stations.index.values:
+            latest_data = get_data(DB,ix,"pocket")
+            print('Station {}: CPM = {}'.format(ix,latest_data))
+
         if ix in d3s_stations.index.values:
-            if not DB.getLatestD3SStationData(ix).empty:
-                latest_d3s_data = DB.getLatestD3SStationData(ix)['counts']
-                print('Station {}: counts = {}'.format(ix,latest_d3s_data))
-        latest_aq_data = None
+            latest_d3s_data = get_data(DB,"d3s")
+            print('Station {}: counts = {}'.format(ix,latest_d3s_data))
+
         if ix in aq_stations.index.values:
-            if not DB.getLatestAQStationData(ix).empty:
-                latest_aq_data = DB.getLatestAQStationData(ix)['PM25']
-                print('Station {}: AQ = {}'.format(ix,latest_aq_data))
-        latest_co2_data = None
+            latest_aq_data = get_data(DB,ix,"aq")
+            print('Station {}: AQ = {}'.format(ix,latest_aq_data))
+
         if ix in adc_stations.index.values:
-            if not DB.getLatestADCStationData(ix).empty:
-                latest_co2_data = DB.getLatestADCStationData(ix)['co2_ppm']
-                print('Station {}: CO2 = {}'.format(ix,latest_co2_data))
+            latest_co2_data = get_data(DB,ix,"adc")
+            print('Station {}: CO2 = {}'.format(ix,latest_co2_data))
+
         latest_t_data = None
         latest_h_data = None
         latest_p_data = None
         if ix in w_stations.index.values:
-            if not DB.getLatestWeatherStationData(ix).empty:
-                temp_data = DB.getLatestWeatherStationData(ix)
+            temp_data = get_data(DB,ix,"weather")
+            if not temp_data.empty:
                 latest_t_data = temp_data['temperature']
                 latest_h_data = temp_data['humidity']
                 latest_p_data = temp_data['pressure']
                 print('Station {}: temp = {}'.format(ix,latest_t_data))
-        if len(latest_data) == 0:
-            continue
+
         csv_fname = latest_data['nickname']
         properties = OrderedDict([
             ('Name', latest_data['Name']),

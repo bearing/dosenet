@@ -78,7 +78,8 @@ class SQLObject:
 
     def refresh(self):
         """Clear the cache of any query results."""
-        self.db.commit()
+        #self.db.commit()
+        self.db.refresh()
 
 # ---------------------------------------------------------------------------
 #       INJECTION-RELATED METHODS
@@ -522,13 +523,9 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:
@@ -567,13 +564,9 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM d3s WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:
@@ -611,13 +604,9 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM adc WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:
@@ -655,13 +644,9 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM air_quality WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:
@@ -701,13 +686,9 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM weather WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
+        df.set_index(df['Name'], inplace=True)
+        df = self.addTimeColumnsToDataframe(df, stationID=stationID)
 
         if len(df) == 0:
             if verbose:

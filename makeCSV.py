@@ -10,7 +10,7 @@ import numpy as np
 import math
 import pandas as pd
 import multiprocessing
-from utils import timeout
+from utils import timeout, TimeoutError
 
 docstring = """
 MYSQL to CSV writer.
@@ -270,7 +270,6 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-@timeout(120)
 def get_database_df(sid,request_type=None,verbose=False):
     """
     gets dataframe of all station data from database and returns dataframe
@@ -294,7 +293,22 @@ def get_database_df(sid,request_type=None,verbose=False):
             else:
                 print('Giving up after 5 attempts')
 
-    df = DB.getAll(sid,request_type,verbose)
+    retry_counter = 0
+    df = pd.DataFrame({})
+    while retry_counter < 3:
+        try:
+            with timeout(200*(retry_counter+1)):
+                DB.refresh()
+                df = DB.getAll(sid,request_type,verbose)
+                return df
+        except (TimeoutError) as e:
+            retry_counter = retry_counter + 1
+            print(e)
+            print("Timed out on try {}".format(retry_counter))
+            pass
+        except (Exception) as e:
+            print(e)
+            return df
     return df
 
 def make_station_files(sid,name,nick,request_type=None,verbose=False):
@@ -309,6 +323,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
+
     df_all = get_database_df(sid,request_type,verbose)
 
     if request_type == 'd3s':
