@@ -758,11 +758,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"))
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -786,11 +782,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = pd.read_sql(q, con=self.db)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = pd.read_sql(q, con=self.db)
 
         if len(df) == 0:
             if verbose:
@@ -814,11 +806,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -843,11 +831,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -903,11 +887,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -931,11 +911,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -960,11 +936,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -989,11 +961,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
@@ -1017,11 +985,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q)
 
         if len(df) == 0:
             if verbose:
