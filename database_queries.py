@@ -30,7 +30,7 @@ def get_all_data(ID,data_type,max_time):
     while retry_counter < 3:
         try:
             with timeout(max_time*(retry_counter+1)):
-                df = DB.getAll(ID,data_type,verbose)
+                df = DB.getAll(ID,data_type,True)
                 return df
         except (TimeoutError) as e:
             retry_counter = retry_counter + 1
