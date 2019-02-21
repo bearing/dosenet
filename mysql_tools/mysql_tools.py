@@ -78,8 +78,7 @@ class SQLObject:
 
     def refresh(self):
         """Clear the cache of any query results."""
-        #self.db.commit()
-        self.db.refresh()
+        self.db.commit()
 
 # ---------------------------------------------------------------------------
 #       INJECTION-RELATED METHODS
