@@ -126,6 +126,7 @@ class DoseNetSlacker(object):
                     if self.v:
                         print('Current stations list: {}'.format(self.stations))
                     self.update_station_status()
+                    break
             except TimeoutError as e:
                 print(e)
                 pass
@@ -134,11 +135,12 @@ class DoseNetSlacker(object):
         """
         Get station list from SQL.
         """
-        self.sql.refresh()
-        if self.test:
-            self.stations = self.sql.getStations()
-        else:
-            self.stations = self.sql.getActiveStations()
+        if self.sql not None:
+            self.sql.refresh()
+            if self.test:
+                self.stations = self.sql.getStations()
+            else:
+                self.stations = self.sql.getActiveStations()
 
     def get_status(self):
         """Check elapsed times and classify each station.
