@@ -135,12 +135,11 @@ class DoseNetSlacker(object):
         """
         Get station list from SQL.
         """
-        if self.sql not None:
-            self.sql.refresh()
-            if self.test:
-                self.stations = self.sql.getStations()
-            else:
-                self.stations = self.sql.getActiveStations()
+        self.sql.refresh()
+        if self.test:
+            self.stations = self.sql.getStations()
+        else:
+            self.stations = self.sql.getActiveStations()
 
     def get_status(self):
         """Check elapsed times and classify each station.
