@@ -24,7 +24,7 @@ import traceback as tb
 from slackclient import SlackClient
 from mysql_tools.mysql_tools import SQLObject
 import MySQLdb as mdb
-from utils import timeout
+from utils import timeout, TimeoutError
 
 SLACK_USER = 'dosenet_server'
 SLACK_CHANNEL = '#bugs_and_outages'
