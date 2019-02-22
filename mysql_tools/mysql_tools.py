@@ -193,7 +193,7 @@ class SQLObject:
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, cpm, cpm_error, error_flag))
         error_code = self.safe_insert(sql_cmd)
-        if not error_code:
+        #if not error_code:
             #TODO: Decide what to do when the insert fails...
 
     def insertIntoAQ(self, stationID, oneMicron, twoPointFiveMicron, tenMicron,
@@ -212,7 +212,7 @@ class SQLObject:
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
         error_code = self.safe_insert(sql_cmd)
-        if not error_code:
+        #if not error_code:
             #TODO: Decide what to do when the insert fails...
 
     def insertIntoCO2(self, stationID, co2_ppm, noise, error_flag, deviceTime, **kwargs):
@@ -230,7 +230,7 @@ class SQLObject:
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, co2_ppm, noise, error_flag))
         error_code = self.safe_insert(sql_cmd)
-        if not error_code:
+        #if not error_code:
             #TODO: Decide what to do when the insert fails...
 
     def insertIntoWeather(self, stationID, temperature, pressure,
@@ -249,7 +249,7 @@ class SQLObject:
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, temperature, pressure, humidity, error_flag))
         error_code = self.safe_insert(sql_cmd)
-        if not error_code:
+        #if not error_code:
             #TODO: Decide what to do when the insert fails...
 
     def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime,
@@ -267,7 +267,7 @@ class SQLObject:
                 deviceTime, stationID, counts, '%s', error_flag))
         # let MySQLdb library handle the special characters in the blob
         error_code = self.safe_insert(sql_cmd)
-        if not error_code:
+        #if not error_code:
             #TODO: Decide what to do when the insert fails...
 
     def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
@@ -277,7 +277,7 @@ class SQLObject:
         sql_cmd = ("INSERT INTO stationlog(stationID, msgCode, message) " +
                    "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
         error_code = self.safe_insert(sql_cmd)
-        if not error_code:
+        #if not error_code:
             #TODO: Decide what to do when the insert fails...
 
     def inject(self, data, verbose=False):
