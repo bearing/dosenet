@@ -1,7 +1,6 @@
 import os
 import functools
 import errno
-import os
 import signal
 
 def mkdir(path):

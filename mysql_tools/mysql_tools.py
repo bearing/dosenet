@@ -8,6 +8,9 @@ import sys
 import datetime
 import time
 import pytz
+import os
+import errno
+import signal
 from mysql.connector import MySQLConnection
 
 class TimeoutError(Exception):
