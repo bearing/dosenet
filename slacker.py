@@ -24,7 +24,6 @@ import traceback as tb
 from slackclient import SlackClient
 from mysql_tools.mysql_tools import SQLObject
 import MySQLdb as mdb
-from utils import timeout, TimeoutError
 
 SLACK_USER = 'dosenet_server'
 SLACK_CHANNEL = '#bugs_and_outages'
@@ -119,17 +118,10 @@ class DoseNetSlacker(object):
         Initialize records in memory and check the SQL database
         for the first time. Keep trying if this times out
         """
-        while True:
-            try:
-                with timeout(300):
-                    self.get_current_station_list()
-                    if self.v:
-                        print('Current stations list: {}'.format(self.stations))
-                    self.update_station_status()
-                    break
-            except TimeoutError as e:
-                print(e)
-                pass
+        self.get_current_station_list()
+        if self.v:
+            print('Current stations list: {}'.format(self.stations))
+        self.update_station_status()
 
     def get_current_station_list(self):
         """
@@ -214,14 +206,11 @@ class DoseNetSlacker(object):
         while True:
             time.sleep(self.interval_s)
             try:
-                with timeout(300):
-                    self.diff_status_and_report()
-            except TimeoutError:
-                self.post('Timeout on Database query... will try again',
-                          icon_emoji=':disappointed')
+                self.diff_status_and_report()
             except mdb.OperationalError:
                 self.post('MySQL server has gone away... will try again',
                           icon_emoji=':disappointed:')
+                pass
             print('Posted at {}'.format(datetime.datetime.now()))
 
     def diff_status_and_report(self):

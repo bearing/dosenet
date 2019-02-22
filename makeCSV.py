@@ -10,7 +10,6 @@ import numpy as np
 import math
 import pandas as pd
 import multiprocessing
-from utils import timeout, TimeoutError
 
 docstring = """
 MYSQL to CSV writer.
@@ -297,18 +296,14 @@ def get_database_df(sid,request_type=None,verbose=False):
     df = pd.DataFrame({})
     while retry_counter < 3:
         try:
-            with timeout(200*(retry_counter+1)):
-                DB.refresh()
-                df = DB.getAll(sid,request_type,verbose)
-                return df
-        except (TimeoutError) as e:
-            retry_counter = retry_counter + 1
-            print(e)
-            print("Timed out on try {}".format(retry_counter))
-            pass
+            DB.refresh()
+            df = DB.getAll(sid,request_type,verbose)
+            return df
         except (Exception) as e:
             print(e)
             return df
+        if len(df)==0:
+            retry_counter = retry_counter + 1
     return df
 
 def make_station_files(sid,name,nick,request_type=None,verbose=False):

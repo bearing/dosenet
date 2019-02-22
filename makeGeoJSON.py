@@ -8,7 +8,6 @@ import datetime
 from mysql_tools.mysql_tools import SQLObject
 from data_transfer import DataFile, nickname_to_remote_csv_fname
 from collections import OrderedDict
-from utils import timeout, TimeoutError
 
 docstring = """
 Main makeGeoJSON and transfer to KEPLER webserver 
@@ -38,61 +37,51 @@ Originally adapted from dev_makeGeoJSON.py (functional) Sat 09/05/15
 
 def get_stations(DB,data_type):
     print('Getting active {} stations'.format(data_type))
-    while True:
-        try:
-            with timeout(120):
-                if data_type=='pocket':
-                    active_stations = DB.getActiveStations()
-                elif data_type=='d3s':
-                    active_stations = DB.getActiveD3SStations()
-                elif data_type=='aq':
-                    active_stations = DB.getActiveAQStations()
-                elif data_type=='adc':
-                    active_stations = DB.getActiveADCStations()
-                elif data_type=='weather':
-                    active_stations = DB.getActiveWeatherStations()
-                print(active_stations)
-                print()
-                return active_stations
-        except TimeoutError:
-            print("Timmed out getting active stations... trying again")
+    if data_type=='pocket':
+        active_stations = DB.getActiveStations()
+    elif data_type=='d3s':
+        active_stations = DB.getActiveD3SStations()
+    elif data_type=='aq':
+        active_stations = DB.getActiveAQStations()
+    elif data_type=='adc':
+        active_stations = DB.getActiveADCStations()
+    elif data_type=='weather':
+        active_stations = DB.getActiveWeatherStations()
+    print(active_stations)
+    print()
+    return active_stations
 
 def get_data(DB,ix,data_type,old_data=0.0):
-    try:
-        with timeout(600):
-            if data_type=="pocket":
-                data_df = DB.getLatestStationData(ix)
-                if not data_df.empty:
-                    return data_df
-                else:
-                    return pd.DataFrame({})
-            if data_type=="d3s":
-                data_df = DB.getLatestD3SStationData(ix)
-                if not data_df.empty:
-                    return data_df['counts']
-                else:
-                    return None
-            if data_type=="aq":
-                data_df = DB.getLatestAQStationData(ix)
-                if not data_df.empty:
-                    return data_df['PM25']
-                else:
-                    return None
-            if data_type=="adc":
-                data_df = DB.getLatestADCStationData(ix)
-                if not data_df.empty:
-                    return data_df['co2_ppm']
-                else:
-                    return None
-            if data_type=="weather":
-                data_df = DB.getLatestWeatherStationData(ix)
-                if not data_df.empty:
-                    return data_df
-                else:
-                    return pd.DataFrame({})
-    except TimeoutError:
-        print("Error: timed out getting data")
-        return old_data
+    if data_type=="pocket":
+        data_df = DB.getLatestStationData(ix)
+        if not data_df.empty:
+            return data_df
+        else:
+            return None
+    if data_type=="d3s":
+        data_df = DB.getLatestD3SStationData(ix)
+        if not data_df.empty:
+            return data_df['counts']
+        else:
+            return None
+    if data_type=="aq":
+        data_df = DB.getLatestAQStationData(ix)
+        if not data_df.empty:
+            return data_df['PM25']
+        else:
+            return None
+    if data_type=="adc":
+        data_df = DB.getLatestADCStationData(ix)
+        if not data_df.empty:
+            return data_df['co2_ppm']
+        else:
+            return None
+    if data_type=="weather":
+        data_df = DB.getLatestWeatherStationData(ix)
+        if not data_df.empty:
+            return data_df
+        else:
+            return None
 
 def main(verbose=False):
     start_time = time.time()
