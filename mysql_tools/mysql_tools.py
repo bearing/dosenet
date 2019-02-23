@@ -63,7 +63,6 @@ class SQLObject:
         #    'dosimeter_network')
         self.db = connection_to_remote_db()
         self.cursor = self.db.cursor(buffered=True)
-        self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
         self.set_session_tz(tz)
         self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
         self.test_station_ids_ix = 0
@@ -79,6 +78,9 @@ class SQLObject:
             self.close()
         except:
             pass
+
+    def set_max_query_time(time=600000):
+        self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
 
     def set_session_tz(self, tz):
         """Sets timezone for this MySQL session.
@@ -151,7 +153,7 @@ class SQLObject:
                 self.close()
                 self.db = connection_to_remote_db()
                 self.cursor = self.db.cursor(buffered=True)
-                cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
                 attempts = attempts + 1
                 pass
             except mysql.connector.Error as err:
@@ -491,7 +493,7 @@ class SQLObject:
                 self.close()
                 self.db = connection_to_remote_db()
                 self.cursor = self.db.cursor(buffered=True)
-                cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
                 attempts = attempts + 1
                 pass
             except mysql.connector.Error as err:
