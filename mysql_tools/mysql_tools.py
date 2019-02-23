@@ -153,7 +153,7 @@ class SQLObject:
                 self.close()
                 self.db = connection_to_remote_db()
                 self.cursor = self.db.cursor(buffered=True)
-                self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                #self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
                 attempts = attempts + 1
                 pass
             except mysql.connector.Error as err:
@@ -493,7 +493,7 @@ class SQLObject:
                 self.close()
                 self.db = connection_to_remote_db()
                 self.cursor = self.db.cursor(buffered=True)
-                self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                #self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
                 attempts = attempts + 1
                 pass
             except mysql.connector.Error as err:
