@@ -79,7 +79,7 @@ class SQLObject:
         except:
             pass
 
-    def set_max_query_time(time=600000):
+    def set_max_query_time(self,time=600000):
         self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
 
     def set_session_tz(self, tz):
