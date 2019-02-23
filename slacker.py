@@ -24,6 +24,8 @@ import traceback as tb
 from slackclient import SlackClient
 from mysql_tools.mysql_tools import SQLObject
 import MySQLdb as mdb
+import sys
+sys.stdout.flush()
 
 SLACK_USER = 'dosenet_server'
 SLACK_CHANNEL = '#bugs_and_outages'
@@ -88,11 +90,13 @@ class DoseNetSlacker(object):
             if self.v:
                 print('Check interval: {}s'.format(self.interval_s))
                 print('Outage interval: {}s'.format(self.outage_interval_s))
+        sys.stdout.flush()
         self.initialize_station_status()
         self.post_initial_report()
         print('Posted initial report at {}'.format(datetime.datetime.now()))
         print('Checking and restarting injector? {}'.format(
                 self.restart_injector))
+        sys.stdout.flush()
 
     def get_slack(self, tokenfile):
         """Load slack token from file."""
@@ -121,6 +125,7 @@ class DoseNetSlacker(object):
         self.get_current_station_list()
         if self.v:
             print('Current stations list: {}'.format(self.stations))
+        sys.stdout.flush()
         print("Getting status")
         self.update_station_status()
 
@@ -179,6 +184,7 @@ class DoseNetSlacker(object):
 
         self.sql.refresh()
         print("Getting latest station data for station {}".format(stationID))
+        sys.stdout.flush()
         try:
             df = self.sql.getLatestStationData(stationID, verbose=False)
         except IndexError:
