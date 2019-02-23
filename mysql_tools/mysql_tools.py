@@ -157,26 +157,6 @@ class SQLObject:
         else:
             return True
 
-    def safe_query(self, q, timeout_time = 300):
-        attempts = 0
-        while attempts < 5:
-            try:
-                with timeout(timeout_time):
-                    df = self.dfFromSql(q)
-                    break
-            except TimeoutError:
-                print("Warning: query operation timed out! Trying again")
-                attempts = attempts + 1
-                sleep(1)
-                pass
-            except Exception:
-                print(e)
-                return pd.DataFrame({})
-        if attempts==10:
-            return pd.DataFrame({})
-        else:
-            return df
-
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
         """
@@ -483,6 +463,26 @@ class SQLObject:
 #       FETCH METHODS
 # ---------------------------------------------------------------------------
 
+    def safe_query(self, q, timeout_time = 300):
+        attempts = 0
+        while attempts < 5:
+            try:
+                with timeout(timeout_time):
+                    df = self.dfFromSql(q)
+                    break
+            except TimeoutError:
+                print("Warning: query operation timed out! Trying again")
+                attempts = attempts + 1
+                sleep(1)
+                pass
+            except Exception:
+                print(e)
+                return pd.DataFrame({})
+        if attempts==10:
+            return pd.DataFrame({})
+        else:
+            return df
+
     def dfFromSql(self, q):
         """Pandas dataframe from SQL query"""
         df = pd.read_sql(q, con=self.db)
@@ -587,7 +587,7 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        df = self.safe_query(q,400)
+        df = self.safe_query(q)
 
         if len(df) == 0:
             if verbose:

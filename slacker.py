@@ -121,6 +121,7 @@ class DoseNetSlacker(object):
         self.get_current_station_list()
         if self.v:
             print('Current stations list: {}'.format(self.stations))
+        print("Getting status")
         self.update_station_status()
 
     def get_current_station_list(self):
@@ -177,6 +178,7 @@ class DoseNetSlacker(object):
         """
 
         self.sql.refresh()
+        print("Getting latest station data for station {}".format(stationID))
         try:
             df = self.sql.getLatestStationData(stationID, verbose=False)
         except IndexError:
