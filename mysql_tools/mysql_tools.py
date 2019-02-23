@@ -63,7 +63,7 @@ class SQLObject:
         #    'dosimeter_network')
         self.db = connection_to_remote_db()
         self.cursor = self.db.cursor(buffered=True)
-        cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+        self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
         self.set_session_tz(tz)
         self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
         self.test_station_ids_ix = 0
