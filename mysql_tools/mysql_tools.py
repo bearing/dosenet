@@ -63,6 +63,7 @@ class SQLObject:
         #    'dosimeter_network')
         self.db = connection_to_remote_db()
         self.cursor = self.db.cursor(buffered=True)
+        cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
         self.set_session_tz(tz)
         self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
         self.test_station_ids_ix = 0
@@ -91,8 +92,10 @@ class SQLObject:
         self.refresh()
 
     def close(self):
-        self.cursor.close()
-        self.db.close()
+        if(connection.is_connected()):
+            self.cursor.close()
+            self.db.close()
+            print("MySQL connection is closed")
 
     def refresh(self):
         """Clear the cache of any query results."""
@@ -143,15 +146,28 @@ class SQLObject:
                     self.cursor.execute(sql_cmd)
                     self.db.commit()
                     break
-            except TimeoutError:
-                print("Warning: insert operation timed out! Trying again")
+            except mysql.connector.OperationalError as err:
+                print('Could not find SQL database! Reestablishing connection')
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                attempts = attempts + 1
+                pass
+            except mysql.connector.Error as err:
+                print(err)
+                print("Error Code:", err.errno)
+                print("SQLSTATE", err.sqlstate)
+                print("Message", err.msg)
                 attempts = attempts + 1
                 sleep(1)
                 pass
             except Exception:
                 print("Error inserting {}}".format(sql_cmd))
                 print(e)
-                return False
+                attempts = attempts + 1
+                sleep(1)
+                pass
         if attempts==10:
             return False
         else:
@@ -470,14 +486,28 @@ class SQLObject:
                 with timeout(timeout_time):
                     df = self.dfFromSql(q)
                     break
-            except TimeoutError:
-                print("Warning: query operation timed out! Trying again")
+            except mysql.connector.OperationalError as err:
+                print('Could not find SQL database! Reestablishing connection')
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                attempts = attempts + 1
+                pass
+            except mysql.connector.Error as err:
+                print(err)
+                print("Error Code:", err.errno)
+                print("SQLSTATE", err.sqlstate)
+                print("Message", err.msg)
                 attempts = attempts + 1
                 sleep(1)
                 pass
             except Exception:
+                print("Error inserting {}}".format(sql_cmd))
                 print(e)
-                return pd.DataFrame({})
+                attempts = attempts + 1
+                sleep(1)
+                pass
         if attempts==10:
             return pd.DataFrame({})
         else:

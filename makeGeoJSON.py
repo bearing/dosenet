@@ -8,6 +8,8 @@ import datetime
 from mysql_tools.mysql_tools import SQLObject
 from data_transfer import DataFile, nickname_to_remote_csv_fname
 from collections import OrderedDict
+import sys
+sys.stdout.flush()
 
 docstring = """
 Main makeGeoJSON and transfer to KEPLER webserver 
@@ -110,18 +112,22 @@ def main(verbose=False):
         if ix in active_stations.index.values:
             latest_data = get_data(DB,ix,"pocket")
             print('Station {}: CPM = {}'.format(ix,latest_data))
+            sys.stdout.flush()
 
         if ix in d3s_stations.index.values:
             latest_d3s_data = get_data(DB,"d3s")
             print('Station {}: counts = {}'.format(ix,latest_d3s_data))
+            sys.stdout.flush()
 
         if ix in aq_stations.index.values:
             latest_aq_data = get_data(DB,ix,"aq")
             print('Station {}: AQ = {}'.format(ix,latest_aq_data))
+            sys.stdout.flush()
 
         if ix in adc_stations.index.values:
             latest_co2_data = get_data(DB,ix,"adc")
             print('Station {}: CO2 = {}'.format(ix,latest_co2_data))
+            sys.stdout.flush()
 
         latest_t_data = None
         latest_h_data = None
@@ -173,6 +179,7 @@ def main(verbose=False):
     # -------------------------------------------------------------------------
     print('makeGeoJSON DONE, the time is {}'.format(datetime.datetime.now()))
     print('Total run time: {:.2f} s'.format(time.time() - start_time))
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':

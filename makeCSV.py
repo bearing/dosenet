@@ -10,6 +10,8 @@ import numpy as np
 import math
 import pandas as pd
 import multiprocessing
+import sys
+sys.stdout.flush()
 
 docstring = """
 MYSQL to CSV writer.
@@ -291,6 +293,7 @@ def get_database_df(sid,request_type=None,verbose=False):
                 pass
             else:
                 print('Giving up after 5 attempts')
+    sys.stdout.flush()
 
     retry_counter = 0
     df = pd.DataFrame({})
@@ -320,6 +323,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
     """
 
     df_all = get_database_df(sid,request_type,verbose)
+    sys.stdout.flush()
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data
@@ -365,11 +369,13 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
     jsonfile.df_to_json(df_all)
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
+    sys.stdout.flush()
 
 def make_all_station_files(stations,get_data,request_type=None,verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
+        sys.stdout.flush()
         make_station_files(sid,name,nick,request_type,verbose)
 
 def main(verbose=False,
@@ -395,26 +401,31 @@ def main(verbose=False,
     stations = DB.getActiveStations()
     print(stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active D3S stations')
     d3s_stations = DB.getActiveD3SStations()
     print(d3s_stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active air quality stations')
     aq_stations = DB.getActiveAQStations()
     print(aq_stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active CO2 stations')
     adc_stations = DB.getActiveADCStations()
     print(adc_stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active weather stations')
     w_stations = DB.getActiveWeatherStations()
     print(w_stations)
     print()
+    sys.stdout.flush()
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------
