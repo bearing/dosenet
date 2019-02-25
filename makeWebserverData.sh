@@ -6,6 +6,8 @@ PATH=$PYTHONPATH:$PATH
 
 . $HOMEPATH/.keychain/$HOSTNAME-sh
 
+source activate aws-test-conda2
+
 args=("$@")
 
 while [ 1 ]; do
