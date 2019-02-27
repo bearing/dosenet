@@ -12,7 +12,7 @@
 - [ ] Rewrite (?) the script that sends data to the website
 
 ## Structure
-For now, let's work in the directory `[py37](py37)` to keep our new code completely isolated
+For now, let's work in the directory [`py37`](py37) to keep our new code completely isolated
 from the old while also preserving the latter for easy copy-pasting. We can do something else
 but this is easy and it works, so why not :stuck_out_tongue:.
 
