@@ -1,3 +1,16 @@
+(Scroll down for the original readme.)
+
+# Python 3 Migration
+- [ ] Make everything compatible with Python 3.7 (duh.)
+- [ ] Make a script `data_getter.py` to get data from the Raspberry Pis
+  - also decrypts the packets
+- [ ] Make a script `injector.py` that
+  - [ ] gets data from the Raspberry Pis using `data_getter.py`
+  - [ ] writes the acquired data to csv files
+- [ ] Rewrite (?) the script that sends data to the website
+
+---
+
 ![](http://i.imgur.com/dVADwI5.png =512x "DoseNet logo")
 # Berkeley RadWatch Dosimeter Network
 # *LBL / UC Berkeley*
