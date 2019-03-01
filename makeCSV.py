@@ -347,9 +347,9 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
     nintervals = [12,48,168,180,183]
     name_sufix = ['_hour','_day','_week','_month','_year']
 
-
+    df = df_all.copy(deep=True)
     for idx in range(len(intervals)):
-        df = get_compressed_data(df_all,intervals[idx],
+        df = get_compressed_data(df,intervals[idx],
                                  nintervals[idx],verbose)
         if len(df) > 0:
             df = DB.addTimeColumnsToDataframe(df,sid)
