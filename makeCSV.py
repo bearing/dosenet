@@ -271,14 +271,7 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-def get_database_df(sid,request_type=None,verbose=False):
-    """
-    gets dataframe of all station data from database and returns dataframe
-
-    Args:
-        sid: station ID
-        request type: specify sensor (silicon,d3s,etc)
-    """
+def get_database():
     dbconnection_attempts = 0
     DB = None
     while True:
@@ -294,7 +287,16 @@ def get_database_df(sid,request_type=None,verbose=False):
             else:
                 print('Giving up after 5 attempts')
     sys.stdout.flush()
+    return DB
 
+def get_database_df(DB,sid,request_type=None,verbose=False):
+    """
+    gets dataframe of all station data from database and returns dataframe
+
+    Args:
+        sid: station ID
+        request type: specify sensor (silicon,d3s,etc)
+    """
     retry_counter = 0
     df = pd.DataFrame({})
     while retry_counter < 3:
@@ -307,7 +309,7 @@ def get_database_df(sid,request_type=None,verbose=False):
             return df
         if len(df)==0:
             retry_counter = retry_counter + 1
-    return df, DB
+    return df
 
 def make_station_files(sid,name,nick,request_type=None,verbose=False):
     """
@@ -321,8 +323,8 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
-
-    df_all, DB = get_database_df(sid,request_type,verbose)
+    DB = get_database()
+    df_all = get_database_df(DB,sid,request_type,verbose)
     sys.stdout.flush()
 
     if request_type == 'd3s':
@@ -360,11 +362,11 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
         jsonfile = DataFile.json_from_nickname(nick + name_sufix[idx])
         jsonfile.df_to_json(df)
 
-    print(df_all)
     if len(df_all) > 0:
         if request_type == 'd3s':
             df_all = format_d3s_data(df_all,True)
         df_all = DB.addTimeColumnsToDataframe(df_all, stationID=sid)
+    print(df_all)
     csvfile = DataFile.csv_from_nickname(nick)
     csvfile.df_to_file(df_all)
     jsonfile = DataFile.json_from_nickname(nick)
