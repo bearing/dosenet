@@ -307,7 +307,7 @@ def get_database_df(sid,request_type=None,verbose=False):
             return df
         if len(df)==0:
             retry_counter = retry_counter + 1
-    return df
+    return df, DB
 
 def make_station_files(sid,name,nick,request_type=None,verbose=False):
     """
@@ -322,7 +322,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
         request type: specify sensor (silicon,d3s,etc)
     """
 
-    df_all = get_database_df(sid,request_type,verbose)
+    df_all, DB = get_database_df(sid,request_type,verbose)
     sys.stdout.flush()
 
     if request_type == 'd3s':
@@ -347,6 +347,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
     nintervals = [12,48,168,180,183]
     name_sufix = ['_hour','_day','_week','_month','_year']
 
+    print(df_all)
     df = df_all.copy(deep=True)
     for idx in range(len(intervals)):
         df = get_compressed_data(df,intervals[idx],
@@ -359,6 +360,7 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
         jsonfile = DataFile.json_from_nickname(nick + name_sufix[idx])
         jsonfile.df_to_json(df)
 
+    print(df_all)
     if len(df_all) > 0:
         if request_type == 'd3s':
             df_all = format_d3s_data(df_all,True)
