@@ -19,7 +19,7 @@ while [ 1 ]; do
   fi
   if [ "${args[0]}" == "--data" ]
   then
-      sleep 150
+      #sleep 150
       python $CODEPATH/makeCSV.py
   fi
 
