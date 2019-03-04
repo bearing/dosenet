@@ -260,7 +260,7 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','co2_ppm','noise'])
 
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))& \
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
