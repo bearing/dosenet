@@ -31,13 +31,13 @@ def rebin(array,n):
     """
     return array.reshape(len(array)/n,n).sum(1)
 
-def get_channels(channels,rebin_factor):
+def get_channels(channels,bfactor):
     """
     convert channel counts binary string from the database into a numpy array
     and rebin by rebin_factor
     """
-    full_array = np.frombuffer(channels,dtype=np.uint8)
-    rebin_array = rebin(full_array,rebin_factor)
+    ch_array = np.frombuffer(channels,dtype=np.uint8)
+    rebin_array = ch_array.reshape(len(ch_array)/rebin_factor,bfactor).sum(1)
     return rebin_array
 
 def get_rounded_time(t):
@@ -106,7 +106,7 @@ def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
             deviceTime_[utc, local, unix] cpm, cpmError
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
-    max_time = get_rounded_time(dt.datetime.now())
+    max_time = df['UNIX_TIMESTAMP(deviceTime)'].iloc[0]
     min_time = max_time - n_intervals*interval
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError',
                                     'keV_per_ch','channels'])
@@ -115,12 +115,12 @@ def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
     if verbose:
         print(comp_df)
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>=(max_time-interval))&
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         if len(idf) > 0:
             channels = np.array([get_channels(x,4)
-                                for x in idf.loc[:,'channelCounts']]).sum(0)
+                                for x in idf['channelCounts']]).sum(0)
             comp_df.loc[idx,'channels'] = channels
             counts = idf.loc[:,'counts'].sum()
             comp_df.loc[idx,'deviceTime_unix'] = idf.iloc[len(idf)//2,0]
