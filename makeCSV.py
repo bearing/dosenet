@@ -37,7 +37,7 @@ def get_channels(channels,bfactor):
     and rebin by rebin_factor
     """
     ch_array = np.frombuffer(channels,dtype=np.uint8)
-    rebin_array = ch_array.reshape(len(ch_array)/rebin_factor,bfactor).sum(1)
+    rebin_array = ch_array.reshape(len(ch_array)/bfactor,bfactor).sum(1)
     return rebin_array
 
 def get_rounded_time(t):
