@@ -10,7 +10,7 @@ Tigran Ter-Stepanyan
 from __future__ import print_function
 import time
 import numpy as np
-from mysql import SQLObject
+from mysql_tools import SQLObject
 
 
 def main(stationID, hours=1., interval_min=5., random_cpm=False):

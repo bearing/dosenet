@@ -4,6 +4,7 @@
 Run on DoseNet Server!
 
 Authors:
+    Ali Hanks (after 2017-06-01)
     Brian Plimley (after 2016-05-01)
     Joseph Curtis (after 2016-04-10)
     Navrit Bal (after 2015-06-15)
@@ -33,11 +34,11 @@ import Crypto.Random
 from Crypto.Cipher import AES
 
 # Extensible way for adding future imports
-import_list = ['crypt', 'mysql', 'udp']
+import_list = ['crypt', 'mysql_tools', 'udp']
 for el in import_list:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), el)))
 from crypt import cust_crypt as ccrypt
-from mysql.mysql_tools import SQLObject
+from mysql_tools.mysql_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl.pub')
@@ -477,6 +478,7 @@ class Injector(object):
 
         May raise PacketLengthError or UnknownRequestType.
         """
+<<<<<<< HEAD
         request_list = ['d3s','AQ','co2','weather']
         try:
             if len(field_list) == 5:
@@ -494,6 +496,59 @@ class Injector(object):
                 #than basing the request type off of data length
                 raise PacketLengthError()
         except:
+=======
+
+        num_log_fields = 5
+        num_data_fields_old = 5
+        num_data_fields_new = 6
+        num_d3s_fields = 5
+        num_AQ_fields = 5
+        num_co2_fields = 5
+        num_weather_fields = 5
+
+        if (len(field_list) != num_log_fields and
+                len(field_list) != num_data_fields_old and
+                len(field_list) != num_data_fields_new and
+                len(field_list) != num_d3s_fields and
+                len(field_list) != num_AQ_fields and
+                len(field_list) != num_co2_fields and
+                len(field_list) != num_weather_fields):
+            raise PacketLengthError(
+                'Found {} fields instead of {}, {}, {}, {}, or {}'.format(
+                    len(field_list),
+                    num_log_fields, num_data_fields_old, num_data_fields_new,
+                    num_d3s_fields, num_co2_fields, num_weather_fields))
+        elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
+            request_type = 'log'
+        elif (len(field_list) == num_AQ_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) >= 40 and
+                len(field_list[3]) <= 80):
+            request_type = 'AQ'
+        elif (len(field_list) == num_d3s_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) > 4096):
+            request_type = 'd3s'
+        elif (len(field_list) == num_co2_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) >= 10 and
+                len(field_list[3]) <= 18):
+            request_type = 'co2'
+        elif (len(field_list) == num_weather_fields and
+                field_list[3].startswith('[') and
+                len(field_list[3]) >= 19 and
+                len(field_list[3]) <= 25):
+
+            request_type = 'weather'
+        elif len(field_list) == num_data_fields_old:
+            request_type = 'data_old'
+        elif len(field_list) == num_data_fields_new:
+            request_type = 'data'
+        else:
+            # currently, this is impossible
+            #   unless num_log_fields is different than num_data_fields_*,
+            #   and the log is submitted without 'LOG' identifier in position 2
+>>>>>>> 3e8df795e8d37bbc4cb993f18126e48525524f22
             raise UnknownRequestType()
 
         return request_type
@@ -675,7 +730,7 @@ class Injector(object):
             inject_method = self.db.injectWeather
 
         try:
-            inject_method(data)
+            inject_method(data,self.verbose)
         except Exception as e:
             print('Injection error:', e)
             return None
@@ -688,6 +743,7 @@ class Injector(object):
         """
 
         stationID = field_dict['stationID']
+        tic = time.time()
         try:
             git_branch, needs_update = self.db.getStationReturnInfo(stationID)
         except IndexError:
@@ -695,11 +751,19 @@ class Injector(object):
             print_status(
                 "Station ID {} missing from `stations` table!", ansi=ANSI_CYAN)
             return
+        toc = time.time()
+        if self.verbose:
+            print('getStationReturnInfo took {} ms'.format((toc - tic) * 1000))
 
         return_packet = "{},{}".format(git_branch, needs_update)
 
+        tic = time.time()
         try:
             request.sendall(return_packet)
+            toc = time.time()
+            if self.verbose:
+                print('request.sendall(return_packet) took {} ms'.format(
+                      (toc - tic) * 1000))
         except socket.error as e:
             print_status("Socket error on TCP return packet: {}".format(e))
         except AttributeError:
@@ -710,11 +774,15 @@ class Injector(object):
                 raise
         else:
             # unset needs_update flag
+            tic = time.time()
             # *** takes ~50 ms - only do if needed!
             if needs_update != 0:
                 self.db.setSingleStationUpdate(
                     field_dict['stationID'], needs_update=0)
-
+            toc = time.time()
+            if self.verbose:
+                print('setSingleStationUpdate took {} ms'.format(
+                      (toc - tic) * 1000))
 
 def print_status(status_text, ansi=None):
     """
