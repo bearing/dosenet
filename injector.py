@@ -478,7 +478,6 @@ class Injector(object):
         May raise PacketLengthError or UnknownRequestType.
         """
         request_list = ['d3s','AQ','co2','weather']
-        print(field_list)
         try:
             if len(field_list) == 5:
                 if field_list[2] == 'LOG':
