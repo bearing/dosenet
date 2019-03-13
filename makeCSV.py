@@ -343,8 +343,10 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
 
     for idx in range(len(intervals)):
         df = df_all.copy(deep=True)
+        print(df)
         df = get_compressed_data(df,intervals[idx],
                                  nintervals[idx],verbose)
+        print(df)
         if len(df) > 0:
             df = DB.addTimeColumnsToDataframe(df,sid)
         csvfile = DataFile.csv_from_nickname(nick+name_sufix[idx])
