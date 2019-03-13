@@ -154,15 +154,15 @@ def get_compressed_dosenet_data(df,integration_time,n_intervals,verbose):
     """
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     max_time = get_rounded_time(dt.datetime.now())
-    min_time = max_time - n_intervals*interval
+    #min_time = max_time - n_intervals*interval
     #df = DB.getDataForStationByRange(sid,min_time,max_time,verbose)
     if len(df) == 0:
         return pd.DataFrame({})
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
 
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))& \
-                (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
+        #time_mask = df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))& (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
 
         max_time = max_time - interval
         ndata = len(idf)
