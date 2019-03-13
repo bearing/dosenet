@@ -558,14 +558,14 @@ class Injector(object):
             ind_conc_one = 0
             ind_conc_twopointfive = 1
             ind_conc_ten = 2
-            ind_error_flag = 4
+            ind_error_flag = 5
         elif request_type == 'co2':
             ind_stype = 2
             ind_deviceTime = 3
             ind_average_data = 4
             ind_co2_ppm = 0
             ind_noise = 1
-            ind_error_flag = 4
+            ind_error_flag = 5
         elif request_type == 'weather':
             ind_stype = 2
             ind_deviceTime = 3
@@ -573,7 +573,7 @@ class Injector(object):
             ind_temp = 0
             ind_pres = 1
             ind_humid = 2
-            ind_error_flag = 4
+            ind_error_flag = 5
 
         field_dict = OrderedDict()
 
