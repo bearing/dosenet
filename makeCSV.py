@@ -116,7 +116,7 @@ def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
     if verbose:
         print(comp_df)
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>=(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>=(max_time-interval))& \
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         if len(idf) > 0:
@@ -161,7 +161,7 @@ def get_compressed_dosenet_data(df,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','cpm','cpmError'])
 
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))& \
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
 
         max_time = max_time - interval
@@ -195,7 +195,7 @@ def get_compressed_aq_data(df,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','PM1','PM25','PM10'])
 
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))& \
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
@@ -228,13 +228,14 @@ def get_compressed_weather_data(df,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_unix','temperature',
                                     'pressure','humidity'])
     for idx in range(n_intervals):
-        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))&
+        idf = df[(df['UNIX_TIMESTAMP(deviceTime)']>(max_time-interval))& \
                 (df['UNIX_TIMESTAMP(deviceTime)']<(max_time))]
         max_time = max_time - interval
         ndata = len(idf)
         if ndata > 0:
             comp_df.loc[idx,'deviceTime_unix'] = idf.iloc[ndata//2,0]
-            comp_df.loc[idx,'temperature'] = idf.loc[:,'temperature'].sum()/ndata
+            comp_df.loc[idx,'temperature'] = idf.loc[:,'temperature'].sum()/\
+                                                ndata
             comp_df.loc[idx,'pressure'] = idf.loc[:,'pressure'].sum()/ndata
             comp_df.loc[idx,'humidity'] = idf.loc[:,'humidity'].sum()/ndata
 
