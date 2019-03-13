@@ -343,10 +343,8 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
 
     for idx in range(len(intervals)):
         df = df_all.copy(deep=True)
-        #print(df)
         df = get_compressed_data(df,intervals[idx],
                                  nintervals[idx],verbose)
-        #print(df)
         if len(df) > 0:
             df = DB.addTimeColumnsToDataframe(df,sid)
         csvfile = DataFile.csv_from_nickname(nick+name_sufix[idx])
@@ -359,7 +357,6 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
         if request_type == 'd3s':
             df_all = format_d3s_data(df_all,True)
         df_all = DB.addTimeColumnsToDataframe(df_all, stationID=sid)
-    print(df_all)
     csvfile = DataFile.csv_from_nickname(nick)
     csvfile.df_to_file(df_all)
     jsonfile = DataFile.json_from_nickname(nick)
