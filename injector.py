@@ -486,7 +486,7 @@ class Injector(object):
                 else:
                     request_type = 'data_old'
             elif len(field_list) == 6:
-                request_type = request_list[field_list[2]-2]
+                request_type = request_list[int(field_list[2])-2]
             elif len(field_list) == 7:
                 request_type = 'data'
             else:
