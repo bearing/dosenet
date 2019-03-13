@@ -37,6 +37,7 @@ def get_channels(channels,bfactor):
     and rebin by rebin_factor
     """
     ch_array = np.frombuffer(channels,dtype=np.uint8)
+    print(ch_array)
     rebin_array = ch_array.reshape(len(ch_array)/bfactor,bfactor).sum(1)
     return rebin_array
 
