@@ -478,7 +478,6 @@ class Injector(object):
 
         May raise PacketLengthError or UnknownRequestType.
         """
-<<<<<<< HEAD
         request_list = ['d3s','AQ','co2','weather']
         try:
             if len(field_list) == 5:
@@ -496,59 +495,6 @@ class Injector(object):
                 #than basing the request type off of data length
                 raise PacketLengthError()
         except:
-=======
-
-        num_log_fields = 5
-        num_data_fields_old = 5
-        num_data_fields_new = 6
-        num_d3s_fields = 5
-        num_AQ_fields = 5
-        num_co2_fields = 5
-        num_weather_fields = 5
-
-        if (len(field_list) != num_log_fields and
-                len(field_list) != num_data_fields_old and
-                len(field_list) != num_data_fields_new and
-                len(field_list) != num_d3s_fields and
-                len(field_list) != num_AQ_fields and
-                len(field_list) != num_co2_fields and
-                len(field_list) != num_weather_fields):
-            raise PacketLengthError(
-                'Found {} fields instead of {}, {}, {}, {}, or {}'.format(
-                    len(field_list),
-                    num_log_fields, num_data_fields_old, num_data_fields_new,
-                    num_d3s_fields, num_co2_fields, num_weather_fields))
-        elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
-            request_type = 'log'
-        elif (len(field_list) == num_AQ_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) >= 40 and
-                len(field_list[3]) <= 80):
-            request_type = 'AQ'
-        elif (len(field_list) == num_d3s_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) > 4096):
-            request_type = 'd3s'
-        elif (len(field_list) == num_co2_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) >= 10 and
-                len(field_list[3]) <= 18):
-            request_type = 'co2'
-        elif (len(field_list) == num_weather_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) >= 19 and
-                len(field_list[3]) <= 25):
-
-            request_type = 'weather'
-        elif len(field_list) == num_data_fields_old:
-            request_type = 'data_old'
-        elif len(field_list) == num_data_fields_new:
-            request_type = 'data'
-        else:
-            # currently, this is impossible
-            #   unless num_log_fields is different than num_data_fields_*,
-            #   and the log is submitted without 'LOG' identifier in position 2
->>>>>>> 3e8df795e8d37bbc4cb993f18126e48525524f22
             raise UnknownRequestType()
 
         return request_type
