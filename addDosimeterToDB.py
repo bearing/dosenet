@@ -75,8 +75,8 @@ class DBTool:
         self.lon = lon
         #tf = TimezoneFinder()
         #self.timezone = tf.timezone_at(lon, lat)
-        tzwhere = tzwhere.tzwhere()
-        self.timezone = tzwhere.tzNameAt(lat, lon)
+        tz = tzwhere.tzwhere()
+        self.timezone = tz.tzNameAt(lat, lon)
         print 'New location at (', lat, ',', lon, ') in', self.timezone, ' timezone'
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
