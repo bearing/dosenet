@@ -488,7 +488,7 @@ class SQLObject:
                 with timeout(timeout_time):
                     df = self.dfFromSql(q)
                     break
-            except mysql.connector.OperationalError as err:
+            except OperationalError as err:
                 print('Could not find SQL database! Reestablishing connection')
                 self.close()
                 self.db = connection_to_remote_db()
@@ -496,7 +496,7 @@ class SQLObject:
                 #self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
                 attempts = attempts + 1
                 pass
-            except mysql.connector.Error as err:
+            except Error as err:
                 print(err)
                 print("Error Code:", err.errno)
                 print("SQLSTATE", err.sqlstate)
