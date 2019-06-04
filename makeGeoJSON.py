@@ -119,7 +119,7 @@ def main(verbose=False):
             sys.stdout.flush()
 
         if ix in d3s_stations.index.values:
-            latest_d3s_data = get_data(DB,"d3s")
+            latest_d3s_data = get_data(DB,ix,"d3s")
             print('Station {}: counts = {}'.format(ix,latest_d3s_data))
             sys.stdout.flush()
 
