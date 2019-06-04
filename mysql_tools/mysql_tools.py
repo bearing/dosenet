@@ -94,10 +94,12 @@ class SQLObject:
         self.refresh()
 
     def close(self):
-        if(connection.is_connected()):
+        try:
             self.cursor.close()
             self.db.close()
             print("MySQL connection is closed")
+        except:
+            print("Connection lost unexpectedly")
 
     def refresh(self):
         """Clear the cache of any query results."""
