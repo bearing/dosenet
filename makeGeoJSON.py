@@ -80,7 +80,7 @@ def get_data(DB,ix,data_type,old_data=0.0):
             return None
     if data_type=="weather":
         data_df = DB.getLatestWeatherStationData(ix)
-        return data_df.empty
+        return data_df
 
 def main(verbose=False):
     start_time = time.time()
