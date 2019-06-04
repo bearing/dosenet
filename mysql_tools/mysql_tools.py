@@ -505,7 +505,7 @@ class SQLObject:
                 sleep(1)
                 pass
             except Exception:
-                print("Error inserting {}}".format(q))
+                print("Error inserting {}".format(q))
                 print(e)
                 attempts = attempts + 1
                 sleep(1)
