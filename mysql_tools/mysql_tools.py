@@ -11,7 +11,7 @@ import pytz
 import os
 import errno
 import signal
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection, OperationalError, Error
 
 class TimeoutError(Exception):
     pass
