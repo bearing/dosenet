@@ -510,7 +510,7 @@ class SQLObject:
                 attempts = attempts + 1
                 time.sleep(1)
                 pass
-        if attempts==10:
+        if attempts>4:
             return pd.DataFrame({})
         else:
             return df
