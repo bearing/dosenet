@@ -104,6 +104,10 @@ def main(verbose=False):
     # Make geojson features and URLs for raw CSV data
     # -------------------------------------------------------------------------
     feature_list = []
+    latest_data = None
+    latest_d3s_data = None
+    latest_aq_data = None
+    latest_co2_data = None
     for ix in active_stations.index:
         # Builds a geojson point feature for the station location
         point = Point([active_stations.loc[ix, 'Long'],
