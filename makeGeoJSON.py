@@ -144,26 +144,27 @@ def main(verbose=False):
                 latest_p_data = temp_data['pressure']
                 print('Station {}: temp = {}'.format(ix,latest_t_data))
 
-        csv_fname = latest_data['nickname']
-        properties = OrderedDict([
-            ('Name', latest_data['Name']),
-            ('CPM', latest_data['cpm']),
-            ('counts', latest_d3s_data),
-            ('co2_ppm', latest_co2_data),
-            ('PM25', latest_aq_data),
-            ('temperature', latest_t_data),
-            ('humidity', latest_h_data),
-            ('pressure', latest_p_data),
-            ('csv_location', csv_fname),
-            ('has_d3s', latest_d3s_data is not None),
-            ('has_aq', latest_aq_data is not None),
-            ('has_co2', latest_co2_data is not None),
-            ('has_w', latest_t_data is not None),
-            ('Latest measurement', str(latest_data['deviceTime_local']))])
-        for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
-                  'timezone']:
-            properties[k] = str(latest_data[k])
-        feature_list.append(Feature(geometry=point, properties=properties))
+        if latest_data is not None:
+            csv_fname = latest_data['nickname']
+            properties = OrderedDict([
+                ('Name', latest_data['Name']),
+                ('CPM', latest_data['cpm']),
+                ('counts', latest_d3s_data),
+                ('co2_ppm', latest_co2_data),
+                ('PM25', latest_aq_data),
+                ('temperature', latest_t_data),
+                ('humidity', latest_h_data),
+                ('pressure', latest_p_data),
+                ('csv_location', csv_fname),
+                ('has_d3s', latest_d3s_data is not None),
+                ('has_aq', latest_aq_data is not None),
+                ('has_co2', latest_co2_data is not None),
+                ('has_w', latest_t_data is not None),
+                ('Latest measurement', str(latest_data['deviceTime_local']))])
+            for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
+                      'timezone']:
+                properties[k] = str(latest_data[k])
+            feature_list.append(Feature(geometry=point, properties=properties))
     # -------------------------------------------------------------------------
     # Close database connection
     # -------------------------------------------------------------------------
