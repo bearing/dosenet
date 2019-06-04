@@ -502,13 +502,13 @@ class SQLObject:
                 print("SQLSTATE", err.sqlstate)
                 print("Message", err.msg)
                 attempts = attempts + 1
-                sleep(1)
+                time.sleep(1)
                 pass
             except Exception as e:
                 print("Error inserting {}".format(q))
                 print(e)
                 attempts = attempts + 1
-                sleep(1)
+                time.sleep(1)
                 pass
         if attempts==10:
             return pd.DataFrame({})
