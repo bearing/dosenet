@@ -163,6 +163,9 @@ class SQLObject:
                 print("Error Code:", err.errno)
                 print("SQLSTATE", err.sqlstate)
                 print("Message", err.msg)
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
                 attempts = attempts + 1
                 sleep(1)
                 pass
@@ -170,9 +173,12 @@ class SQLObject:
                 print("Error inserting {}}".format(sql_cmd))
                 print(e)
                 attempts = attempts + 1
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
                 sleep(1)
                 pass
-        if attempts==10:
+        if attempts>9:
             return False
         else:
             return True
@@ -503,12 +509,18 @@ class SQLObject:
                 print("Error Code:", err.errno)
                 print("SQLSTATE", err.sqlstate)
                 print("Message", err.msg)
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
                 attempts = attempts + 1
                 time.sleep(1)
                 pass
             except Exception as e:
                 print("Error inserting {}".format(q))
                 print(e)
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
                 attempts = attempts + 1
                 time.sleep(1)
                 pass
