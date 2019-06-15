@@ -3,6 +3,7 @@ dosenet.sublime-project
 dosenet.sublime-workspace
 ucbdosenet_slack_token.txt
 tmp/
+**/.mypy_cache/
 
 # Swap
 [._]*.s[a-v][a-z]
