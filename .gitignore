@@ -22,3 +22,6 @@ Session.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# VS Code config files
+.vscode/
