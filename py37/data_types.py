@@ -1,7 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Tuple
+from enum import Enum
+from typing import Tuple, Union
 from typing_extensions import Protocol
+
+class SensorData(Enum):
+    AQ = AQSensorData,
+    CO2 = CO2SensorData,
+    D3S = D3SSensorData,
+    PG = PGSensorData,
+    Weather = WeatherSensorData
+
 
 class CSVAble(Protocol):
     def to_csv(self) -> str: ...
