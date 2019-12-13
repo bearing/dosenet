@@ -22,7 +22,7 @@ import pandas as pd
 import subprocess
 import traceback as tb
 from slackclient import SlackClient
-from mysql_tools.mysql_tools import SQLObject
+from myText_tools.mytext_tools import SQLObject
 import MySQLdb as mdb
 
 SLACK_USER = 'dosenet_server'

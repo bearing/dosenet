@@ -38,7 +38,7 @@ import_list = ['crypt', 'mysql_tools', 'udp']
 for el in import_list:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), el)))
 from crypt import cust_crypt as ccrypt
-from mysql_tools.mysql_tools import SQLObject
+from myText_tools.mytext_tools import SQLObject
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl.pub')
