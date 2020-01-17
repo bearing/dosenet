@@ -25,20 +25,24 @@ import os
 import time
 import argparse
 import socket
-import SocketServer
 import datetime
 from collections import OrderedDict
 import ast
 import multiprocessing
-import Crypto.Random
-from Crypto.Cipher import AES
-
 # Extensible way for adding future imports
-import_list = ['crypt', 'mysql_tools', 'udp']
+import_list = ['crypt', 'myText_tools', 'udp']
 for el in import_list:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), el)))
-from crypt import cust_crypt as ccrypt
-from myText_tools.mytext_tools import SQLObject
+from myText_tools.mytext_tools import TextObject
+try:
+    import Crypto.Random
+    from Crypto.Cipher import AES
+    from crypt import cust_crypt as ccrypt
+    import SocketServer
+except:
+    pass
+
+
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl.pub')
@@ -61,6 +65,7 @@ ANSI_YEL = '\033[33m' + ANSI_BOLD
 ANSI_CYAN = '\033[36m' + ANSI_BOLD
 ANSI_MG = '\033[35m' + ANSI_BOLD
 
+DATA_PATH = "../dosenet_data/"
 
 class Injector(object):
     """
@@ -140,7 +145,7 @@ class Injector(object):
         self.test_packet = None
 
         # Connect to database
-        self.db = SQLObject()
+        self.db = TextObject(Data_Path=DATA_PATH)
 
         # Decrypter
         print('\tPrivate Key:', self.private_key)
