@@ -132,7 +132,7 @@ class TextObject:
         #         deviceTime, stationID, cpm, cpm_error, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        dosimeterfile = open(self.Data_Path + str(stationID) + "_Dosimeter.txt", "a+")
+        dosimeterfile = open(self.Data_Path + str(stationID) + "_Dosimeter.csv", "a+")
         #dosimeterfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(cpm) + ", " + str(cpm_error)
         #   + ", " + str(error_flag) + "\n")
         dosimeterfile.write("{},{},{},{},{}\n".format(deviceTime, stationID, cpm, cpm_error, error_flag))
@@ -162,7 +162,7 @@ class TextObject:
         #         deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        aqfile = open(self.Data_Path + str(stationID) + "_AQ.txt", "a+")
+        aqfile = open(self.Data_Path + str(stationID) + "_AQ.csv", "a+")
         #aqfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(oneMicron) + ", "
         #    + str(twoPointFiveMicron) + ", " + str(tenMicron) + ", " + str(error_flag) + "\n")
         aqfile.write("{},{},{},{},{},{}\n".format(deviceTime, stationID, oneMicron, twoPointFiveMicron,
@@ -189,7 +189,7 @@ class TextObject:
         #         deviceTime, stationID, co2_ppm, noise, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        co2file = open(self.Data_Path + str(stationID) + "_CO2.txt", "a+")
+        co2file = open(self.Data_Path + str(stationID) + "_CO2.csv", "a+")
         #co2file.write(str(deviceTime) + ", " + str(stationID) + ", " + str(co2_ppm) + ", "
         #        + str(noise) + ", " + str(error_flag) + "\n")\
         co2file.write("{},{},{},{},{}\n".format(deviceTime, stationID, co2_ppm, noise, error_flag))
@@ -216,7 +216,7 @@ class TextObject:
         #         deviceTime, stationID, temperature, pressure, humidity, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        weatherfile = open(self.Data_Path + str(stationID) + "_Weather.txt", "a+")
+        weatherfile = open(self.Data_Path + str(stationID) + "_Weather.csv", "a+")
         #weatherfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(temperature) + ", "
         #       + str(pressure) + ", " + str(humidity) + ", " + str(error_flag) + "\n")
         weatherfile.write("{},{},{},{},{},{}\n".format(deviceTime, stationID, temperature, pressure,
@@ -242,7 +242,7 @@ class TextObject:
         # # let MySQLdb library handle the special characters in the blob
         # self.cursor.execute(sql_cmd, (spectrum_blob,))
         # self.db.commit()
-        d3sfile = open(self.Data_Path + str(stationID) + "_D3S.txt", "a+")
+        d3sfile = open(self.Data_Path + str(stationID) + "_D3S.csv", "a+")
         #d3sfile.write(str(deviceTime) + ", " + str(counts) + ", " + str(spectrum_blob)
         #       + ", " + str(error_flag) + "\n")
         d3sfile.write("{},{},{},{},{}\n".format(deviceTime, stationID, counts, spectrum_blob, error_flag))
@@ -260,7 +260,7 @@ class TextObject:
         #            "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        logfile = open(self.Data_Path + str(stationID) + "_Log.txt", "a+")
+        logfile = open(self.Data_Path + str(stationID) + "_Log.csv", "a+")
         #logfile.write(str(msgCode) + ", " + str(msgText) + "\n")
         logfile.write("{},{},{}\n".format(stationID, msgCode, msgText))
         logfile.close()

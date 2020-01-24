@@ -22,7 +22,7 @@ class TestTextObject(unittest.TestCase):
         data = {'hash': 'abc', 'stationID': 1, 'cpm': 2.0,
                 'cpm_error': 3.0, 'error_flag': 4}
         mydb.inject(data)
-        r = open(mydb.Data_Path + "1_Dosimeter.txt")
+        r = open(mydb.Data_Path + "1_Dosimeter.csv")
         d = r.readlines()[-1]
         r.close()
         self.assertTrue(d.endswith(",1,2.0,3.0,4\n"))
@@ -32,7 +32,7 @@ class TestTextObject(unittest.TestCase):
         data = {'hash': 'abc', 'stationID': 1, 'oneMicron': 2.0,
                 'twoPointFiveMicron': 3.0, 'tenMicron': 4.0, 'error_flag': 5}
         mydb.injectAQ(data)
-        r = open(mydb.Data_Path + "1_AQ.txt")
+        r = open(mydb.Data_Path + "1_AQ.csv")
         d = r.readlines()[-1]
         r.close()
         self.assertTrue(d.endswith(",1,2.0,3.0,4.0,5\n"))
@@ -42,7 +42,7 @@ class TestTextObject(unittest.TestCase):
         data = {'hash': 'abc', 'stationID': 1, 'co2_ppm': 2.0, 'noise':
                 3.0, 'error_flag': 4}
         mydb.injectCO2(data)
-        r = open(mydb.Data_Path + "1_CO2.txt")
+        r = open(mydb.Data_Path + "1_CO2.csv")
         d = r.readlines()[-1]
         r.close()
         self.assertTrue(d.endswith(",1,2.0,3.0,4\n"))
@@ -52,7 +52,7 @@ class TestTextObject(unittest.TestCase):
         data = {'hash': 'abc', 'stationID': 1, 'temperature': 2.0, 'pressure':
                 3.0, 'humidity': 4.0, 'error_flag': 5}
         mydb.injectWeather(data)
-        r = open(mydb.Data_Path + '1_Weather.txt')
+        r = open(mydb.Data_Path + '1_Weather.csv')
         d = r.readlines()[-1]
         r.close()
         self.assertTrue(d.endswith(",1,2.0,3.0,4.0,5\n"))

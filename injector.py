@@ -34,13 +34,10 @@ import_list = ['crypt', 'myText_tools', 'udp']
 for el in import_list:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), el)))
 from myText_tools.mytext_tools import TextObject
-try:
-    import Crypto.Random
-    from Crypto.Cipher import AES
-    from crypt import cust_crypt as ccrypt
-    import SocketServer
-except:
-    pass
+import Crypto.Random
+from Crypto.Cipher import AES
+from crypt import cust_crypt as ccrypt
+import SocketServer
 
 
 

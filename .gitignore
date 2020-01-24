@@ -6,6 +6,7 @@ ucbdosenet_slack_token.txt
 .DS_store
 dosenet_data/
 tmp/
+venv/
 
 # Swap
 [._]*.s[a-v][a-z]
