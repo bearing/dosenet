@@ -62,7 +62,7 @@ ANSI_YEL = '\033[33m' + ANSI_BOLD
 ANSI_CYAN = '\033[36m' + ANSI_BOLD
 ANSI_MG = '\033[35m' + ANSI_BOLD
 
-DATA_PATH = "../dosenet_data/"
+DATA_PATH = "tmp"
 
 class Injector(object):
     """
