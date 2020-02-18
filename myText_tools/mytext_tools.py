@@ -12,20 +12,6 @@ import pytz
 this is really similiar to mysql_tools.py; I changed the insertinto... method for 
 sql server into text file format. Each text file has a title of stationID + type
 + txt. So far I did not change the getter and setter, which is written for sql
-
-Questions:
-where is the insert method used?
-which folder to insert the data in?
-how to how should the code for fetching data work?
-Readline? do we need a getter and setter funtion?
-Some other variable that I don't know, such as hash?
-how to test this code?
-
-order: injector.py => TextObject => insertinto
-
-Data_path 
-
-for computer or server
 '''
 
 def datetime_tz(year, month, day, hour=0, minute=0, second=0, tz='UTC'):
@@ -125,17 +111,20 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        # sql_cmd = (
+            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+
+    # sql_cmd = (
         #     "INSERT INTO " +
         #     "dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) " +
         #     "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
         #         deviceTime, stationID, cpm, cpm_error, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        dosimeterfile = open(self.Data_Path + str(stationID) + "_Dosimeter.csv", "a+")
+        dosimeterfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + ".csv", "a+")
         #dosimeterfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(cpm) + ", " + str(cpm_error)
         #   + ", " + str(error_flag) + "\n")
-        dosimeterfile.write("{},{},{},{},{}\n".format(deviceTime, stationID, cpm, cpm_error, error_flag))
+        dosimeterfile.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, cpm, cpm_error, error_flag))
         dosimeterfile.close()
 
 
@@ -155,6 +144,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
+            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "air_quality(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
@@ -162,10 +153,10 @@ class TextObject:
         #         deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        aqfile = open(self.Data_Path + str(stationID) + "_AQ.csv", "a+")
+        aqfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_aq.csv", "a+")
         #aqfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(oneMicron) + ", "
         #    + str(twoPointFiveMicron) + ", " + str(tenMicron) + ", " + str(error_flag) + "\n")
-        aqfile.write("{},{},{},{},{},{}\n".format(deviceTime, stationID, oneMicron, twoPointFiveMicron,
+        aqfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, oneMicron, twoPointFiveMicron,
         tenMicron, error_flag))
         aqfile.close()
 
@@ -182,6 +173,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
+            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "adc(deviceTime, stationID, co2_ppm, noise, errorFlag) " +
@@ -189,10 +182,10 @@ class TextObject:
         #         deviceTime, stationID, co2_ppm, noise, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        co2file = open(self.Data_Path + str(stationID) + "_CO2.csv", "a+")
+        co2file = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_adc.csv", "a+")
         #co2file.write(str(deviceTime) + ", " + str(stationID) + ", " + str(co2_ppm) + ", "
         #        + str(noise) + ", " + str(error_flag) + "\n")\
-        co2file.write("{},{},{},{},{}\n".format(deviceTime, stationID, co2_ppm, noise, error_flag))
+        co2file.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, co2_ppm, noise, error_flag))
         co2file.close()
 
     def insertIntoWeather(self, stationID, temperature, pressure,
@@ -209,6 +202,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
+            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
@@ -216,10 +211,10 @@ class TextObject:
         #         deviceTime, stationID, temperature, pressure, humidity, error_flag))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        weatherfile = open(self.Data_Path + str(stationID) + "_Weather.csv", "a+")
+        weatherfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_weather.csv", "a+")
         #weatherfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(temperature) + ", "
         #       + str(pressure) + ", " + str(humidity) + ", " + str(error_flag) + "\n")
-        weatherfile.write("{},{},{},{},{},{}\n".format(deviceTime, stationID, temperature, pressure,
+        weatherfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal ,deviceTime, temperature, pressure,
         humidity, error_flag))
         weatherfile.close()
 
@@ -234,6 +229,9 @@ class TextObject:
         counts = sum(spectrum)
         spectrum = np.array(spectrum, dtype=np.uint8)
         spectrum_blob = spectrum.tobytes()
+        deviceTime = time.time()
+        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "d3s(deviceTime, stationID, counts, channelCounts, errorFlag) " +
@@ -242,10 +240,10 @@ class TextObject:
         # # let MySQLdb library handle the special characters in the blob
         # self.cursor.execute(sql_cmd, (spectrum_blob,))
         # self.db.commit()
-        d3sfile = open(self.Data_Path + str(stationID) + "_D3S.csv", "a+")
+        d3sfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_d3s.csv", "a+")
         #d3sfile.write(str(deviceTime) + ", " + str(counts) + ", " + str(spectrum_blob)
         #       + ", " + str(error_flag) + "\n")
-        d3sfile.write("{},{},{},{},{}\n".format(deviceTime, stationID, counts, spectrum_blob, error_flag))
+        d3sfile.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, counts, spectrum_blob, error_flag))
         d3sfile.close()
 
     def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
@@ -260,9 +258,12 @@ class TextObject:
         #            "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
-        logfile = open(self.Data_Path + str(stationID) + "_Log.csv", "a+")
+        deviceTime = time.time()
+        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        logfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_log.csv", "a+")
         #logfile.write(str(msgCode) + ", " + str(msgText) + "\n")
-        logfile.write("{},{},{}\n".format(stationID, msgCode, msgText))
+        logfile.write("{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, msgCode, msgText))
         logfile.close()
 
     def inject(self, data, verbose=False):
@@ -392,6 +393,20 @@ class TextObject:
         needs_update = station[fil].iloc[0]["needsUpdate"]
         git_branch = station[fil].iloc[0]["gitBranch"]
         return git_branch, needs_update
+
+    def getStationName(self, stationID):
+        """Read gitBranch and needsUpdate from stations table."""
+        station = pd.read_csv(self.Data_Path + "Station.csv")
+        fil = station['ID'] == stationID
+        name = station[fil].iloc[0]["nickname"]
+        return name
+
+    def getStationTZ(self, stationID):
+        """Read gitBranch and needsUpdate from stations table."""
+        station = pd.read_csv(self.Data_Path + "Station.csv")
+        fil = station['ID'] == stationID
+        name = station[fil].iloc[0]["timezone"]
+        return name
 
 
 
