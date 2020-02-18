@@ -197,13 +197,18 @@ class TextObject:
 
         Insert a row of Weather data into the Weather table
         """
+        print('weather')
         if (not isinstance(deviceTime, int) and
                 not isinstance(deviceTime, float)):
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
+            print(deviceTime)
             deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+            print(deviceTimeUTC)
             deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+            print(deviceTimeUTC)
+
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
@@ -226,12 +231,16 @@ class TextObject:
         Data are written in the order of device time, stationID, count, spectrum_blob, error flag
         Insert a row of D3S data into the d3s table.
         """
+        print("d3s")
         counts = sum(spectrum)
         spectrum = np.array(spectrum, dtype=np.uint8)
         spectrum_blob = spectrum.tobytes()
         deviceTime = time.time()
+        print(deviceTime)
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        print(deviceTimeUTC)
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        print(deviceTimeUTC)
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "d3s(deviceTime, stationID, counts, channelCounts, errorFlag) " +
@@ -258,6 +267,8 @@ class TextObject:
         #            "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
         # self.cursor.execute(sql_cmd)
         # self.db.commit()
+        print("log")
+        print(msgText)
         deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
