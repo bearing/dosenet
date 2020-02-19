@@ -111,8 +111,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
 
     # sql_cmd = (
         #     "INSERT INTO " +
@@ -144,8 +144,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "air_quality(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
@@ -173,8 +173,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         # sql_cmd = (
         #     "INSERT INTO " +
         #     "adc(deviceTime, stationID, co2_ppm, noise, errorFlag) " +
@@ -203,11 +203,11 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-            print(deviceTime)
-            deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-            print(deviceTimeUTC)
-            deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-            print(deviceTimeUTC)
+        print(deviceTime)
+        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
+        print(deviceTimeUTC)
+        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        print(deviceTimeUTC)
 
         # sql_cmd = (
         #     "INSERT INTO " +
@@ -235,7 +235,11 @@ class TextObject:
         counts = sum(spectrum)
         spectrum = np.array(spectrum, dtype=np.uint8)
         spectrum_blob = spectrum.tobytes()
-        deviceTime = time.time()
+        if (not isinstance(deviceTime, int) and
+                not isinstance(deviceTime, float)):
+            if deviceTime is not None:
+                print('Warning: received non-numeric deviceTime! Ignoring')
+            deviceTime = time.time()
         print(deviceTime)
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         print(deviceTimeUTC)
@@ -269,7 +273,11 @@ class TextObject:
         # self.db.commit()
         print("log")
         print(msgText)
-        deviceTime = time.time()
+        if (not isinstance(deviceTime, int) and
+                not isinstance(deviceTime, float)):
+            if deviceTime is not None:
+                print('Warning: received non-numeric deviceTime! Ignoring')
+            deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         logfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_log.csv", "a+")
