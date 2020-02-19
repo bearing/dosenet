@@ -38,6 +38,7 @@ import Crypto.Random
 from Crypto.Cipher import AES
 from crypt import cust_crypt as ccrypt
 import SocketServer
+import traceback
 
 
 
@@ -684,6 +685,8 @@ class Injector(object):
             inject_method(data, self.verbose)
         except Exception as e:
             print('Injection error:', e)
+            print(traceback.format_exc())
+            traceback.print_tb(e.__traceback__)
             return None
 
     def handle_return_packet(self, field_dict, request):
