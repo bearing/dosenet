@@ -645,7 +645,7 @@ class Injector(object):
     def handle_injection(self, data, request_type,
                          mode=None, client_address=None):
         """
-        Inject data into SqlObject. Handle errors.
+        Inject data into TextObject. Handle errors.
         """
 
         if self.test_serve:
@@ -678,7 +678,9 @@ class Injector(object):
             inject_method = self.db.injectWeather
 
         try:
-            inject_method(data,self.verbose)
+            print(inject_method)
+            print(data)
+            inject_method(data, self.verbose)
         except Exception as e:
             print('Injection error:', e)
             return None
