@@ -461,7 +461,7 @@ class Injector(object):
 
         try:
             request_type = self.classify_request(field_list)
-            print("handle_request_type: request_type = {}".format(request_type))
+            #print("handle_request_type: request_type = {}".format(request_type))
         except PacketLengthError as e:
             # encrypted test message
             print_status(

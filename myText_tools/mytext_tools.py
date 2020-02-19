@@ -113,7 +113,7 @@ class TextObject:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        print(self.getStationTZ(stationID))
+        print("insertintoDosenet: TZ = {}".format(self.getStationTZ(stationID)))
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
 
     # sql_cmd = (
