@@ -680,13 +680,13 @@ class Injector(object):
             inject_method = self.db.injectWeather
 
         try:
-            print(inject_method)
-            print(data)
+            #print(inject_method)
+            #print(data)
             inject_method(data, self.verbose)
         except Exception as e:
             print('Injection error:', e)
-            print(traceback.format_exc())
-            traceback.print_tb(e.__traceback__)
+            #print(traceback.format_exc())
+            #traceback.print_tb(e.__traceback__)
             return None
 
     def handle_return_packet(self, field_dict, request):
