@@ -25,20 +25,22 @@ import os
 import time
 import argparse
 import socket
-import SocketServer
 import datetime
 from collections import OrderedDict
 import ast
 import multiprocessing
-import Crypto.Random
-from Crypto.Cipher import AES
-
 # Extensible way for adding future imports
-import_list = ['crypt', 'mysql_tools', 'udp']
+import_list = ['crypt', 'myText_tools', 'udp']
 for el in import_list:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), el)))
+from myText_tools.mytext_tools import TextObject
+import Crypto.Random
+from Crypto.Cipher import AES
 from crypt import cust_crypt as ccrypt
-from mysql_tools.mysql_tools import SQLObject
+import SocketServer
+import traceback
+
+
 
 PRIVATE_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl')
 PUBLIC_KEY = os.path.expanduser('~/.ssh/id_rsa_lbl.pub')
@@ -61,6 +63,7 @@ ANSI_YEL = '\033[33m' + ANSI_BOLD
 ANSI_CYAN = '\033[36m' + ANSI_BOLD
 ANSI_MG = '\033[35m' + ANSI_BOLD
 
+DATA_PATH = "tmp/"
 
 class Injector(object):
     """
@@ -140,7 +143,7 @@ class Injector(object):
         self.test_packet = None
 
         # Connect to database
-        self.db = SQLObject()
+        self.db = TextObject(Data_Path=DATA_PATH)
 
         # Decrypter
         print('\tPrivate Key:', self.private_key)
@@ -458,6 +461,7 @@ class Injector(object):
 
         try:
             request_type = self.classify_request(field_list)
+            #print("handle_request_type: request_type = {}".format(request_type))
         except PacketLengthError as e:
             # encrypted test message
             print_status(
@@ -643,7 +647,7 @@ class Injector(object):
     def handle_injection(self, data, request_type,
                          mode=None, client_address=None):
         """
-        Inject data into SqlObject. Handle errors.
+        Inject data into TextObject. Handle errors.
         """
 
         if self.test_serve:
@@ -651,7 +655,7 @@ class Injector(object):
                 mode.upper(), format_packet(data, client_address)))
             return
         elif request_type.startswith('data'):
-            print_status('Injecting {}: {}'.format(
+            print_status('Injecting pocket {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.inject
         elif request_type == 'd3s':
@@ -659,26 +663,29 @@ class Injector(object):
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectD3S
         elif request_type == 'log':
-            print_status('Injecting {} to log: {}'.format(
+            print_status('Injecting log {} to log: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectLog
         elif request_type == 'AQ':
-            print_status('Injecting {}: {}'.format(
+            print_status('Injecting aq {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectAQ
         elif request_type == 'co2':
-            print_status('Injecting {}: {}'.format(
+            print_status('Injecting co2 {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectCO2
         elif request_type == 'weather':
-            print_status('Injecting {}: {}'.format(
+            print_status('Injecting weather {}: {}'.format(
                 mode.upper(), format_packet(data, client_address)))
             inject_method = self.db.injectWeather
 
         try:
-            inject_method(data,self.verbose)
+            #print(inject_method)
+            #print(data)
+            inject_method(data, self.verbose)
         except Exception as e:
             print('Injection error:', e)
+            print(traceback.format_exc())
             return None
 
     def handle_return_packet(self, field_dict, request):

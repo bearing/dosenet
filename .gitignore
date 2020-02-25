@@ -2,7 +2,11 @@
 dosenet.sublime-project
 dosenet.sublime-workspace
 ucbdosenet_slack_token.txt
+.idea
+.DS_store
+dosenet_data/
 tmp/
+venv/
 
 # Swap
 [._]*.s[a-v][a-z]

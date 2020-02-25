@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from __future__ import division
-from mysql_tools.mysql_tools import SQLObject
+from myText_tools.mytext_tools import SQLObject
 from data_transfer import DataFile
 import time
 import datetime as dt
