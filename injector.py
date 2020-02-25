@@ -226,11 +226,12 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
+            stype = 1
             test_cpm = 1.1
             test_cpm_error = 0.1
             test_error_flag = 0
-            raw_packet = '{},{},{},{},{}'.format(
-                test_hash, test_id, test_cpm, test_cpm_error, test_error_flag)
+            raw_packet = '{},{},{},{},{},{}'.format(
+                test_hash, test_id, stype, test_cpm, test_cpm_error, test_error_flag)
             # encrypter
             en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             # encrypted packet
@@ -245,12 +246,13 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
+            stype = 3
             test_time = time.time()
             test_data = [169.01, 229.01, 331.01, 428324.01, 11223.01, 4142.01, 522.01, 84.01, 24.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
-            raw_packet = '{},{},{},{},{}'.format(
-                test_hash, test_id, test_time, new_test_data, test_error_flag)
+            raw_packet = '{},{},{},{},{},{}'.format(
+                test_hash, test_id, stype, test_time, new_test_data, test_error_flag)
             en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
@@ -263,12 +265,13 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
+            stype = 4
             test_time = time.time()
             test_data = [500.01, 3.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
-            raw_packet = '{},{},{},{},{}'.format(
-                test_hash, test_id, test_time, new_test_data, test_error_flag)
+            raw_packet = '{},{},{},{},{},{}'.format(
+                test_hash, test_id, stype, test_time, new_test_data, test_error_flag)
             en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
@@ -281,12 +284,13 @@ class Injector(object):
             inj_stat = self.db.getInjectorStation()
             test_hash = inj_stat['IDLatLongHash']
             test_id = inj_stat.name
+            stype = 5
             test_time = time.time()
             test_data = [21.52, 999.81, 36.01]
             new_test_data = str(test_data).replace(',', ';')
             test_error_flag = 0
-            raw_packet = '{},{},{},{},{}'.format(
-                test_hash, test_id, test_time, new_test_data, test_error_flag)
+            raw_packet = '{},{},{},{},{},{}'.format(
+                test_hash, test_id, stype, test_time, new_test_data, test_error_flag)
             en = ccrypt.public_d_encrypt(key_file_lst=[PUBLIC_KEY])
             self.test_packet = en.encrypt_message(raw_packet)[0]
         return self.test_packet
@@ -474,57 +478,23 @@ class Injector(object):
 
         May raise PacketLengthError or UnknownRequestType.
         """
-
-        num_log_fields = 5
-        num_data_fields_old = 5
-        num_data_fields_new = 6
-        num_d3s_fields = 5
-        num_AQ_fields = 5
-        num_co2_fields = 5
-        num_weather_fields = 5
-
-        if (len(field_list) != num_log_fields and
-                len(field_list) != num_data_fields_old and
-                len(field_list) != num_data_fields_new and
-                len(field_list) != num_d3s_fields and
-                len(field_list) != num_AQ_fields and
-                len(field_list) != num_co2_fields and
-                len(field_list) != num_weather_fields):
-            raise PacketLengthError(
-                'Found {} fields instead of {}, {}, {}, {}, or {}'.format(
-                    len(field_list),
-                    num_log_fields, num_data_fields_old, num_data_fields_new,
-                    num_d3s_fields, num_co2_fields, num_weather_fields))
-        elif field_list[2] == 'LOG' and len(field_list) == num_log_fields:
-            request_type = 'log'
-        elif (len(field_list) == num_AQ_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) >= 40 and
-                len(field_list[3]) <= 80):
-            request_type = 'AQ'
-        elif (len(field_list) == num_d3s_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) > 4096):
-            request_type = 'd3s'
-        elif (len(field_list) == num_co2_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) >= 10 and
-                len(field_list[3]) <= 18):
-            request_type = 'co2'
-        elif (len(field_list) == num_weather_fields and
-                field_list[3].startswith('[') and
-                len(field_list[3]) >= 19 and
-                len(field_list[3]) <= 25):
-
-            request_type = 'weather'
-        elif len(field_list) == num_data_fields_old:
-            request_type = 'data_old'
-        elif len(field_list) == num_data_fields_new:
-            request_type = 'data'
-        else:
-            # currently, this is impossible
-            #   unless num_log_fields is different than num_data_fields_*,
-            #   and the log is submitted without 'LOG' identifier in position 2
+        request_list = ['d3s','AQ','co2','weather']
+        try:
+            if len(field_list) == 5:
+                if field_list[2] == 'LOG':
+                    request_type = 'log'
+                else:
+                    request_type = 'data_old'
+            elif len(field_list) == 6:
+                request_type = request_list[int(field_list[2])-2]
+            elif len(field_list) == 7:
+                request_type = 'data'
+            else:
+                #This should deal with any errors that come along with determining
+                #some given request type and is hopefully more robust
+                #than basing the request type off of data length
+                raise PacketLengthError()
+        except:
             raise UnknownRequestType()
 
         return request_type
@@ -567,38 +537,43 @@ class Injector(object):
             ind_cpm_error = 3
             ind_error_flag = 4
         elif request_type == 'data':
-            ind_deviceTime = 2
-            ind_cpm = 3
-            ind_cpm_error = 4
-            ind_error_flag = 5
+            ind_stype = 2
+            ind_deviceTime = 3
+            ind_cpm = 4
+            ind_cpm_error = 5
+            ind_error_flag = 6
         elif request_type == 'log':
             # position 2 is "LOG" - already checked in classify_request()
             ind_msgCode = 3
             ind_msgText = 4
         elif request_type == 'd3s':
-            ind_deviceTime = 2
-            ind_spectrum = 3
-            ind_error_flag = 4
+            ind_stype = 2
+            ind_deviceTime = 3
+            ind_spectrum = 4
+            ind_error_flag = 5
         elif request_type == 'AQ':
-            ind_deviceTime = 2
-            ind_average_data = 3
+            ind_stype = 2
+            ind_deviceTime = 3
+            ind_average_data = 4
             ind_conc_one = 0
             ind_conc_twopointfive = 1
             ind_conc_ten = 2
-            ind_error_flag = 4
+            ind_error_flag = 5
         elif request_type == 'co2':
-            ind_deviceTime = 2
-            ind_average_data = 3
+            ind_stype = 2
+            ind_deviceTime = 3
+            ind_average_data = 4
             ind_co2_ppm = 0
             ind_noise = 1
-            ind_error_flag = 4
+            ind_error_flag = 5
         elif request_type == 'weather':
-            ind_deviceTime = 2
-            ind_average_data = 3
+            ind_stype = 2
+            ind_deviceTime = 3
+            ind_average_data = 4
             ind_temp = 0
             ind_pres = 1
             ind_humid = 2
-            ind_error_flag = 4
+            ind_error_flag = 5
 
         field_dict = OrderedDict()
 

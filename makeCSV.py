@@ -138,6 +138,7 @@ def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
         print(comp_df)
     comp_df = comp_df.join(df_channels)
     return comp_df
+"""
 
 def get_compressed_dosenet_data(df,integration_time,n_intervals,verbose):
     """
