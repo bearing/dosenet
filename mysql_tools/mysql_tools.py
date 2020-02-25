@@ -8,7 +8,25 @@ import sys
 import datetime
 import time
 import pytz
-from mysql.connector import MySQLConnection
+import os
+import errno
+import signal
+from mysql.connector import MySQLConnection, OperationalError, Error
+
+class TimeoutError(Exception):
+    pass
+
+class timeout:
+    def __init__(self, seconds=10, error_message=os.strerror(errno.ETIME)):
+        self.seconds = seconds
+        self.error_message = error_message
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
 
 USER = 'root'  # set while creating the instance
 HOST = 'dosenet-0.cork9lvwvd2g.us-west-1.rds.amazonaws.com'  # obtained AFTER creating the instance
@@ -61,6 +79,9 @@ class SQLObject:
         except:
             pass
 
+    def set_max_query_time(self,time=600000):
+        self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+
     def set_session_tz(self, tz):
         """Sets timezone for this MySQL session.
         This affects the timestamp strings shown by deviceTime and receiveTime.
@@ -73,8 +94,12 @@ class SQLObject:
         self.refresh()
 
     def close(self):
-        self.cursor.close()
-        self.db.close()
+        try:
+            self.cursor.close()
+            self.db.close()
+            print("MySQL connection is closed")
+        except:
+            print("Connection lost unexpectedly")
 
     def refresh(self):
         """Clear the cache of any query results."""
@@ -94,9 +119,9 @@ class SQLObject:
             self.cursor.execute(sql_cmd)
             self.verified_stations = self.cursor.fetchall()
         except Exception as e:
-            raise e
             msg = 'Error: Could not get list of stations from the database!'
             print(msg)
+            raise e
             # email_message.send_email(
             #     process=os.path.basename(__file__), error_message=msg)
 
@@ -117,6 +142,47 @@ class SQLObject:
             # email_message.send_email(
             #     process=os.path.basename(__file__), error_message=msg)
 
+    def safe_insert(self, sql_cmd):
+        attempts = 0
+        while attempts < 10:
+            try:
+                with timeout(100):
+                    self.cursor.execute(sql_cmd)
+                    self.db.commit()
+                    break
+            except OperationalError as err:
+                print('Could not find SQL database! Reestablishing connection')
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                #self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                attempts = attempts + 1
+                pass
+            except Error as err:
+                print(err)
+                print("Error Code:", err.errno)
+                print("SQLSTATE", err.sqlstate)
+                print("Message", err.msg)
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                attempts = attempts + 1
+                sleep(1)
+                pass
+            except Exception:
+                print("Error inserting {}}".format(sql_cmd))
+                print(e)
+                attempts = attempts + 1
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                sleep(1)
+                pass
+        if attempts>9:
+            return False
+        else:
+            return True
+
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
         """
@@ -135,8 +201,9 @@ class SQLObject:
             "dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, cpm, cpm_error, error_flag))
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
+        error_code = self.safe_insert(sql_cmd)
+        #if not error_code:
+            #TODO: Decide what to do when the insert fails...
 
     def insertIntoAQ(self, stationID, oneMicron, twoPointFiveMicron, tenMicron,
                      error_flag, deviceTime, **kwargs):
@@ -153,8 +220,9 @@ class SQLObject:
             "air_quality(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
+        error_code = self.safe_insert(sql_cmd)
+        #if not error_code:
+            #TODO: Decide what to do when the insert fails...
 
     def insertIntoCO2(self, stationID, co2_ppm, noise, error_flag, deviceTime, **kwargs):
         """
@@ -170,8 +238,9 @@ class SQLObject:
             "adc(deviceTime, stationID, co2_ppm, noise, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, co2_ppm, noise, error_flag))
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
+        error_code = self.safe_insert(sql_cmd)
+        #if not error_code:
+            #TODO: Decide what to do when the insert fails...
 
     def insertIntoWeather(self, stationID, temperature, pressure,
                           humidity, error_flag, deviceTime, **kwargs):
@@ -188,8 +257,9 @@ class SQLObject:
             "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
                 deviceTime, stationID, temperature, pressure, humidity, error_flag))
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
+        error_code = self.safe_insert(sql_cmd)
+        #if not error_code:
+            #TODO: Decide what to do when the insert fails...
 
     def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime,
                       **kwargs):
@@ -205,8 +275,9 @@ class SQLObject:
             "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
                 deviceTime, stationID, counts, '%s', error_flag))
         # let MySQLdb library handle the special characters in the blob
-        self.cursor.execute(sql_cmd, (spectrum_blob,))
-        self.db.commit()
+        error_code = self.safe_insert(sql_cmd)
+        #if not error_code:
+            #TODO: Decide what to do when the insert fails...
 
     def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
         """
@@ -214,8 +285,9 @@ class SQLObject:
         """
         sql_cmd = ("INSERT INTO stationlog(stationID, msgCode, message) " +
                    "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
-        self.cursor.execute(sql_cmd)
-        self.db.commit()
+        error_code = self.safe_insert(sql_cmd)
+        #if not error_code:
+            #TODO: Decide what to do when the insert fails...
 
     def inject(self, data, verbose=False):
         """Authenticate the data packet and then insert into database"""
@@ -353,16 +425,26 @@ class SQLObject:
         col_list = "gitBranch, needsUpdate"
         q = "SELECT {} FROM stations WHERE `ID` = {};".format(
             col_list, stationID)
-        df = self.dfFromSql(q)
+        df = self.safe_query(q)
 
-        needs_update = df['needsUpdate'][0]
-        git_branch = df['gitBranch'][0]
+        if len(df) > 0:
+            needs_update = df['needsUpdate'][0]
+            git_branch = df['gitBranch'][0]
+        else:
+            git_branch = 'master'
+            needs_update = 0
 
         return git_branch, needs_update
 
 # ---------------------------------------------------------------------------
 #       STATION-UPDATE-RELATED METHODS
 # ---------------------------------------------------------------------------
+
+    def sendSingleStationChange(self, stationID, column, value):
+        q = "UPDATE stations SET `{}` = {} WHERE `ID`={}".format(
+                column,value,stationID)
+        self.cursor.execute(q)
+        self.refresh()
 
     def setSingleStationUpdate(self, stationID, needs_update=0):
         """
@@ -407,6 +489,46 @@ class SQLObject:
 #       FETCH METHODS
 # ---------------------------------------------------------------------------
 
+    def safe_query(self, q, timeout_time = 300):
+        attempts = 0
+        while attempts < 5:
+            try:
+                with timeout(timeout_time):
+                    df = self.dfFromSql(q)
+                    break
+            except OperationalError as err:
+                print('Could not find SQL database! Reestablishing connection')
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                #self.cursor.execute("SET SESSION MAX_EXECUTION_TIME=600000")
+                attempts = attempts + 1
+                pass
+            except Error as err:
+                print(err)
+                print("Error Code:", err.errno)
+                print("SQLSTATE", err.sqlstate)
+                print("Message", err.msg)
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                attempts = attempts + 1
+                time.sleep(1)
+                pass
+            except Exception as e:
+                print("Error inserting {}".format(q))
+                print(e)
+                self.close()
+                self.db = connection_to_remote_db()
+                self.cursor = self.db.cursor(buffered=True)
+                attempts = attempts + 1
+                time.sleep(1)
+                pass
+        if attempts>4:
+            return pd.DataFrame({})
+        else:
+            return df
+
     def dfFromSql(self, q):
         """Pandas dataframe from SQL query"""
         df = pd.read_sql(q, con=self.db)
@@ -437,49 +559,44 @@ class SQLObject:
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
         q = "SELECT * FROM stations;"
-        df = self.dfFromSql(q)
-        df.set_index(df['ID'], inplace=True)
-        del df['ID']
+        df = self.safe_query(q)
+        if len(df) > 0:
+            df.set_index(df['ID'], inplace=True)
+            del df['ID']
         return df
 
     def getActiveStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getStations()
-        df = df[df['display'] == 1]
-        del df['display']
+        if len(df) > 0:
+            df = df[df['display'] == 1]
+            del df['display']
+        return df
+
+    def getSensorStations(self, ID):
+        """Read the stations table, but only entries with display=={ID}."""
+        df = self.getActiveStations()
+        if len(df) > 0:
+            active_list = [x[ID]=="1" for x in df['devices'].tolist()]
+            df = df[pd.Series([x[ID]=="1" for x in df['devices'].tolist()],
+                            index=df['devices'].index)]
         return df
 
     def getActiveD3SStations(self):
         """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[1]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
+        return self.getSensorStations(1)
 
     def getActiveAQStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[2]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[2]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
+        """Read the stations table, but only entries with display==2."""
+        return self.getSensorStations(2)
 
     def getActiveWeatherStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[3]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[3]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
+        """Read the stations table, but only entries with display==3."""
+        return self.getSensorStations(3)
 
     def getActiveADCStations(self):
         """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[4]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
+        return self.getSensorStations(4)
 
     def getSingleStation(self, stationID):
         """Read one entry of the stations table into a pandas dataframe."""
@@ -516,13 +633,7 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q)
 
         if len(df) == 0:
             if verbose:
@@ -536,6 +647,8 @@ class SQLObject:
                 print(df)
             return df.iloc[0]
         else:
+            df.set_index(df['Name'], inplace=True)
+            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
             return df.iloc[0]
 
     def getLatestD3SStationData(self, stationID, verbose=False):
@@ -561,13 +674,7 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM d3s WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,500)
 
         if len(df) == 0:
             if verbose:
@@ -581,6 +688,8 @@ class SQLObject:
                 print(df)
             return df.iloc[0]
         else:
+            df.set_index(df['Name'], inplace=True)
+            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
             return df.iloc[0]
 
     def getLatestADCStationData(self, stationID, verbose=False):
@@ -605,13 +714,7 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM adc WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -625,6 +728,8 @@ class SQLObject:
                 print(df)
             return df.iloc[0]
         else:
+            df.set_index(df['Name'], inplace=True)
+            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
             return df.iloc[0]
 
     def getLatestAQStationData(self, stationID, verbose=False):
@@ -649,13 +754,7 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM air_quality WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -669,6 +768,8 @@ class SQLObject:
                 print(df)
             return df.iloc[0]
         else:
+            df.set_index(df['Name'], inplace=True)
+            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
             return df.iloc[0]
 
     def getLatestWeatherStationData(self, stationID, verbose=False):
@@ -695,13 +796,7 @@ class SQLObject:
             "(SELECT MAX(deviceTime) FROM weather WHERE stationID='{}')".format(
                 stationID),
             "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -715,6 +810,8 @@ class SQLObject:
                 print(df)
             return df.iloc[0]
         else:
+            df.set_index(df['Name'], inplace=True)
+            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
             return df.iloc[0]
 
     def getInjectorStation(self):
@@ -752,11 +849,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"))
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -780,11 +873,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = pd.read_sql(q, con=self.db)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q, 500)
 
         if len(df) == 0:
             if verbose:
@@ -808,11 +897,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -837,11 +922,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.dfFromSql(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -866,11 +947,7 @@ class SQLObject:
             "AND UNIX_TIMESTAMP(deviceTime)",
             "BETWEEN {} AND {}".format(timemin,timemax),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -897,11 +974,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -925,11 +998,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,500)
 
         if len(df) == 0:
             if verbose:
@@ -954,11 +1023,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -983,11 +1048,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
@@ -1011,11 +1072,7 @@ class SQLObject:
             "WHERE stationID={}".format(stationID),
             "AND deviceTime >= (NOW() - {})".format(intervalStr),
             "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
+        df = self.safe_query(q,400)
 
         if len(df) == 0:
             if verbose:
