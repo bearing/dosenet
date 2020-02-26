@@ -19,6 +19,18 @@ import csv
 import re
 #from timezonefinder.timezonefinder import TimezoneFinder
 from tzwhere import tzwhere
+from mysql.connector import MySQLConnection
+
+USER = 'root'  # set while creating the instance
+HOST = 'dosenet-0.cork9lvwvd2g.us-west-1.rds.amazonaws.com'  # obtained AFTER creating the instance
+PORT = 3306  # default value (can be changed while creating the instance)
+PASSWORD = 'radiationisrad'  # set while creating the instance
+DATABASE = 'dosenet'   # set while creating the instance
+
+def connection_to_remote_db():
+    """Returns a connection to the remote database."""
+    return MySQLConnection(user=USER, host=HOST, port=PORT,
+                           password=PASSWORD, database=DATABASE)
 
 class Parser:
     def __init__(self):
@@ -47,11 +59,12 @@ class DBTool:
     def __init__(self, name, nickname, lat, lon, cpmtorem,
                  display, devices, *ID):
         # Open database connection
-        self.db = mdb.connect(
-            "127.0.0.1",
-            "ne170group",
-            "ne170groupSpring2015",
-            "dosimeter_network")
+        #self.db = mdb.connect(
+        #    "127.0.0.1",
+        #    "ne170group",
+        #    "ne170groupSpring2015",
+        #    "dosimeter_network")
+        self.db = connection_to_remote_db()
         try:
             self.ID = ID[0]
         except Exception as ex:
@@ -60,17 +73,25 @@ class DBTool:
         self.nickname = nickname
         self.lat = lat
         self.lon = lon
+<<<<<<< HEAD
 	tzwhere = tzwhere.tzwhere()
 	self.timezone = tzwhere.tzNameAt(lat, lon)
         #tf = TimezoneFinder()
         #self.timezone = tf.timezone_at(lon, lat)
+=======
+        #tf = TimezoneFinder()
+        #self.timezone = tf.timezone_at(lon, lat)
+        tz = tzwhere.tzwhere()
+        self.timezone = tz.tzNameAt(lat, lon)
+>>>>>>> d15daa4bf2616548f68cab6f7cf096ac458831b4
         print 'New location at (', lat, ',', lon, ') in', self.timezone, ' timezone'
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
         self.display = display
         self.devices = devices
         # prepare a cursor object using cursor() method
-        self.cursor = self.db.cursor()
+        #self.cursor = self.db.cursor()
+        self.cursor = self.db.cursor(buffered=True)
         self.md5hash = ''
         self.new_station = ''
         self.initialState = self.getInitialState()
