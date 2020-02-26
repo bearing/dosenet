@@ -34,7 +34,7 @@ def get_channels(channels,rebin_factor):
     convert channel counts binary string from the database into a numpy array
     and rebin by rebin_factor
     """
-    full_array = np.fromstring(channels,dtype=np.uint8)
+    full_array = np.frombuffer(channels,dtype=np.uint8)
     rebin_array = rebin(full_array,rebin_factor)
     return rebin_array
 

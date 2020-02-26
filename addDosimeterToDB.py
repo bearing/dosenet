@@ -17,7 +17,8 @@ import argparse
 import itertools
 import csv
 import re
-from timezonefinder.timezonefinder import TimezoneFinder
+#from timezonefinder.timezonefinder import TimezoneFinder
+from tzwhere import tzwhere
 
 class Parser:
     def __init__(self):
@@ -59,8 +60,10 @@ class DBTool:
         self.nickname = nickname
         self.lat = lat
         self.lon = lon
-        tf = TimezoneFinder()
-        self.timezone = tf.timezone_at(lon, lat)
+	tzwhere = tzwhere.tzwhere()
+	self.timezone = tzwhere.tzNameAt(lat, lon)
+        #tf = TimezoneFinder()
+        #self.timezone = tf.timezone_at(lon, lat)
         print 'New location at (', lat, ',', lon, ') in', self.timezone, ' timezone'
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
