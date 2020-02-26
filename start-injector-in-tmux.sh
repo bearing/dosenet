@@ -25,6 +25,9 @@ tmux send-keys -t INJECTOR C-c
 
 echo "  Sourcing .bashrc to get alias..."
 tmux send-keys -t INJECTOR ". ~/.bashrc" C-m
+echo "  Setting conda environment..."
+tmux send-keys -t INJECTOR "source activate aws-test-conda2" C-m
+tmux send-keys -t INJECTOR "export PATH=/home/dosenet/anaconda3/envs/aws-test-conda2/bin:$PATH" C-m
 echo "  Starting new injector..."
 tmux send-keys -t INJECTOR "injector" C-m
 # the alias is not loaded in this bash script.
