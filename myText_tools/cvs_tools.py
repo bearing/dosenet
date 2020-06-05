@@ -70,7 +70,7 @@ def convert_byte(line):
     split_buffer[-2] = str(cpm)
     buffer = ",".join(split_buffer)
     keV_per_ch = 2.57
-    return buffer + str(cpm_error) + "," + str(keV_per_ch) + "," + spectrum_string + ",0"
+    return buffer + str(cpm_error) + "," + str(keV_per_ch) + "," + spectrum_string + ",0" + "\n"
 
 def d3s_files_converter(Data_Path = "/Users/ethanchang/dosenet/dosenet_data/dosenet/dosenet_data/testing_data", output_dir = "/Users/ethanchang/dosenet/myText_tools/tmp/dosenet"):
     """convert all d3s files in one directory to readable d3s files"""
@@ -209,8 +209,22 @@ def convert_d3s(Data_Path = "/Users/ethanchang/dosenet/dosenet_data/dosenet/dose
     data = spectrum_string.split(",")
     print(len(data))
 
+def find_binary(data_path = "/Users/ethanchang/dosenet/dosenet_data/dosenet/dosenet_data/testing_data"):
+    files = [f for f in listdir(data_path) if
+             isfile(join(data_path, f)) and re.fullmatch('^((?!(year|month|week|day|hour)).)*$', f)]
+    for f in files:
+        file = open(join(data_path, f), 'rb')
+        while True:
+            ch = file.read(1)
+            if ch == b"":
+                break
+            if ord(ch) < 32 and ord(ch) != 10:
+                print(f)
+                break
+
 #fixCsvColumns("/Users/ethanchang/dosenet/dosenet_data/dosenet/uw_adc.csv", "/Users/ethanchang/dosenet/dosenet_data/dosenet/uw_adc-f2.csv")
 #fix_all()
-d3s_files_converter()
+#d3s_files_converter()
 # trim_file()
 #convert_d3s()
+find_binary()
