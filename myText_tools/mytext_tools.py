@@ -3,17 +3,18 @@
 from __future__ import print_function
 import numpy as np
 import pandas as pd
-import sys
 import datetime
 import time
 import pytz
-import traceback
+import re
+from os import listdir
+from os.path import isfile, join
 
-'''
+"""
 this is really similiar to mysql_tools.py; I changed the insertinto... method for 
 sql server into text file format. Each text file has a title of stationID + type
-+ txt. So far I did not change the getter and setter, which is written for sql
-'''
++ txt. So far I did not change the getter and setter, which is written for sql.
+"""
 
 def datetime_tz(year, month, day, hour=0, minute=0, second=0, tz='UTC'):
     dt_naive = datetime.datetime(year, month, day, hour, minute, second)
@@ -27,7 +28,6 @@ def epoch_to_datetime(epoch, tz='UTC'):
               datetime.timedelta(seconds=epoch))
     tzinfo = pytz.timezone(tz)
     return dt_utc.astimezone(tzinfo)
-
 
 class TextObject:
     def __init__(self, tz='+00:00', Data_Path="../dosenet_data/"):
@@ -56,7 +56,6 @@ class TextObject:
         Might not be needed. Depends what you're doing with the data.
         """
         print('[CONFIG] Setting session timezone to: {}'.format(tz))
-        #self.refresh()
 
 # ---------------------------------------------------------------------------
 #       INJECTION-RELATED METHODS
@@ -75,8 +74,6 @@ class TextObject:
             raise e
             msg = 'Error: Could not get list of stations from the database!'
             print(msg)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
 
     def checkHashFromRAM(self, ID):
         "unused"
@@ -92,8 +89,6 @@ class TextObject:
             return False
             msg = 'Error: Could not find a station matching that ID'
             print(msg)
-            # email_message.send_email(
-            #     process=os.path.basename(__file__), error_message=msg)
 
     def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
                           deviceTime=None, **kwargs):
@@ -113,23 +108,13 @@ class TextObject:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        #print("insertintoDosenet: TZ = {}".format(self.getStationTZ(stationID)))
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-
-    # sql_cmd = (
-        #     "INSERT INTO " +
-        #     "dosnet(deviceTime, stationID, cpm, cpmError, errorFlag) " +
-        #     "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
-        #         deviceTime, stationID, cpm, cpm_error, error_flag))
-        # self.cursor.execute(sql_cmd)
-        # self.db.commit()
-        dosimeterfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + ".csv", "a+")
-        #dosimeterfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(cpm) + ", " + str(cpm_error)
-        #   + ", " + str(error_flag) + "\n")
-        dosimeterfile.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, cpm, cpm_error, error_flag))
-        dosimeterfile.close()
-
-
+        try:
+            dosimeterfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + ".csv", "a+")
+            dosimeterfile.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, cpm, cpm_error, error_flag))
+            dosimeterfile.close()
+        except:
+            pass
 
     def insertIntoAQ(self, stationID, oneMicron, twoPointFiveMicron, tenMicron,
                      error_flag, deviceTime = None, **kwargs):
@@ -148,19 +133,13 @@ class TextObject:
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-        # sql_cmd = (
-        #     "INSERT INTO " +
-        #     "air_quality(deviceTime, stationID, PM1, PM25, PM10, errorFlag) " +
-        #     "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
-        #         deviceTime, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag))
-        # self.cursor.execute(sql_cmd)
-        # self.db.commit()
-        aqfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_aq.csv", "a+")
-        #aqfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(oneMicron) + ", "
-        #    + str(twoPointFiveMicron) + ", " + str(tenMicron) + ", " + str(error_flag) + "\n")
-        aqfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, oneMicron, twoPointFiveMicron,
-        tenMicron, error_flag))
-        aqfile.close()
+        try:
+            aqfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_aq.csv", "a+")
+            aqfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, oneMicron, twoPointFiveMicron,
+            tenMicron, error_flag))
+            aqfile.close()
+        except:
+            pass
 
     def insertIntoCO2(self, stationID, co2_ppm, noise, error_flag, deviceTime = None, **kwargs):
         """
@@ -177,18 +156,12 @@ class TextObject:
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-        # sql_cmd = (
-        #     "INSERT INTO " +
-        #     "adc(deviceTime, stationID, co2_ppm, noise, errorFlag) " +
-        #     "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
-        #         deviceTime, stationID, co2_ppm, noise, error_flag))
-        # self.cursor.execute(sql_cmd)
-        # self.db.commit()
-        co2file = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_adc.csv", "a+")
-        #co2file.write(str(deviceTime) + ", " + str(stationID) + ", " + str(co2_ppm) + ", "
-        #        + str(noise) + ", " + str(error_flag) + "\n")\
-        co2file.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, co2_ppm, noise, error_flag))
-        co2file.close()
+        try:
+            co2file = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_adc.csv", "a+")
+            co2file.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, co2_ppm, noise, error_flag))
+            co2file.close()
+        except:
+            pass
 
     def insertIntoWeather(self, stationID, temperature, pressure,
                           humidity, error_flag, deviceTime = None, **kwargs):
@@ -206,20 +179,13 @@ class TextObject:
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-
-        # sql_cmd = (
-        #     "INSERT INTO " +
-        #     "weather(deviceTime, stationID, temperature, pressure, humidity, errorFlag) " +
-        #     "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {}, {});".format(
-        #         deviceTime, stationID, temperature, pressure, humidity, error_flag))
-        # self.cursor.execute(sql_cmd)
-        # self.db.commit()
-        weatherfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_weather.csv", "a+")
-        #weatherfile.write(str(deviceTime) + ", " + str(stationID) + ", " + str(temperature) + ", "
-        #       + str(pressure) + ", " + str(humidity) + ", " + str(error_flag) + "\n")
-        weatherfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal ,deviceTime, temperature, pressure,
-        humidity, error_flag))
-        weatherfile.close()
+        try:
+            weatherfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_weather.csv", "a+")
+            weatherfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal ,deviceTime, temperature, pressure,
+            humidity, error_flag))
+            weatherfile.close()
+        except:
+            pass
 
     def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime = None,
                       **kwargs):
@@ -227,11 +193,15 @@ class TextObject:
         Create text file with the name of stationID and the type, D3S.
 
         Data are written in the order of device time, stationID, count, spectrum_blob, error flag
+
         Insert a row of D3S data into the d3s table.
         """
-        counts = sum(spectrum)
         spectrum = np.array(spectrum, dtype=np.uint8)
-        spectrum_blob = spectrum.tobytes()
+        rebin_array = spectrum.reshape(len(spectrum) // 4, 4).sum(1)
+        spectrum_string = ",".join(map(str, rebin_array.tolist()))
+        cpm = sum(rebin_array) / 5
+        cpm_error = np.sqrt(sum(rebin_array)) / 5
+        keV_per_ch = 2.57
         if (not isinstance(deviceTime, int) and
                 not isinstance(deviceTime, float)):
             if deviceTime is not None:
@@ -239,21 +209,14 @@ class TextObject:
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-        # sql_cmd = (
-        #     "INSERT INTO " +
-        #     "d3s(deviceTime, stationID, counts, channelCounts, errorFlag) " +
-        #     "VALUES (FROM_UNIXTIME({:.3f}), {}, {}, {}, {});".format(
-        #         deviceTime, stationID, counts, '%s', error_flag))
-        # # let MySQLdb library handle the special characters in the blob
-        # self.cursor.execute(sql_cmd, (spectrum_blob,))
-        # self.db.commit()
-        d3sfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_d3s.csv", "a+")
-        #d3sfile.write(str(deviceTime) + ", " + str(counts) + ", " + str(spectrum_blob)
-        #       + ", " + str(error_flag) + "\n")
-        d3sfile.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, counts, spectrum_blob, error_flag))
-        d3sfile.close()
+        try:
+            d3sfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_d3s.csv", "a+")
+            d3sfile.write("{},{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, cpm, cpm_error, keV_per_ch, spectrum_string, error_flag))
+            d3sfile.close()
+        except:
+            pass
 
-    def insertIntoLog(self, stationID, msgCode, msgText, **kwargs):
+    def insertIntoLog(self, stationID, msgCode, msgText, deviceTime = None, **kwargs):
         """
         Create text file with the name of stationID and the type, dosimeter.
 
@@ -261,10 +224,6 @@ class TextObject:
 
         Insert a log message into the stationlog table.
         """
-        # sql_cmd = ("INSERT INTO stationlog(stationID, msgCode, message) " +
-        #            "VALUES ({}, {}, '{}')".format(stationID, msgCode, msgText))
-        # self.cursor.execute(sql_cmd)
-        # self.db.commit()
         if (not isinstance(deviceTime, int) and
                 not isinstance(deviceTime, float)):
             if deviceTime is not None:
@@ -272,10 +231,12 @@ class TextObject:
             deviceTime = time.time()
         deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
         deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
-        logfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_log.csv", "a+")
-        #logfile.write(str(msgCode) + ", " + str(msgText) + "\n")
-        logfile.write("{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, msgCode, msgText))
-        logfile.close()
+        try:
+            logfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_log.csv", "a+")
+            logfile.write("{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, msgCode, msgText))
+            logfile.close()
+        except:
+            pass
 
     def inject(self, data, verbose=False):
         """Authenticate the data packet and then insert into database"""
@@ -419,9 +380,113 @@ class TextObject:
         name = station[fil].iloc[0]["timezone"]
         return name
 
+    # ethan: make a getall, read it like the the writing method, for text reading csv with dataframe
+    # return panda dataframe.
+    def getAll(self, stationID, request_type=None, verbose=False):
+        if request_type == 'd3s':
+            d3sfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_d3s.csv", "r")
+            data = pd.read_csv(d3sfile)
+            d3sfile.close()
+        elif request_type == 'aq':
+            aqfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_aq.csv", "r")
+            data = pd.read_csv(aqfile)
+            aqfile.close()
+        elif request_type == 'weather':
+            weatherfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_weather.csv", "r")
+            data = pd.read_csv(weatherfile)
+            weatherfile.close()
+        elif request_type == 'adc':
+            co2file = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_adc.csv", "r")
+            data = pd.read_csv(co2file)
+            co2file.close()
+        else:
+            dosimeterfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + ".csv", "r")
+            data = pd.read_csv(dosimeterfile)
+            dosimeterfile.close()
+        return data
 
+    def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
+        """
+        Input dataframe from query with UNIX_TIMESTAMP for deviceTime. The output has 3 time columns:
+            deviceTime_unix (renamed from UNIX_TIMESTAMP(deviceTime))
+            deviceTime_utc
+            deviceTime_local
 
-        '''
+        stackoverflow.com/questions/17159207/change-timezone-of-date-time-
+          column-in-pandas-and-add-as-hierarchical-index
+        """
+        if isinstance(tz, str):
+            this_tz = tz
+        elif isinstance(stationID, (int, str)):
+            this_tz = self.getTimezoneFromID(stationID)
+        else:
+            print('[TZ WARNING] Defaulting to `US/Pacific`')
+            this_tz = 'US/Pacific'
+        # Sanity check
+        assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
+
+        # Rename existing unix epoch seconds columns
+        df.rename(inplace=True, columns={
+            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix'})
+
+        # Timezones are evil but pandas are fuzzy ...
+        deviceTime = pd.Index(pd.to_datetime(
+            df['deviceTime_unix'], unit='s')).tz_localize('UTC')
+        df['deviceTime_utc'] = deviceTime
+        df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
+
+        # Rearrange the columns (iterate in opposite order of placement)
+        new_cols = df.columns.tolist()
+        for colname in ['deviceTime_unix',
+                        'deviceTime_local',
+                        'deviceTime_utc']:
+            new_cols.insert(0, new_cols.pop(new_cols.index(colname)))
+        df = df[new_cols]
+        return df
+
+    def getActiveStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getStations()
+        df = df[df['display'] == 1]
+        del df['display']
+        return df
+
+    def getActiveD3SStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[1]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
+    def getActiveAQStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[2]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[2]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
+    def getActiveWeatherStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[3]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[3]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
+    def getActiveADCStations(self):
+        """Read the stations table, but only entries with display==1."""
+        df = self.getActiveStations()
+        active_list = [x[4]=="1" for x in df['devices'].tolist()]
+        df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
+                          index=df['devices'].index)]
+        return df
+
+class AuthenticationError(Exception):
+    pass
+
+    '''
         self.refresh()
         col_list = "gitBranch, needsUpdate"
         q = "SELECT {} FROM stations WHERE `ID` = {};".format(
@@ -432,8 +497,8 @@ class TextObject:
         git_branch = df['gitBranch'][0]
 
         return git_branch, needs_update
-        '''
-        '''
+    '''
+    '''
         this_hash = self.getStations()['IDLatLongHash'][data['stationID']]
         # Check for this specific hash
         if data['hash'] != this_hash:
@@ -1230,6 +1295,9 @@ class TextObject:
             func = self.getDataForStationByInterval
         return func(stationID,'INTERVAL 1 YEAR',verbose)
 
+    #ethan: make a getall, read it like the the writing method, for text reading csv with dataframe
+    # return panda dataframe.
+    
     def getAll(self, stationID, request_type=None, verbose=False):
         if request_type == 'd3s':
             func = self.getD3SDataForStationByInterval
@@ -1253,7 +1321,6 @@ class TextObject:
             print('Num Entries:', len(df))
             print('HEAD:\n{}'.format(df.head()))
             print()
-
 
 class AuthenticationError(Exception):
     pass

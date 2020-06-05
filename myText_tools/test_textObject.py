@@ -1,6 +1,7 @@
 import unittest
 from unittest import TestCase
-
+import pandas
+import makeCSV
 from mytext_tools import *
 
 '''
@@ -56,6 +57,43 @@ class TestTextObject(unittest.TestCase):
         d = r.readlines()[-1]
         r.close()
         self.assertTrue(d.endswith(",1,2.0,3.0,4.0,5\n"))
+
+    def test_injectD3S(self):
+        mydb = TextObject(Data_Path="/Users/ethanchang/dosenet/myText_tools/dosenet_data/")
+        data = {'hash': 'abc', 'stationID': 1, 'spectrum': 4096 * [1], 'error_flag': 5}
+        mydb.injectD3S(data)
+        r = open(mydb.Data_Path + "dosenet/" + 'lbl_d3s.csv')
+        d = r.readlines()[-1]
+        r.close()
+        self.assertTrue(d.endswith(",1,2.0,3.0,4.0,5\n"))
+
+    def test_getAll(self):
+        mydb = TextObject()
+        df = mydb.getAll(10005, "weather")
+        print(df)
+        makeCSV.make_station_files(10005, "test5", "test5", "weather")
+
+    def test_getAll_d3s(self):
+        """Getting d3s data form lbl outside"""
+        mydb = TextObject()
+        df = mydb.getAll(29, "d3s")
+        print(df)
+        makeCSV.make_station_files(29, "LBL Outside", "lbl_outside", "d3s")
+
+    def test_getAll_aq(self):
+        """Getting d3s data form lbl outside"""
+        mydb = TextObject()
+        #df = mydb.getAll(50, "aq")
+        #print(df)
+        makeCSV.make_station_files(50, "University of Washington", "uw", "aq")
+
+    def test_getAll_adc(self):
+        """Getting d3s data form lbl outside"""
+        mydb = TextObject()
+        df = mydb.getAll(50, "adc")
+        print(df)
+        makeCSV.make_station_files(50, "University of Washington", "uw", "adc")
+
 
 if __name__ == '__main__':
     unittest.main()
