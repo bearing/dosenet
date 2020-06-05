@@ -227,4 +227,4 @@ def find_binary(data_path = "/Users/ethanchang/dosenet/dosenet_data/dosenet/dose
 #d3s_files_converter()
 # trim_file()
 #convert_d3s()
-find_binary()
+#find_binary()
