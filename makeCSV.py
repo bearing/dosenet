@@ -10,6 +10,8 @@ import numpy as np
 import math
 import pandas as pd
 import multiprocessing
+import sys
+sys.stdout.flush()
 
 docstring = """
 Text to CSV writer.
@@ -29,13 +31,14 @@ def rebin(array,n):
     """
     return array.reshape(len(array)/n,n).sum(1)
 
-def get_channels(channels,rebin_factor):
+def get_channels(channels,bfactor):
     """
     convert channel counts binary string from the database into a numpy array
     and rebin by rebin_factor
     """
-    full_array = np.fromstring(channels,dtype=np.uint8)
-    rebin_array = rebin(full_array,rebin_factor)
+    ch_array = np.frombuffer(channels,dtype=np.uint8)
+    print(ch_array)
+    rebin_array = ch_array.reshape(int(len(ch_array)/bfactor),bfactor).sum(1)
     return rebin_array
 
 def get_rounded_time(t):
@@ -115,6 +118,7 @@ def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
         DataFrame with 3 time columns and 2 data columns:
             deviceTime_[utc, local, unix] cpm, cpmError
     """
+    
     interval = dt.timedelta(minutes=integration_time).total_seconds()
     print("interval for d3s: " + str(interval))
     max_time = df['deviceTime_unix'].iloc[0]
@@ -287,23 +291,9 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
-    dbconnection_attempts = 0
-    DB = None
-    while True:
-        try:
-            DB = TextObject()
-            break
-        except (OperationalError) as e:
-            print(e)
-            print('Trying again...')
-            dbconnection_attempts += 1
-            if dbconnection_attempts < 5:
-                pass
-            else:
-                print('Giving up after 5 attempts')
-
-    #ethan: getall? in text
-    df_all = DB.getAll(sid,request_type,verbose)
+    DB = get_database()
+    df_all = get_database_df(DB,sid,request_type,verbose)
+    sys.stdout.flush()
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data
@@ -327,18 +317,19 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
     nintervals = [12,48,168,180,183]
     name_sufix = ['_hour','_day','_week','_month','_year']
 
-
     for idx in range(len(intervals)):
         df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
         csvfile = DataFile.csv_from_nickname(nick+name_sufix[idx])
         csvfile.df_to_file(df)
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
+    sys.stdout.flush()
 
 def make_all_station_files(stations,get_data,request_type=None,verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
+        sys.stdout.flush()
         make_station_files(sid,name,nick,request_type,verbose)
 
 def main(verbose=False,
@@ -364,26 +355,31 @@ def main(verbose=False,
     stations = DB.getActiveStations()
     print(stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active D3S stations')
     d3s_stations = DB.getActiveD3SStations()
     print(d3s_stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active air quality stations')
     aq_stations = DB.getActiveAQStations()
     print(aq_stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active CO2 stations')
     adc_stations = DB.getActiveADCStations()
     print(adc_stations)
     print()
+    sys.stdout.flush()
 
     print('Getting active weather stations')
     w_stations = DB.getActiveWeatherStations()
     print(w_stations)
     print()
+    sys.stdout.flush()
     # -------------------------------------------------------------------------
     # Pull data for each station, save to CSV and transfer
     # -------------------------------------------------------------------------

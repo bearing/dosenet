@@ -1,26 +1,31 @@
 #!/usr/bin/env bash
 
 HOMEPATH=/home/dosenet
-PYTHONPATH=$HOMEPATH/anaconda/bin/
+PYTHONPATH=$HOMEPATH/anaconda3/envs/aws-test-conda2/bin
 PATH=$PYTHONPATH:$PATH
+CODEPATH=$HOMEPATH/git/dosenet-ali-dev
 
 . $HOMEPATH/.keychain/$HOSTNAME-sh
 
-# let devices post first
-for arg in "$@"
-do
-    if [ "$arg" == "--geojson" ]
-    then
-        python $HOMEPATH/git/dosenet/makeGeoJSON.py
-    fi
-    if [ "$arg" == "--data" ]
-    then
-        python $HOMEPATH/git/dosenet/makeCSV.py
-    fi
+args=("$@")
+
+while [ 1 ]; do
+  if [ "${args[0]}" == "--geojson" ]
+  then
+      sleep 30
+      $PYTHONPATH/python $CODEPATH/makeGeoJSON.py
+  fi
+  if [ "${args[0]}" == "--data" ]
+  then
+      #sleep 150
+      $PYTHONPATH/python $CODEPATH/makeCSV.py
+  fi
+
+  $PYTHONPATH/python $CODEPATH/sendDataToWebserver.py
+  echo "Finished sending data to webserver"
+
+  logger --stderr --id --tag $LOGTAG "Finished sending data to webserver"
+
+  sleep 5m
+
 done
-#python $HOMEPATH/git/dosenet/makeCSV.py
-#python $HOMEPATH/git/dosenet/makeGeoJSON.py
-
-python $HOMEPATH/git/dosenet/sendDataToWebserver.py
-
-logger --stderr --id --tag $LOGTAG "Finished sending data to webserver"

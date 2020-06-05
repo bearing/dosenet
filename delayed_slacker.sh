@@ -10,7 +10,9 @@ DELAY_TIME_S=10
 
 sleep $DELAY_TIME_S
 
-python $SLACKER_PATH/slacker.py -i &
+source activate aws-test-conda2
+
+python $SLACKER_PATH/slacker.py -i &> /tmp/slacker.log
 
 if [[ $? -eq 0 ]]
 then

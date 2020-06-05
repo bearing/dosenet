@@ -1322,6 +1322,9 @@ class AuthenticationError(Exception):
             print('HEAD:\n{}'.format(df.head()))
             print()
 
+class AuthenticationError(Exception):
+    pass
+
 
 if __name__ == "__main__":
     sql = SQLObject()
