@@ -401,12 +401,12 @@ def main(verbose=False,
     all_processes = []
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(w_stations,get_data,'weather',verbose))
+                                args=(w_stations,get_data,DB,'weather',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(d3s_stations,get_data,'d3s',verbose))
+                                args=(d3s_stations,get_data,DB,'d3s',verbose))
 
     for p in all_processes:
         p.join()
