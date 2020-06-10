@@ -462,32 +462,28 @@ class TextObject:
     def getActiveD3SStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[1]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[1]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
     def getActiveAQStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[2]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[2]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[2]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
     def getActiveWeatherStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[3]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[3]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[3]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
     def getActiveADCStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[4]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[4]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
