@@ -346,6 +346,7 @@ def main(verbose=False,
          last_week=False,
          last_month=False,
          last_year=False,
+         data_path=None,
          **kwargs):
     get_data = {'get_day': last_day,
                 'get_week': last_week,
@@ -356,7 +357,10 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # My text data base interface
     # -------------------------------------------------------------------------
-    DB = TextObject()
+    if not data_path:
+        DB = TextObject()
+    else:
+        DB = TextObject(Data_Path=data_path)
     # -------------------------------------------------------------------------
     # Pick active stations
     # -------------------------------------------------------------------------
@@ -438,5 +442,6 @@ if __name__ == "__main__":
                         help='get compressed csv for last month')
     parser.add_argument('-y', '--last-year', action='store_true',
                         help='get compressed csv for last year')
+    parser.add_argument('-p', '--data_path', type=str, default=None)
     args = parser.parse_args()
     main(**vars(args))
