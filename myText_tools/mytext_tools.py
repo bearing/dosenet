@@ -444,6 +444,14 @@ class TextObject:
         df = df[new_cols]
         return df
 
+    def getStations(self):
+        """Read the stations table from MySQL into a pandas dataframe."""
+        q = "SELECT * FROM stations;"
+        df = pd.read_csv(join(self.Data_Path, "Station.csv"))
+        df.set_index(df['ID'], inplace=True)
+        del df['ID']
+        return df
+
     def getActiveStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getStations()
@@ -482,6 +490,95 @@ class TextObject:
         df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
+
+    def getLatestStationData(self, stationID, type, verbose=False, time_stamp=None):
+        """Return most recent data entry for given station."""
+        if type != any(["adc", "aq", "d3s", "weather", ""]):
+            raise IOError("type given does not exist.")
+        stations_data = pd.read_csv(self.Data_Path, "Station.csv")
+        station_row = stations_data.loc(stations_data['ID'] == stationID)
+        station_name = station_row[1]
+        last_data = pd.read_csv(self.Data_Path + "/dosenet/", station_name + "_" + type + ".csv")
+        time_received = last_data[2]
+        lat = stations_data[2]
+        long = stations_data[3]
+        time_zone = stations_data[-1]
+        nick_name = stations_data[-2]
+        cpm_to_rem = stations_data[4]
+        cpm_to_usv = stations_data[5]
+        display = stations_data[6]
+        if type == "":
+            cols = {"deviceTime_unix": [time_received],
+            "stationID" : [stationID],
+            "cpm": [last_data[-3]],
+            "cpmError": [last_data[-2]],
+            "errorFlag": [last_data[-1]],
+            "ID": [stationID],
+            "Name": [station_name],
+            "Lat": [lat],
+            "`Long`": [long],
+            "cpmtorem": [cpm_to_rem],
+            "cpmtousv": [cpm_to_usv],
+            "display": [display],
+            "nickname": [nick_name],
+            "timezone": [time_zone]}
+            return pd.DataFrame(data=cols)
+        if type == "adc":
+            cols = ["UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "co2_ppm",
+            "noise",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "display",
+            "nickname",
+            "timezone"]
+        if type == "d3s":
+            cols = ["UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "counts",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "cpmtorem",
+            "display",
+            "nickname",
+            "timezone"]
+        if type == "weather":
+            cols = ["UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "temperature",
+            "pressure",
+            "humidity",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "display",
+            "nickname",
+            "timezone"]
+        if type == "aq":
+            cols = ["UNIX_TIMESTAMP(deviceTime)",
+            "UNIX_TIMESTAMP(receiveTime)",
+            "stationID",
+            "PM25",
+            "errorFlag",
+            "ID",
+            "Name",
+            "Lat",
+            "`Long`",
+            "display",
+            "nickname",
+            "timezone"]
+
 
 class AuthenticationError(Exception):
     pass
