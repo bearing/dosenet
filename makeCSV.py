@@ -275,7 +275,7 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-def make_station_files(sid,name,nick,request_type=None,verbose=False):
+def make_station_files(sid,name,nick,DB,request_type=None,verbose=False):
     """
     generage all csv files for a station
 
@@ -287,20 +287,6 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
-    dbconnection_attempts = 0
-    DB = None
-    while True:
-        try:
-            DB = TextObject()
-            break
-        except (OperationalError) as e:
-            print(e)
-            print('Trying again...')
-            dbconnection_attempts += 1
-            if dbconnection_attempts < 5:
-                pass
-            else:
-                print('Giving up after 5 attempts')
 
     #ethan: getall? in text
     df_all = DB.getAll(sid,request_type,verbose)
@@ -335,11 +321,11 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
-def make_all_station_files(stations,get_data,request_type=None,verbose=False):
+def make_all_station_files(stations,get_data,db,request_type=None,verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
-        make_station_files(sid,name,nick,request_type,verbose)
+        make_station_files(sid,name,nick,db,request_type,verbose)
 
 def main(verbose=False,
          last_day=False,
@@ -394,17 +380,17 @@ def main(verbose=False,
 
     all_processes = []
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(stations,get_data,'dosenet',verbose))
+                                args=(stations,get_data,DB,'dosenet',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(aq_stations,get_data,'aq',verbose))
+                                args=(aq_stations,get_data,DB,'aq',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(adc_stations,get_data,'adc',verbose))
+                                args=(adc_stations,get_data,DB,'adc',verbose))
     p.start()
     all_processes.append(p)
 
