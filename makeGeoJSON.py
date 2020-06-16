@@ -5,7 +5,7 @@ import geojson
 from geojson import Point, Feature, FeatureCollection
 import time
 import datetime
-from myText_tools.mytext_tools import SQLObject
+from myText_tools.mytext_tools import TextObject
 from data_transfer import DataFile
 from collections import OrderedDict
 import sys
@@ -82,12 +82,15 @@ def get_data(DB,ix,data_type,old_data=0.0):
         data_df = DB.getLatestWeatherStationData(ix)
         return data_df
 
-def main(verbose=False):
+def main(verbose=False, data_path=None):
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Open database tool
     # -------------------------------------------------------------------------
-    DB = SQLObject()
+    if not data_path:
+        DB = TextObject()
+    else:
+        DB = TextObject(data_path)
     # -------------------------------------------------------------------------
     # Get dataframe of active stations
     # -------------------------------------------------------------------------
@@ -111,22 +114,22 @@ def main(verbose=False):
                        active_stations.loc[ix, 'Lat']])
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         if ix in active_stations.index.values:
-            latest_data = get_data(DB,ix,"pocket")
+            latest_data = DB.getLatestStationData(ix, "")
             print('Station {}: CPM = {}'.format(ix,latest_data))
             sys.stdout.flush()
 
         if ix in d3s_stations.index.values:
-            latest_d3s_data = get_data(DB,ix,"d3s")
+            latest_d3s_data = DB.getLatestStationData(ix, "d3s")
             print('Station {}: counts = {}'.format(ix,latest_d3s_data))
             sys.stdout.flush()
 
         if ix in aq_stations.index.values:
-            latest_aq_data = get_data(DB,ix,"aq")
+            latest_aq_data = DB.getLatestStationData(ix, "aq")
             print('Station {}: AQ = {}'.format(ix,latest_aq_data))
             sys.stdout.flush()
 
         if ix in adc_stations.index.values:
-            latest_co2_data = get_data(DB,ix,"adc")
+            latest_co2_data = DB.getLatestStationData(ix, "adc")
             print('Station {}: CO2 = {}'.format(ix,latest_co2_data))
             sys.stdout.flush()
 
@@ -134,7 +137,7 @@ def main(verbose=False):
         latest_h_data = None
         latest_p_data = None
         if ix in w_stations.index.values:
-            temp_data = get_data(DB,ix,"weather")
+            temp_data = DB.getLatestStationData(ix, "weather")
             if not temp_data.empty:
                 latest_t_data = temp_data['temperature']
                 latest_h_data = temp_data['humidity']
@@ -189,5 +192,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=docstring)
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
+    parser.add_argument('-p', '--data_path', type=str, default=None)
     args = parser.parse_args()
     main(**vars(args))
