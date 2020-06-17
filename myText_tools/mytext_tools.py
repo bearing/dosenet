@@ -489,103 +489,107 @@ class TextObject:
 
     def getLatestStationData(self, stationID, type, verbose=False, time_stamp=None):
         """Return most recent data entry for given station."""
-        if type != "adc" and type != "aq" and type != "d3s" and type != "weather" and type != "":
-            raise IOError("type given does not exist.")
-        if type != "":
-            type = "_" + type
-        stations_data = pd.read_csv(self.Data_Path + "Station.csv")
-        station_row = stations_data.loc[stations_data['ID'] == stationID].iloc[0]
-        station_name = station_row[1]
-        nick_name = station_row[-2]
-        print(self.Data_Path + "dosenet/" + nick_name + type + ".csv")
-        station_file = pd.read_csv(self.Data_Path + "dosenet/" + nick_name + type + ".csv")
-        last_data = station_file.iloc[station_file['deviceTime_unix'].idxmax()]
-        time_received = last_data[2]
-        lat = station_row[2]
-        long = station_row[3]
-        time_zone = station_row[-1]
-        cpm_to_rem = station_row[4]
-        cpm_to_usv = station_row[5]
-        display = station_row[6]
-        if type == "":
-            cols = {"deviceTime_unix": [time_received],
-                    "stationID" : [stationID],
-                    "cpm": [last_data[-3]],
-                    "cpmError": [last_data[-2]],
-                    "errorFlag": [last_data[-1]],
-                    "ID": [stationID],
-                    "Name": [station_name],
-                    "Lat": [lat],
-                    "`Long`": [long],
-                    "cpmtorem": [cpm_to_rem],
-                    "cpmtousv": [cpm_to_usv],
-                    "display": [display],
-                    "nickname": [nick_name],
-                    "timezone": [time_zone]}
-            return pd.DataFrame(data=cols)
-        if type == "adc":
-            cols = {"deviceTime_unix": [time_received],
-                    "stationID": [stationID],
-                    "co2_ppm": [last_data[-2]],
-                    "errorFlag": [last_data[-1]],
-                    "ID": [stationID],
-                    "Name": [station_name],
-                    "Lat": [lat],
-                    "`Long`": [long],
-                    "cpmtorem": [cpm_to_rem],
-                    "cpmtousv": [cpm_to_usv],
-                    "display": [display],
-                    "nickname": [nick_name],
-                    "timezone": [time_zone]}
-            return pd.DataFrame(data=cols)
-        if type == "d3s":
-            cols = {"deviceTime_unix": [time_received],
-                    "stationID": [stationID],
-                    "counts": [last_data[3]],
-                    "errorFlag": [last_data[-1]],
-                    "ID": [stationID],
-                    "Name": [station_name],
-                    "Lat": [lat],
-                    "`Long`": [long],
-                    "cpmtorem": [cpm_to_rem],
-                    "cpmtousv": [cpm_to_usv],
-                    "display": [display],
-                    "nickname": [nick_name],
-                    "timezone": [time_zone]}
-            return pd.DataFrame(data=cols)
-        if type == "weather":
-            cols = {"deviceTime_unix": [time_received],
-                    "stationID": [stationID],
-                    "temperature": [last_data[-4]],
-                    "pressure": [last_data[-3]],
-                    "humidity": [last_data[-2]],
-                    "errorFlag": [last_data[-1]],
-                    "ID": [stationID],
-                    "Name": [station_name],
-                    "Lat": [lat],
-                    "`Long`": [long],
-                    "cpmtorem": [cpm_to_rem],
-                    "cpmtousv": [cpm_to_usv],
-                    "display": [display],
-                    "nickname": [nick_name],
-                    "timezone": [time_zone]}
-            return pd.DataFrame(data=cols)
-        if type == "aq":
-            cols = {"deviceTime_unix": [time_received],
-                    "stationID": [stationID],
-                    "PM25": [last_data[-3]],
-                    "errorFlag": [last_data[-1]],
-                    "ID": [stationID],
-                    "Name": [station_name],
-                    "Lat": [lat],
-                    "`Long`": [long],
-                    "cpmtorem": [cpm_to_rem],
-                    "cpmtousv": [cpm_to_usv],
-                    "display": [display],
-                    "nickname": [nick_name],
-                    "timezone": [time_zone]}
-            return pd.DataFrame(data=cols)
-
+        try:
+            if type != "adc" and type != "aq" and type != "d3s" and type != "weather" and type != "":
+                raise IOError("type given does not exist.")
+            if type != "":
+                type = "_" + type
+            stations_data = pd.read_csv(self.Data_Path + "Station.csv")
+            station_row = stations_data.loc[stations_data['ID'] == stationID].iloc[0]
+            station_name = station_row[1]
+            nick_name = station_row[-2]
+            station_file = pd.read_csv(self.Data_Path + "dosenet/" + nick_name + type + ".csv")
+            last_data = station_file.iloc[station_file['deviceTime_unix'].idxmax()]
+            time_received = last_data[2]
+            lat = station_row[2]
+            long = station_row[3]
+            time_zone = station_row[-1]
+            cpm_to_rem = station_row[4]
+            cpm_to_usv = station_row[5]
+            display = station_row[6]
+            if type == "":
+                cols = {"deviceTime_unix": [time_received],
+                        "stationID" : [stationID],
+                        "cpm": [last_data[-3]],
+                        "cpmError": [last_data[-2]],
+                        "errorFlag": [last_data[-1]],
+                        "ID": [stationID],
+                        "Name": [station_name],
+                        "Lat": [lat],
+                        "`Long`": [long],
+                        "cpmtorem": [cpm_to_rem],
+                        "cpmtousv": [cpm_to_usv],
+                        "display": [display],
+                        "nickname": [nick_name],
+                        "timezone": [time_zone]}
+                return pd.DataFrame(data=cols)
+            if type == "_adc":
+                cols = {"deviceTime_unix": [time_received],
+                        "stationID": [stationID],
+                        "co2_ppm": [last_data[-2]],
+                        "errorFlag": [last_data[-1]],
+                        "ID": [stationID],
+                        "Name": [station_name],
+                        "Lat": [lat],
+                        "`Long`": [long],
+                        "cpmtorem": [cpm_to_rem],
+                        "cpmtousv": [cpm_to_usv],
+                        "display": [display],
+                        "nickname": [nick_name],
+                        "timezone": [time_zone]}
+                return pd.DataFrame(data=cols)
+            if type == "_d3s":
+                cols = {"deviceTime_unix": [time_received],
+                        "stationID": [stationID],
+                        "counts": [last_data[3]],
+                        "errorFlag": [last_data[-1]],
+                        "ID": [stationID],
+                        "Name": [station_name],
+                        "Lat": [lat],
+                        "`Long`": [long],
+                        "cpmtorem": [cpm_to_rem],
+                        "cpmtousv": [cpm_to_usv],
+                        "display": [display],
+                        "nickname": [nick_name],
+                        "timezone": [time_zone]}
+                return pd.DataFrame(data=cols)
+            if type == "_weather":
+                cols = {"deviceTime_unix": [time_received],
+                        "stationID": [stationID],
+                        "temperature": [last_data[-4]],
+                        "pressure": [last_data[-3]],
+                        "humidity": [last_data[-2]],
+                        "errorFlag": [last_data[-1]],
+                        "ID": [stationID],
+                        "Name": [station_name],
+                        "Lat": [lat],
+                        "`Long`": [long],
+                        "cpmtorem": [cpm_to_rem],
+                        "cpmtousv": [cpm_to_usv],
+                        "display": [display],
+                        "nickname": [nick_name],
+                        "timezone": [time_zone]}
+                return pd.DataFrame(data=cols)
+            if type == "_aq":
+                cols = {"deviceTime_unix": [time_received],
+                        "stationID": [stationID],
+                        "PM25": [last_data[-3]],
+                        "errorFlag": [last_data[-1]],
+                        "ID": [stationID],
+                        "Name": [station_name],
+                        "Lat": [lat],
+                        "`Long`": [long],
+                        "cpmtorem": [cpm_to_rem],
+                        "cpmtousv": [cpm_to_usv],
+                        "display": [display],
+                        "nickname": [nick_name],
+                        "timezone": [time_zone]}
+                return pd.DataFrame(data=cols)
+            else:
+                return pd.DataFrame()
+        except Exception as e:
+            print(e)
+            print(self.Data_Path + "dosenet/" + nick_name + type + ".csv")
 
 class AuthenticationError(Exception):
     pass

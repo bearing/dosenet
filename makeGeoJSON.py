@@ -90,7 +90,7 @@ def main(verbose=False, data_path=None):
     if not data_path:
         DB = TextObject()
     else:
-        DB = TextObject(data_path)
+        DB = TextObject(Data_Path=data_path)
     # -------------------------------------------------------------------------
     # Get dataframe of active stations
     # -------------------------------------------------------------------------
@@ -119,17 +119,17 @@ def main(verbose=False, data_path=None):
             sys.stdout.flush()
 
         if ix in d3s_stations.index.values:
-            latest_d3s_data = DB.getLatestStationData(ix, "d3s")
+            latest_d3s_data = DB.getLatestStationData(ix, "d3s")["counts"]
             print('Station {}: counts = {}'.format(ix,latest_d3s_data))
             sys.stdout.flush()
 
         if ix in aq_stations.index.values:
-            latest_aq_data = DB.getLatestStationData(ix, "aq")
+            latest_aq_data = DB.getLatestStationData(ix, "aq")["PM25"]
             print('Station {}: AQ = {}'.format(ix,latest_aq_data))
             sys.stdout.flush()
 
         if ix in adc_stations.index.values:
-            latest_co2_data = DB.getLatestStationData(ix, "adc")
+            latest_co2_data = DB.getLatestStationData(ix, "adc")["co2_ppm"]
             print('Station {}: CO2 = {}'.format(ix,latest_co2_data))
             sys.stdout.flush()
 
@@ -160,9 +160,8 @@ def main(verbose=False, data_path=None):
                 ('has_aq', latest_aq_data is not None),
                 ('has_co2', latest_co2_data is not None),
                 ('has_w', latest_t_data is not None),
-                ('Latest measurement', str(latest_data['deviceTime_local']))])
-            for k in ['deviceTime_unix', 'deviceTime_utc', 'deviceTime_local',
-                      'timezone']:
+                ('Latest measurement', str(latest_data['deviceTime_unix']))])
+            for k in ['deviceTime_unix', 'timezone']:
                 properties[k] = str(latest_data[k])
             feature_list.append(Feature(geometry=point, properties=properties))
     # -------------------------------------------------------------------------
