@@ -56,31 +56,34 @@ def get_stations(DB,data_type):
 def get_data(DB,ix,data_type,old_data=0.0):
     if data_type=="pocket":
         data_dict = DB.getLatestStationData(ix)
-        if not data_dict.empty:
+        if data_dict:
             return data_dict
         else:
             return None
     if data_type=="d3s":
         data_dict = DB.getLatestD3SStationData(ix)
-        if not data_dict.empty:
+        if data_dict:
             return data_dict['counts']
         else:
             return None
     if data_type=="aq":
         data_dict = DB.getLatestAQStationData(ix)
-        if not data_dict.empty:
+        if data_dict:
             return data_dict['PM25']
         else:
             return None
     if data_type=="adc":
         data_dict = DB.getLatestADCStationData(ix)
-        if not data_dict.empty:
+        if data_dict:
             return data_dict['co2_ppm']
         else:
             return None
     if data_type=="weather":
         data_dict = DB.getLatestWeatherStationData(ix)
-        return data_dict
+        if data_dict:
+            return data_dict
+        else:
+            return None
 
 def main(verbose=False, data_path=None):
     start_time = time.time()
@@ -138,7 +141,7 @@ def main(verbose=False, data_path=None):
         latest_p_data = None
         if ix in w_stations.index.values:
             temp_data = DB.getLatestStationData(ix, "weather")
-            if not temp_data.empty:
+            if temp_data:
                 latest_t_data = temp_data['temperature']
                 latest_h_data = temp_data['humidity']
                 latest_p_data = temp_data['pressure']
