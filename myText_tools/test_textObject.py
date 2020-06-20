@@ -97,7 +97,7 @@ class TestTextObject(unittest.TestCase):
     def test_getLatest(self):
         mydb = TextObject(Data_Path="/Users/ethanchang/dosenet/dosenet_data/")
         df = mydb.getLatestStationData(29, "")
-        print(df.iloc[0])
+        print(df['stationID'])
 
 
 if __name__ == '__main__':

@@ -55,32 +55,32 @@ def get_stations(DB,data_type):
 
 def get_data(DB,ix,data_type,old_data=0.0):
     if data_type=="pocket":
-        data_df = DB.getLatestStationData(ix)
-        if not data_df.empty:
-            return data_df
+        data_dict = DB.getLatestStationData(ix)
+        if not data_dict.empty:
+            return data_dict
         else:
             return None
     if data_type=="d3s":
-        data_df = DB.getLatestD3SStationData(ix)
-        if not data_df.empty:
-            return data_df['counts']
+        data_dict = DB.getLatestD3SStationData(ix)
+        if not data_dict.empty:
+            return data_dict['counts']
         else:
             return None
     if data_type=="aq":
-        data_df = DB.getLatestAQStationData(ix)
-        if not data_df.empty:
-            return data_df['PM25']
+        data_dict = DB.getLatestAQStationData(ix)
+        if not data_dict.empty:
+            return data_dict['PM25']
         else:
             return None
     if data_type=="adc":
-        data_df = DB.getLatestADCStationData(ix)
-        if not data_df.empty:
-            return data_df['co2_ppm']
+        data_dict = DB.getLatestADCStationData(ix)
+        if not data_dict.empty:
+            return data_dict['co2_ppm']
         else:
             return None
     if data_type=="weather":
-        data_df = DB.getLatestWeatherStationData(ix)
-        return data_df
+        data_dict = DB.getLatestWeatherStationData(ix)
+        return data_dict
 
 def main(verbose=False, data_path=None):
     start_time = time.time()
