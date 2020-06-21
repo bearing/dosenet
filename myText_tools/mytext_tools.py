@@ -505,7 +505,6 @@ class TextObject:
         cpm_to_usv = station_row[5]
         display = station_row[6]
         station_file = pd.read_csv(self.Data_Path + "dosenet/" + nick_name + type + ".csv")
-        print(len(station_file))
         """checking that station_file has data, else return a dictionary with None(s)"""
         if len(station_file) < 1:
             cols = {"deviceTime_unix": None,
