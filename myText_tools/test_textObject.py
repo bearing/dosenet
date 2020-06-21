@@ -95,9 +95,10 @@ class TestTextObject(unittest.TestCase):
         makeCSV.make_station_files(50, "University of Washington", "uw", "adc")
 
     def test_getLatest(self):
-        mydb = TextObject(Data_Path="/Users/ethanchang/dosenet/dosenet_data/")
-        df = mydb.getLatestStationData(29, "")
-        print(df['stationID'])
+        mydb = TextObject(Data_Path="/Users/ethanchang/dosenet/dosenet_data/dosenet/dosenet_data/")
+        df = mydb.getLatestStationData(33, "aq")
+        print(df)
+        print(df['PM25'])
 
 
 if __name__ == '__main__':
