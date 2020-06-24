@@ -96,7 +96,7 @@ class TestTextObject(unittest.TestCase):
 
     def test_getLatest(self):
         mydb = TextObject(Data_Path="/Users/ethanchang/dosenet/dosenet_data/dosenet/dosenet_data/")
-        df = mydb.getLatestStationData(33, "aq")
+        df = mydb.getLatestStationData(50, "")
         print(df)
         print(df['PM25'])
 
