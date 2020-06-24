@@ -444,162 +444,10 @@ class TextObject:
         df = df[new_cols]
         return df
 
-    def getActiveStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getStations()
-        df = df[df['display'] == 1]
-        del df['display']
-        return df
-
-    def getActiveD3SStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[1]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
-
-    def getActiveAQStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[2]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[2]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
-
-    def getActiveWeatherStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[3]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[3]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
-
-    def getActiveADCStations(self):
-        """Read the stations table, but only entries with display==1."""
-        df = self.getActiveStations()
-        active_list = [x[4]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
-                          index=df['devices'].index)]
-        return df
-
-class AuthenticationError(Exception):
-    pass
-
-    '''
-        self.refresh()
-        col_list = "gitBranch, needsUpdate"
-        q = "SELECT {} FROM stations WHERE `ID` = {};".format(
-            col_list, stationID)
-        df = self.dfFromSql(q)
-
-        needs_update = df['needsUpdate'][0]
-        git_branch = df['gitBranch'][0]
-
-        return git_branch, needs_update
-    '''
-    '''
-        this_hash = self.getStations()['IDLatLongHash'][data['stationID']]
-        # Check for this specific hash
-        if data['hash'] != this_hash:
-            raise AuthenticationError(
-                "Hash mismatch on ID {}: data packet {}; database {}".format(
-                    data['stationID'], data['hash'], this_hash))
-
-        # Everything checks out
-        return None
-    
-    def getStationReturnInfo(self, stationID):
-        """Read gitBranch and needsUpdate from stations table."""
-        #self.refresh()
-        col_list = "gitBranch, needsUpdate"
-        q = "SELECT {} FROM stations WHERE `ID` = {};".format(
-            col_list, stationID)
-        df = self.dfFromSql(q)
-
-        needs_update = df['needsUpdate'][0]
-        git_branch = df['gitBranch'][0]
-
-        return git_branch, needs_update
-    
-# ---------------------------------------------------------------------------
-#       STATION-UPDATE-RELATED METHODS
-# ---------------------------------------------------------------------------
-
-    def setSingleStationUpdate(self, stationID, needs_update=0):
-        """
-        Set needsUpdate = {} for a single station in stations table. Default: 0
-
-        Do this after you tell the device to update and reboot, because after
-        that it doesn't need the update.
-
-        (You could also use this to set needsUpdate = 1 for a single station.)
-        """
-
-        if (not isinstance(needs_update, int) and
-                not isinstance(needs_update, bool)):
-            raise AssertionError('needs_update should be a bool or int (0, 1)')
-
-        needs_update = int(needs_update)    # db expects 0 or 1
-        q = "UPDATE stations SET needsUpdate={} WHERE `ID`={}".format(
-            needs_update, stationID)
-        self.cursor.execute(q)
-        self.refresh()
-
-    def setAllStationsUpdate(self, needs_update=1):
-        """
-        Set needsUpdate = {} for all stations in stations table. Default: 1
-
-        Do this if there is a bug in the code such that all stations need to
-        update. Of course you have to fix the bug first ;-)
-
-        (You could also use this to set needsUpdate = 0 for all stations.)
-        """
-
-        if (not isinstance(needs_update, int) and
-                not isinstance(needs_update, bool)):
-            raise AssertionError('needs_update should be a bool or int (0, 1)')
-
-        needs_update = int(needs_update)    # db expects 0 or 1
-        q = "UPDATE stations SET needsUpdate={}".format(needs_update)
-        self.cursor.execute(q)
-        self.refresh()
-
-# ---------------------------------------------------------------------------
-#       FETCH METHODS
-# ---------------------------------------------------------------------------
-
-    def dfFromSql(self, q):
-        """Pandas dataframe from SQL query"""
-        df = pd.read_sql(q, con=self.db)
-        return df
-
-    def rawSql(self, q):
-        """Raw result of SQL query"""
-        self.cursor.execute(q)
-        out = self.cursor.fetchall()
-        return out
-
-    def getHashFromDB(self, ID):
-        "unused"
-        # RUN "SELECT IDLatLongHash FROM stations WHERE `ID` = $$$ ;"
-        try:
-            self.cursor.execute("SELECT IDLatLongHash FROM stations \
-                            WHERE `ID` = '%s';" % (ID))
-            dbHash = self.cursor.fetchall()
-            return dbHash
-        except (KeyboardInterrupt, SystemExit):
-            print('User interrupted for some reason, byeeeee')
-            sys.exit(0)
-        except (Exception) as e:
-            print(e)
-            print('Exception: Could not get hash from database. ' +
-                  'Is the DoseNet server online and running MySQL?')
-
     def getStations(self):
         """Read the stations table from MySQL into a pandas dataframe."""
         q = "SELECT * FROM stations;"
-        df = self.dfFromSql(q)
+        df = pd.read_csv(join(self.Data_Path, "Station.csv"))
         df.set_index(df['ID'], inplace=True)
         del df['ID']
         return df
@@ -614,720 +462,153 @@ class AuthenticationError(Exception):
     def getActiveD3SStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[1]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[1]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[1]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
     def getActiveAQStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[2]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[2]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[2]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
     def getActiveWeatherStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[3]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[3]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[3]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
     def getActiveADCStations(self):
         """Read the stations table, but only entries with display==1."""
         df = self.getActiveStations()
-        active_list = [x[4]=="1" for x in df['devices'].tolist()]
-        df = df[pd.Series([x[4]=="1" for x in df['devices'].tolist()],
+        df = df[pd.Series([str(x)[4]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
 
-    def getSingleStation(self, stationID):
-        """Read one entry of the stations table into a pandas dataframe."""
-        q = "SELECT * FROM stations WHERE `ID` = {};".format(
-                stationID)
-        df = self.dfFromSql(q)
-        df.set_index(df['ID'], inplace=True)
-        del df['ID']
-        return df
-
-    def getLatestStationData(self, stationID, verbose=False):
+    def getLatestStationData(self, stationID, type, verbose=False, time_stamp=None):
         """Return most recent data entry for given station."""
-        col_list = ', '.join((
-            "UNIX_TIMESTAMP(deviceTime)",
-            "UNIX_TIMESTAMP(receiveTime)",
-            "stationID",
-            "cpm",
-            "cpmError",
-            "errorFlag",
-            "ID",
-            "Name",
-            "Lat",
-            "`Long`",
-            "cpmtorem",
-            "cpmtousv",
-            "display",
-            "nickname",
-            "timezone"
-        ))
-        q = ' '.join((
-            "SELECT {cols} FROM dosnet".format(cols=col_list),
-            "INNER JOIN stations ON dosnet.stationID = stations.ID",
-            "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM dosnet WHERE stationID='{}')".format(
-                stationID),
-            "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        elif len(df) > 1:
-            if verbose:
-                print('[SQL WARNING] more than one recent result for ' +
-                      'stationID={}'.format(stationID))
-                print(df)
-            return df.iloc[0]
+        if type != "adc" and type != "aq" and type != "d3s" and type != "weather" and type != "":
+            raise IOError("type given does not exist.")
+        if type != "":
+            type = "_" + type
+        stations_data = pd.read_csv(self.Data_Path + "Station.csv")
+        station_row = stations_data.loc[stations_data['ID'] == stationID].iloc[0]
+        station_name = station_row[1]
+        nick_name = station_row[-2]
+        lat = station_row[2]
+        long = station_row[3]
+        time_zone = station_row[-1]
+        cpm_to_rem = station_row[4]
+        cpm_to_usv = station_row[5]
+        display = station_row[6]
+        station_file = pd.read_csv(self.Data_Path + "dosenet/" + nick_name + type + ".csv")
+        """checking that station_file has data, else return a dictionary with None(s)"""
+        if len(station_file) < 1:
+            cols = {"deviceTime_unix": None,
+                    "stationID": stationID,
+                    "cpm": None,
+                    "cpmError": None,
+                    "co2_ppm": None,
+                    "counts": None,
+                    "errorFlag": None,
+                    "temperature": None,
+                    "pressure": None,
+                    "humidity": None,
+                    "PM25": None,
+                    "ID": stationID,
+                    "Name": station_name,
+                    "Lat": lat,
+                    "`Long`": long,
+                    "cpmtorem": cpm_to_rem,
+                    "cpmtousv": cpm_to_usv,
+                    "display": display,
+                    "nickname": nick_name,
+                    "timezone": time_zone}
+            return cols
+        last_data = station_file.iloc[station_file['deviceTime_unix'].idxmax()]
+        time_received = last_data[2]
+        if type == "":
+            cols = {"deviceTime_unix": time_received,
+                    "stationID" : stationID,
+                    "cpm": last_data[-3],
+                    "cpmError": last_data[-2],
+                    "errorFlag": last_data[-1],
+                    "ID": stationID,
+                    "Name": station_name,
+                    "Lat": lat,
+                    "`Long`": long,
+                    "cpmtorem": cpm_to_rem,
+                    "cpmtousv": cpm_to_usv,
+                    "display": display,
+                    "nickname": nick_name,
+                    "timezone": time_zone}
+            return cols
+        if type == "_adc":
+            cols = {"deviceTime_unix": time_received,
+                    "stationID": stationID,
+                    "co2_ppm": last_data[-2],
+                    "errorFlag": last_data[-1],
+                    "ID": stationID,
+                    "Name": station_name,
+                    "Lat": lat,
+                    "`Long`": long,
+                    "cpmtorem": cpm_to_rem,
+                    "cpmtousv": cpm_to_usv,
+                    "display": display,
+                    "nickname": nick_name,
+                    "timezone": time_zone}
+            return cols
+        if type == "_d3s":
+            cols = {"deviceTime_unix": time_received,
+                    "stationID": stationID,
+                    "counts": last_data[3],
+                    "errorFlag": last_data[-1],
+                    "ID": stationID,
+                    "Name": station_name,
+                    "Lat": lat,
+                    "`Long`": long,
+                    "cpmtorem": cpm_to_rem,
+                    "cpmtousv": cpm_to_usv,
+                    "display": display,
+                    "nickname": nick_name,
+                    "timezone": time_zone}
+            return cols
+        if type == "_weather":
+            cols = {"deviceTime_unix": time_received,
+                    "stationID": stationID,
+                    "temperature": last_data[-4],
+                    "pressure": last_data[-3],
+                    "humidity": last_data[-2],
+                    "errorFlag": last_data[-1],
+                    "ID": stationID,
+                    "Name": station_name,
+                    "Lat": lat,
+                    "`Long`": long,
+                    "cpmtorem": cpm_to_rem,
+                    "cpmtousv": cpm_to_usv,
+                    "display": display,
+                    "nickname": nick_name,
+                    "timezone": time_zone}
+            return cols
+        if type == "_aq":
+            cols = {"deviceTime_unix": time_received,
+                    "stationID": stationID,
+                    "PM25": last_data[-3],
+                    "errorFlag": last_data[-1],
+                    "ID": stationID,
+                    "Name": station_name,
+                    "Lat": lat,
+                    "`Long`": long,
+                    "cpmtorem": cpm_to_rem,
+                    "cpmtousv": cpm_to_usv,
+                    "display": display,
+                    "nickname": nick_name,
+                    "timezone": time_zone}
+            return cols
         else:
-            return df.iloc[0]
-
-    def getLatestD3SStationData(self, stationID, verbose=False):
-        col_list = ', '.join((
-            "UNIX_TIMESTAMP(deviceTime)",
-            "UNIX_TIMESTAMP(receiveTime)",
-            "stationID",
-            "counts",
-            "errorFlag",
-            "ID",
-            "Name",
-            "Lat",
-            "`Long`",
-            "cpmtorem",
-            "display",
-            "nickname",
-            "timezone"
-        ))
-        q = ' '.join((
-            "SELECT {cols} FROM d3s".format(cols=col_list),
-            "INNER JOIN stations ON d3s.stationID = stations.ID",
-            "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM d3s WHERE stationID='{}')".format(
-                stationID),
-            "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        elif len(df) > 1:
-            if verbose:
-                print('[SQL WARNING] more than one recent result for ' +
-                      'stationID={}'.format(stationID))
-                print(df)
-            return df.iloc[0]
-        else:
-            return df.iloc[0]
-
-    def getLatestADCStationData(self, stationID, verbose=False):
-        col_list = ', '.join((
-            "UNIX_TIMESTAMP(deviceTime)",
-            "UNIX_TIMESTAMP(receiveTime)",
-            "stationID",
-            "co2_ppm",
-            "noise",
-            "ID",
-            "Name",
-            "Lat",
-            "`Long`",
-            "display",
-            "nickname",
-            "timezone"
-        ))
-        q = ' '.join((
-            "SELECT {cols} FROM adc".format(cols=col_list),
-            "INNER JOIN stations ON adc.stationID = stations.ID",
-            "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM adc WHERE stationID='{}')".format(
-                stationID),
-            "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        elif len(df) > 1:
-            if verbose:
-                print('[SQL WARNING] more than one recent result for ' +
-                      'stationID={}'.format(stationID))
-                print(df)
-            return df.iloc[0]
-        else:
-            return df.iloc[0]
-
-    def getLatestAQStationData(self, stationID, verbose=False):
-        col_list = ', '.join((
-            "UNIX_TIMESTAMP(deviceTime)",
-            "UNIX_TIMESTAMP(receiveTime)",
-            "stationID",
-            "PM25",
-            "errorFlag",
-            "ID",
-            "Name",
-            "Lat",
-            "`Long`",
-            "display",
-            "nickname",
-            "timezone"
-        ))
-        q = ' '.join((
-            "SELECT {cols} FROM air_quality".format(cols=col_list),
-            "INNER JOIN stations ON air_quality.stationID = stations.ID",
-            "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM air_quality WHERE stationID='{}')".format(
-                stationID),
-            "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        elif len(df) > 1:
-            if verbose:
-                print('[SQL WARNING] more than one recent result for ' +
-                      'stationID={}'.format(stationID))
-                print(df)
-            return df.iloc[0]
-        else:
-            return df.iloc[0]
-
-    def getLatestWeatherStationData(self, stationID, verbose=False):
-        col_list = ', '.join((
-            "UNIX_TIMESTAMP(deviceTime)",
-            "UNIX_TIMESTAMP(receiveTime)",
-            "stationID",
-            "temperature",
-            "pressure",
-            "humidity",
-            "errorFlag",
-            "ID",
-            "Name",
-            "Lat",
-            "`Long`",
-            "display",
-            "nickname",
-            "timezone"
-        ))
-        q = ' '.join((
-            "SELECT {cols} FROM weather".format(cols=col_list),
-            "INNER JOIN stations ON weather.stationID = stations.ID",
-            "WHERE deviceTime = ",
-            "(SELECT MAX(deviceTime) FROM weather WHERE stationID='{}')".format(
-                stationID),
-            "AND stationID='{}';".format(stationID)))
-        try:
-            df = self.dfFromSql(q)
-            df.set_index(df['Name'], inplace=True)
-            df = self.addTimeColumnsToDataframe(df, stationID=stationID)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        elif len(df) > 1:
-            if verbose:
-                print('[SQL WARNING] more than one recent result for ' +
-                      'stationID={}'.format(stationID))
-                print(df)
-            return df.iloc[0]
-        else:
-            return df.iloc[0]
-
-    def getInjectorStation(self):
-        "The injector est station is station 0."
-        return self.getStations().loc[0, :]
-
-    def getNextTestStation(self):
-        """What is this useful for?"""
-        test_station = self.getStations().loc[
-            self.test_station_ids[self.test_station_ids_ix], :]
-        # Cycle!
-        if self.test_station_ids_ix == len(self.test_station_ids) - 1:
-            self.test_station_ids_ix = 0
-        else:
-            self.test_station_ids_ix += 1
-        return test_station
-
-    def getTimezoneFromID(self, stationID):
-        """Returns the string representation of a station's timezone."""
-        q = "SELECT timezone FROM stations WHERE `ID` = {};".format(stationID)
-        tz = self.rawSql(q)
-        return str(tz[0][0])
-
-    def getDataForStationByRange(self, stationID, timemin, timemax, verbose=False):
-        """
-        Get the data from this station between timemin and timemax.
-        """
-        col_list = ', '.join((
-            "UNIX_TIMESTAMP(deviceTime)",
-            "cpm",
-            "cpmError"))
-        q = ' '.join((
-            "SELECT {} FROM dosnet".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND UNIX_TIMESTAMP(deviceTime)",
-            "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;"))
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-
-    def getD3SDataForStationByRange(self, stationID, timemin, timemax, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "counts",
-            "channelCounts"])
-        q = ' '.join([
-            "SELECT {} FROM d3s".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND UNIX_TIMESTAMP(deviceTime)",
-            "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = pd.read_sql(q, con=self.db)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-
-    def getADCDataForStationByRange(self, stationID, timemin, timemax, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "co2_ppm",
-            "noise"])
-        q = ' '.join([
-            "SELECT {} FROM adc".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND UNIX_TIMESTAMP(deviceTime)",
-            "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-
-    def getWeatherDataForStationByRange(self, stationID, timemin, timemax, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "temperature",
-            "pressure",
-            "humidity"])
-        q = ' '.join([
-            "SELECT {} FROM weather".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND UNIX_TIMESTAMP(deviceTime)",
-            "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-
-    def getAQDataForStationByRange(self, stationID, timemin, timemax, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "PM1",
-            "PM25",
-            "PM10"])
-        q = ' '.join([
-            "SELECT {} FROM air_quality".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND UNIX_TIMESTAMP(deviceTime)",
-            "BETWEEN {} AND {}".format(timemin,timemax),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-
-    def getDataForStationByInterval(self, stationID, intervalStr, verbose=False):
-        """
-        Get the last (interval) of data from this station.
-        intervalStr looks like 'INTERVAL 1 DAY'.
-        """
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "cpm",
-            "cpmError"])
-        q = ' '.join([
-            "SELECT {} FROM dosnet".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
-
-    def getD3SDataForStationByInterval(self, stationID, intervalStr, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "counts",
-            "channelCounts"])
-        q = ' '.join([
-            "SELECT {} FROM d3s".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
-
-    def getAQDataForStationByInterval(self, stationID, intervalStr, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "PM1",
-            "PM25",
-            "PM10"])
-        q = ' '.join([
-            "SELECT {} FROM air_quality".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
-
-    def getWeatherDataForStationByInterval(self, stationID, intervalStr, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "temperature",
-            "pressure",
-            "humidity"])
-        q = ' '.join([
-            "SELECT {} FROM weather".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
-
-    def getADCDataForStationByInterval(self, stationID, intervalStr, verbose=False):
-        col_list = ', '.join([
-            "UNIX_TIMESTAMP(deviceTime)",
-            "co2_ppm",
-            "noise"])
-        q = ' '.join([
-            "SELECT {} FROM adc".format(col_list),
-            "WHERE stationID={}".format(stationID),
-            "AND deviceTime >= (NOW() - {})".format(intervalStr),
-            "ORDER BY deviceTime DESC;"])
-        try:
-            df = self.dfFromSql(q)
-        except (Exception) as e:
-            print(e)
-            return pd.DataFrame({})
-
-        if len(df) == 0:
-            if verbose:
-                print('[SQL WARNING] no data returned for stationID={}'.format(
-                        stationID))
-            return pd.DataFrame({})
-        else:
-            if verbose:
-                print('[SQL INFO] returning data for stationID={}'.format(
-                        stationID))
-            return df
-            #return self.addTimeColumnsToDataframe(df, stationID=stationID)
-
-    def addTimeColumnsToDataframe(self, df, stationID=None, tz=None):
-        """
-        Input dataframe from query with UNIX_TIMESTAMP for deviceTime. The output has 3 time columns:
-            deviceTime_unix (renamed from UNIX_TIMESTAMP(deviceTime))
-            deviceTime_utc
-            deviceTime_local
-
-        stackoverflow.com/questions/17159207/change-timezone-of-date-time-
-          column-in-pandas-and-add-as-hierarchical-index
-        """
-        if isinstance(tz, str):
-            this_tz = tz
-        elif isinstance(stationID, (int, str)):
-            this_tz = self.getTimezoneFromID(stationID)
-        else:
-            print('[TZ WARNING] Defaulting to `US/Pacific`')
-            this_tz = 'US/Pacific'
-        # Sanity check
-        assert isinstance(this_tz, str), '[TZ ERROR] Not a tz str: {}'.format(this_tz)
-
-        # Rename existing unix epoch seconds columns
-        df.rename(inplace=True, columns={
-            'UNIX_TIMESTAMP(deviceTime)': 'deviceTime_unix'})
-
-        # Timezones are evil but pandas are fuzzy ...
-        deviceTime = pd.Index(pd.to_datetime(
-            df['deviceTime_unix'], unit='s')).tz_localize('UTC')
-        df['deviceTime_utc'] = deviceTime
-        df['deviceTime_local'] = deviceTime.tz_convert(this_tz)
-
-        # Rearrange the columns (iterate in opposite order of placement)
-        new_cols = df.columns.tolist()
-        for colname in ['deviceTime_unix',
-                        'deviceTime_local',
-                        'deviceTime_utc']:
-            new_cols.insert(0, new_cols.pop(new_cols.index(colname)))
-        df = df[new_cols]
-        return df
-
-    def getLastHour(self, stationID, request_type=None, verbose=False):
-        if request_type == 'd3s':
-            func = self.getD3SDataForStationByInterval
-        elif request_type == 'aq':
-            func = self.getAQDataForStationByInterval
-        elif request_type == 'weather':
-            func = self.getWeatherDataForStationByInterval
-        elif request_type == 'adc':
-            func = self.getADCDataForStationByInterval
-        else:
-            func = self.getDataForStationByInterval
-        return func(stationID,'INTERVAL 1 HOUR',verbose)
-
-    def getLastDay(self, stationID, request_type=None, verbose=False):
-        if request_type == 'd3s':
-            func = self.getD3SDataForStationByInterval
-        elif request_type == 'aq':
-            func = self.getAQDataForStationByInterval
-        elif request_type == 'weather':
-            func = self.getWeatherDataForStationByInterval
-        elif request_type == 'adc':
-            func = self.getADCDataForStationByInterval
-        else:
-            func = self.getDataForStationByInterval
-        return func(stationID,'INTERVAL 1 DAY',verbose)
-
-    def getLastWeek(self, stationID, request_type=None, verbose=False):
-        if request_type == 'd3s':
-            func = self.getD3SDataForStationByInterval
-        elif request_type == 'aq':
-            func = self.getAQDataForStationByInterval
-        elif request_type == 'weather':
-            func = self.getWeatherDataForStationByInterval
-        elif request_type == 'adc':
-            func = self.getADCDataForStationByInterval
-        else:
-            func = self.getDataForStationByInterval
-        return func(stationID,'INTERVAL 1 WEEK',verbose)
-
-    def getLastMonth(self, stationID, request_type=None, verbose=False):
-        if request_type == 'd3s':
-            func = self.getD3SDataForStationByInterval
-        elif request_type == 'aq':
-            func = self.getAQDataForStationByInterval
-        elif request_type == 'weather':
-            func = self.getWeatherDataForStationByInterval
-        elif request_type == 'adc':
-            func = self.getADCDataForStationByInterval
-        else:
-            func = self.getDataForStationByInterval
-        return func(stationID,'INTERVAL 1 MONTH',verbose)
-
-    def getLastYear(self, stationID, request_type=None, verbose=False):
-        if request_type == 'd3s':
-            func = self.getD3SDataForStationByInterval
-        elif request_type == 'aq':
-            func = self.getAQDataForStationByInterval
-        elif request_type == 'weather':
-            func = self.getWeatherDataForStationByInterval
-        elif request_type == 'adc':
-            func = self.getADCDataForStationByInterval
-        else:
-            func = self.getDataForStationByInterval
-        return func(stationID,'INTERVAL 1 YEAR',verbose)
-
-    #ethan: make a getall, read it like the the writing method, for text reading csv with dataframe
-    # return panda dataframe.
-    
-    def getAll(self, stationID, request_type=None, verbose=False):
-        if request_type == 'd3s':
-            func = self.getD3SDataForStationByInterval
-        elif request_type == 'aq':
-            func = self.getAQDataForStationByInterval
-        elif request_type == 'weather':
-            func = self.getWeatherDataForStationByInterval
-        elif request_type == 'adc':
-            func = self.getADCDataForStationByInterval
-        else:
-            func = self.getDataForStationByInterval
-        return func(stationID,'INTERVAL 10 YEAR',verbose)
-
-    def testLastMethods(self, stationID=1):
-        """Test SQLObject.getLast* methods"""
-        print('Testing last data methods with stationID={}\n'.format(stationID))
-        for method in [self.getLastDay, self.getLastWeek, self.getLastMonth,
-                       self.getLastYear]:
-            print('Testing: {}'.format(method))
-            df = method(stationID)
-            print('Num Entries:', len(df))
-            print('HEAD:\n{}'.format(df.head()))
-            print()
+            raise IOError("No type matches")
 
 class AuthenticationError(Exception):
     pass
-
-
-if __name__ == "__main__":
-    sql = SQLObject()
-    pd.set_option('display.expand_frame_repr', False)
-    sql.testLastMethods(6)
-        '''

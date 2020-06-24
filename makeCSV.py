@@ -275,7 +275,7 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-def make_station_files(sid,name,nick,request_type=None,verbose=False):
+def make_station_files(sid,name,nick,DB,request_type=None,verbose=False):
     """
     generage all csv files for a station
 
@@ -287,20 +287,6 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
             determined from command line arguments
         request type: specify sensor (silicon,d3s,etc)
     """
-    dbconnection_attempts = 0
-    DB = None
-    while True:
-        try:
-            DB = TextObject()
-            break
-        except (OperationalError) as e:
-            print(e)
-            print('Trying again...')
-            dbconnection_attempts += 1
-            if dbconnection_attempts < 5:
-                pass
-            else:
-                print('Giving up after 5 attempts')
 
     #ethan: getall? in text
     df_all = DB.getAll(sid,request_type,verbose)
@@ -335,17 +321,18 @@ def make_station_files(sid,name,nick,request_type=None,verbose=False):
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
-def make_all_station_files(stations,get_data,request_type=None,verbose=False):
+def make_all_station_files(stations,get_data,db,request_type=None,verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
-        make_station_files(sid,name,nick,request_type,verbose)
+        make_station_files(sid,name,nick,db,request_type,verbose)
 
 def main(verbose=False,
          last_day=False,
          last_week=False,
          last_month=False,
          last_year=False,
+         data_path=None,
          **kwargs):
     get_data = {'get_day': last_day,
                 'get_week': last_week,
@@ -356,7 +343,10 @@ def main(verbose=False,
     # -------------------------------------------------------------------------
     # My text data base interface
     # -------------------------------------------------------------------------
-    DB = TextObject()
+    if not data_path:
+        DB = TextObject()
+    else:
+        DB = TextObject(Data_Path=data_path)
     # -------------------------------------------------------------------------
     # Pick active stations
     # -------------------------------------------------------------------------
@@ -390,17 +380,17 @@ def main(verbose=False,
 
     all_processes = []
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(stations,get_data,'dosenet',verbose))
+                                args=(stations,get_data,DB,'dosenet',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(aq_stations,get_data,'aq',verbose))
+                                args=(aq_stations,get_data,DB,'aq',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(adc_stations,get_data,'adc',verbose))
+                                args=(adc_stations,get_data,DB,'adc',verbose))
     p.start()
     all_processes.append(p)
 
@@ -411,12 +401,12 @@ def main(verbose=False,
     all_processes = []
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(w_stations,get_data,'weather',verbose))
+                                args=(w_stations,get_data,DB,'weather',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(d3s_stations,get_data,'d3s',verbose))
+                                args=(d3s_stations,get_data,DB,'d3s',verbose))
 
     for p in all_processes:
         p.join()
@@ -438,5 +428,6 @@ if __name__ == "__main__":
                         help='get compressed csv for last month')
     parser.add_argument('-y', '--last-year', action='store_true',
                         help='get compressed csv for last year')
+    parser.add_argument('-p', '--data_path', type=str, default=None)
     args = parser.parse_args()
     main(**vars(args))
