@@ -68,23 +68,16 @@ class DBTool:
         try:
             self.ID = ID[0]
         except Exception as ex:
-            print 'Auto generating ID, good choice.'
+            print('Auto generating ID, good choice.')
         self.name = name
         self.nickname = nickname
         self.lat = lat
         self.lon = lon
-<<<<<<< HEAD
-	tzwhere = tzwhere.tzwhere()
-	self.timezone = tzwhere.tzNameAt(lat, lon)
+    	tzwhere = tzwhere.tzwhere()
+	    self.timezone = tzwhere.tzNameAt(lat, lon)
         #tf = TimezoneFinder()
         #self.timezone = tf.timezone_at(lon, lat)
-=======
-        #tf = TimezoneFinder()
-        #self.timezone = tf.timezone_at(lon, lat)
-        tz = tzwhere.tzwhere()
-        self.timezone = tz.tzNameAt(lat, lon)
->>>>>>> d15daa4bf2616548f68cab6f7cf096ac458831b4
-        print 'New location at (', lat, ',', lon, ') in', self.timezone, ' timezone'
+        print('New location at (', lat, ',', lon, ') in', self.timezone, ' timezone')
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
         self.display = display
@@ -109,9 +102,9 @@ class DBTool:
         for i in range(0, len(id_range)):
             this_id = id_range[i][0]
             if this_id < 10000:
-                print 'checking next ID: ', this_id
+                print('checking next ID: ', this_id)
                 next_id = max(this_id, next_id)
-        print 'found final ID: ', next_id+1
+        print('found final ID: ', next_id+1)
         self.ID = next_id+1
 
     def addDosimeter(self):
@@ -154,14 +147,14 @@ class DBTool:
         sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
         self.ID = self.runSQL(sql, least=True)
         if 1 <= self.ID <= 3:
-            print 'Check the DB (stations) - there\'s probably an ID collision'
+            print('Check the DB (stations) - there\'s probably an ID collision')
         elif self.ID < 0:
-            print 'ID less than 0?? There\'s a problem afoot'
+            print('ID less than 0?? There\'s a problem afoot')
         elif self.ID is None:
-            print 'ID is None... Byyeeeeeeee'
+            print('ID is None... Byyeeeeeeee')
             sys.exit(1)
         else:
-            print 'ID looks good'
+            print('ID looks good')
 
     def getHash(self):
         # RUN "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`))
@@ -187,7 +180,7 @@ class DBTool:
 
     def checkIfDuplicate(self):
         # Check for Name, ID, or MD5 hash collision (duplicate entry)
-        print 'Checking for duplicates...'
+        print('Checking for duplicates...')
         if any(str(self.name) in i for i in self.initialState):
             print ('ERROR: Duplicate NAME detected, not commiting changes. ' +
                    'Byyeeeeeeee')
@@ -201,11 +194,11 @@ class DBTool:
                    'Byyeeeeeeee')
             return True
         else:
-            print 'Good news: no duplicates'
+            print('Good news: no duplicates')
             return False
 
     def runSQL(self, sql, least=False, less=False, everything=False):
-        print '\t\t\t SQL: ', sql
+        print('\t\t\t SQL: ', sql)
         try:
             self.cursor.execute(sql)
             if least:
@@ -233,23 +226,23 @@ class DBTool:
     def main(self):
         self.duplicate = True
         try:
-            print 'GET ID'
+            print('GET ID')
             self.getID(self.name)
-            print 'GET HASH'
+            print('GET HASH')
             self.getHash()
-            print 'SET HASH'
+            print('SET HASH')
             self.setHash()
-            print 'GET NEW STATION'
+            print('GET NEW STATION')
             self.new_station = self.getNewStation()
-            print self.new_station
+            print(self.new_station)
             if not self.checkIfDuplicate():
-                print 'Generating csv file for this location'
+                print('Generating csv file for this location')
                 self.makeCSV()
-                print 'Good news: Committing changes! All done!'
+                print('Good news: Committing changes! All done!')
                 self.db.commit()
-                print 'SUCESSSSSS'
+                print('SUCESSSSSS')
         except Exception as ex:
-            print '\t ~~~~ FAILED ~~~~'
+            print('\t ~~~~ FAILED ~~~~')
             raise ex
             sys.exit(1)
 
@@ -257,7 +250,7 @@ if __name__ == "__main__":
     parse = Parser()
     name = parse.args.name[0]
     nickname = parse.args.nickname[0]
-    print name
+    print(name)
     lat = parse.args.lat[0]
     lon = parse.args.long[0]
     cpmtorem = parse.args.conv[0]
@@ -267,7 +260,7 @@ if __name__ == "__main__":
         dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display, devices)
     else:
         ID = parse.args.ID[0]
-        print 'Forced ID: ', ID
+        print('Forced ID: ', ID)
         dbtool = DBTool(name, nickname, lat, lon, cpmtorem, display,
                         devices, ID)
     sys.exit(0)
