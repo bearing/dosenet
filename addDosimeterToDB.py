@@ -12,14 +12,10 @@
 #################
 
 import sys
-import MySQLdb as mdb
 import argparse
-import itertools
 import csv
-import re
-#from timezonefinder.timezonefinder import TimezoneFinder
 from tzwhere import tzwhere
-from mysql.connector import MySQLConnection
+import hashlib
 
 USER = 'root'  # set while creating the instance
 HOST = 'dosenet-0.cork9lvwvd2g.us-west-1.rds.amazonaws.com'  # obtained AFTER creating the instance
@@ -27,10 +23,6 @@ PORT = 3306  # default value (can be changed while creating the instance)
 PASSWORD = 'radiationisrad'  # set while creating the instance
 DATABASE = 'dosenet'   # set while creating the instance
 
-def connection_to_remote_db():
-    """Returns a connection to the remote database."""
-    return MySQLConnection(user=USER, host=HOST, port=PORT,
-                           password=PASSWORD, database=DATABASE)
 
 class Parser:
     def __init__(self):
@@ -58,13 +50,7 @@ class Parser:
 class DBTool:
     def __init__(self, name, nickname, lat, lon, cpmtorem,
                  display, devices, *ID):
-        # Open database connection
-        #self.db = mdb.connect(
-        #    "127.0.0.1",
-        #    "ne170group",
-        #    "ne170groupSpring2015",
-        #    "dosimeter_network")
-        self.db = connection_to_remote_db()
+        self.data_path = "/Users/ethanchang/dosenet/dosenet_data/"
         try:
             self.ID = ID[0]
         except Exception as ex:
@@ -73,148 +59,89 @@ class DBTool:
         self.nickname = nickname
         self.lat = lat
         self.lon = lon
-    	tzwhere = tzwhere.tzwhere()
-	    self.timezone = tzwhere.tzNameAt(lat, lon)
-        #tf = TimezoneFinder()
-        #self.timezone = tf.timezone_at(lon, lat)
+        tz = tzwhere.tzwhere()
+        self.timezone = tz.tzNameAt(lat, lon)
         print('New location at (', lat, ',', lon, ') in', self.timezone, ' timezone')
         self.cpmtorem = cpmtorem
         self.cpmtousv = cpmtorem*10
         self.display = display
         self.devices = devices
-        # prepare a cursor object using cursor() method
-        #self.cursor = self.db.cursor()
-        self.cursor = self.db.cursor(buffered=True)
-        self.md5hash = ''
+        self.gitBranch = "master"
+        self.needsUpdate = 0
         self.new_station = ''
-        self.initialState = self.getInitialState()
         if not ID:
-            self.addDosimeter()
-        else:
-            self.addDosimeterWithID()
+            self.setID()
+        self.md5hash = self.generate_hash()
+        self.addDosimeterWithID()
 
-    def getInitialState(self):
-        sql = "SELECT `Name`, IDLatLongHash FROM stations;"
-        return self.runSQL(sql, everything=True)
+    def setID(self):
+        try:
+            station_file = open(self.data_path + "Station.csv", "r")
+            station_file.readline()
+            lines = station_file.readlines()
+            max_id = 0
+            for line in lines:
+                data = line.split(",")
+                this_id = int(data[0])
+                if 10000 > this_id and this_id > max_id:
+                    max_id = this_id
+            self.ID = max_id + 1
+            station_file.close()
+        except Exception as ex:
+            raise ex
 
-    def setID(self, id_range):
-        next_id = 0
-        for i in range(0, len(id_range)):
-            this_id = id_range[i][0]
-            if this_id < 10000:
-                print('checking next ID: ', this_id)
-                next_id = max(this_id, next_id)
-        print('found final ID: ', next_id+1)
-        self.ID = next_id+1
-
-    def addDosimeter(self):
-        #determine ID based on list of IDs already in use in database
-        sql = ("SELECT ID FROM stations;")
-        id_range = self.runSQL(sql, everything=True) #returns a python tuple with one element
-        self.setID(id_range)
-
-        # Adds a row to dosimeter_network.stations
-        sql = ("INSERT INTO stations " +
-               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`," +
-               "`display`,`devices`,IDLatLongHash,`nickname`,`timezone`) " +
-               "VALUES " +
-               "('{}','{}','{}','{}','{}','{}','{}','{}',".format(
-                    self.ID, self.name, self.lat, self.lon, self.cpmtorem,
-                    self.cpmtousv, self.display, self.devices) +
-               "'This should not be here :(','{}','{}');".format(
-                    self.nickname,self.timezone))
-        self.runSQL(sql)
-        self.main()
+    def runText(self, text):
+        try:
+            station_file = open(self.data_path + "Station.csv", "a+")
+            station_file.write(text)
+            station_file.close()
+        except Exception as ex:
+            raise ex
 
     def addDosimeterWithID(self):
-        sql = ("INSERT INTO stations " +
-               "(`ID`,`Name`,`Lat`,`Long`,`cpmtorem`,`cpmtousv`," +
-               "`display`,`devices`,IDLatLongHash,`nickname`,`timezone`) " +
-               "VALUES " +
-               "('{}','{}','{}','{}','{}','{}','{}','{}',".format(
-                    self.ID, self.name, self.lat, self.lon, self.cpmtorem,
-                    self.cpmtousv, self.display, self.devices) +
-               "'This should not be here :(','{}','{}');".format(
-                    self.nickname,self.timezone))
-        self.runSQL(sql)
-        self.main()
+        if not self.check_unique(self.ID, self.name):
+            print( str(self.ID) + " or " + str(self.name) + " already taken")
+        else :
+            text = "{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+                self.ID, self.name, self.lat, self.lon, self.cpmtorem,
+                self.cpmtousv, self.display, self.devices, self.gitBranch,
+                self.needsUpdate, self.md5hash, self.nickname, self.timezone)
+            self.runText(text)
+            self.makeCSV()
+
+    def check_unique(self, id, name):
+        try:
+            station_file = open(self.data_path + "Station.csv", "r")
+            lines = station_file.readlines()
+            for line in lines:
+                data = line.split(",")
+                if data[0] == id:
+                    return False
+                if data[1] == name:
+                    return False
+            station_file.close()
+            return True
+        except Exception as ex:
+            raise ex
 
     def getID(self, name):
-        # The database uses auto-incremented ID numbers so we need to get
-        # the ID from the `dosimeter_network.stations` table for when we
-        # add the hash
-        # RUN "SELECT ID  FROM stations WHERE name = 'SOME NAME';"
-        sql = "SELECT ID FROM stations WHERE name = '%s';" % (self.name)
-        self.ID = self.runSQL(sql, least=True)
-        if 1 <= self.ID <= 3:
-            print('Check the DB (stations) - there\'s probably an ID collision')
-        elif self.ID < 0:
-            print('ID less than 0?? There\'s a problem afoot')
-        elif self.ID is None:
-            print('ID is None... Byyeeeeeeee')
-            sys.exit(1)
-        else:
-            print('ID looks good')
-
-    def getHash(self):
-        # RUN "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`))
-        #         FROM stations
-        #         WHERE `ID` = $$$ ;"
-        sql = "SELECT MD5(CONCAT(`ID`, `Lat`, `Long`)) FROM stations \
-                WHERE `ID` = '%s' ;" % (self.ID)
-        self.md5hash = self.runSQL(sql, least=True)
-
-    def setHash(self):
-        # Sets a MD5 hash of the ID, Latitude & for security reasons...
-
-        # RUN "UPDATE stations
-        #        SET IDLatLongHash = 'SOME MD5 HASH'
-        #         WHERE ID = $$$ ;"
-        sql = "UPDATE stations SET IDLatLongHash = '%s' \
-                 WHERE ID = '%s';" % (self.md5hash, self.ID)
-        self.runSQL(sql)
-
-    def getNewStation(self):
-        sql = "SELECT * FROM stations WHERE ID = '%s';" % (self.ID)
-        return self.runSQL(sql, less=True)
-
-    def checkIfDuplicate(self):
-        # Check for Name, ID, or MD5 hash collision (duplicate entry)
-        print('Checking for duplicates...')
-        if any(str(self.name) in i for i in self.initialState):
-            print ('ERROR: Duplicate NAME detected, not commiting changes. ' +
-                   'Byyeeeeeeee')
-            return True
-        elif any(str(self.ID) in i for i in self.initialState):
-            print ('ERROR: Duplicate ID detected, not commiting changes. ' +
-                   'Byyeeeeeeee')
-            return True
-        elif any(str(self.md5hash) in i for i in self.initialState):
-            print ('ERROR: Duplicate HASH detected, not commiting changes. ' +
-                   'Byyeeeeeeee')
-            return True
-        else:
-            print('Good news: no duplicates')
-            return False
-
-    def runSQL(self, sql, least=False, less=False, everything=False):
-        print('\t\t\t SQL: ', sql)
         try:
-            self.cursor.execute(sql)
-            if least:
-                result = self.cursor.fetchall()[0][0]
-                return result
-            if less:
-                result = self.cursor.fetchall()[0]
-                return result
-            if everything:
-                result = self.cursor.fetchall()
-                return result
-        except (KeyboardInterrupt, SystemExit):
-            pass
-        except Exception, e:
-            raise e
-            sys.exit(1)
+            station_file = open(self.data_path + "Station.csv", "r")
+            lines = station_file.readlines()
+            this_id = -1
+            for line in lines:
+                data = line.split(",")
+                if name == data[1]:
+                    this_id = data[0]
+                    break
+            station_file.close()
+            return this_id
+        except Exception as ex:
+            raise ex
+
+    def generate_hash(self):
+        key = "{}{}{}".format(self.ID,self.lat,self.lon)
+        return hashlib.md5(key.encode()).hexdigest()
 
     def makeCSV(self):
         fname = "/home/dosenet/config-files/%s.csv" % (self.nickname)
@@ -223,28 +150,6 @@ class DBTool:
             stationwriter.writerow(['stationID', 'message_hash', 'lat', 'long'])
             stationwriter.writerow([self.ID, self.md5hash, self.lat, self.lon])
 
-    def main(self):
-        self.duplicate = True
-        try:
-            print('GET ID')
-            self.getID(self.name)
-            print('GET HASH')
-            self.getHash()
-            print('SET HASH')
-            self.setHash()
-            print('GET NEW STATION')
-            self.new_station = self.getNewStation()
-            print(self.new_station)
-            if not self.checkIfDuplicate():
-                print('Generating csv file for this location')
-                self.makeCSV()
-                print('Good news: Committing changes! All done!')
-                self.db.commit()
-                print('SUCESSSSSS')
-        except Exception as ex:
-            print('\t ~~~~ FAILED ~~~~')
-            raise ex
-            sys.exit(1)
 
 if __name__ == "__main__":
     parse = Parser()
