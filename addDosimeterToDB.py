@@ -50,7 +50,7 @@ class Parser:
 class DBTool:
     def __init__(self, name, nickname, lat, lon, cpmtorem,
                  display, devices, *ID):
-        self.data_path = "/Users/ethanchang/dosenet/dosenet_data/"
+        self.data_path = "/home/dosenet/tmp/"
         try:
             self.ID = ID[0]
         except Exception as ex:
