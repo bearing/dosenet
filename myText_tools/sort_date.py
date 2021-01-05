@@ -23,12 +23,12 @@ def sort_csv(inputfile, outputFile):
         # print(item)
     lines = all[1:]
     header = all[0]
+    print(",".join(header), file=ouf)
     # sort by unix time
     if len(lines) > 0:
         sorted_lines = sorted(lines, key=operator.itemgetter(2), reverse=False)
-    print(",".join(header), file=ouf)
-    for line in sorted_lines:
-        print(",".join(line), file=ouf)
+        for line in sorted_lines:
+            print(",".join(line), file=ouf)
     inf.close()
     ouf.close()
 
