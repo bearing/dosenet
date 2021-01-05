@@ -18,21 +18,25 @@ def sort_csv(inputfile, outputFile):
     all = []
     reader = csv.reader(inf, delimiter=",")
     # print(all)
-    for item in reader:
-        all.append(item)
-        # print(item)
-    lines = all[1:]
-    header = all[0]
-    print(",".join(header), file=ouf)
-    # sort by unix time
-    if len(lines) > 0:
-        try:
-            sorted_lines = sorted(lines, key=operator.itemgetter(2), reverse=False)
-            for line in sorted_lines:
-                print(",".join(line), file=ouf)
-        except Exception as e:
-            print(e)
-            print(lines)
+    try:
+        for item in reader:
+            all.append(item)
+            # print(item)
+        lines = all[1:]
+        header = all[0]
+        print(",".join(header), file=ouf)
+        # sort by unix time
+        if len(lines) > 0:
+            try:
+                sorted_lines = sorted(lines, key=operator.itemgetter(2), reverse=False)
+                for line in sorted_lines:
+                    print(",".join(line), file=ouf)
+            except Exception as e:
+                print(e)
+                print(lines)
+    except Exception as e:
+        print(e)
+        print(inputfile)
     inf.close()
     ouf.close()
 
