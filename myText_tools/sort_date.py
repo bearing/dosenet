@@ -24,7 +24,8 @@ def sort_csv(inputfile, outputFile):
     lines = all[1:]
     header = all[0]
     # sort by unix time
-    sorted_lines = sorted(lines, key=operator.itemgetter(2), reverse=False)
+    if len(lines) > 0:
+        sorted_lines = sorted(lines, key=operator.itemgetter(2), reverse=False)
     print(",".join(header), file=ouf)
     for line in sorted_lines:
         print(",".join(line), file=ouf)
