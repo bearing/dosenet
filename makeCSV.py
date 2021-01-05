@@ -290,6 +290,7 @@ def make_station_files(sid,name,nick,DB,request_type=None,verbose=False):
 
     #ethan: getall? in text
     df_all = DB.getAll(sid,request_type,verbose)
+    df_all = df_all[::-1]
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data
