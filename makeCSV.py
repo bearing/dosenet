@@ -171,7 +171,7 @@ def get_compressed_dosenet_data(df,integration_time,n_intervals,verbose):
     comp_df = pd.DataFrame(columns=['deviceTime_UTC', 'deviceTime_local', 'deviceTime_unix','cpm','cpmError'])
     for idx in range(n_intervals):
         idf = df[(df['deviceTime_unix']>(max_time-interval))&
-                (df['deviceTime_unix']<(max_time))]
+                (df['deviceTime_unix']<=(max_time))]
 
         max_time = max_time - interval
         ndata = len(idf)
@@ -291,6 +291,8 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
     #ethan: getall? in text
     df_all = DB.getAll(sid,request_type,verbose)
     df_all = df_all[::-1]
+    print("")
+    print("Starting process for {}".format(name))
     print(df_all[0:10])
 
     if request_type == 'd3s':
