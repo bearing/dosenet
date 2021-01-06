@@ -314,6 +314,9 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
     nintervals = [12,48,168,180,183]
     name_sufix = ['_hour','_day','_week','_month','_year']
 
+    if len(df_all)==0:
+        print("Warning: No data for {}".format(name))
+        return
 
     for idx in range(len(intervals)):
         df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
@@ -326,7 +329,11 @@ def make_all_station_files(stations,get_data,db,data_path="",request_type=None,v
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
-        make_station_files(sid,name,nick,db,data_path,request_type,verbose)
+        try:
+            make_station_files(sid,name,nick,db,data_path,request_type,verbose)
+        except Exception as e:
+            print(e)
+            print("ERROR: Failed to generate time data for {}".format(name))
 
 def main(verbose=False,
          last_day=False,
