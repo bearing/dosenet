@@ -321,7 +321,7 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
     for idx in range(len(intervals)):
         df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
         if len(data_path) > 0:
-            data_path = data_path + "dosenet\"
+            data_path = data_path + "dosenet/"
         csvfile = DataFile.csv_from_nickname(data_path+nick+name_sufix[idx])
         csvfile.df_to_file(df)
 
