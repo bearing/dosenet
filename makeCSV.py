@@ -291,6 +291,7 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
     #ethan: getall? in text
     df_all = DB.getAll(sid,request_type,verbose)
     df_all = df_all[::-1]
+    print(df_all[0:10])
 
     if request_type == 'd3s':
         get_compressed_data = get_compressed_d3s_data
@@ -318,10 +319,10 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
         print("Warning: No data for {}".format(name))
         return
 
+    if len(data_path) > 0:
+        data_path = data_path + "dosenet/"
     for idx in range(len(intervals)):
         df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
-        if len(data_path) > 0:
-            data_path = data_path + "dosenet/"
         csvfile = DataFile.csv_from_nickname(data_path+nick+name_sufix[idx])
         csvfile.df_to_file(df)
 
