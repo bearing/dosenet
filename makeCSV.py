@@ -317,16 +317,16 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
 
     for idx in range(len(intervals)):
         df = get_compressed_data(df_all,intervals[idx],nintervals[idx],verbose)
-        csvfile = DataFile.csv_from_nickname(nick+name_sufix[idx])
+        csvfile = DataFile.csv_from_nickname(data_path+nick+name_sufix[idx])
         csvfile.df_to_file(df)
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
-def make_all_station_files(stations,get_data,db,request_type=None,verbose=False):
+def make_all_station_files(stations,get_data,db,data_path="",request_type=None,verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
-        make_station_files(sid,name,nick,db,request_type,verbose)
+        make_station_files(sid,name,nick,db,data_path,request_type,verbose)
 
 def main(verbose=False,
          last_day=False,
