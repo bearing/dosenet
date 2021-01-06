@@ -275,7 +275,7 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-def make_station_files(sid,name,nick,DB,request_type=None,verbose=False):
+def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=False):
     """
     generage all csv files for a station
 
@@ -381,17 +381,17 @@ def main(verbose=False,
 
     all_processes = []
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(stations,get_data,DB,'dosenet',verbose))
+                                args=(stations,get_data,DB,data_path,'dosenet',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(aq_stations,get_data,DB,'aq',verbose))
+                                args=(aq_stations,get_data,DB,data_path,'aq',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(adc_stations,get_data,DB,'adc',verbose))
+                                args=(adc_stations,get_data,DB,data_path,'adc',verbose))
     p.start()
     all_processes.append(p)
 
@@ -402,12 +402,12 @@ def main(verbose=False,
     all_processes = []
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(w_stations,get_data,DB,'weather',verbose))
+                                args=(w_stations,get_data,DB,data_path,'weather',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(d3s_stations,get_data,DB,'d3s',verbose))
+                                args=(d3s_stations,get_data,DB,data_path,'d3s',verbose))
 
     for p in all_processes:
         p.join()
