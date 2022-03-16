@@ -18,7 +18,7 @@ def sort_csv(inputfile, outputFile):
     all = []
 
     # clean out any null data first
-    data_initial = open(inf, "rb")
+    data_initial = open(inputfile, "rb")
     reader = csv.reader((line.replace('\0','') for line in data_initial), delimiter=",")
     #reader = csv.reader(inf, delimiter=",")
 
