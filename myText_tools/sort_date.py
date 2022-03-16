@@ -16,6 +16,15 @@ def sort_csv(inputfile, outputFile):
     inf = open(inputfile, "r")
     ouf = open(outputFile, "w")
     all = []
+
+    # clean out any null data first
+    fi = open(inputfile, 'rb')
+    data = fi.read()
+    fi.close()
+    fo = open(inputfile, 'wb')
+    fo.write(data.replace('\x00', ''))
+    fo.close()
+
     reader = csv.reader(inf, delimiter=",")
     # print(all)
     try:
