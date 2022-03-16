@@ -13,15 +13,20 @@ def sort_all(data_path = "/home/dosenet/backups/tmp/dosenet", output_dir = "/hom
         sort_csv(join(data_path, f), join(output_dir, f))
 
 def sort_csv(inputfile, outputFile):
+
+    # clean out any null data first
+    fi = open(inputfile, 'rb')
+    data = fi.read()
+    fi.close()
+    fo = open(inputfile, 'wb')
+    fo.write(data.replace(b'\x00', ''))
+    fo.close()
+
     inf = open(inputfile, "r")
     ouf = open(outputFile, "w")
     all = []
 
-    # clean out any null data first
-    data_initial = open(inputfile, "rb")
-    reader = csv.reader((line.replace('\0','') for line in data_initial), delimiter=",")
-    #reader = csv.reader(inf, delimiter=",")
-
+    reader = csv.reader(inf, delimiter=",")
     # print(all)
     try:
         for item in reader:
