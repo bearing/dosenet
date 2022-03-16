@@ -107,8 +107,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(deviceTime).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(deviceTime, self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         try:
             dosimeterfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + ".csv", "a+")
             dosimeterfile.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, cpm, cpm_error, error_flag))
