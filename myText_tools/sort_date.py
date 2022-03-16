@@ -7,7 +7,7 @@ import operator
 # read in all the csv in a directory and write a function that sort the csv with date
 # sort data function will be given an input file and an output file => sorted output into input
 
-def sort_all(data_path = "/home/dosenet/backups/tmp/dosenet", output_dir = "/home/dosenet/backups/tmp1/dosenet"):
+def sort_all(data_path = "/home/dosenet/backups/tmp/dosenet", output_dir = "/home/dosenet/backups/tmp_test/dosenet"):
     files = [f for f in listdir(data_path) if isfile(join(data_path, f)) and re.fullmatch('^((?!(year|month|week|day|hour)).)*$', f)]
     for f in files:
         sort_csv(join(data_path, f), join(output_dir, f))
