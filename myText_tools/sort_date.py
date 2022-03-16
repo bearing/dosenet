@@ -29,6 +29,7 @@ def sort_csv(inputfile, outputFile):
         if len(lines) > 0:
             try:
                 sorted_lines = sorted(lines, key=operator.itemgetter(2), reverse=False)
+                print("Writing sorted lines to new file: {}".format(ouf))
                 for line in sorted_lines:
                     print(",".join(line), file=ouf)
             except Exception as e:
