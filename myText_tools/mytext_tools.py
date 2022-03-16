@@ -131,8 +131,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(deviceTime).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(deviceTime, self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         try:
             aqfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_aq.csv", "a+")
             aqfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, oneMicron, twoPointFiveMicron,
@@ -154,8 +154,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(deviceTime).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(deviceTime, self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         try:
             co2file = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_adc.csv", "a+")
             co2file.write("{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, co2_ppm, noise, error_flag))
@@ -177,8 +177,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(deviceTime).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(deviceTime, self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         try:
             weatherfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_weather.csv", "a+")
             weatherfile.write("{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal ,deviceTime, temperature, pressure,
@@ -207,8 +207,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(deviceTime).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(deviceTime, self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         try:
             d3sfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_d3s.csv", "a+")
             d3sfile.write("{},{},{},{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, cpm, cpm_error, keV_per_ch, spectrum_string, error_flag))
@@ -229,8 +229,8 @@ class TextObject:
             if deviceTime is not None:
                 print('Warning: received non-numeric deviceTime! Ignoring')
             deviceTime = time.time()
-        deviceTimeUTC = epoch_to_datetime(time.time()).strftime('%Y-%m-%d %H:%M:%S%z')
-        deviceTimeLocal = epoch_to_datetime(time.time(), self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeUTC = epoch_to_datetime(deviceTime).strftime('%Y-%m-%d %H:%M:%S%z')
+        deviceTimeLocal = epoch_to_datetime(deviceTime, self.getStationTZ(stationID)).strftime('%Y-%m-%d %H:%M:%S%z')
         try:
             logfile = open(self.Data_Path + "dosenet/" + self.getStationName(stationID) + "_log.csv", "a+")
             logfile.write("{},{},{},{},{}\n".format(deviceTimeUTC, deviceTimeLocal, deviceTime, msgCode, msgText))
