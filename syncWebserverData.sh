@@ -3,8 +3,6 @@
 # Script to backup dosenet data and sync with webserver
 
 echo " Copying data to backups"
-cp -rf /home/dosenet/backups/tmp2/* /home/dosenet/backups/tmp3
-cp -rf /home/dosenet/backups/tmp1/* /home/dosenet/backups/tmp2
 cp -rf /home/dosenet/backups/tmp/* /home/dosenet/backups/tmp1
 cp -rf /home/dosenet/tmp/* /home/dosenet/backups/tmp
 

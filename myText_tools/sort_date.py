@@ -32,6 +32,7 @@ def sort_csv(inputfile, outputFile):
                 for line in sorted_lines:
                     print(",".join(line), file=ouf)
             except Exception as e:
+                print("Error:")
                 print(e)
                 print(lines)
     except Exception as e:
