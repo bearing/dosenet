@@ -19,7 +19,7 @@ def sort_csv(inputfile, outputFile):
     data = fi.read()
     fi.close()
     fo = open(inputfile, 'wb')
-    fo.write(data.replace(b'\x00', ''))
+    fo.write(data.replace(b'\x00', b''))
     fo.close()
 
     inf = open(inputfile, "r")
