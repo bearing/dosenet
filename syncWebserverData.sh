@@ -3,8 +3,8 @@
 # Script to backup dosenet data and sync with webserver
 
 echo " Copying data to backups"
-cp -rf /home/dosenet/backups/tmp/* /home/dosenet/backups/tmp1
-cp -rf /home/dosenet/tmp/* /home/dosenet/backups/tmp
+cp -urf /home/dosenet/backups/tmp/* /home/dosenet/backups/tmp1
+cp -urf /home/dosenet/tmp/* /home/dosenet/backups/tmp
 
 cd /home/dosenet/backups
 source activate aws-test-conda2
