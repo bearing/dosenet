@@ -13,4 +13,5 @@ python /home/dosenet/git/dosenet/makeGeoJSON.py -p "/home/dosenet/backups/tmp/"
 python /home/dosenet/git/dosenet/makeCSV.py -p "/home/dosenet/backups/tmp/"
 
 echo " Syncing data with webserver"
-lftp -e "mirror -Rnv /home/dosenet/backups/tmp /test/; quit;" -u coeradwatch-RADWATCH,r4dw4tch sftp://coeradwatch.sftp.wpengine.com:2222
+#lftp -e "mirror -Rnv /home/dosenet/backups/tmp /test/; quit;" -u coeradwatch-RADWATCH,r4dw4tch sftp://coeradwatch.sftp.wpengine.com:2222
+lftp -e "mirror -Rnv /home/dosenet/backups/tmp /test/; quit;" -u coeradwatch-RADWATCH,KtL&zSE3 sftp://coeradwatch.sftp.wpengine.com:2222
