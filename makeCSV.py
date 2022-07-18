@@ -122,6 +122,9 @@ def get_compressed_d3s_data(df,integration_time,n_intervals,verbose):
                                     'keV_per_ch', 'channels'])
     if verbose:
         print(comp_df)
+
+    #comp_df = df.resample(str(rebin)+"S", label='right').mean().reset_index()
+
     for idx in range(n_intervals):
         idf = df[(df['deviceTime_unix']>(max_time-interval))&
                 (df['deviceTime_unix']<(max_time))]
@@ -275,7 +278,7 @@ def get_compressed_adc_data(df,integration_time,n_intervals,verbose):
 
     return comp_df
 
-def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=False):
+def make_station_files(sid,name,nick,DB,get_data,data_path="",request_type=None,verbose=False):
     """
     generage all csv files for a station
 
@@ -313,9 +316,13 @@ def make_station_files(sid,name,nick,DB,data_path="",request_type=None,verbose=F
         print('No data-type specified')
         return None
 
-    intervals = [5,30,60,240,2880]
-    nintervals = [12,48,168,180,183]
-    name_sufix = ['_hour','_day','_week','_month','_year']
+    intervals = [5,30,60,240]
+    nintervals = [12,48,168,180]
+    name_sufix = ['_hour','_day','_week','_month']
+    if get_data['get_year']:
+        intervals.append(2880)
+        nintervals.append(183)
+        name_sufix.append('_year')
 
     if len(df_all)==0:
         print("Warning: No data for {}".format(name))
@@ -335,15 +342,15 @@ def make_all_station_files(stations,get_data,db,data_path="",request_type=None,v
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
         try:
-            make_station_files(sid,name,nick,db,data_path,request_type,verbose)
+            make_station_files(sid,name,nick,db,get_data,data_path,request_type,verbose)
         except Exception as e:
             print(e)
             print("ERROR: Failed to generate time data for {}".format(name))
 
 def main(verbose=False,
-         last_day=False,
-         last_week=False,
-         last_month=False,
+         last_day=True,
+         last_week=True,
+         last_month=True,
          last_year=False,
          data_path=None,
          **kwargs):
