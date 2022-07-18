@@ -440,13 +440,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=docstring)
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
-    parser.add_argument('-d', '--last-day', action='store_true',
+    parser.add_argument('-d', '--last-day', action='store_true', default=False,
                         help='get compressed csv for last day')
-    parser.add_argument('-w', '--last-week', action='store_true',
+    parser.add_argument('-w', '--last-week', action='store_true', default=False,
                         help='get compressed csv for last week')
-    parser.add_argument('-m', '--last-month', action='store_true',
+    parser.add_argument('-m', '--last-month', action='store_true', default=False,
                         help='get compressed csv for last month')
-    parser.add_argument('-y', '--last-year', action='store_true',
+    parser.add_argument('-y', '--last-year', action='store_true', default=False,
                         help='get compressed csv for last year')
     parser.add_argument('-p', '--data_path', type=str, default=None)
     args = parser.parse_args()

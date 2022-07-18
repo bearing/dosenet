@@ -20,6 +20,11 @@ while [ 1 ]; do
       #sleep 150
       $PYTHONPATH/python $CODEPATH/makeCSV.py
   fi
+  if [ "${args[0]}" == "--year" ]
+  then
+      #sleep 150
+      $PYTHONPATH/python $CODEPATH/makeCSV.py -y
+  fi
 
   $PYTHONPATH/python $CODEPATH/sendDataToWebserver.py
   echo "Finished sending data to webserver"
