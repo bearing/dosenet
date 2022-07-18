@@ -6,6 +6,7 @@ echo " Copying data to backups"
 cp -urf /home/dosenet/backups/tmp/* /home/dosenet/backups/tmp1
 cp -urf /home/dosenet/tmp/* /home/dosenet/backups/tmp
 
+echo " Updating json and binned data"
 cd /home/dosenet/backups
 source activate aws-test-conda2
 export PATH=/home/dosenet/anaconda3/envs/aws-test-conda2/bin:$PATH
