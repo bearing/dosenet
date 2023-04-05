@@ -6,6 +6,7 @@ from myText_tools.mytext_tools import TextObject
 from data_transfer import DataFile
 import time
 import datetime as dt
+import pytz
 import numpy as np
 import math
 import pandas as pd
@@ -28,6 +29,27 @@ def rebin(array,n):
     rebin a 1d numpy array by n (should force to be factor of array length)
     """
     return array.reshape(len(array)/n,n).sum(1)
+
+def time_bin_data(df,sample_seconds):
+    """
+    uses the pandas resample method for applying the time binning
+    - need to redo the time columns after this resample
+    """
+    df = df.copy()
+    df.loc[:,'deviceTime_utc'] = df['deviceTime_unix']
+    df.set_index(['deviceTime_utc'])
+    df.index = pd.to_datetime(df.index, unit='s')
+    df_binned = df.resample(str(sample_seconds)+"S", label='right').mean().reset_index()
+    df_clean = df_binned.dropna()
+
+    # Add back in the local time-zone column
+    tz = pytz.timezone('America/Los_Angeles')
+    df_clean.loc[:,'deviceTime_local'] = df_clean['deviceTime_utc']
+    df_clean = df_clean[['deviceTime_utc','deviceTime_local','deviceTime_unix']+[c for c in df_clean if c not in ['deviceTime_utc','deviceTime_local','deviceTime_unix']]]
+
+    df_final = df_clean.copy()
+    for i in range(len(data1_final)):
+        df_final.loc[:,'deviceTime_local'].iloc[i] = df_clean['deviceTime_unix'].iloc[i].replace(tzinfo=pytz.utc).astimezone(tz)    
 
 def get_channels(channels,rebin_factor):
     """

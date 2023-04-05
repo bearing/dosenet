@@ -22,8 +22,7 @@ import pandas as pd
 import subprocess
 import traceback as tb
 from slackclient import SlackClient
-from myText_tools.mytext_tools import SQLObject
-import MySQLdb as mdb
+from myText_tools.mytext_tools import TextObject
 import sys
 sys.stdout.flush()
 
@@ -47,12 +46,6 @@ CHECK_INTERVAL_S = 2 * 60
 TEST_CHECK_INTERVAL_S = 60
 HIGH_THRESH_CPM = 20
 HIGH_INTERVAL_STR = 'INTERVAL 1 WEEK'
-HIGH_SQL = ' '.join((
-    "SELECT * FROM dosnet",
-    "WHERE (stationID = {}".format('{}'),
-    "AND cpm > {}".format(HIGH_THRESH_CPM),
-    "AND deviceTime > (NOW() - {}))".format(HIGH_INTERVAL_STR),
-    "ORDER BY deviceTime DESC;"))
 OUTAGE_DURATION_THRESH_S = 6 * 60 * 60
 ALMOST_OUT_DURATION_THRESH_S = 6 * 60
 TEST_OUTAGE_DURATION_THRESH_S = 300
@@ -112,9 +105,9 @@ class DoseNetSlacker(object):
         """Connect the MySQL database."""
 
         try:
-            self.sql = SQLObject()
+            self.sql = TextObject()
         except:     # MySQLdb/connections.py _mysql_exceptions.OperationalError
-            print('Could not find SQL database! Starting without it')
+            print('Could not find database! Starting without it')
             self.sql = None
 
     def initialize_station_status(self):
@@ -133,7 +126,6 @@ class DoseNetSlacker(object):
         """
         Get station list from SQL.
         """
-        self.sql.refresh()
         if self.test:
             self.stations = self.sql.getStations()
         else:
@@ -148,19 +140,22 @@ class DoseNetSlacker(object):
         out = []
         almost_out = []
         high = []
+        dead = []
 
         for stationID in self.stations.index.values:
-            this_elapsed_time = self.get_elapsed_time(stationID)
+            this_elapsed_time, data = self.get_elapsed_time(stationID)
             undeployed.append(this_elapsed_time is None)
             out.append(this_elapsed_time > self.outage_interval_s)
             almost_out.append(this_elapsed_time > self.almost_out_interval_s)
-            high.append(self.check_for_high_countrates(stationID))
+            high.append(self.check_for_high_countrates(data,stationID))
+            dead.append(self.check_for_dead(data,stationID))
 
         status = pd.DataFrame({
             'undeployed': undeployed,
             'out': out,
             'almost': almost_out,
             'high': high,
+            'dead': dead,
             'ID': self.stations.index.values
         })
         status.set_index('ID', drop=True, inplace=True)
@@ -182,23 +177,15 @@ class DoseNetSlacker(object):
         Check how long it's been since the device posted data.
         """
 
-        self.sql.refresh()
         print("Getting latest station data for station {}".format(stationID))
         sys.stdout.flush()
         try:
-            df = self.sql.getLatestStationData(stationID, verbose=False)
-        except IndexError:
-            # on SQLObject.getTimezoneFromID
-            # posted in Slack 3/24/2017 at 1:46pm
-            # try to replicate and debug
-            q = "SELECT timezone FROM stations WHERE `ID` = {};".format(
-                stationID)
-            tz = self.rawSql(q)
-            msg = '\n'.join(
-                'IndexError in SQLObject.getTimezoneFromID',
-                'q = {}'.format(q),
-                'tz = self.rawSql(q) = {}'.format(tz))
+            df = self.sql.getAllLatestStationData(stationID, 'all', verbose=False)
+        except Exception as e:
+            msg = 'No data found for station {}'.format(stationID)
             slacker.post('Exception: {}'.format(msg))
+            slacker.post('Error message: {}'.format(e))
+            return None, None
 
         try:
             elapsed_time = time.time() - df['deviceTime_unix']
@@ -206,7 +193,7 @@ class DoseNetSlacker(object):
             # no station data
             elapsed_time = None
 
-        return elapsed_time
+        return elapsed_time, df
 
     def run(self):
         """Check SQL database, post messages. Blocks execution."""
@@ -215,8 +202,8 @@ class DoseNetSlacker(object):
             time.sleep(self.interval_s)
             try:
                 self.diff_status_and_report()
-            except mdb.OperationalError:
-                self.post('MySQL server has gone away... will try again',
+            except:
+                self.post('Database has gone away... will try again',
                           icon_emoji=':disappointed:')
                 pass
             print('Posted at {}'.format(datetime.datetime.now()))
@@ -311,14 +298,19 @@ class DoseNetSlacker(object):
 
         return None
 
-    def check_for_high_countrates(self, stationID):
+    def check_for_high_countrates(self, data, stationID):
         """
         Look for active stations with countrate > xxx.
         """
-        self.sql.refresh()
-        df = self.sql.dfFromSql(HIGH_SQL.format(stationID))
-        is_high = len(df.index) > 0
+        high_data = data[(data['CPM']>HIGH_THRESH_CPM) & (data['ID']==stationID)]
+        is_high = len(high_data.index) > 0
         return is_high
+
+    def check_for_dead(self, data, stationID):
+        station_data = data[(data['ID']==stationID)]
+        # Drop columns with non-zero values
+        dead_sensors = station_data.drop(station_data.columns[station_data[station_data == 0].isnull().any()].tolist(),axis=1)
+        return dead_sensors.columns.to_list()
 
     def post_initial_report(self):
         """
@@ -364,8 +356,7 @@ class DoseNetSlacker(object):
                 adj_text)
             self.post(msg, icon_emoji=icon_emoji)
 
-    def post(self, msg_text, channel=SLACK_CHANNEL,
-             icon_emoji=None):
+    def post(self, msg_text, channel=SLACK_CHANNEL,icon_emoji=None):
         """
         Post a message on Slack. Defaults are filled in already
         """

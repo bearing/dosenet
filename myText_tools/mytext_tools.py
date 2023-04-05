@@ -30,7 +30,7 @@ def epoch_to_datetime(epoch, tz='UTC'):
     return dt_utc.astimezone(tzinfo)
 
 class TextObject:
-    def __init__(self, tz='+00:00', Data_Path="../dosenet_data/"):
+    def __init__(self, tz='+00:00', Data_Path="/home/dosenet/tmp/"):
         self.set_session_tz(tz)
         self.test_station_ids = [0, 10001, 10002, 10003, 10004, 10005]
         self.test_station_ids_ix = 0
@@ -90,8 +90,7 @@ class TextObject:
             msg = 'Error: Could not find a station matching that ID'
             print(msg)
 
-    def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag,
-                          deviceTime=None, **kwargs):
+    def insertIntoDosenet(self, stationID, cpm, cpm_error, error_flag, deviceTime=None, **kwargs):
         """
         Create text file with the name of stationID and the type, dosimeter.
 
@@ -116,8 +115,7 @@ class TextObject:
         except:
             pass
 
-    def insertIntoAQ(self, stationID, oneMicron, twoPointFiveMicron, tenMicron,
-                     error_flag, deviceTime = None, **kwargs):
+    def insertIntoAQ(self, stationID, oneMicron, twoPointFiveMicron, tenMicron, error_flag, deviceTime = None, **kwargs):
         """
         Create text file with the name of stationID and the type, AQ.
 
@@ -163,8 +161,7 @@ class TextObject:
         except:
             pass
 
-    def insertIntoWeather(self, stationID, temperature, pressure,
-                          humidity, error_flag, deviceTime = None, **kwargs):
+    def insertIntoWeather(self, stationID, temperature, pressure, humidity, error_flag, deviceTime = None, **kwargs):
         """
         Create text file with the name of stationID and the type, weather.
 
@@ -187,8 +184,7 @@ class TextObject:
         except:
             pass
 
-    def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime = None,
-                      **kwargs):
+    def insertIntoD3S(self, stationID, spectrum, error_flag, deviceTime = None, **kwargs):
         """
         Create text file with the name of stationID and the type, D3S.
 
@@ -486,6 +482,15 @@ class TextObject:
         df = df[pd.Series([str(x)[4]=="1" for x in df['devices'].tolist()],
                           index=df['devices'].index)]
         return df
+
+    def getAllLatestStationData(self, stationID, verbose=False, time_stamp=None):
+        types = ["adc","aq","d3s","weather",""]
+        dfs = []
+        for type in types:
+            df = getLatestStationData(stationID,type,verbose,time_stamp)
+            dfs.append(df)
+        df_all = pd.concat(dfs)
+        return df_all
 
     def getLatestStationData(self, stationID, type, verbose=False, time_stamp=None):
         """Return most recent data entry for given station."""

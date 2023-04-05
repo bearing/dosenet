@@ -108,6 +108,7 @@ class DBTool:
                 self.needsUpdate, self.md5hash, self.nickname, self.timezone)
             self.runText(text)
             self.makeCSV()
+            self.makeDataCSV()
 
     def check_unique(self, id, name):
         try:
@@ -149,6 +150,31 @@ class DBTool:
             stationwriter = csv.writer(csvfile, delimiter=',')
             stationwriter.writerow(['stationID', 'message_hash', 'lat', 'long'])
             stationwriter.writerow([self.ID, self.md5hash, self.lat, self.lon])
+
+    def makeDataCSV(self):
+        sensors = ['','_d3s','_aq','_adc','_weather']
+        meta_data = [,
+                     []
+                    ]
+        for i,sensor in enumerate(sensors):
+            self.devices[i]=='1':
+                fname = "/home/dosenet/tmp/dosenet/%s_%s.csv" % (self.nickname,sensor)
+                with open(fname, 'w') as csvfile:
+                    fwriter = csv.writer(csvfile, delimeter=',')
+                    if i==0:
+                        fwriter.writerow(['deviceTime_utc','deviceTime_local','deviceTime_unix','cpm','cpmError','error_flag'])
+                    if i==1:
+                        meta_data = ['deviceTime_utc','deviceTime_local','deviceTime_unix','cpm','cpmError','keV_per_ch']
+                        for i in range(1024):
+                            meta_data.append(str(i))
+                        meta_data.append('error_flag')
+                        fwriter.writerow(meta_data)
+                    if i==2:
+                        fwriter.writerow(['deviceTime_utc','deviceTime_local','deviceTime_unix','PM1','PM25','PM10','error_flag'])
+                    if i==3:
+                        fwriter.writerow(['deviceTime_utc','deviceTime_local','deviceTime_unix','co2_ppm','noise','error_flag'])
+                    if i==4:
+                        fwriter.writerow(['deviceTime_utc','deviceTime_local','deviceTime_unix','temperature','pressure','humidity','error_flag'])
 
 
 if __name__ == "__main__":

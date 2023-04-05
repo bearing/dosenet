@@ -1,0 +1,20 @@
+ISSUES:
+
+geoJSON is not updating correctly
+- looks like data isn't being read correctly to find new entry
+- older locations still work, but not getting newest data point
+
+Time binning methods need speeding up: use pandas resample
+- needs datatime ojbects for resampling
+- looks like only quick/clean way to get this is using the epoch time column (use this method in LabMethods.py from E11)
+- basically can only do the same opperation to all columns (mean, sum, etc) 
+    - probably sum and manually modify this as appropriate
+    - maybe mean for most data and sum for counts
+- need to re-build other time columns? At least the local time as this is what we would want for web display
+
+Raw data on website is too big
+- push to somewhere else like dropbox (this is what radwatch does) and then link to that on website?
+- compress data first?
+- different data format?
+- move back to database interface with API/query interface on website? (Longer term option, a lot of work)
+

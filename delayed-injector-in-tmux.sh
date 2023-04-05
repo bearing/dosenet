@@ -3,9 +3,10 @@
 # Upon boot, SQL db is not ready immediately.
 # Therefore, wait a bit before starting the injector.
 
-DELAY_TIME_S=10
+#UPDATE: not using SQL anymore, but slight delay for system still not a terrible idea
+DELAY_TIME_S=5
 
 sleep $DELAY_TIME_S
 
-/home/dosenet/git/dosenet/start-injector-in-tmux.sh
+bash /home/dosenet/git/dosenet/start-injector-in-tmux.sh
 
