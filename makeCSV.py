@@ -359,7 +359,7 @@ def make_station_files(sid,name,nick,DB,get_data,data_path="",request_type=None,
 
     print('    Loaded {} data for (id={}) {}'.format(request_type, sid, name))
 
-def make_all_station_files(stations,get_data,db,data_path="",request_type=None,verbose=False):
+def make_all_station_files(stations,get_data,db,data_path="",request_type=None,output_path="",verbose=False):
     for sid, name, nick in zip(stations.index, stations['Name'],
                                stations['nickname']):
         print('(id={}) {}'.format(sid, name))
@@ -375,6 +375,7 @@ def main(verbose=False,
          last_month=True,
          last_year=False,
          data_path=None,
+         output_path=None,
          **kwargs):
     get_data = {'get_day': last_day,
                 'get_week': last_week,
@@ -422,17 +423,17 @@ def main(verbose=False,
 
     all_processes = []
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(stations,get_data,DB,data_path,'dosenet',verbose))
+                                args=(stations,get_data,DB,output_path,'dosenet',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(aq_stations,get_data,DB,data_path,'aq',verbose))
+                                args=(aq_stations,get_data,DB,output_path,'aq',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(adc_stations,get_data,DB,data_path,'adc',verbose))
+                                args=(adc_stations,get_data,DB,output_path,'adc',verbose))
     p.start()
     all_processes.append(p)
 
@@ -443,12 +444,12 @@ def main(verbose=False,
     all_processes = []
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(w_stations,get_data,DB,data_path,'weather',verbose))
+                                args=(w_stations,get_data,DB,output_path,'weather',verbose))
     p.start()
     all_processes.append(p)
 
     p = multiprocessing.Process(target=make_all_station_files,
-                                args=(d3s_stations,get_data,DB,data_path,'d3s',verbose))
+                                args=(d3s_stations,get_data,DB,output_path,'d3s',verbose))
 
     for p in all_processes:
         p.join()
@@ -471,5 +472,6 @@ if __name__ == "__main__":
     parser.add_argument('-y', '--last-year', action='store_true', default=False,
                         help='get compressed csv for last year')
     parser.add_argument('-p', '--data_path', type=str, default=None)
+    parser.add_argument('-o', '--output_path', type=str, default=None)
     args = parser.parse_args()
     main(**vars(args))

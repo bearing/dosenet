@@ -6,7 +6,7 @@ from geojson import Point, Feature, FeatureCollection
 import time
 import datetime
 from myText_tools.mytext_tools import TextObject
-from data_transfer import DataFile
+from data_transfer import DataFile, LOCAL_DATA_DIR
 from collections import OrderedDict
 import sys
 sys.stdout.flush()
@@ -85,7 +85,7 @@ def get_data(DB,ix,data_type,old_data=0.0):
         else:
             return None
 
-def main(verbose=False, data_path=None):
+def main(verbose=False, data_path=None, output_path=None):
     start_time = time.time()
     # -------------------------------------------------------------------------
     # Open database tool
@@ -181,6 +181,8 @@ def main(verbose=False, data_path=None):
     # -------------------------------------------------------------------------
     geojsonfile = DataFile.default_geojson()
     geojsonfile.write_to_file(dump)
+    cmd = "cp " + geojsonfile.local_fname + " " + output_path + "output.geojson"
+    os.system(cmd)
     # -------------------------------------------------------------------------
     # Finished!
     # -------------------------------------------------------------------------
@@ -195,5 +197,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Print more output')
     parser.add_argument('-p', '--data_path', type=str, default=None)
+    parser.add_argument('-o', '--output_path', type=str, default=None)
     args = parser.parse_args()
     main(**vars(args))
