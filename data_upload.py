@@ -6,8 +6,13 @@ import glob
 all_files = glob.glob("/home/dosenet/tmp/dosenet/*")
 
 
-access_token = 'J3pP-JFgRPQAAAAAAAAAAd9V5TMi0QB8Sl0YwOnIammQ6JNA17e1UTlYVGoI0dlb'
-dbx = dropbox.Dropbox(access_token, timeout=1100)
+#access_token = 'J3pP-JFgRPQAAAAAAAAAAd9V5TMi0QB8Sl0YwOnIammQ6JNA17e1UTlYVGoI0dlb'
+#dbx = dropbox.Dropbox(access_token, timeout=1100)
+dbx = dropbox.Dropbox(
+    app_key = '4gvw2rkpim3tblr',
+    app_secret = 'cyjzkxzixsha81t',
+    oauth2_refresh_token = 'J3pP-JFgRPQAAAAAAAAAAd9V5TMi0QB8Sl0YwOnIammQ6JNA17e1UTlYVGoI0dlb'
+)
 
 for file in all_files:
     file_path = file
