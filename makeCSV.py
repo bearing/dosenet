@@ -342,9 +342,9 @@ def make_station_files(sid,name,nick,DB,get_data,data_path="",request_type=None,
     nintervals = [12,48,168,180]
     name_sufix = ['_hour','_day','_week','_month']
     if get_data['get_year']:
-        intervals.append(2880)
-        nintervals.append(183)
-        name_sufix.append('_year')
+        intervals = [2880]
+        nintervals = [183]
+        name_sufix = ['_year']
 
     if len(df_all)==0:
         print("Warning: No data for {}".format(name))

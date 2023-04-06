@@ -2,7 +2,8 @@ ISSUES:
 
 geoJSON is not updating correctly
 - looks like data isn't being read correctly to find new entry
-- older locations still work, but not getting newest data point
+- UPDATE: new data files do not start with the meta-data, need to implement creating initial files with just header when new station is created
+- UPDATE: initial fix attempt implemented - needs testing with next station
 
 Time binning methods need speeding up: use pandas resample
 - needs datatime ojbects for resampling
