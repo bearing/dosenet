@@ -54,3 +54,5 @@ for file in all_files:
 
     f.close()
 
+    dbx.sharing_create_shared_link(destination_path)
+
