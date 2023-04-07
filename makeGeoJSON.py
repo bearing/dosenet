@@ -118,22 +118,22 @@ def main(verbose=False, data_path=None, output_path=None):
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         if ix in active_stations.index.values:
             latest_data = DB.getLatestStationData(ix, "")
-            print('Station {}: CPM = {}'.format(ix,latest_data))
+            print('Station {}: {}, CPM = {}'.format(ix,DB.getStationName(ix),latest_data))
             sys.stdout.flush()
 
         if ix in d3s_stations.index.values:
             latest_d3s_data = DB.getLatestStationData(ix, "d3s")["counts"]
-            print('Station {}: counts = {}'.format(ix,latest_d3s_data))
+            print('Station {}: {}, counts = {}'.format(ix,DB.getStationName(ix),latest_d3s_data))
             sys.stdout.flush()
 
         if ix in aq_stations.index.values:
             latest_aq_data = DB.getLatestStationData(ix, "aq")["PM25"]
-            print('Station {}: AQ = {}'.format(ix,latest_aq_data))
+            print('Station {}: {}, AQ = {}'.format(ix,DB.getStationName(ix),latest_aq_data))
             sys.stdout.flush()
 
         if ix in adc_stations.index.values:
             latest_co2_data = DB.getLatestStationData(ix, "adc")["co2_ppm"]
-            print('Station {}: CO2 = {}'.format(ix,latest_co2_data))
+            print('Station {}: {}, CO2 = {}'.format(ix,DB.getStationName(ix),latest_co2_data))
             sys.stdout.flush()
 
         latest_t_data = None
@@ -145,7 +145,7 @@ def main(verbose=False, data_path=None, output_path=None):
                 latest_t_data = temp_data['temperature']
                 latest_h_data = temp_data['humidity']
                 latest_p_data = temp_data['pressure']
-                print('Station {}: temp = {}'.format(ix,latest_t_data))
+                print('Station {}: {}, temp = {}'.format(ix,DB.getStationName(ix),latest_t_data))
 
         if latest_data is not None:
             csv_fname = latest_data['nickname']
