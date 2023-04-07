@@ -64,7 +64,7 @@ for file in all_files:
     dbx.sharing_create_shared_link(destination_path)
     file_link = dbx.sharing_list_shared_links(destination_path).links[0].url
     link_key = file_link.rsplit('/', 2)[1]
-    file_name = link.rsplit('/',2)[2].rsplit('?',1)[0]
+    file_name = file_link.rsplit('/',2)[2].rsplit('?',1)[0]
     key_dict[file_name] = link_key
 
 outfile = open('/home/dosenet/data/tmp/link_info.json','w')

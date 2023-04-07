@@ -152,7 +152,7 @@ def main(verbose=False, data_path=None, output_path=None):
         if latest_data['cpm'] is not None:
             # set CPM to None if zero to keep from showing up on map?
             if latest_data['cpm'] == 0:
-                latest_data['cpm'] = None
+                latest_data['cpm'] = 2.5 # maybe just show a default value so the location does show up?
             csv_fname = latest_data['nickname']
             properties = OrderedDict([
                 ('Name', latest_data['Name']),
