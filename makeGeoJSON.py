@@ -148,7 +148,10 @@ def main(verbose=False, data_path=None, output_path=None):
                 latest_p_data = temp_data['pressure']
                 print('Station {}: {}, temp = {}'.format(ix,DB.getStationName(ix),latest_t_data))
 
-        if latest_data is not None:
+        if latest_data['cpm'] is not None:
+            # set CPM to None if zero to keep from showing up on map?
+            if latest_data['cpm'] == 0:
+                latest_data['cpm'] = None
             csv_fname = latest_data['nickname']
             properties = OrderedDict([
                 ('Name', latest_data['Name']),
