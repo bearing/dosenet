@@ -9,6 +9,7 @@ from myText_tools.mytext_tools import TextObject
 from data_transfer import DataFile, LOCAL_DATA_DIR
 from collections import OrderedDict
 import sys
+import os
 sys.stdout.flush()
 
 docstring = """
