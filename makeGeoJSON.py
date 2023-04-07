@@ -107,18 +107,19 @@ def main(verbose=False, data_path=None, output_path=None):
     # Make geojson features and URLs for raw CSV data
     # -------------------------------------------------------------------------
     feature_list = []
-    latest_data = None
-    latest_d3s_data = None
-    latest_aq_data = None
-    latest_co2_data = None
     for ix in active_stations.index:
+        # reset data variables for each station as we loop through
+        latest_data = None
+        latest_d3s_data = None
+        latest_aq_data = None
+        latest_co2_data = None
         # Builds a geojson point feature for the station location
         point = Point([active_stations.loc[ix, 'Long'],
                        active_stations.loc[ix, 'Lat']])
         # Get latest dose (CPM) and time to display in exported GeoJSON file
         if ix in active_stations.index.values:
             latest_data = DB.getLatestStationData(ix, "")
-            print('Station {}: {}, CPM = {}'.format(ix,DB.getStationName(ix),latest_data))
+            print('Station {}: {}, CPM = {}'.format(ix,DB.getStationName(ix),latest_data['cpm']))
             sys.stdout.flush()
 
         if ix in d3s_stations.index.values:
