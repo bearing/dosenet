@@ -183,7 +183,9 @@ def main(verbose=False, data_path=None, output_path=None):
     geojsonfile = DataFile.default_geojson()
     geojsonfile.write_to_file(dump)
     cmd = "cp " + geojsonfile.local_fname + " " + output_path + "output.geojson"
-    os.system(cmd)
+    print(cmd)
+    error_flag = os.system(cmd)
+    print(error_flag)
     # -------------------------------------------------------------------------
     # Finished!
     # -------------------------------------------------------------------------

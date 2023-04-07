@@ -1,10 +1,10 @@
 import dropbox
 import os
 import glob
-
+import json
 
 all_files = glob.glob("/home/dosenet/tmp/dosenet/*")
-
+key_dict = {}
 
 #access_token = 'J3pP-JFgRPQAAAAAAAAAAd9V5TMi0QB8Sl0YwOnIammQ6JNA17e1UTlYVGoI0dlb'
 #dbx = dropbox.Dropbox(access_token, timeout=1100)
@@ -40,8 +40,8 @@ for file in all_files:
             while f.tell() < file_size:
                 if ((file_size - f.tell()) <= CHUNK_SIZE):
                     #if remaining filesize is less than 4mb
-                    print(dbx.files_upload_session_finish(f.read(CHUNK_SIZE),cursor,commit))
-                    print('\n\n\ncomplete')
+                    print(dbx.files_upload_session_finish(f.read(CHUNK_SIZE),cursor,commit).name)
+                    print('\ncomplete\n\n')
                     #Finish the upload session and save the uploaded data to the given file path.
                 else:
                     dbx.files_upload_session_append_v2(f.read(CHUNK_SIZE),cursor)
@@ -50,7 +50,7 @@ for file in all_files:
                     #offset updated to new byte position in file
                     b_left = round(((file_size-f.tell())/file_size),2)*100
                     b_left = str(b_left)+"%" if b_left < 1000 else 0
-                    print("\r       {} remaining....".format(b_left), end="")
+                    print("\r       {} remaining....".format(b_left))
                     #fun percentage remaining printing thing
     except Exception as e:
         print("ERROR: file upload failed!")
@@ -62,4 +62,11 @@ for file in all_files:
     f.close()
 
     dbx.sharing_create_shared_link(destination_path)
+    file_link = dbx.sharing_list_shared_links(destination_path).links[0].url
+    link_key = file_link.rsplit('/', 2)[1]
+    file_name = link.rsplit('/',2)[2].rsplit('?',1)[0]
+    key_dict[file_name] = link_key
 
+outfile = open('/home/dosenet/data/tmp/link_info.json','w')
+key_json = json.dump(key_dict, outfile)
+print(key_json)
