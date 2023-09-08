@@ -62,7 +62,8 @@ for file in all_files:
                         print("\r       {} remaining....".format(b_left))
                     b_left_last = b_left
     except Exception as e:
-        print("ERROR: upload of",dbx.files_upload_session_finish(f.read(CHUNK_SIZE),cursor,commit).name,'failed!')
+        print("ERROR: upload of ",file_path,'failed!')
+        #print("ERROR: upload of",dbx.files_upload_session_finish(f.read(CHUNK_SIZE),cursor,commit).name,'failed!')
         print("")
         print(e)
         print("")
