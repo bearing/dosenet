@@ -30,7 +30,7 @@ for file in all_files:
 
     try:
         if file_size <= CHUNK_SIZE:
-            dbx.files_upload(f.read(), destination_path)
+            dbx.files_upload(f.read(), destination_path, mode=dropbox.files.WriteMode.overwrite)
 
         else:
             upload_session_start_result = dbx.files_upload_session_start(f.read(CHUNK_SIZE)) #read 4mb of the file, start session
