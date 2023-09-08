@@ -33,13 +33,13 @@ for file in all_files:
             dbx.files_upload(f.read(), destination_path, mode=dropbox.files.WriteMode.overwrite)
 
         else:
-            upload_session_start_result = dbx.files_upload_session_start(f.read(CHUNK_SIZE),mode=dropbox.files.WriteMode.overwrite) #read 4mb, start session
+            upload_session_start_result = dbx.files_upload_session_start(f.read(CHUNK_SIZE)) #read 4mb of the file, start session
             cursor = dropbox.files.UploadSessionCursor(session_id=upload_session_start_result.session_id,offset=f.tell())
             # UploadSessorCursor contains the upload session ID and the offset.
             # I'm guessing they're setting the initial offset to 0mb (right?) through f.tell()
             # f.tell(): returns an integer giving the file object’s current position in the file represented as number of bytes from the beginning of the file.
 
-            commit = dropbox.files.CommitInfo(path=destination_path)
+            commit = dropbox.files.CommitInfo(path=destination_path,mode=dropbox.files.WriteMode.overwrite)
             #Contains the path and other optional modifiers for the future upload commit.
 
             while f.tell() < file_size:
