@@ -2,6 +2,7 @@ import dropbox
 import os
 import glob
 import json
+import time
 
 all_files = glob.glob("/home/dosenet/tmp/dosenet/*")
 key_dict = {}
@@ -15,6 +16,10 @@ dbx = dropbox.Dropbox(
 )
 
 for file in all_files:
+    file_mod_time = os.path.getmtime(file)
+    # reject if hasn't been modified in the last month
+    if file_mod_time < (time.time() - 30*24*60*60):
+        continue
     file_path = file
     destination_path = "/data/"+file_path.rsplit('/', 1)[-1]
     f = open(file_path,'rb')
@@ -38,10 +43,12 @@ for file in all_files:
             #Contains the path and other optional modifiers for the future upload commit.
 
             while f.tell() < file_size:
+                b_left_last = 100.0
                 if ((file_size - f.tell()) <= CHUNK_SIZE):
                     #if remaining filesize is less than 4mb
+                    print('')
                     print(dbx.files_upload_session_finish(f.read(CHUNK_SIZE),cursor,commit).name)
-                    print('\ncomplete\n\n')
+                    print('complete\n\n')
                     #Finish the upload session and save the uploaded data to the given file path.
                 else:
                     dbx.files_upload_session_append_v2(f.read(CHUNK_SIZE),cursor)
@@ -50,10 +57,12 @@ for file in all_files:
                     #offset updated to new byte position in file
                     b_left = round(((file_size-f.tell())/file_size),2)*100
                     b_left = str(b_left)+"%" if b_left < 1000 else 0
-                    print("\r       {} remaining....".format(b_left))
-                    #fun percentage remaining printing thing
+                    #fun percentage remaining printing thing but only print sometimes
+                    if (b_left_last - b_left) > 20:
+                        print("\r       {} remaining....".format(b_left))
+                    b_left_last = b_left
     except Exception as e:
-        print("ERROR: file upload failed!")
+        print("ERROR: upload of",dbx.files_upload_session_finish(f.read(CHUNK_SIZE),cursor,commit).name,'failed!')
         print("")
         print(e)
         print("")
